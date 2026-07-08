@@ -410,7 +410,7 @@ export const Reports = () => {
 
     const cancelMap = {}
     cancelled.forEach(s => {
-      const key = s.cancelReason === 'almashtirish' ? 'almashtirish'
+      const key = (s.cancelReason === 'almashtirish' || s.cancelReason === 'exchange') ? 'almashtirish'
         : s.cancelReason && CANCEL_REASONS[s.cancelReason] ? s.cancelReason
         : 'qaytarish'
       cancelMap[key] = (cancelMap[key] || 0) + 1
