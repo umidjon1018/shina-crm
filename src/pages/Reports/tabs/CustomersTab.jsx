@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -9,6 +10,7 @@ import { C, DetailButton, GrowthBadge, InstagramDM, Modal, ModalTable, MonthlyDy
 
 const CustomersTab = ({ ctx }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const {
     // state
     period, modal, openModal, closeModal,
@@ -221,12 +223,12 @@ const CustomersTab = ({ ctx }) => {
                 </div>
                 <div className="px-0 py-3 border-t border-border/50 mt-3 flex items-center justify-between gap-3">
                   <button
-                    onClick={() => window.location.href = '/management?tab=discounts'}
+                    onClick={() => navigate('/management?tab=discounts')}
                     className="text-xs text-accent-blue hover:underline">
                     {t('rep_btn_go_discounts')}
                   </button>
                   <button
-                    onClick={() => window.location.href = '/customers'}
+                    onClick={() => navigate('/customers')}
                     className="text-xs text-accent-orange hover:underline">
                     {t('rep_btn_go_customers')}
                   </button>
@@ -378,7 +380,7 @@ const CustomersTab = ({ ctx }) => {
             {modal === 'customerProfileModal' && selectedCustomer && (() => {
               const c = selectedCustomer
               return (
-                <Modal open title={c.name} subtitle={`${c.phone || ''} • @${c.instagram || '—'}`} size="xl" onClose={closeModal}>
+                <Modal open title={c.name} subtitle={[c.phone, c.instagram ? `@${c.instagram}` : null].filter(Boolean).join(' • ') || '—'} size="xl" onClose={closeModal}>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                     {[
                       { label:t('rep_cust_stat_total_spent'), value: fmtUZS(c.totalSpent),  color: C.green  },
@@ -812,7 +814,7 @@ const CustomersTab = ({ ctx }) => {
                     onClick={() => {
                       closeModal()
                       // Boshqaruv sahifasi → Sozlamalar tab → Mijoz manbalari kartasiga
-                      window.location.href = '/management?tab=settings#customer-sources'
+                      navigate('/management?tab=settings')
                     }}
                     className="px-4 py-2 rounded-xl text-sm font-bold bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 border border-accent-blue/30 transition-colors">
                     {t('rep_btn_go_management')}

@@ -930,13 +930,14 @@ export const Reports = () => {
       }
     }).sort((a,b) => b.totalSpent - a.totalSpent)
 
-    // loyaltyLevel — Customers.jsx bilan bir xil: MOCK_SALES dan (s.total >= loyaltyMinAmount)
+    // loyaltyLevel — ltvList bilan bir xil: MOCK_SALES + MOCK_USED_SALES dan (s.total >= loyaltyMinAmount)
     const loyaltyStatsRaw = { bronze: 0, silver: 0, gold: 0 }
     const minAmt = storeLoyaltyMinAmount || 100000
     shopCustomers.forEach(cust => {
-      const qualified = MOCK_SALES.filter(s =>
-        s.customerId === cust.id && s.status !== 'cancelled' && s.total >= minAmt
-      ).length
+      const qualified = [
+        ...MOCK_SALES.filter(s => s.customerId === cust.id && s.status !== 'cancelled' && s.total >= minAmt),
+        ...MOCK_USED_SALES.filter(s => s.customerId === cust.id && s.status !== 'cancelled' && s.total >= minAmt),
+      ].length
       if (qualified >= GOLD_THRESHOLD) loyaltyStatsRaw.gold++
       else if (qualified >= SILVER_THRESHOLD) loyaltyStatsRaw.silver++
       else loyaltyStatsRaw.bronze++
@@ -992,7 +993,7 @@ export const Reports = () => {
       totalCustomers: shopCustomers.length,
       churnRiskList, birthdayList, monthlyRetention,
     }
-  }, [period, filterByPeriod, storeLoyaltyVisitsRequired, storeSilverVisits, storeLoyaltyMinAmount, selectedShopId, MOCK_SALES, MOCK_CUSTOMERS])
+  }, [period, filterByPeriod, storeLoyaltyVisitsRequired, storeSilverVisits, storeLoyaltyMinAmount, selectedShopId, MOCK_SALES, MOCK_CUSTOMERS, MOCK_USED_SALES])
 
   // --- TAB 5: EMPLOYEES ---
   // Oylik sotuv dinamikasi hisoblash (universal)
