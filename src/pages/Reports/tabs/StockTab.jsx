@@ -379,7 +379,7 @@ const StockTab = ({ ctx }) => {
                 
                 const prevIncome = MOCK_INCOME_BATCHES.filter(b => {
                   const stockItem = stockStats.withDaysLeft.find(s => s.productName === b.productName)
-                  return stockItem?.category === cat && b.dueDate?.startsWith(prevMonth)
+                  return stockItem?.category === cat && b.receivedAt?.startsWith(prevMonth)
                 }).reduce((s,b) => s+b.quantity, 0)
                 
                 const prevSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt?.startsWith(prevMonth))
@@ -473,7 +473,7 @@ const StockTab = ({ ctx }) => {
                           MOCK_INCOME_BATCHES.forEach(b => {
                             const stockItem = stockStats.withDaysLeft.find(s => s.productName === b.productName)
                             const cat = stockItem?.category || 'accessory'
-                            if (b.dueDate?.startsWith(m)) catMap[cat] = (catMap[cat]||0) + b.quantity
+                            if (b.receivedAt?.startsWith(m)) catMap[cat] = (catMap[cat]||0) + b.quantity
                           })
                           const total = Object.values(catMap).reduce((s,x) => s+x, 0)
                           return (
@@ -733,7 +733,7 @@ const StockTab = ({ ctx }) => {
               const MONTHS_LIST = Array.from(_mSet3).sort().reverse()
               const prevMonth = MONTHS_LIST[1] || MONTHS_LIST[0]
               
-              const prevIncomeCapital = MOCK_INCOME_BATCHES.filter(b => b.dueDate?.startsWith(prevMonth))
+              const prevIncomeCapital = MOCK_INCOME_BATCHES.filter(b => b.receivedAt?.startsWith(prevMonth))
                 .reduce((s, b) => {
                   const stockItem = stockStats.withDaysLeft.find(st => st.productName === b.productName)
                   const price = stockItem ? stockItem.purchasePrice : 0
