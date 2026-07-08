@@ -1015,10 +1015,10 @@ export const Reports = () => {
     const cur  = MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(m) && s.status !== 'cancelled')
     const prv  = prev ? MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(prev) && s.status !== 'cancelled') : []
     const total   = cur.reduce((s, x) => s + x.total, 0)
-    const profit  = cur.reduce((s, x) => s + getSaleProfit(x), 0)
+    const profit  = cur.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
     const count   = cur.length
     const prevTotal  = prv.reduce((s, x) => s + x.total, 0)
-    const prevProfit = prv.reduce((s, x) => s + getSaleProfit(x), 0)
+    const prevProfit = prv.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
     const prevCount  = prv.length
     const MONTHLY_TARGETS_LIVE = (storeMonthlyTargets && Object.keys(storeMonthlyTargets).length > 0)
       ? storeMonthlyTargets

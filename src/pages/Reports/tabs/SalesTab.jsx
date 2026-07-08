@@ -497,9 +497,10 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Jami foyda === */}
       {modal === 'salsProfitModal' && (() => {
         const monthlyData = getMonthlySalesChart()
-        const filtered = (modalFilter === 'all'
-          ? MOCK_SALES.filter(s => s.status !== 'cancelled')
-          : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+        const effectiveFilter = modalFilter !== 'all' ? modalFilter : (period !== 'all' ? period : null)
+        const filtered = (effectiveFilter
+          ? MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(effectiveFilter))
+          : MOCK_SALES.filter(s => s.status !== 'cancelled')
         ).sort((a,b) => (b.soldAt||'').localeCompare(a.soldAt||''))
 
         return (
@@ -507,7 +508,7 @@ const SalesTab = ({ ctx }) => {
             <div className="flex items-center justify-between mb-5">
               <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
               <span className="text-text-muted text-xs">
-                {t('wh_in_total')}: {fmtUZS(filtered.reduce((s,x) => s+getSaleProfit(x), 0))}
+                {t('wh_in_total')}: {fmtUZS(filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0))}
               </span>
             </div>
 
