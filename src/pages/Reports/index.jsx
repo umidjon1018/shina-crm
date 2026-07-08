@@ -303,16 +303,13 @@ export const Reports = () => {
   // --- TAB 1: SALES ---
   const salesData = useMemo(() => {
     const filtered = filterByPeriod(MOCK_SALES, 'soldAt')
-    const completed = filtered.filter(s => s.status !== 'cancelled')
+    const completed = filtered.filter(s => s.status !== 'cancelled' && !s._isExchange)
     const cancelled = filtered.filter(s => s.status === 'cancelled')
     const totalSales = completed.reduce((s, x) => s + x.total, 0)
     const totalProfit = completed.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
     const avgCheck = totalSales / (completed.length || 1)
     const salesCount = completed.length
-    // Bekor = qaytarish (pul qaytariladi, tovar qaytadi)
-    // Almashtirilgan = almashtirish eski tovar (tovar qaytadi, lekin yangi sotuv bor)
-    // Ikkalasi ham omborga qaytadi, shuning uchun ikkalasi ham "bekor" hisoblanadi
-    const cancelledCount  = cancelled.filter(s => s.cancelReason === 'qaytarish' || (!s.cancelReason && s.refundType !== 'exchange')).length
+    const cancelledCount  = cancelled.length
     const exchangedCount  = cancelled.filter(s => s.cancelReason === 'almashtirish').length
 
     const installmentTotal = completed.filter(s => s.paymentType === 'installment').reduce((s, x) => s + (x.installmentDebt ?? Math.max(0, x.total - (x.installmentPaidAmount || 0))), 0)
