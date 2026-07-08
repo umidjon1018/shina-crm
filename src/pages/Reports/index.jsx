@@ -137,9 +137,9 @@ export const Reports = () => {
     }).catch(() => {})
   }, [])
 
-  const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
-  const MOCK_EXPENSES = selectedShopId === 'all' ? _allExpenses : _allExpenses.filter(e => e.shopId === selectedShopId)
-  const MOCK_INCOME_BATCHES = selectedShopId === 'all' ? _allBatches : _allBatches.filter(b => b.shopId === selectedShopId)
+  const MOCK_SALES = useMemo(() => selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId), [_allSales, selectedShopId])
+  const MOCK_EXPENSES = useMemo(() => selectedShopId === 'all' ? _allExpenses : _allExpenses.filter(e => e.shopId === selectedShopId), [_allExpenses, selectedShopId])
+  const MOCK_INCOME_BATCHES = useMemo(() => selectedShopId === 'all' ? _allBatches : _allBatches.filter(b => b.shopId === selectedShopId), [_allBatches, selectedShopId])
   const MOCK_BATCHES = MOCK_INCOME_BATCHES
 
   // Bir joyda aniqlangan konstantalar — barcha joylarda shu ishlatiladi
@@ -463,7 +463,7 @@ export const Reports = () => {
       chartSources, newCount, returnCount, newRevenue, returnRevenue, chartHours, chartCancelReasons, chartCategories,
       targetMonthSales
     }
-  }, [period, filterByPeriod, storeProductCategories, t, selectedShopId])
+  }, [period, filterByPeriod, storeProductCategories, t, selectedShopId, MOCK_SALES, MOCK_RETURNS])
 
   // --- B/U TOVARLAR (used items) — global davr filtridan mustaqil, har bo'lim o'z filtriga ega ---
   const usedData = useMemo(() => {
@@ -500,7 +500,7 @@ export const Reports = () => {
       acquiredStock, acquiredCount, acquiredValue, inStockCount, inStockValue, allInStock, soldCount, allSold,
       scrappedCount, scrappedValue, allScrapped,
     }
-  }, [period, filterByPeriod])
+  }, [period, filterByPeriod, MOCK_USED_SALES, MOCK_USED_STOCK])
 
   const filterUsedByMonth = (arr, dateField, month) => {
     if (month === 'all') return arr
@@ -695,7 +695,7 @@ export const Reports = () => {
       chartCapitalByCategory, monthlyCapitalByCategory, turnoverStandards,
       outOfStockItems, lowStockItems, frozenByProduct, stockWithSales,
     }
-  }, [storeProductCategories, notSoldDays, selectedShopId])
+  }, [storeProductCategories, notSoldDays, selectedShopId, MOCK_SALES, MOCK_ITEMS, MOCK_PRODUCTS, MOCK_INCOME_BATCHES])
 
   const filteredStock = stockCategory === 'all'
     ? stockStats.withDaysLeft
@@ -851,7 +851,7 @@ export const Reports = () => {
       monthlyChart, expChart, expByMonth, dailyBreakdown, combinedExpenses,
       inventoryByMonth, inventoryTotal, capitalReturnByMonth, capitalReturnTotal,
     }
-  }, [period, filterByPeriod, storeMonthlyTargets, storeUsdRate, i18n.language, selectedShopId])
+  }, [period, filterByPeriod, storeMonthlyTargets, storeUsdRate, i18n.language, selectedShopId, MOCK_SALES, MOCK_PRODUCTS, MOCK_INCOME_BATCHES, MOCK_EXPENSES, MOCK_CAPITAL, MOCK_USED_SALES])
 
   // --- TAB 4: CUSTOMERS ---
   const customerStats = useMemo(() => {
@@ -995,7 +995,7 @@ export const Reports = () => {
       totalCustomers: shopCustomers.length,
       churnRiskList, birthdayList, monthlyRetention,
     }
-  }, [period, filterByPeriod, storeLoyaltyVisitsRequired, storeSilverVisits, storeLoyaltyMinAmount, selectedShopId])
+  }, [period, filterByPeriod, storeLoyaltyVisitsRequired, storeSilverVisits, storeLoyaltyMinAmount, selectedShopId, MOCK_SALES, MOCK_CUSTOMERS])
 
   // --- TAB 5: EMPLOYEES ---
   // Oylik sotuv dinamikasi hisoblash (universal)
@@ -1213,7 +1213,7 @@ export const Reports = () => {
       monthlyActivity, cancelByEmp,
       totalCancelled: cancelByEmp.reduce((s, e) => s + e.cancelCount, 0),
     }
-  }, [period, filterByPeriod, selectedShopId])
+  }, [period, filterByPeriod, selectedShopId, MOCK_SALES, MOCK_RETURNS])
 
   // --- TAB 6: FINANCE ---
   const financeStats = useMemo(() => {
@@ -1508,7 +1508,7 @@ export const Reports = () => {
       orgStats, totalInstallmentCommission,
       supplierDebts, incomeBatchDebts, cfTotal,
     }
-  }, [period, filterByPeriod, storeInstallmentOrgs, storeUsdRate, selectedShopId])
+  }, [period, filterByPeriod, storeInstallmentOrgs, storeUsdRate, selectedShopId, MOCK_SALES, MOCK_INCOME_BATCHES, MOCK_EXPENSES, MOCK_CAPITAL, MOCK_SUPPLIERS])
 
   const getExportData = (format) => {
     setShowExportMenu(false)
