@@ -463,7 +463,7 @@ export const Reports = () => {
       chartSources, newCount, returnCount, newRevenue, returnRevenue, chartHours, chartCancelReasons, chartCategories,
       targetMonthSales
     }
-  }, [period, filterByPeriod, storeProductCategories, t, selectedShopId, MOCK_SALES, MOCK_RETURNS])
+  }, [period, filterByPeriod, storeProductCategories, t, selectedShopId, MOCK_SALES, MOCK_RETURNS, MOCK_PRODUCTS])
 
   // --- B/U TOVARLAR (used items) — global davr filtridan mustaqil, har bo'lim o'z filtriga ega ---
   const usedData = useMemo(() => {

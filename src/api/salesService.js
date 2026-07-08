@@ -59,7 +59,18 @@ const map = (s) => ({
 export const getSales = async (shopId) => {
   const params = shopId && shopId !== 'all' ? { shop_id: shopId } : {}
   const { data } = await api.get('/api/sales', { params })
-  return data.map(map)
+  const sales = data.map(map)
+  // isNewCustomer: har bir mijoz uchun eng birinchi sotuv yangi hisoblanadi
+  const firstSaleByCustomer = {}
+  ;[...sales].sort((a, b) => a.soldAt.localeCompare(b.soldAt)).forEach(s => {
+    if (s.customerId && !(s.customerId in firstSaleByCustomer)) {
+      firstSaleByCustomer[s.customerId] = s.id
+    }
+  })
+  return sales.map(s => ({
+    ...s,
+    isNewCustomer: s.customerId ? firstSaleByCustomer[s.customerId] === s.id : false,
+  }))
 }
 
 export const createSale = async (saleData) => {
