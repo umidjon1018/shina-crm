@@ -920,6 +920,16 @@ export const Reports = () => {
       const todayMonth = parseInt(TODAY.split('-')[1])
       const isBirthdayMonth = birthMonth === todayMonth
 
+      // loyaltyGrantedAt: Silver/Gold ga o'tgan sana — N-chi qualified sotuv sanasi
+      const threshold = computedLevel === 'gold' ? GOLD_THRESHOLD : computedLevel === 'silver' ? SILVER_THRESHOLD : null
+      const sortedQualified = [..._custSalesAll]
+        .filter(s => s.total >= minAmt2)
+        .sort((a, b) => a.soldAt.localeCompare(b.soldAt))
+      const loyaltyGrantedAt = threshold && sortedQualified[threshold - 1]
+        ? sortedQualified[threshold - 1].soldAt?.slice(0, 10)
+        : null
+      const loyaltyReason = "Tashrif soni to'ldi"
+
       return {
         ...c, totalVisits, totalSpent, avgMonthly, ltv12m: avgMonthly * 12,
         firstVisit, lastVisit,
@@ -927,6 +937,7 @@ export const Reports = () => {
         avgCheck, avgInterval, nextLevel,
         daysSinceLastVisit, churnRisk, isBirthdayMonth,
         qualifiedVisits, loyaltyLevel: computedLevel,
+        loyaltyGrantedAt, loyaltyReason,
       }
     }).sort((a,b) => b.totalSpent - a.totalSpent)
 
