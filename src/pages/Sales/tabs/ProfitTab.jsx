@@ -11,6 +11,7 @@ const ProfitTab = ({ ctx }) => {
   const {
     filteredProfitItems, sortedProfitItems,
     profitMonthFilter, setProfitMonthFilter, profitMonthOptions, formatMonthValue,
+    profitTypeFilter, setProfitTypeFilter,
     profitSearch, setProfitSearch,
     profitPage, setProfitPage,
     profitSortField, profitSortOrder, handleProfitSort,
@@ -51,6 +52,14 @@ const ProfitTab = ({ ctx }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h3 className="font-syne font-bold text-text-primary text-base">{t('sl_profit_table_title')}</h3>
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1 bg-bg-tertiary border border-border rounded-xl p-1">
+              {[['all', 'Barchasi'], ['new', 'Yangi'], ['used', 'Eski']].map(([val, label]) => (
+                <button key={val} onClick={() => { setProfitTypeFilter(val); setProfitPage(1) }}
+                  className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${profitTypeFilter === val ? 'bg-accent-red text-white' : 'text-text-muted hover:text-text-primary'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-text-muted font-bold whitespace-nowrap">Oy:</span>
               <select value={profitMonthFilter} onChange={e => { setProfitMonthFilter(e.target.value); setProfitPage(1) }}
@@ -104,7 +113,7 @@ const ProfitTab = ({ ctx }) => {
             </thead>
             <tbody className="divide-y divide-border/60">
               {sortedProfitItems.slice((profitPage - 1) * 20, profitPage * 20).map(item => (
-                <tr key={item.id} className={`transition-colors text-text-primary ${item.isCancelled ? 'opacity-50 bg-accent-red/5 line-through' : 'hover:bg-bg-tertiary/20'}`}>
+                <tr key={item.id} className={`transition-colors text-text-primary ${item.isCancelled ? 'bg-accent-red/5 text-text-muted' : 'hover:bg-bg-tertiary/20'}`}>
                   <td className="px-3 py-3 whitespace-nowrap text-text-secondary">{new Date(item.soldAt).toLocaleString('uz-UZ')}</td>
                   <td className="px-3 py-3 truncate font-bold text-text-primary">
                     {(() => {

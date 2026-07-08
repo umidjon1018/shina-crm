@@ -229,6 +229,7 @@ export const useSalesState = () => {
   const [returnsSortOrder, setReturnsSortOrder] = useState('desc')
 
   const [profitMonthFilter, setProfitMonthFilter] = useState('all')
+  const [profitTypeFilter, setProfitTypeFilter] = useState('all')
   const [profitSearch, setProfitSearch] = useState('')
   const [profitSortField, setProfitSortField] = useState('soldAt')
   const [profitSortOrder, setProfitSortOrder] = useState('desc')
@@ -1401,12 +1402,14 @@ export const useSalesState = () => {
         const m = String(date.getMonth() + 1).padStart(2, '0');
         if (`${y}-${m}` !== profitMonthFilter) return false;
       }
+      if (profitTypeFilter === 'new' && item.isUsedSale) return false;
+      if (profitTypeFilter === 'used' && !item.isUsedSale) return false;
       if (!q) return true;
       return (item.name || '').toLowerCase().includes(q) ||
              (item.customerName || '').toLowerCase().includes(q) ||
              (item.soldByName || '').toLowerCase().includes(q)
     });
-  }, [profitItems, profitMonthFilter, profitSearch]);
+  }, [profitItems, profitMonthFilter, profitTypeFilter, profitSearch]);
 
   const sortedProfitItems = useMemo(() => {
     return sortData(filteredProfitItems, profitSortField, profitSortOrder);
@@ -1566,7 +1569,7 @@ export const useSalesState = () => {
     installmentSalesPage, setInstallmentSalesPage, profitPage, setProfitPage,
     historyMonthFilter, setHistoryMonthFilter, historySortField, setHistorySortField, historySortOrder, setHistorySortOrder,
     returnsMonthFilter, setReturnsMonthFilter, returnsHistoryMonthFilter, setReturnsHistoryMonthFilter, returnsSortField, setReturnsSortField, returnsSortOrder, setReturnsSortOrder,
-    profitMonthFilter, setProfitMonthFilter, profitSearch, setProfitSearch, profitSortField, setProfitSortField, profitSortOrder, setProfitSortOrder,
+    profitMonthFilter, setProfitMonthFilter, profitTypeFilter, setProfitTypeFilter, profitSearch, setProfitSearch, profitSortField, setProfitSortField, profitSortOrder, setProfitSortOrder,
     installmentMonthFilter, setInstallmentMonthFilter, installmentSortField, setInstallmentSortField, installmentSortOrder, setInstallmentSortOrder,
     maxDiscount, effectiveDiscount, customerHasLoyalty, subtotal, discountAmount, total,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
