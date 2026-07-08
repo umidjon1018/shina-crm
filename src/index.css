@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Mode */
+  --bg-primary:     #F0F4F8;
+  --bg-secondary:   #FFFFFF;
+  --bg-tertiary:    #E8EEF5;
+  --sidebar-bg:     #0F1520;
+  --border:         #D1DCE8;
+  --border-bright:  #A0B4C8;
+  --accent-red:     #DC2626;
+  --accent-orange:  #EA7C2B;
+  --accent-blue:    #2563EB;
+  --accent-green:   #16A34A;
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+  --glow-red:       rgba(220, 38, 38, 0.08);
+  --glow-blue:      rgba(37, 99, 235, 0.08);
+}
+
+.dark {
+  /* Dark Mode */
+  --bg-primary:     #080C14;
+  --bg-secondary:   #0F1520;
+  --bg-tertiary:    #161E2E;
+  --sidebar-bg:     #060A10;
+  --border:         #1E2A3D;
+  --border-bright:  #2A3A54;
+  --accent-red:     #E63946;
+  --accent-orange:  #F4A261;
+  --accent-blue:    #3B82F6;
+  --accent-green:   #22C55E;
+  --text-primary:   #F1F5F9;
+  --text-secondary: #8899B0;
+  --text-muted:     #4A5A70;
+  --glow-red:       rgba(230, 57, 70, 0.15);
+  --glow-blue:      rgba(59, 130, 246, 0.10);
+}
+
+[data-theme="brand"] {
+  /* Brand Theme — GoodTires colors */
+  --bg-primary:     #EEF2FF;
+  --bg-secondary:   #FFFFFF;
+  --bg-tertiary:    #E0E9FF;
+  --sidebar-bg:     #0A2A6E;
+  --border:         #BFCFEE;
+  --border-bright:  #1E5FB8;
+  --accent-red:     #E30613;
+  --accent-orange:  #EA7C2B;
+  --accent-blue:    #1E5FB8;
+  --accent-green:   #16A34A;
+  --text-primary:   #0A2A6E;
+  --text-secondary: #1E5FB8;
+  --text-muted:     #6B8CC4;
+  --glow-red:       rgba(227, 6, 19, 0.12);
+  --glow-blue:      rgba(30, 95, 184, 0.12);
+}
+
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary font-dm transition-colors duration-300 antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne font-bold tracking-tight;
+  }
+}
+
+/* Custom Utilities */
+.glass {
+  @apply bg-opacity-60 backdrop-blur-md border border-border;
+}
+
+.glow-red {
+  box-shadow: 0 0 20px var(--glow-red);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px var(--glow-blue);
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar — theme rangiga mos */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border, #2a2a3e);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #4a4a6a);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border, #2a2a3e) var(--bg-tertiary, #1a1a2e);
+}

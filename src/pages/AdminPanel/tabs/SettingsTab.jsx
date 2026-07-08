@@ -1,0 +1,187 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Building, Settings, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react'
+import { useSettingsStore } from '../../../store/settingsStore'
+import { useAuditStore } from '../../../store/auditStore'
+import { useAuthStore } from '../../../store/authStore'
+
+function SettingsTab() {
+  const { t, i18n } = useTranslation()
+  const {
+    companyName, companyLogo, setCompanyName, setCompanyLogo,
+    sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
+    aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
+    aiModel, setAiModel, aiMonthlyLimit, setAiMonthlyLimit, aiAgentEnabled, toggleAiAgentEnabled,
+  } = useSettingsStore()
+  const { addLog } = useAuditStore()
+  const { user: me } = useAuthStore()
+
+  const getSidebarLabel = (labels, key, lang) => {
+    const val = labels?.[key]
+    if (!val) return ''
+    if (typeof val === 'string') return val
+    return val[lang] || val['uz'] || ''
+  }
+
+  const [companyNameForm, setCompanyNameForm] = useState(companyName)
+  const [companySaved, setCompanySaved] = useState(false)
+  const [showAiKey, setShowAiKey] = useState(false)
+  const [aiKeySaved, setAiKeySaved] = useState(false)
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+
+      {/* Kompaniya */}
+      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center"><Building size={20}/></div>
+          <div>
+            <h3 className="font-syne font-bold text-text-primary text-base">🏢 {t('adm_set_company_title')}</h3>
+            <p className="text-xs text-text-muted">{t('adm_set_company_subtitle')}</p>
+          </div>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_logo_label')}</label>
+          <div className="flex items-center gap-3">
+            {companyLogo
+              ? <img src={companyLogo} alt="logo" className="w-12 h-12 rounded-xl object-cover border border-border"/>
+              : <div className="w-12 h-12 rounded-xl bg-bg-tertiary border border-border flex items-center justify-center text-text-muted text-xs">{t('adm_set_logo_none')}</div>
+            }
+            <div className="flex gap-2">
+              <label className="cursor-pointer px-3 py-2 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-xs hover:text-text-primary transition-colors">
+                {t('adm_set_logo_upload')}
+                <input type="file" accept="image/*" className="hidden" onChange={e => {
+                  const file = e.target.files[0]; if (!file) return
+                  const reader = new FileReader()
+                  reader.onload = ev => setCompanyLogo(ev.target.result)
+                  reader.readAsDataURL(file)
+                }} />
+              </label>
+              {companyLogo && <button onClick={()=>setCompanyLogo(null)} className="px-3 py-2 rounded-xl bg-accent-red/10 text-accent-red text-xs hover:bg-accent-red/20 transition-colors">{t('adm_set_logo_delete')}</button>}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_company_name')}</label>
+          <div className="flex items-center gap-3">
+            <input type="text" value={companyNameForm} onChange={e=>setCompanyNameForm(e.target.value)} placeholder={t('adm_set_company_placeholder')}
+              className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm" />
+            <button onClick={()=>{ if(!companyNameForm.trim()) return; setCompanyName(companyNameForm.trim()); setCompanySaved(true); setTimeout(()=>setCompanySaved(false),2000) }}
+              className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 flex-shrink-0 transition-all ${companySaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'}`}>
+              {companySaved ? <CheckCircle size={16}/> : t('save')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Konfiguratsiya */}
+      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center"><Settings size={20}/></div>
+          <div>
+            <h3 className="font-syne font-bold text-text-primary text-base">⚙️ {t('adm_set_config_title')}</h3>
+            <p className="text-xs text-text-muted">{t('adm_set_config_subtitle')}</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[
+            { key:'dashboard', icon:'🏠', defaultLabel: t('dashboard') }, { key:'warehouse', icon:'📦', defaultLabel: t('warehouse') },
+            { key:'sales', icon:'🛒', defaultLabel: t('sales') }, { key:'customers', icon:'👥', defaultLabel: t('customers') },
+            { key:'income', icon:'📈', defaultLabel: t('income') }, { key:'expenses', icon:'💳', defaultLabel: t('expenses') },
+            { key:'reports', icon:'📊', defaultLabel: t('reports') }, { key:'aiAgent', icon:'🤖', defaultLabel: t('ai_agent') },
+            { key:'management', icon:'⚡', defaultLabel: t('management') },
+          ].map(({ key, icon, defaultLabel }) => {
+            const isHidden = (hiddenPages||[]).includes(key)
+            const currentLabel = getSidebarLabel(sidebarLabels, key, i18n.language) || defaultLabel
+            return (
+              <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${isHidden ? 'opacity-40 bg-bg-tertiary border-border/50' : 'bg-bg-tertiary border-border'}`}>
+                <span className="text-base w-6 text-center flex-shrink-0">{icon}</span>
+                <input type="text" value={currentLabel} disabled={isHidden} onChange={e=>setSidebarLabel(key, e.target.value, i18n.language)}
+                  className="flex-1 bg-bg-primary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent-red disabled:cursor-not-allowed" />
+                <button onClick={()=>toggleHiddenPage(key)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isHidden ? 'bg-accent-green/10 text-accent-green hover:bg-accent-green/20' : 'bg-bg-primary text-text-muted hover:text-accent-red hover:bg-accent-red/10 border border-border'}`}>
+                  {isHidden ? t('adm_set_page_show') : t('adm_set_page_hide')}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* AI Agent */}
+      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center"><KeyRound size={20}/></div>
+            <div>
+              <h3 className="font-syne font-bold text-text-primary text-base">🤖 {t('adm_set_ai_title')}</h3>
+              <p className="text-xs text-text-muted">{t('adm_set_ai_subtitle')}</p>
+            </div>
+          </div>
+          <button onClick={() => { toggleAiAgentEnabled(); addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: aiAgentEnabled ? 'AI Agent o\'chirildi' : 'AI Agent yoqildi', actionKey: aiAgentEnabled ? 'audit_ai_disabled' : 'audit_ai_enabled', entity: 'settings', details: 'aiAgentEnabled' }) }}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${aiAgentEnabled ? 'bg-accent-green/10 text-accent-green hover:bg-accent-green/20' : 'bg-bg-primary text-text-muted hover:text-accent-red hover:bg-accent-red/10 border border-border'}`}>
+            {aiAgentEnabled ? t('adm_set_ai_enabled') : t('adm_set_ai_disabled')}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_provider')}</label>
+            <select value={aiApiProvider} onChange={e=>setAiApiProvider(e.target.value)}
+              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm">
+              <option value="anthropic">Anthropic (Claude)</option>
+              <option value="openai">OpenAI (ChatGPT)</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_model')}</label>
+            <select value={aiModel} onChange={e=>setAiModel(e.target.value)}
+              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm">
+              {aiApiProvider === 'anthropic' ? (
+                <>
+                  <option value="claude-haiku">Claude Haiku ({t('adm_ai_desc_fast')})</option>
+                  <option value="claude-sonnet">Claude Sonnet ({t('adm_ai_desc_balanced')})</option>
+                  <option value="claude-opus">Claude Opus ({t('adm_ai_desc_powerful')})</option>
+                </>
+              ) : (
+                <>
+                  <option value="gpt-4o-mini">GPT-4o mini ({t('adm_ai_desc_fast')})</option>
+                  <option value="gpt-4o">GPT-4o ({t('adm_ai_desc_balanced')})</option>
+                </>
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_key')}</label>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <input type={showAiKey ? 'text' : 'password'} value={aiApiKey} onChange={e=>setAiApiKey(e.target.value)}
+                placeholder={t('adm_set_ai_key_placeholder')}
+                className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 pr-10 text-text-primary focus:outline-none focus:border-accent-red text-sm font-mono" />
+              <button type="button" onClick={()=>setShowAiKey(v=>!v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
+                {showAiKey ? <EyeOff size={16}/> : <Eye size={16}/>}
+              </button>
+            </div>
+            <button onClick={()=>{ setAiKeySaved(true); addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'AI API kaliti yangilandi', actionKey: 'audit_ai_key_updated', entity: 'settings', details: aiApiProvider }); setTimeout(()=>setAiKeySaved(false),2000) }}
+              className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 flex-shrink-0 transition-all ${aiKeySaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'}`}>
+              {aiKeySaved ? <CheckCircle size={16}/> : t('save')}
+            </button>
+          </div>
+          <p className="text-xs text-text-muted mt-2">{t('adm_set_ai_key_note')}</p>
+        </div>
+
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_limit')}</label>
+          <input type="number" min="0" value={aiMonthlyLimit} onChange={e=>setAiMonthlyLimit(Number(e.target.value))}
+            className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red font-semibold text-sm" />
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+
+export default SettingsTab

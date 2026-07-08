@@ -1,0 +1,1862 @@
+
+GoodTires CRM — To'liq Arxitektura Hujjati v2.0
+Loyiha: Shina, disk va avto-aksessuar do'koni uchun CRM + AI Agent tizimi Do'kon nomi: GoodTires Logo: GoodTires (ko'k "GOOD" + qizil "TIRES" + shina rasmi) Versiya: 2.0 (yakuniy arxitektura) Sana: May 2026 Egasi: Umidjon (Admin)
+
+1. LOYIHA MAQSADI
+GoodTires CRM — Toshkentdagi shina, disk va avto-aksessuar do'konini boshqarish uchun zamonaviy CRM tizimi. Tizim ombor, sotuv, mijozlar, xodimlar, moliya, sodiqlik, AI yordamchilar va lead boshqaruvini birlashtiradi.
+Biznes konteksti:
+Hozir 2 ta do'kon (filial), kelajakda cheksiz filial qo'shish imkoni
+5 xil tovar kategoriyasi: shina, disk, akkumulyator/moy/aksessuar, xizmat
+5–7 xodim: admin, boshqaruvchilar, sotuvchilar
+Naqd, karta va muddatli to'lov (3, 6, 12 oy)
+Yetkazib beruvchilardan naqd va nasiya tovar olish
+Toshkent va viloyatlarga yetkazib berish
+Qog'oz talon asosidagi sodiqlik dasturi
+Instagram DM lead boshqaruvi (birinchi versiyada manual, keyinchalik avtomatik)
+
+2. ASOSIY QARORLAR (arxitektura bo'yicha)
+Masala
+Qaror
+Mahsulot modeli
+Hybrid (umumiy jadval + JSONB atributlar)
+Narx saqlash
+FIFO partiyalar (har kirim alohida narx)
+Rollar tizimi
+Variant B (asosiy rol + chekbox ruxsatlar)
+Sessiya
+Qattiq qulflash (1 qurilma = 1 sessiya)
+Yangi qurilma
+Admin tasdig'i (Variant C+)
+Selfi
+Har login log + admin panelda ko'rinadi
+Bar kod format
+SH-MIC-19565R15-000001 (6 xona)
+Bar kod chop
+PNG eksport → Niimbot B21 / Phomemo M110 ilovasi
+Bar kod skaner
+ZXing-js (telefon kamerasi orqali)
+Chegirma
+3 darajali (sotuvchi / boshqaruvchi / admin)
+Sodiqlik
+10 xarid → 25% (1 komplekt shina yoki disk, mijoz tanlaydi)
+Filiallar
+Cheksiz (katalog umumiy, qoldiq/sotuv/xarajat alohida)
+Til
+UZ + RU (i18n)
+Tema
+Light / Dark / GoodTires Brand (CSS Variables)
+AI
+Claude API (Sonnet 4.6)
+Instagram
+Birinchi versiyada manual lead, 2-versiyada Meta API
+
+3. TEXNOLOGIK STACK
+Frontend
+Texnologiya
+Maqsad
+React 19 + Vite
+Framework
+Tailwind CSS + CSS Variables
+Stil + Tema
+React Router v6
+Routing
+Zustand (persist)
+Global state
+TanStack Query
+Server state, caching
+React Hook Form + Zod
+Forma + validatsiya
+Framer Motion
+Animatsiya
+lucide-react
+Ikonalar
+Recharts
+Grafiklar
+ZXing-js
+Bar kod skaner (kamera)
+JsBarcode
+Bar kod generatsiya
+QRCode.js
+QR kod (sodiqlik talon)
+Axios
+HTTP client
+date-fns
+Sana formatlash
+i18next
+UZ + RU tarjima
+PWA: manifest.json + Service Worker → telefonga "Add to Home Screen"
+Backend
+Texnologiya
+Maqsad
+Node.js 20+
+Runtime
+Fastify
+Framework
+TypeScript
+Til
+Prisma
+ORM
+PostgreSQL 16
+Asosiy DB
+Redis
+Sessiya blacklist, cache
+BullMQ
+AI va eslatma vazifalari
+JWT + HTTP-only Cookie
+Auth
+Zod
+Validatsiya
+Multer / Fastify-multipart
+Fayl yuklash
+Sharp
+Rasm optimallashtirish (selfi)
+Claude API
+AI agentlar
+PDFKit / Puppeteer
+Chek va shartnoma PDF
+ExcelJS
+Hisobot eksport
+DevOps
+Texnologiya
+Maqsad
+Docker Compose
+PostgreSQL + Redis
+Git
+Version control
+Ubuntu 24.04 VPS
+Hosting
+Nginx
+Reverse proxy
+Let's Encrypt
+SSL
+pg_dump + cron
+Kunlik backup
+
+4. FOYDALANUVCHILAR VA XAVFSIZLIK
+4.1. Rollar va ruxsatlar (Variant B)
+Asosiy rollar (default ruxsatlar bilan):
+Rol
+Default ruxsatlar
+ADMIN
+Hammasi
+MANAGER
+sotuv, ombor, hisobot, mijozlar, yetkazib beruvchi, xarajat, lead
+SELLER
+sotuv (yaratish), qoldiq ko'rish, mijozlar ko'rish
+WAREHOUSE
+kirim, qoldiq, tovar boshqaruvi
+Ruxsatlar ro'yxati (chekboxlar):
+dashboard.view
+
+warehouse.view
+warehouse.in              -- kirim qilish
+warehouse.edit            -- tovar ma'lumotini o'zgartirish
+warehouse.transfer        -- filiallar orasida ko'chirish
+warehouse.barcode_print
+
+sales.view
+sales.create
+sales.cancel              -- 5 daqiqa ichida o'zi, undan keyin manager/admin
+sales.discount_small      -- 0–5% chegirma
+sales.discount_medium     -- 5–15% (manager tasdig'i)
+sales.discount_large      -- 15%+ (admin tasdig'i)
+sales.return              -- qaytarish/almashtirish
+
+customers.view
+customers.create
+customers.edit
+customers.loyalty         -- sodiqlik tizimi boshqaruvi
+
+suppliers.view
+suppliers.manage
+suppliers.debt
+
+expenses.view
+expenses.create
+
+reports.view
+reports.export
+
+leads.view
+leads.manage
+
+ai.use
+
+admin.users
+admin.shops
+admin.categories
+admin.settings
+admin.devices
+admin.login_history
+Filial ruxsati: Har xodimga qaysi filial(lar)ga kirishi belgilanadi. Xodim faqat o'z filiali ma'lumotlarini ko'radi (admin hammani ko'radi).
+4.2. Sessiya qulflash — qattiq
+Har login'da yangi session_id yaratiladi
+Eski session_id Redis blacklist'ga tushadi
+Middleware har so'rovda session_id ni tekshiradi
+Login uchun rate limit: 3 xato → 5 daqiqa blok
+4.3. Yangi qurilma tasdig'i (Variant C+)
+Birinchi kirish (yangi qurilma):
+Login + parol kiritiladi
+Kamera ochiladi → selfi olinadi
+Qurilma ma'lumotlari (browser fingerprint, IP, user-agent) + selfi admin paneliga tushadi: "Tasdiq kutilmoqda"
+Xodim "Admin tasdig'ini kutmoqdasiz" sahifasini ko'radi
+Admin tasdiqlaydi → xodim kiradi, qurilma "ishonchli" bo'lib saqlanadi
+Admin rad qilsa → kirish ruxsat etilmaydi
+Keyingi kirishlar (ishonchli qurilma):
+Login + parol → selfi olinadi → tarixga saqlanadi
+Xodim darhol kiradi (admin tasdig'i kutilmaydi)
+Admin "Login tarixi" da har kirish selfi bilan ko'radi
+Xavf signallari (avtomatik):
+Noma'lum IP dan kirish
+Bir kunda 5+ marta xato parol
+Bir kunda 5+ marta chegirma (15%+) berilgan
+4.4. Parol xavfsizligi
+bcrypt (12 rounds)
+Rate limit: 3 xato → 5 daqiqa blok
+JWT: 15 daqiqa | Refresh token: 7 kun (HTTP-only cookie)
+
+5. TEMA VA STIL TIZIMI
+5.1. ThemeContext (boshidan quriladi)
+// src/contexts/ThemeContext.jsx
+// 3 ta tema: light, dark, brand
+
+const themes = {
+  light: {
+    '--bg-primary': '#FFFFFF',
+    '--bg-secondary': '#F8F9FA',
+    '--bg-card': '#FFFFFF',
+    '--text-primary': '#0A0A0A',
+    '--text-secondary': '#6B7280',
+    '--border': '#E5E7EB',
+    '--accent': '#1E5FB8',      // GoodTires ko'k
+    '--accent-red': '#E30613',  // GoodTires qizil
+    '--accent-hover': '#1A4F9E',
+    '--success': '#16A34A',
+    '--warning': '#D97706',
+    '--danger': '#DC2626',
+    '--sidebar-bg': '#0A2A6E',
+    '--sidebar-text': '#FFFFFF',
+  },
+  dark: {
+    '--bg-primary': '#0F1117',
+    '--bg-secondary': '#1A1D27',
+    '--bg-card': '#1E2130',
+    '--text-primary': '#F0F2F5',
+    '--text-secondary': '#9CA3AF',
+    '--border': '#2D3148',
+    '--accent': '#3B82F6',
+    '--accent-red': '#EF4444',
+    '--accent-hover': '#2563EB',
+    '--success': '#22C55E',
+    '--warning': '#F59E0B',
+    '--danger': '#EF4444',
+    '--sidebar-bg': '#13162B',
+    '--sidebar-text': '#E5E7EB',
+  },
+  brand: {
+    // GoodTires brand ranglariga asoslangan maxsus tema
+    '--bg-primary': '#EEF2FF',
+    '--bg-secondary': '#E0E9FF',
+    '--bg-card': '#FFFFFF',
+    '--text-primary': '#0A2A6E',
+    '--text-secondary': '#1E5FB8',
+    '--border': '#BFCFEE',
+    '--accent': '#1E5FB8',
+    '--accent-red': '#E30613',
+    '--accent-hover': '#0A2A6E',
+    '--success': '#16A34A',
+    '--warning': '#D97706',
+    '--danger': '#E30613',
+    '--sidebar-bg': '#0A2A6E',
+    '--sidebar-text': '#FFFFFF',
+  }
+}
+5.2. GoodTires brand ranglari
+Ko'k (primary):     #1E5FB8
+To'q ko'k (dark):  #0A2A6E
+Qizil (accent):    #E30613
+Oq:                #FFFFFF
+Kulrang:           #F8F9FA
+
+6. MA'LUMOTLAR MODELI (Prisma Schema)
+6.1. Asosiy tuzilma
+// ============================
+// SOZLAMALAR VA DO'KON
+// ============================
+
+model Setting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+// company_name = "GoodTires"
+// company_logo = "/uploads/logo.jpg"
+// default_currency = "UZS"
+// low_stock_threshold = "3"
+// stagnant_days = "60"
+// seasonal_summer_month = "4"   // Aprel
+// seasonal_winter_month = "10"  // Oktabr
+// installment_3m_percent = "0"
+// installment_6m_percent = "10"
+// installment_12m_percent = "15"
+
+model Shop {
+  id        String   @id @default(cuid())
+  name      String   // "Do'kon 1", "Do'kon 2"
+  address   String?
+  phone     String?
+  workHours String?  // "09:00–20:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  users          UserShop[]
+  sales          Sale[]
+  expenses       Expense[]
+  stockMovements StockMovement[]
+  transfers      StockTransfer[]
+  shopPrices     ProductShopPrice[]
+}
+
+// ============================
+// FOYDALANUVCHILAR
+// ============================
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  birthDate    DateTime?
+  role         Role     @default(SELLER)
+  permissions  String[] // ["sales.view", "sales.create", ...]
+  isActive     Boolean  @default(true)
+  salaryType   SalaryType?
+  salaryAmount Decimal?
+  salaryPercent Decimal?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  shops          UserShop[]
+  sessions       Session[]
+  trustedDevices TrustedDevice[]
+  loginAttempts  LoginAttempt[]
+  sales          Sale[]
+  stockMovements StockMovement[]
+  transfersFrom  StockTransfer[] @relation("TransferFrom")
+  transfersTo    StockTransfer[] @relation("TransferTo")
+  loyaltyApprovals LoyaltyRedemption[]
+  discountApprovals DiscountRequest[]
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  SELLER
+  WAREHOUSE
+}
+
+enum SalaryType {
+  FIXED
+  PERCENT
+  MIXED
+}
+
+model UserShop {
+  userId String
+  shopId String
+  user   User   @relation(fields: [userId], references: [id])
+  shop   Shop   @relation(fields: [shopId], references: [id])
+  @@id([userId, shopId])
+}
+
+// ============================
+// XAVFSIZLIK
+// ============================
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String   @unique // Redis blacklist uchun
+  deviceId  String
+  userAgent String
+  ipAddress String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model TrustedDevice {
+  id           String       @id @default(cuid())
+  userId       String
+  deviceId     String
+  deviceName   String?
+  status       DeviceStatus @default(PENDING)
+  selfieUrl    String?
+  approvedBy   String?
+  approvedAt   DateTime?
+  lastUsedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  user         User         @relation(fields: [userId], references: [id])
+  @@unique([userId, deviceId])
+}
+
+enum DeviceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BLOCKED
+}
+
+model LoginAttempt {
+  id           String   @id @default(cuid())
+  userId       String?
+  username     String
+  success      Boolean
+  selfieUrl    String?
+  deviceId     String?
+  ipAddress    String
+  userAgent    String
+  isSuspicious Boolean  @default(false)
+  suspiciousReason String?
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+// ============================
+// KATEGORIYALAR VA MAHSULOTLAR
+// ============================
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   // "Shina", "Disk", "Aksessuar", "Xizmat"
+  slug      String   @unique // "tire", "wheel", "accessory", "service"
+  icon      String?
+  prefix    String   // bar kod: "SH", "DS", "AK", "XZ"
+  isService Boolean  @default(false)
+  isActive  Boolean  @default(true)
+
+  attributes AttributeDefinition[]
+  products   Product[]
+}
+
+model AttributeDefinition {
+  id         String        @id @default(cuid())
+  categoryId String
+  key        String        // "brand", "country", "size", "season"
+  label      String        // "Brend", "Mamlakat", "Razmer", "Mavsumi"
+  labelRu    String?       // Rus tili
+  type       AttributeType
+  options    String[]      // select uchun
+  optionsRu  String[]      // Rus tili variantlari
+  required   Boolean       @default(false)
+  order      Int           @default(0)
+  category   Category      @relation(fields: [categoryId], references: [id])
+}
+
+enum AttributeType {
+  TEXT
+  NUMBER
+  SELECT
+  DATE
+  TEXTAREA
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  categoryId String
+  sku       String   @unique // "SH-MIC-19565R15-000001"
+  name      String   // "Michelin 195/65 R15"
+  brand     String?
+  size      String?
+  season    Season   @default(NA) // mavsumiy kategoriya
+  attributes Json    // { "country": "Fransiya", "carCategory": "Sedan" }
+
+  // Sotuv narxlari (default, filial override mumkin)
+  cashPrice              Decimal
+  installmentBasePrice   Decimal
+  installment3mPercent   Decimal @default(0)
+  installment6mPercent   Decimal @default(0.10)
+  installment12mPercent  Decimal @default(0.15)
+
+  // Ombor
+  totalStock    Int     @default(0)
+  totalSold     Int     @default(0)
+  lowStockThreshold Int @default(3)
+
+  // Qaytarish
+  warrantyDays  Int?    // null = sozlanmagan, 0 = qaytarish yo'q
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category   Category  @relation(fields: [categoryId], references: [id])
+  batches    ProductBatch[]
+  saleItems  SaleItem[]
+  movements  StockMovement[]
+  shopPrices ProductShopPrice[]
+
+  @@index([sku])
+  @@index([categoryId])
+  @@index([brand])
+  @@index([season])
+}
+
+enum Season {
+  SUMMER      // yoz
+  WINTER      // qish
+  ALL_SEASON  // butun yil
+  NA          // qo'llanmaydi (disk, aksessuar)
+}
+
+// Filial bo'yicha maxsus narx (null = default narx)
+model ProductShopPrice {
+  productId            String
+  shopId               String
+  cashPrice            Decimal?
+  installmentBasePrice Decimal?
+  product              Product @relation(fields: [productId], references: [id])
+  shop                 Shop    @relation(fields: [shopId], references: [id])
+  @@id([productId, shopId])
+}
+
+// ============================
+// OMBOR: FIFO PARTIYALAR
+// ============================
+
+model ProductBatch {
+  id                String   @id @default(cuid())
+  productId         String
+  batchNumber       String   @unique // "BTH-20260514-000001"
+  purchasePrice     Decimal
+  quantityIn        Int
+  quantitySold      Int      @default(0)
+  quantityRemaining Int
+  supplierId        String?
+  supplierDebtId    String?
+  shopId            String?  // qaysi filialga keldi
+  receivedAt        DateTime @default(now())
+  receivedBy        String
+  notes             String?
+
+  product      Product      @relation(fields: [productId], references: [id])
+  supplier     Supplier?    @relation(fields: [supplierId], references: [id])
+  supplierDebt SupplierDebt? @relation(fields: [supplierDebtId], references: [id])
+  allocations  SaleItemBatch[]
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  type      MovementType
+  productId String
+  batchId   String?
+  quantity  Int
+  unitPrice Decimal?
+  shopId    String
+  userId    String
+  saleId    String?
+  returnId  String?
+  transferId String?
+  notes     String?
+  createdAt DateTime     @default(now())
+
+  product  Product @relation(fields: [productId], references: [id])
+  shop     Shop    @relation(fields: [shopId], references: [id])
+  user     User    @relation(fields: [userId], references: [id])
+}
+
+enum MovementType {
+  IN         // kirim
+  OUT        // sotuv
+  RETURN     // qaytarish
+  ADJUST     // qo'lda tuzatish
+  TRANSFER_OUT // filialdan chiqish
+  TRANSFER_IN  // filialga kirish
+}
+
+// Filiallar orasida ko'chirish
+model StockTransfer {
+  id          String         @id @default(cuid())
+  fromShopId  String
+  toShopId    String
+  productId   String
+  batchId     String?
+  quantity    Int
+  status      TransferStatus @default(PENDING)
+  requestedBy String
+  approvedBy  String?
+  notes       String?
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  fromShop   Shop @relation("TransferFrom", fields: [fromShopId], references: [id])
+  toShop     Shop @relation("TransferTo", fields: [toShopId], references: [id])
+  requestedByUser User @relation("TransferFrom", fields: [requestedBy], references: [id])
+  approvedByUser  User? @relation("TransferTo", fields: [approvedBy], references: [id])
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+// ============================
+// MIJOZLAR
+// ============================
+
+model Customer {
+  id          String   @id @default(cuid())
+  fullName    String
+  phone       String   @unique
+  passport    String?
+  address     String?
+  birthDate   DateTime?
+  carInfo     String?  // "Cobalt 2018, oq"
+  notes       String?
+  isBlocked   Boolean  @default(false)
+  blockReason String?
+  createdAt   DateTime @default(now())
+
+  guarantorId String?
+  guarantor   Customer?  @relation("Guarantor", fields: [guarantorId], references: [id])
+  guaranteedFor Customer[] @relation("Guarantor")
+
+  sales        Sale[]
+  installments Installment[]
+  loyaltyCard  LoyaltyCard?
+  leads        Lead[]
+}
+
+// ============================
+// SODIQLIK TIZIMI (TALON)
+// ============================
+
+model LoyaltyCard {
+  id           String   @id @default(cuid())
+  cardNumber   String   @unique // "T-2026-000142"
+  customerId   String   @unique
+  stampsCount  Int      @default(0) // joriy davr muhr soni
+  totalStamps  Int      @default(0) // umumiy muhr soni
+  totalRedemptions Int  @default(0) // necha marta chegirma ishlatilgan
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customer     Customer          @relation(fields: [customerId], references: [id])
+  redemptions  LoyaltyRedemption[]
+}
+
+model LoyaltyRedemption {
+  id            String   @id @default(cuid())
+  loyaltyCardId String
+  saleId        String   @unique
+  stampsBefore  Int      // chegirmadan oldin nechta muhr edi
+  discountPercent Decimal // 25%
+  discountAmount Decimal  // aniq summa
+  productId     String?  // qaysi tovar/komplektga qo'llanildi
+  productName   String?
+  quantity      Int?
+  approvedBy    String   // sotuvchi yoki manager
+  createdAt     DateTime @default(now())
+
+  loyaltyCard   LoyaltyCard @relation(fields: [loyaltyCardId], references: [id])
+  approvedByUser User       @relation(fields: [approvedBy], references: [id])
+}
+
+// Qoida: stampsCount = 9 bo'lsa va yangi sotuv bo'lsa:
+// 1. stampsCount = 10 ga oshadi
+// 2. Sotuvchi ekranida "SODIQLIK CHEGIRMASI!" xabari chiqadi
+// 3. Mijoz tanlaydi: shina yoki diskka 25% chegirma
+// 4. Sotuv yakunlangach:
+//    - LoyaltyRedemption yaratiladi
+//    - stampsCount = 0 ga qaytadi
+//    - totalRedemptions += 1
+//
+// Agar 10-chi xaridda shina/disk bo'lmasa:
+//    - stampsCount = 10 bo'lib qoladi
+//    - Keyingi shina/disk bor xaridda avtomatik chiqadi
+//    - Qayta 0'ga tushadi
+
+// ============================
+// CHEGIRMA TIZIMI
+// ============================
+
+model DiscountRequest {
+  id             String        @id @default(cuid())
+  saleId         String?
+  requestedBy    String        // sotuvchi
+  approvedBy     String?       // manager yoki admin
+  discountType   DiscountType
+  discountPercent Decimal?
+  discountAmount Decimal?
+  reason         String?
+  status         ApprovalStatus @default(PENDING)
+  createdAt      DateTime      @default(now())
+  resolvedAt     DateTime?
+
+  requestedByUser User  @relation("DiscountRequester", fields: [requestedBy], references: [id])
+  approvedByUser  User? @relation("DiscountApprover", fields: [approvedBy], references: [id])
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  LOYALTY        // sodiqlik chegirmasi
+  PROMOTION      // aksiya chegirmasi
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Aksiyalar (admin paneldan yaratiladi)
+model Promotion {
+  id          String        @id @default(cuid())
+  name        String        // "Yanvar aksiyasi"
+  type        PromotionType
+  discountPercent Decimal?
+  discountAmount Decimal?
+  minQuantity Int?           // minimum nechta dona
+  minAmount   Decimal?       // minimum summa
+  categoryId  String?        // qaysi kategoriya
+  brandFilter String?        // qaysi brend
+  shopId      String?        // qaysi filial (null = hammasi)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+}
+
+enum PromotionType {
+  PERCENT_OFF        // % chegirma
+  FIXED_OFF          // aniq summa chegirma
+  BUY_X_GET_PERCENT  // X ta olsang Y% chegirma
+}
+
+// ============================
+// SOTUVLAR
+// ============================
+
+model Sale {
+  id              String      @id @default(cuid())
+  saleNumber      String      @unique // "S-20260514-000001"
+  shopId          String
+  userId          String
+  customerId      String?
+  paymentType     PaymentType
+  installmentMonths Int?
+  installmentPercent Decimal? @default(0)
+
+  subtotal        Decimal
+  servicesAmount  Decimal     @default(0)
+  deliveryAmount  Decimal     @default(0)
+  discountAmount  Decimal     @default(0)
+  discountType    DiscountType?
+  loyaltyRedemptionId String?
+  totalAmount     Decimal
+  totalProfit     Decimal     // FIFO bo'yicha avtomatik
+
+  deliveryRegion  String?
+  deliveryAddress String?
+
+  status          SaleStatus  @default(COMPLETED)
+  cancelledAt     DateTime?
+  cancelledBy     String?
+  cancelReason    String?
+  cancelWindowEnd DateTime?   // sotuv + 5 daqiqa (o'zi bekor qila oladi)
+
+  createdAt       DateTime    @default(now())
+
+  shop     Shop      @relation(fields: [shopId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+  items    SaleItem[]
+  services SaleService[]
+  installment Installment?
+  returns  Return[]
+}
+
+enum PaymentType {
+  CASH
+  CARD
+  INSTALLMENT
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELLED
+  PARTIALLY_RETURNED
+  FULLY_RETURNED
+}
+
+model SaleItem {
+  id         String  @id @default(cuid())
+  saleId     String
+  productId  String
+  quantity   Int
+  unitPrice  Decimal
+  totalPrice Decimal
+  profit     Decimal // FIFO bo'yicha
+  discountApplied Boolean @default(false) // sodiqlik/aksiya chegirmasi
+
+  sale             Sale           @relation(fields: [saleId], references: [id])
+  product          Product        @relation(fields: [productId], references: [id])
+  batchAllocations SaleItemBatch[]
+}
+
+// FIFO: bir SaleItem bir necha partiyadan bo'lishi mumkin
+model SaleItemBatch {
+  id            String  @id @default(cuid())
+  saleItemId    String
+  batchId       String
+  quantity      Int
+  purchasePrice Decimal
+
+  saleItem SaleItem     @relation(fields: [saleItemId], references: [id])
+  batch    ProductBatch @relation(fields: [batchId], references: [id])
+}
+
+model SaleService {
+  id        String  @id @default(cuid())
+  saleId    String
+  serviceId String
+  price     Decimal
+
+  sale    Sale    @relation(fields: [saleId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  nameRu      String?
+  category    String   // "Do'kondan xarid", "Yetkazib berish", "Boshqa"
+  price       Decimal
+  isFree      Boolean  @default(false) // bepul xizmat
+  isActive    Boolean  @default(true)
+  saleServices SaleService[]
+}
+
+// Yetkazib berish narxlari (hududlar bo'yicha)
+model DeliveryRate {
+  id       String  @id @default(cuid())
+  region   String  @unique // "Toshkent", "Samarqand", ...
+  price    Decimal
+  isActive Boolean @default(true)
+}
+
+// ============================
+// QAYTARISH
+// ============================
+
+model Return {
+  id           String     @id @default(cuid())
+  returnNumber String     @unique // "R-20260514-000001"
+  saleId       String
+  customerId   String?
+  reason       String
+  totalAmount  Decimal
+  type         ReturnType
+  exchangeSaleId String?
+  approvedBy   String?
+  createdAt    DateTime   @default(now())
+  createdBy    String
+
+  sale    Sale         @relation(fields: [saleId], references: [id])
+  items   ReturnItem[]
+}
+
+enum ReturnType {
+  REFUND
+  EXCHANGE
+}
+
+model ReturnItem {
+  id        String  @id @default(cuid())
+  returnId  String
+  productId String
+  quantity  Int
+  unitPrice Decimal
+  return    Return  @relation(fields: [returnId], references: [id])
+}
+
+// ============================
+// MUDDATLI TO'LOV
+// ============================
+
+model Installment {
+  id               String            @id @default(cuid())
+  saleId           String            @unique
+  customerId       String
+  totalAmount      Decimal
+  monthsCount      Int
+  monthlyPayment   Decimal
+  paidAmount       Decimal           @default(0)
+  remainingAmount  Decimal
+  startDate        DateTime
+  endDate          DateTime
+  status           InstallmentStatus @default(ACTIVE)
+  passportCopyUrl  String?
+  guarantorPassportUrl String?
+  contractUrl      String?           // PDF shartnoma
+  createdAt        DateTime          @default(now())
+
+  sale     Sale     @relation(fields: [saleId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+  payments InstallmentPayment[]
+}
+
+enum InstallmentStatus {
+  ACTIVE
+  COMPLETED
+  OVERDUE
+  DEFAULTED
+}
+
+model InstallmentPayment {
+  id            String   @id @default(cuid())
+  installmentId String
+  amount        Decimal
+  paymentDate   DateTime @default(now())
+  receivedBy    String
+  notes         String?
+  installment   Installment @relation(fields: [installmentId], references: [id])
+}
+
+// ============================
+// YETKAZIB BERUVCHILAR VA NASIYA
+// ============================
+
+model Supplier {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String?
+  contactPerson String?
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  batches ProductBatch[]
+  debts   SupplierDebt[]
+}
+
+model SupplierDebt {
+  id              String     @id @default(cuid())
+  supplierId      String
+  totalAmount     Decimal
+  paidAmount      Decimal    @default(0)
+  remainingAmount Decimal
+  dueDate         DateTime
+  status          DebtStatus @default(UNPAID)
+  notes           String?
+  createdAt       DateTime   @default(now())
+
+  supplier Supplier         @relation(fields: [supplierId], references: [id])
+  batches  ProductBatch[]
+  payments SupplierPayment[]
+}
+
+enum DebtStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+model SupplierPayment {
+  id          String   @id @default(cuid())
+  debtId      String
+  amount      Decimal
+  paymentDate DateTime @default(now())
+  paidBy      String
+  notes       String?
+  debt        SupplierDebt @relation(fields: [debtId], references: [id])
+}
+
+// ============================
+// XARAJATLAR
+// ============================
+
+model Expense {
+  id          String          @id @default(cuid())
+  shopId      String?
+  name        String
+  category    ExpenseCategory
+  amount      Decimal
+  expenseDate DateTime
+  recurring   Boolean         @default(false)
+  dueDate     DateTime?       // eslatma uchun
+  createdBy   String
+  createdAt   DateTime        @default(now())
+
+  shop Shop? @relation(fields: [shopId], references: [id])
+}
+
+enum ExpenseCategory {
+  RENT
+  UTILITIES
+  SALARY
+  TAX
+  MARKETING
+  TRANSPORT
+  OTHER
+}
+
+// ============================
+// LEAD (INSTAGRAM DM VA BOSHQA)
+// ============================
+
+model Lead {
+  id          String     @id @default(cuid())
+  source      LeadSource @default(MANUAL)
+  fullName    String?
+  phone       String?
+  instagramId String?    // @username
+  message     String?    // dastlabki so'rov
+  interest    String?    // "215/55 R17 shina, Lassa brendi"
+  categoryId  String?
+  budget      Decimal?
+  status      LeadStatus @default(NEW)
+  assignedTo  String?    // qaysi sotuvchiga biriktirildi
+  customerId  String?    // sotuv bo'lsa, mijozga bog'lanadi
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+  messages LeadMessage[]
+}
+
+enum LeadSource {
+  MANUAL
+  INSTAGRAM
+  TELEGRAM
+  CALL
+  WALK_IN
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  SOLD
+  LOST
+}
+
+model LeadMessage {
+  id        String      @id @default(cuid())
+  leadId    String
+  direction MessageDir
+  content   String      @db.Text
+  sentAt    DateTime    @default(now())
+  lead      Lead        @relation(fields: [leadId], references: [id])
+}
+
+enum MessageDir {
+  INBOUND   // mijozdan kelgan
+  OUTBOUND  // biz yuborgan
+}
+
+// ============================
+// AI AGENT VA CHATLAR
+// ============================
+
+model AIAgent {
+  id                 String   @id @default(cuid())
+  name               String
+  nameRu             String?
+  slug               String   @unique
+  description        String
+  descriptionRu      String?
+  systemPrompt       String   @db.Text
+  allowedDataSources String[]
+  isActive           Boolean  @default(true)
+  icon               String?
+
+  chats AIChat[]
+}
+
+// 4 ta birinchi versiya agentlari:
+// 1. sales-agent    — Savdo agenti
+// 2. pr-agent       — PR/Marketing agenti
+// 3. customer-agent — Mijoz muloqoti agenti
+// 4. product-agent  — Tovar bazasi agenti
+
+model AIChat {
+  id        String   @id @default(cuid())
+  agentId   String
+  userId    String
+  shopId    String?
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agent    AIAgent    @relation(fields: [agentId], references: [id])
+  messages AIMessage[]
+}
+
+model AIMessage {
+  id         String      @id @default(cuid())
+  chatId     String
+  role       MessageRole
+  content    String      @db.Text
+  metadata   Json?
+  tokensUsed Int?
+  createdAt  DateTime    @default(now())
+
+  chat AIChat @relation(fields: [chatId], references: [id])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ============================
+// ESLATMALAR
+// ============================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String?          // null = admin
+  shopId    String?
+  type      NotificationType
+  title     String
+  message   String
+  linkUrl   String?
+  isRead    Boolean          @default(false)
+  priority  Priority         @default(NORMAL)
+  metadata  Json?            // qo'shimcha ma'lumotlar
+  createdAt DateTime         @default(now())
+}
+
+enum NotificationType {
+  LOW_STOCK            // tovar kamligi
+  STAGNANT_STOCK       // uzoq vaqt sotilmagan tovar
+  CUSTOMER_BIRTHDAY    // mijoz tug'ilgan kuni
+  SUPPLIER_DEBT_DUE    // yetkazib beruvchiga to'lov muddati
+  INSTALLMENT_DUE      // mijoz to'lov muddati
+  OVERDUE_PAYMENT      // kechiktirilgan to'lov
+  EXPENSE_DUE          // xarajat muddati
+  SEASONAL_REMINDER    // mavsum almashuvi
+  NEW_DEVICE_PENDING   // yangi qurilma tasdiq kutmoqda
+  SUSPICIOUS_LOGIN     // shubhali kirish
+  RISK_ALERT           // xavf signali
+  LOYALTY_MILESTONE    // sodiqlik talon to'ldi
+  SYSTEM               // tizim xabari
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// ============================
+// AUDIT LOG
+// ============================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // "sale.create", "user.deactivate", "price.change"
+  entityType String   // "Sale", "Product", "User"
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+7. BAR KOD TIZIMI
+7.1. Format
+SH-MIC-19565R15-000001
+│   │   │        └── 6 xonali tartib raqami (999,999 gacha)
+│   │   └────────── Razmer (195/65R15 → 19565R15, bo'sh joy va "/" olib tashlanadi)
+│   └────────────── Brend qisqartmasi (Michelin → MIC, 3 harf)
+└────────────────── Kategoriya prefiksi (SH=Shina, DS=Disk, AK=Aksessuar, XZ=Xizmat)
+Misollar:
+Michelin 195/65 R15   → SH-MIC-19565R15-000001
+Lassa 215/55 R17      → SH-LAS-21555R17-000001
+Bridgestone 205/65 R15 → SH-BRI-20565R15-000001
+BBS R17 disk          → DS-BBS-R17-000001
+Borbet R18 disk       → DS-BOR-R18-000001
+Mobil 5W-30 moy       → AK-MOB-5W30-000001
+Montaj xizmati        → XZ-MON-000001
+Qoida:
+Raqam 000001 dan boshlanadi, ortadi
+999999 dan keyin 7 xonaga o'tadi (avtomatik)
+Hech qachon takrorlanmaydi (DB'da UNIQUE constraint)
+7.2. Chop etish jarayoni
+Kirim qilingandan keyin "Bar kod yaratish" tugmasi
+Tizim barcha yangi tovarlar uchun bar kod yaratadi
+"Chop etish" tugmasi → PNG rasmlar (Niimbot/Phomemo o'lchamlari: 40×30mm, 50×30mm)
+Telefonga yuborish yoki to'g'ridan-to'g'ri Niimbot ilovasida ochish
+7.3. Sodiqlik talon QR kod formati
+GT-LOYALTY-000142
+│   │        └── 6 xonali tartib raqami
+│   └─────────── Loyalty identifikator
+└─────────────── GoodTires
+
+8. CHEGIRMA TIZIMI
+8.1. 3 darajali chegirma
+Daraja
+%
+Kim beradi
+Tasdiqlash
+Kichik
+0–5%
+Sotuvchi
+Avtomatik
+O'rta
+5–15%
+Boshqaruvchi
+Manager tasdig'i
+Katta
+15%+
+Admin
+Admin tasdig'i
+Tasdiqlash jarayoni:
+Sotuvchi 10% chegirma kiritadi → "Boshqaruvchi tasdig'i kerak" xabari
+Boshqaruvchi panelida "Chegirma so'rovlari" bo'limida chiqadi
+Boshqaruvchi tasdiqlasa → sotuv davom etadi
+15 daqiqa ichida tasdiq bo'lmasa → sotuv o'tkazilib yuborish mumkin yoki kichik chegirma bilan davom etish
+8.2. Aksiyalar (admin paneldan)
+Brend bo'yicha (Lassa brendiga 10% chegirma)
+Kategoriya bo'yicha (barcha qish shinalariga 15%)
+Miqdor bo'yicha (4+ shina olsang 5% chegirma)
+Summa bo'yicha (3 mln+ xaridga 7% chegirma)
+Muddatli: boshlanish va tugash sanasi
+8.3. Sodiqlik chegirmasi
+10-chi xaridda avtomatik chiqadi
+25% — faqat 1 ta komplekt shina yoki disk (mijoz tanlaydi)
+Komplekt: standart 4 dona, lekin 1 tadan ham bo'ladi
+Agar o'sha xaridda shina/disk yo'q bo'lsa → stampsCount 10 da qoladi, keyingi shina/disk xaridida chiqadi
+
+9. SODIQLIK TIZIMI (TALON) — TO'LIQ OQIM
+1. Yangi mijoz → "Talon berish" tugmasi
+   → LoyaltyCard yaratiladi (T-2026-000142)
+   → Niimbot'dan talon chiqariladi (QR kod + mijoz ismi + 10 ta bo'sh doira)
+   → Sotuvchi qog'oz talonga muhr bosadi (1-xarid)
+   → stampsCount = 1
+
+2. Keyingi xaridlarda:
+   → Mijoz talon ko'rsatadi → sotuvchi skaner qiladi yoki raqam kiritadi
+   → Tizim: "Jasur Toshmatov — 7-chi xaridi, 3 ta qoldi"
+   → Sotuvchi qog'oz talonga muhr bosadi
+   → stampsCount += 1
+
+3. 10-chi xaridda (stampsCount = 9 → 10):
+   → Ekranda: "🎉 TABRIKLAYMIZ! Bu mijozning 10-chi xaridi!"
+   → "Chegirmani qo'llash" tugmasi chiqadi
+   → Mijoz: shina yoki disk, nechta dona tanlaydi
+   → 25% chegirma o'sha tovar(lar)ga qo'llaniladi
+   → Sotuv yakunlanadi, LoyaltyRedemption saqlanadi
+   → stampsCount = 0 (yangi davr boshlanadi)
+   → Yangi talon chiqariladi (ixtiyoriy)
+
+4. Agar 10-chi xaridda shina/disk yo'q:
+   → stampsCount = 10 bo'lib qoladi
+   → Keyingi shina/disk xaridida avtomatik chiqadi
+
+10. ESLATMALAR TIZIMI
+Eslatma turi
+Qoida
+Kimga
+Tovar kamligi
+Qoldiq ≤ lowStockThreshold
+Admin, Manager
+To'xtab qolgan tovar
+stagnant_days kun sotilmagan
+Admin, Manager
+Mijoz tug'ilgan kuni
+Tug'ilgan kuni ertalab
+Admin, Manager
+Yetkazib beruvchi qarzi
+Muddatga 3 kun qolsa
+Admin
+Mijoz muddatli to'lovi
+Muddatga 3 kun qolsa
+Admin, Manager
+Kechiktirilgan to'lov
+Muddat o'tsa
+Admin, Manager
+Xarajat muddati
+Ijara/kommunal muddatiga 5 kun
+Admin
+Mavsumiy eslatma
+Aprel 1 (yoz) va Oktyabr 1 (qish)
+Admin
+Yangi qurilma
+Darhol
+Admin
+Shubhali kirish
+Darhol
+Admin
+Xavf signali
+Kunlik tahlil
+Admin
+Xavf signallari (RISK_ALERT):
+Bu hafta sotuv oldingi haftaga nisbatan 30%+ pasaydi
+Bir sotuvchi bir kunda 3+ marta katta chegirma berdi
+Bir mijozning 3+ sotuvi bekor qilindi
+Foyda marjasi o'tgan oyga nisbatan 20%+ pasaydi
+Omborda 5+ tovar stagnant_days ni oshib ketdi
+
+11. SOTUV CHEKI NAMUNA
+        ┌─────────────────────────────┐
+        │    [GOODTIRES LOGO]         │
+        │    GoodTires                │
+        │    Toshkent sh., [manzil]   │
+        │    Tel: +998 XX XXX-XX-XX   │
+        ├─────────────────────────────┤
+        │ Chek: S-20260514-000001     │
+        │ Sana: 14.05.2026  16:32     │
+        │ Sotuvchi: Jasur             │
+        │ Do'kon: Do'kon 1            │
+        ├─────────────────────────────┤
+        │ TOVARLAR:                   │
+        │ 1. Lassa 215/55 R17    x2   │
+        │    450,000 × 2 = 900,000    │
+        │ 2. Michelin 195/65 R15 x4   │
+        │    520,000 × 4 = 2,080,000  │
+        ├─────────────────────────────┤
+        │ XIZMATLAR:                  │
+        │ - Shina o'rnatish   BEPUL   │
+        │ - Balansirovka     100,000  │
+        ├─────────────────────────────┤
+        │ Tovarlar:       2,980,000   │
+        │ Xizmatlar:        100,000   │
+        │ Chegirma (5%):   -154,000   │
+        │ ─────────────────────────   │
+        │ JAMI:           2,926,000   │
+        │ To'lov: Naqd                │
+        ├─────────────────────────────┤
+        │ Mijoz: Karim Karimov        │
+        │ Tel: +998 90 XXX-XX-XX      │
+        │ Talon: T-2026-000142 (7/10) │
+        ├─────────────────────────────┤
+        │ Rahmat! Yana tashrif        │
+        │ buyuring.                   │
+        │ Garantiya: 7 kun            │
+        │ goodtires.uz                │
+        └─────────────────────────────┘
+Chek shakli ish boshqaruvchidan olingandan keyin aniqlanadi.
+
+12. FRONTEND STRUKTURA
+12.1. Papka tuzilmasi
+src/
+├── api/
+│   ├── client.js              // axios instance, interceptors
+│   ├── auth.api.js
+│   ├── products.api.js
+│   ├── sales.api.js
+│   ├── customers.api.js
+│   ├── suppliers.api.js
+│   ├── reports.api.js
+│   ├── ai.api.js
+│   ├── leads.api.js
+│   └── admin.api.js
+│
+├── components/
+│   ├── ui/                    // base UI (200 qatordan oshmaslik)
+│   │   ├── Button.jsx
+│   │   ├── Input.jsx
+│   │   ├── Select.jsx
+│   │   ├── Modal.jsx
+│   │   ├── Table.jsx
+│   │   ├── Card.jsx
+│   │   ├── Tabs.jsx
+│   │   ├── Toast.jsx
+│   │   ├── Badge.jsx
+│   │   ├── Skeleton.jsx
+│   │   ├── Pagination.jsx
+│   │   ├── DatePicker.jsx
+│   │   └── ThemeToggle.jsx
+│   │
+│   ├── shared/
+│   │   ├── BarcodeScanner.jsx
+│   │   ├── BarcodeGenerator.jsx
+│   │   ├── SelfieCapture.jsx
+│   │   ├── ProductCard.jsx
+│   │   ├── PriceDisplay.jsx
+│   │   ├── ShopSelector.jsx
+│   │   ├── NotificationBell.jsx
+│   │   ├── LanguageToggle.jsx
+│   │   └── ConfirmDialog.jsx
+│   │
+│   └── domain/                // har sahifaning kichik komponentlari
+│       ├── sale/
+│       │   ├── SaleForm.jsx
+│       │   ├── CartList.jsx
+│       │   ├── CartItem.jsx
+│       │   ├── PaymentSelector.jsx
+│       │   ├── CustomerSelector.jsx
+│       │   ├── ServiceSelector.jsx
+│       │   ├── DeliverySelector.jsx
+│       │   ├── DiscountInput.jsx
+│       │   ├── LoyaltyBadge.jsx
+│       │   ├── SaleSummary.jsx
+│       │   └── ReceiptModal.jsx
+│       ├── product/
+│       │   ├── ProductForm.jsx
+│       │   ├── CategoryAttributes.jsx
+│       │   ├── BatchList.jsx
+│       │   ├── BatchForm.jsx
+│       │   └── BarcodePreview.jsx
+│       ├── customer/
+│       │   ├── CustomerForm.jsx
+│       │   ├── CustomerCard.jsx
+│       │   ├── LoyaltyCard.jsx
+│       │   └── InstallmentSchedule.jsx
+│       ├── reports/
+│       │   ├── SalesChart.jsx
+│       │   ├── TopProductsTable.jsx
+│       │   ├── ProfitSummary.jsx
+│       │   ├── SeasonalChart.jsx
+│       │   └── EmployeeStats.jsx
+│       ├── ai/
+│       │   ├── AgentCard.jsx
+│       │   ├── ChatWindow.jsx
+│       │   ├── MessageBubble.jsx
+│       │   └── AgentDataBadge.jsx
+│       └── lead/
+│           ├── LeadCard.jsx
+│           ├── LeadForm.jsx
+│           └── LeadConversation.jsx
+│
+├── contexts/
+│   ├── ThemeContext.jsx        // light/dark/brand
+│   ├── AuthContext.jsx
+│   ├── ShopContext.jsx        // joriy filial
+│   └── NotificationContext.jsx
+│
+├── hooks/
+│   ├── usePermission.js       // ruxsatlar tekshirish
+│   ├── useAuth.js
+│   ├── useShop.js
+│   ├── useDebounce.js
+│   ├── useBarcodeScanner.js
+│   ├── useFormatPrice.js
+│   ├── useLang.js             // 'UZ' | 'RU'
+│   └── useNotifications.js
+│
+├── i18n/
+│   ├── uz.json
+│   └── ru.json
+│
+├── layouts/
+│   ├── AuthLayout.jsx
+│   ├── MainLayout.jsx
+│   └── PendingApprovalLayout.jsx
+│
+├── pages/
+│   ├── auth/
+│   │   ├── Login.jsx                    // mavjud, saqlandi
+│   │   ├── SelfieVerification.jsx
+│   │   └── PendingApproval.jsx
+│   │
+│   ├── Dashboard.jsx
+│   │
+│   ├── warehouse/
+│   │   ├── WarehouseList/
+│   │   │   ├── index.jsx
+│   │   │   ├── components/
+│   │   │   │   ├── ProductFilters.jsx
+│   │   │   │   ├── ProductTable.jsx
+│   │   │   │   ├── StockStatusBadge.jsx
+│   │   │   │   └── SeasonBadge.jsx
+│   │   │   └── hooks/
+│   │   │       └── useWarehouseList.js
+│   │   ├── StockIn/
+│   │   │   ├── index.jsx
+│   │   │   ├── components/
+│   │   │   │   ├── ProductSearchStep.jsx
+│   │   │   │   ├── NewProductForm.jsx
+│   │   │   │   ├── ExistingProductForm.jsx
+│   │   │   │   ├── BatchSummary.jsx
+│   │   │   │   └── BarcodeGenerateStep.jsx
+│   │   │   └── hooks/
+│   │   │       └── useStockIn.js
+│   │   ├── StockInHistory.jsx
+│   │   ├── BatchDetails.jsx
+│   │   └── PrintBarcodes.jsx
+│   │
+│   ├── sales/
+│   │   ├── NewSale/
+│   │   │   ├── index.jsx
+│   │   │   ├── components/ (yuqorida keltirildi)
+│   │   │   └── hooks/
+│   │   │       ├── useCart.js
+│   │   │       └── useSaleSubmit.js
+│   │   ├── SalesList.jsx
+│   │   ├── SaleDetails.jsx
+│   │   └── Returns.jsx
+│   │
+│   ├── customers/
+│   │   ├── CustomersList.jsx
+│   │   ├── CustomerDetails/
+│   │   │   ├── index.jsx
+│   │   │   ├── components/
+│   │   │   │   ├── CustomerInfo.jsx
+│   │   │   │   ├── SalesHistory.jsx
+│   │   │   │   ├── LoyaltyProgress.jsx
+│   │   │   │   └── InstallmentStatus.jsx
+│   │   │   └── hooks/
+│   │   │       └── useCustomerDetails.js
+│   │   └── Installments.jsx
+│   │
+│   ├── suppliers/
+│   │   ├── SuppliersList.jsx
+│   │   └── SupplierDebts.jsx
+│   │
+│   ├── expenses/
+│   │   └── Expenses.jsx
+│   │
+│   ├── reports/
+│   │   ├── ReportsHome.jsx
+│   │   ├── SalesReport.jsx
+│   │   ├── StockInReport.jsx
+│   │   ├── StockReport.jsx
+│   │   ├── ProfitReport.jsx
+│   │   └── EmployeeReport.jsx
+│   │
+│   ├── leads/
+│   │   ├── LeadsList.jsx
+│   │   └── LeadDetails.jsx
+│   │
+│   ├── ai/
+│   │   ├── AgentsHome.jsx
+│   │   ├── SalesAgent.jsx
+│   │   ├── PRAgent.jsx
+│   │   ├── CustomerAgent.jsx
+│   │   └── ProductAgent.jsx
+│   │
+│   └── admin/
+│       ├── UsersManagement.jsx
+│       ├── UserForm.jsx
+│       ├── PermissionsEditor.jsx
+│       ├── ShopsManagement.jsx
+│       ├── CategoriesManagement.jsx
+│       ├── PendingDevices.jsx
+│       ├── LoginHistory.jsx
+│       ├── Promotions.jsx
+│       └── Settings.jsx
+│
+├── store/
+│   ├── authStore.js
+│   ├── themeStore.js
+│   ├── cartStore.js
+│   └── notificationStore.js
+│
+├── utils/
+│   ├── formatPrice.js         // 2,500,000 → "2 500 000 so'm"
+│   ├── formatDate.js
+│   ├── generateBarcode.js     // SKU generator
+│   ├── permissions.js         // hasPermission helper
+│   ├── fifo.js                // FIFO hisoblash
+│   └── validation.js
+│
+├── App.jsx
+├── main.jsx
+├── ProtectedRoute.jsx
+└── index.css
+12.2. Marshrutlar
+PUBLIC:
+/login
+/pending-approval
+
+PROTECTED:
+/                        → Dashboard
+/warehouse               → Qoldiq ro'yxati
+/warehouse/in            → Kirim qilish
+/warehouse/in/history    → Kirim tarixi
+/warehouse/batches/:id   → Partiya tafsilotlari
+/warehouse/barcodes      → Bar kod chop etish
+/sales/new               → Yangi sotuv
+/sales                   → Sotuvlar tarixi
+/sales/:id               → Sotuv tafsilotlari
+/sales/returns           → Qaytarishlar
+/customers               → Mijozlar
+/customers/:id           → Mijoz tafsilotlari
+/installments            → Muddatli to'lovlar
+/suppliers               → Yetkazib beruvchilar
+/suppliers/debts         → Nasiya qarzlar
+/expenses                → Xarajatlar
+/reports                 → Hisobotlar bosh sahifa
+/reports/sales           → Sotuv hisoboti
+/reports/stock-in        → Kirim hisoboti
+/reports/stock           → Qoldiq hisoboti
+/reports/profit          → Foyda hisoboti
+/reports/employees       → Xodimlar hisoboti
+/leads                   → Lead boshqaruvi
+/leads/:id               → Lead tafsilotlari
+/ai                      → AI agentlar
+/ai/sales                → Savdo agenti
+/ai/pr                   → PR agenti
+/ai/customer             → Mijoz agenti
+/ai/product              → Tovar agenti
+
+ADMIN:
+/admin/users             → Xodimlar
+/admin/shops             → Filiallar
+/admin/categories        → Kategoriyalar
+/admin/promotions        → Aksiyalar
+/admin/devices           → Qurilmalar tasdig'i
+/admin/login-history     → Login tarixi
+/admin/settings          → Sozlamalar
+12.3. Sidebar navigatsiya
+GoodTires [Logo]
+[Filial tanlash dropdown]
+─────────────────
+📊 Dashboard
+─────────────────
+📦 Ombor
+   └── Qoldiq
+   └── Kirim
+   └── Kirim tarixi
+   └── Bar kodlar
+💰 Sotuv
+   └── Yangi sotuv
+   └── Sotuv tarixi
+   └── Qaytarishlar
+👥 Mijozlar
+   └── Mijozlar ro'yxati
+   └── Muddatli to'lovlar
+🚛 Yetkazib beruvchilar
+   └── Ro'yxat
+   └── Qarzlar
+💸 Xarajatlar
+📈 Hisobotlar
+   └── Sotuv
+   └── Kirim
+   └── Qoldiq
+   └── Foyda
+   └── Xodimlar
+📩 Lead'lar
+🤖 AI Agentlar
+─────────────────
+⚙️ Admin Panel [faqat admin/manager]
+─────────────────
+[Avatar] Jasur  [Chiqish]
+
+13. HISOBOTLAR VA FILTRLAR
+13.1. Sotuv hisoboti
+Filtrlar:
+Sana oralig'i (kun/hafta/oy/yil/mavsum/individual)
+Filial
+Sotuvchi
+To'lov turi (naqd/karta/muddatli)
+Kategoriya
+Brend
+Mavsum (yoz/qish/butun yil)
+Ko'rsatkichlar:
+Jami sotuv summasi
+Jami foyda
+O'rtacha chek
+Eng ko'p sotilgan tovarlar (TOP 10)
+Eng kam sotilgan tovarlar (BOTTOM 10)
+Brend bo'yicha sotuv
+Kategoriya bo'yicha sotuv
+Mavsumiy tahlil (yoz vs qish)
+13.2. Qoldiq hisoboti
+Filtrlar: Filial, kategoriya, brend, mavsum, holat (normal/kam/to'xtab qolgan)
+Ko'rsatkichlar:
+Umumiy qoldiq (soni va summasi)
+Kam qolgan tovarlar (threshold'dan past)
+To'xtab qolgan tovarlar (60+ kun sotilmagan)
+"Qotib qolgan kapital" — sotilmagan tovarlarning kirim narxi
+Partiya bo'yicha narx tarixlari
+13.3. Foyda hisoboti
+Kirim − Sotuv − Xarajat = Sof foyda
+Filial bo'yicha solishtirish
+Oylik trend grafigi
+Eng foydali kategoriya/brend/tovar
+13.4. Xodimlar hisoboti
+Har xodim: sotuv soni, summasi, foydasi
+Reyting jadval
+Berilgan chegirmalar
+Bekor qilingan sotuvlar
+
+14. AI AGENTLAR
+14.1. 4 ta asosiy agent
+Agent
+Ma'lumot manbalari
+Asosiy vazifalari
+Savdo agenti
+sales, products, stock
+Sotuv tahlili, o'sish imkoniyatlari, aksiya tavsiyalari
+PR agenti
+sales, promotions, seasons
+Marketing g'oyalari, aktsiya rejalari, reklama matni
+Mijoz agenti
+customers, sales, loyalty
+Mijozga javob shabloni, tavsiyalar, muloqot uslubi
+Tovar agenti
+products, batches, reports
+Qaysi tovar kerak, mavsumiy buyurtma, narx tahlili
+14.2. Texnik tuzilma
+Har agent — Claude API ga alohida system prompt bilan murojaat
+Agent faqat o'z allowedDataSources ma'lumotlariga kiradi
+Chat tarixi DB'da saqlanadi (har sessiyada so'nggi 20 xabar yuboriladi)
+AI javobida tavsiya qilingan tovarlar yoki sahifalar havolasi bo'lishi mumkin
+
+15. SPRINT YO'L XARITASI
+Sprint 1 — Asos va Auth (Frontend)
+[x] Login sahifa (mavjud, saqlandi)
+[x] MainLayout, Sidebar (mavjud, saqlandi)
+[ ] ThemeContext (light/dark/brand) — boshidan quriladi
+[ ] i18n setup (UZ + RU)
+[ ] Logo va do'kon nomi sozlash
+[ ] PWA manifest
+[ ] SelfieCapture komponenti
+[ ] PendingApproval sahifasi
+[ ] Auth flow (mock → real tayyorlash)
+[ ] ProtectedRoute + ruxsatlar
+Sprint 2 — Tovarlar va Kirim (Frontend)
+[ ] Kategoriyalar va atributlar (4 ta tayyor)
+[ ] Mahsulot qo'shish/tahrirlash formasi
+[ ] Kirim sahifasi (yangi + mavjud tovar, FIFO partiya)
+[ ] Bar kod yaratish (JsBarcode)
+[ ] Bar kod chop etish (PNG eksport, Niimbot o'lchamlari)
+[ ] Qoldiq ro'yxati (filtrlar: kategoriya, brend, mavsum, holat)
+Sprint 3 — Sotuv (Frontend)
+[ ] Yangi sotuv sahifasi
+[ ] Bar kod skaner (ZXing-js)
+[ ] Savat (cart) tizimi
+[ ] To'lov turi: naqd, karta, muddatli
+[ ] Mijoz tanlash/yaratish
+[ ] Sodiqlik talon tekshiruv va chegirma
+[ ] Chegirma tizimi (3 daraja)
+[ ] Aksiyalar avtomatik qo'llash
+[ ] Xizmat qo'shish
+[ ] Yetkazib berish
+[ ] Sotuv bekor qilish (5 daqiqa)
+[ ] Chek ko'rinishi va chop etish
+Sprint 4 — Mijozlar va Muddatli to'lov (Frontend)
+[ ] Mijozlar ro'yxati va tafsilotlari
+[ ] Muddatli to'lov boshqaruvi
+[ ] To'lov qabul qilish
+[ ] Sodiqlik tizimi (LoyaltyCard UI)
+[ ] Qaytarish/almashtirish
+Sprint 5 — Yetkazib beruvchilar, Xarajatlar, Lead (Frontend)
+[ ] Yetkazib beruvchilar
+[ ] Nasiya qarzlar va to'lovlar
+[ ] Xarajatlar
+[ ] Lead boshqaruvi (manual)
+[ ] Eslatmalar UI
+Sprint 6 — Hisobotlar (Frontend)
+[ ] 5 ta asosiy hisobot
+[ ] TOP/BOTTOM filtrlar
+[ ] Mavsumiy tahlil
+[ ] Grafiklar (Recharts)
+[ ] Excel/PDF eksport
+Sprint 7 — AI Agentlar (Frontend)
+[ ] 4 ta agent kartochkasi
+[ ] Chat interfeysi
+[ ] Tarix ko'rsatish
+Sprint 8 — Admin Panel (Frontend)
+[ ] Xodimlar boshqaruvi
+[ ] Ruxsatlar editori (chekboxlar)
+[ ] Filiallar boshqaruvi
+[ ] Aksiyalar boshqaruvi
+[ ] Qurilmalar tasdig'i
+[ ] Login tarixi (selfilar)
+[ ] Sozlamalar
+Sprint 9 — Backend
+[ ] PostgreSQL + Prisma setup
+[ ] Seed data (kategoriyalar, atributlar, xizmatlar, yetkazib berish)
+[ ] Auth (JWT, sessiya, selfie yuklash)
+[ ] Barcha API endpointlar
+[ ] FIFO va foyda hisoblash service
+[ ] Bar kod generatsiya service
+[ ] Eslatmalar (BullMQ workers)
+[ ] AI agent integratsiya (Claude API)
+[ ] PDF: chek va shartnoma
+[ ] Excel: hisobot eksport
+Sprint 10 — Integratsiya va Test
+[ ] Frontend → Backend ulanishi
+[ ] End-to-end test
+[ ] Xavfsizlik audit
+[ ] Performance optimization
+[ ] Backup tizim
+Sprint 11 — Production
+[ ] Domen va hosting
+[ ] HTTPS/SSL
+[ ] Monitoring
+[ ] Xodimlarni o'rgatish
+[ ] Ishga tushirish
+
+16. XAVFSIZLIK PRINTSIPLARI
+API kalitlari va secretlar — faqat .env (server side)
+Frontend'da hech qanday secret, kirim narxi, foyda raqami ko'rsatilmaydi (sotuvchi uchun)
+Har API endpointda permission tekshiruvi
+SQL injection — Prisma ORM avtomatik himoya
+XSS — React avtomatik escape
+CSRF — JWT + SameSite=Strict cookie
+Rate limiting — login va AI endpointlarda
+HTTPS — production'da majburiy
+Kunlik avtomatik backup (pg_dump)
+Audit log — har muhim amal saqlanadi
+Fayl yuklanishi — faqat ruxsat etilgan formatlar (jpg, png, pdf), hajm cheklovi
+Selfi rasmlari — xususiy papkada, URL'ga to'g'ridan-to'g'ri kirish yo'q
+
+17. MOCK MA'LUMOT KONVENSIYASI
+// MOCK — replace with: GET /api/products?category=tire
+const products = [
+  {
+    id: "1",
+    sku: "SH-MIC-19565R15-000001",
+    name: "Michelin 195/65 R15",
+    cashPrice: 650000,
+    stock: 12,
+    season: "SUMMER"
+  }
+]
+Har mock ma'lumot ustida aniq izoh qoladi. Backend tayyor bo'lganda faqat mock'ni o'chirib, useQuery ga almashtirish kifoya.
+
+18. MUHIM TEXNIK QARORLAR
+Masala
+Qaror
+Sabab
+Komponent hajmi
+Max 150 qator
+Refactoringdan qochish
+Domain papkalar
+Har sahifa o'z komponentlari
+Tez navigatsiya va modullash
+API state
+TanStack Query
+Cache, loading, error avtomatik
+Global state
+Zustand
+Oddiy, lightweight
+Stil
+Tailwind + CSS Variables
+Theme tizimi + utility classes
+Tema
+ThemeContext (boshidan)
+Keyinchalik qo'shsa muammo
+FIFO
+DB darajasida
+Aniq foyda hisoblash
+Audit log
+Har muhim amalda
+Xavfsizlik va tarix
+Bar kod
+Code-128 (JsBarcode)
+Niimbot va boshqa printerlar uchun mos
+PDF
+PDFKit (Node.js)
+Chek va shartnoma
+
+Hujjat versiyasi: 2.0 Oxirgi yangilanish: 15-may, 2026 Status: Yakuniy — Sprint 1 boshlanishga tayyor
+

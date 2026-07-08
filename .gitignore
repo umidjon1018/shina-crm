@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables — never commit real secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Credentials — demo users, real passwords should never be committed
+src/config/credentials.local.js
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+*.log
+
+# Temp files
+*.tmp
+*.bak
+git_diff_utf8.txt
+src_pages_reports_diff.txt
+arch_text.txt
+step_18_output.txt
+replace_script.cjs

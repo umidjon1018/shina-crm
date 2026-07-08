@@ -1,0 +1,40 @@
+﻿
+{"step_index":18,"source":"MODEL","type":"VIEW_FILE","status":"DONE","created_at":"2026-05-31T20:12:45Z","content":"Cre
+ated At: 2026-05-31T20:12:45Z\nCompleted At: 2026-05-31T20:12:45Z\nFile Path: `file:///c:/Users/Umidjon/Desktop/shina_c
+rm/src/pages/Reports.jsx`\nTotal Lines: 6917\nTotal Bytes: 413219\nShowing lines 446 to 1245\nThe following code has be
+en modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that
+ any changes targeting the original code should remove the line number, colon, and leading space.\n446:     visitDates:
+['2024-02-10','2024-08-20','2025-01-15','2025-09-03','2026-05-14']\n447:   },\n448:   {\n449:     id:'C002', name:'Mali
+ka Karimova',\n450:     phone:'+998902345678', instagram:'malika_karimova',\n451:     birthDate:'1995-07-22',\n452:    
+ totalVisits:3, totalSpent:4510000,\n453:     loyaltyLevel:'bronze',\n454:     loyaltyGrantedAt:'2024-08-15',\n455:    
+ loyaltyReason:\"Birinchi tashrif вЂ” Bronze darajasi berildi\",\n456:     lastVisit:'2026-05-14', firstVisit:'2024-08-
+15',\n457:     visitDates:['2024-08-15','2025-03-25','2026-05-14']\n458:   },\n459:   {\n460:     id:'C003', name:'Bobu
+r Toshmatov',\n461:     phone:'+998903456789', instagram:'bobur_toshmatov',\n462:     birthDate:'1988-11-05',\n463:    
+ totalVisits:3, totalSpent:4060000,\n464:     loyaltyLevel:'bronze',\n465:     loyaltyGrantedAt:'2025-02-28',\n466:    
+ loyaltyReason:\"Birinchi tashrif вЂ” Bronze darajasi berildi\",\n467:     lastVisit:'2026-04-14', firstVisit:'2025-02-
+28',\n468:     visitDates:['2025-02-28','2025-03-18','2026-04-14']\n469:   },\n470: ]\n471: \n472: // MOCK вЂ” replace 
+with: GET /api/expenses\n473: const DEFAULT_EXPENSES_DATA = [\n474:   { id: 'exp1',  categoryId: 'cat1', categoryLabel:
+ 'Ijara',       amountUZS: 3500000, date: '2026-05-01' },\n475:   { id: 'exp2',  categoryId: 'cat2', categoryLabel: 'Ko
+mmunal',    amountUZS: 420000,  date: '2026-05-02' },\n476:   { id: 'exp3',  categoryId: 'cat3', categoryLabel: 'Ish ha
+qi',    amountUZS: 8000000, date: '2026-05-05' },\n477:   { id: 'exp4',  categoryId: 'cat4', categoryLabel: 'Transport'
+,   amountUZS: 4445000, date: '2026-05-06' },\n478:   { id: 'exp5\n<truncated 38183 bytes>\n     const prev    = prevId
+x >= 0 ? MONTHS_ASC_LOCAL[prevIdx] : null\n1218:     const cur  = SALES_DATA.filter(s => s.soldAt.startsWith(m) && s.st
+atus === 'completed')\n1219:     const prv  = prev ? SALES_DATA.filter(s => s.soldAt.startsWith(prev) && s.status === '
+completed') : []\n1220:     const total   = cur.reduce((s, x) => s + x.total, 0)\n1221:     const profit  = cur.reduce(
+(s, x) => s + x.profit, 0)\n1222:     const count   = cur.length\n1223:     const prevTotal  = prv.reduce((s, x) => s +
+ x.total, 0)\n1224:     const prevProfit = prv.reduce((s, x) => s + x.profit, 0)\n1225:     const prevCount  = prv.leng
+th\n1226:     const target  = MONTHLY_TARGETS[m] || 0\n1227:     const targetPct = target > 0 ? Math.round((total / tar
+get) * 100) : null\n1228:     const installmentTotal = cur.filter(s => s.paymentType === 'installment').reduce((s, x) =
+> s + x.installmentDebt, 0)\n1229:     return {\n1230:       name: MONTH_NAMES[m], month: m,\n1231:       total, profit
+, count, target, targetPct,\n1232:       installmentTotal,\n1233:       growthTotal:  prevTotal  > 0 ? Math.round(((tot
+al  - prevTotal)  / prevTotal)  * 100) : null,\n1234:       growthProfit: prevProfit > 0 ? Math.round(((profit - prevPr
+ofit) / prevProfit) * 100) : null,\n1235:       growthCount:  prevCount  > 0 ? Math.round(((count  - prevCount)  / prev
+Count)  * 100) : null,\n1236:     }\n1237:   })\n1238: \n1239:   const employeeStats = useMemo(() => {\n1240:     if (!
+EMPLOYEES_DATA || !Array.isArray(EMPLOYEES_DATA) || EMPLOYEES_DATA.length === 0) {\n1241:       return { empStats:[], a
+ctiveCount:0, topSeller:null, monthlyActivity:[], cancelByEmp:[], totalCancelled:0 }\n1242:     }\n1243: \n1244:     co
+nst completed  = filterByPeriod(SALES_DATA, 'soldAt').filter(s => s.status === 'completed')\n1245:     const cancelled 
+ = filterByPeriod(SALES_DATA, 'soldAt').filter(s => s.status === 'cancelled')\nThe above content does NOT show the enti
+re file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool 
+again to view those lines.\n"}
+
+
