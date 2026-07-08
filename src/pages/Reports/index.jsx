@@ -858,7 +858,7 @@ export const Reports = () => {
     const retentionRate = (newCount + returnCount) > 0
       ? Math.round((returnCount / (newCount + returnCount)) * 100) : 0
 
-    const shopCustomers = selectedShopId === 'all' ? MOCK_CUSTOMERS : MOCK_CUSTOMERS.filter(c => c.shopId === selectedShopId)
+    const shopCustomers = MOCK_CUSTOMERS
     const ltvList = shopCustomers.map(c => {
       // firstVisit: c.firstVisit → birinchi sotuv sanasi (yangi + B/U) → bugun
       const _custSalesAll = [
