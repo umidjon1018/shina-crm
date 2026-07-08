@@ -381,8 +381,8 @@ const SalesTab = ({ ctx }) => {
                   <tbody className="divide-y divide-border/50">
                     {sortedData(
                       sortConfig.table === 'sales' && sortConfig.key
-                        ? salesData.filtered
-                        : [...salesData.filtered].sort((a,b) => b.total - a.total),
+                        ? salesData.completed
+                        : [...salesData.completed].sort((a,b) => b.total - a.total),
                       'sales'
                     )
                       .slice((salesTablePage - 1) * SALES_PAGE_SIZE, salesTablePage * SALES_PAGE_SIZE)
