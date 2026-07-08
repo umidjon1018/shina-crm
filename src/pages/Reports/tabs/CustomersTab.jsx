@@ -67,14 +67,12 @@ const CustomersTab = ({ ctx }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {customerStats.birthdayList.filter(c => c.instagram).map(c => (
-                    <a key={c.id}
-                      href={`https://ig.me/m/${c.instagram}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {customerStats.birthdayList.map(c => (
+                    <button key={c.id}
+                      onClick={() => { setSelectedCustomer(c); openModal('customerProfileModal') }}
                       className="px-3 py-1.5 rounded-lg text-xs font-bold bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 transition-colors">
                       {c.name.split(' ')[0]}{t('rep_cust_send_dm')}
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>
