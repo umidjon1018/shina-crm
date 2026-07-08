@@ -521,9 +521,9 @@ const CustomersTab = ({ ctx }) => {
                           {c.churnRisk === 'none' ? t('rep_cust_active_badge') : c.churnRisk === 'low' ? t('rep_risk_low') : c.churnRisk === 'medium' ? t('rep_risk_medium') : t('rep_risk_high')}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {c.customerSales.slice(0,6).map((s,i) => (
-                          <span key={i} className="px-2 py-0.5 rounded bg-accent-green/10 text-accent-green text-[10px] font-bold">
+                      <div className="flex flex-wrap gap-2 mb-2 max-h-20 overflow-y-auto pr-1">
+                        {c.customerSales.map((s,i) => (
+                          <span key={i} className="px-2 py-0.5 rounded bg-accent-green/10 text-accent-green text-[10px] font-bold whitespace-nowrap">
                             {s.soldAt?.slice(0,10)} — {fmtUZS(s.total)}
                           </span>
                         ))}
