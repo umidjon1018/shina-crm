@@ -100,6 +100,7 @@ const Sales = () => {
     customerPaySuccess, handleCustomerPaySubmit,
     filteredProfitItems, sortedProfitItems,
     profitMonthFilter, setProfitMonthFilter, profitMonthOptions,
+    profitTypeFilter, setProfitTypeFilter,
     profitSearch, setProfitSearch, profitPage, setProfitPage,
     profitSortField, profitSortOrder, handleProfitSort,
   } = state
@@ -221,6 +222,7 @@ const Sales = () => {
           // profit
           filteredProfitItems, sortedProfitItems,
           profitMonthFilter, setProfitMonthFilter, profitMonthOptions,
+          profitTypeFilter, setProfitTypeFilter,
           profitSearch, setProfitSearch, profitPage, setProfitPage,
           profitSortField, profitSortOrder, handleProfitSort,
         }
