@@ -555,7 +555,7 @@ export const useSalesState = () => {
   }
 
   const executeCancelSale = async (sale, cancelReason, refundType) => {
-    await apiCancelSale(sale.id)
+    await apiCancelSale(sale.id, cancelReason)
 
     if (sale.customerId) {
       const customer = allCustomers.find(c => c.id === sale.customerId)
@@ -1198,7 +1198,7 @@ export const useSalesState = () => {
                   ? t('sl_status_partial')
                   : t('sl_status_nasiya')
             )
-          : s.cancelReason === 'almashtirish' ? t('sl_hist_status_exchanged')
+          : (s.cancelReason === 'exchange' || s.cancelReason === 'almashtirish') ? t('sl_hist_status_exchanged')
           : t('sl_hist_status_cancelled')
       };
     });

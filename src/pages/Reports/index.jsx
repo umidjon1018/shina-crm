@@ -309,8 +309,8 @@ export const Reports = () => {
     const totalProfit = completed.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
     const avgCheck = totalSales / (completed.length || 1)
     const salesCount = completed.length
-    const cancelledCount  = cancelled.length
-    const exchangedCount  = cancelled.filter(s => s.cancelReason === 'almashtirish').length
+    const cancelledCount  = cancelled.filter(s => s.cancelReason !== 'exchange' && s.cancelReason !== 'almashtirish').length
+    const exchangedCount  = cancelled.filter(s => s.cancelReason === 'exchange' || s.cancelReason === 'almashtirish').length
 
     const installmentTotal = completed.filter(s => s.paymentType === 'installment').reduce((s, x) => s + (x.installmentDebt ?? Math.max(0, x.total - (x.installmentPaidAmount || 0))), 0)
 

@@ -97,8 +97,8 @@ export const createSale = async (saleData) => {
   return map(data)
 }
 
-export const cancelSale = async (id) => {
-  await api.put(`/api/sales/${id}/cancel`)
+export const cancelSale = async (id, cancelReason) => {
+  await api.put(`/api/sales/${id}/cancel`, { cancel_reason: cancelReason || null })
 }
 
 export const makeInstallmentPayment = async (saleId, amount) => {
