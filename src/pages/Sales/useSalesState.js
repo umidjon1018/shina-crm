@@ -1301,7 +1301,7 @@ export const useSalesState = () => {
   
   const profitItems = useMemo(() => {
     const items = [];
-    baseSalesForHistory.filter(s => !s._isExchange).forEach(s => {
+    baseSalesForHistory.forEach(s => {
       if (!s.items) return;
       const isCancelled = s.status === 'cancelled'
       const totalProfit = isCancelled ? 0 : getSaleProfit(s);
