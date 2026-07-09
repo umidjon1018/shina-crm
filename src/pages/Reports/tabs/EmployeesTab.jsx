@@ -736,6 +736,8 @@ const EmployeesTab = ({ ctx }) => {
                             { key:'cancelReason', label:t('col_reason'), render: r => {
                               if (r._rowKind === 'exchange') return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
                               const LABELS = {
+                                almashtirish:          t('col_exchange'),
+                                exchange:              t('col_exchange'),
                                 narx_mos_emas:         t('sl_cancel_r_price'),
                                 tovar_yoq:             t('rep_emp_modal_cancelled_reason_out_of_stock'),
                                 mijoz_fikr_ozgartirdi: t('rep_emp_modal_cancelled_reason_changed_mind'),
