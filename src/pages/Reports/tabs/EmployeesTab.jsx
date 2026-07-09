@@ -131,14 +131,14 @@ const EmployeesTab = ({ ctx }) => {
                       <th className="text-right px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'totalSales')}>
                         {t('rep_emp_col_total_sum')} <SortIcon table="employees" col="totalSales" />
                       </th>
-                      <th className="text-right px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'avgSale')}>
-                        {t('rep_emp_col_avg_check')} <SortIcon table="employees" col="avgSale" />
+                      <th className="text-right px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'avgCheck')}>
+                        {t('rep_emp_col_avg_check')} <SortIcon table="employees" col="avgCheck" />
                       </th>
                       <th className="text-center px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'newCustomers')}>
                         {t('rep_emp_col_new')} <SortIcon table="employees" col="newCustomers" />
                       </th>
-                      <th className="text-center px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'cancelRate')}>
-                        {t('rep_emp_col_cancel_pct')} <SortIcon table="employees" col="cancelRate" />
+                      <th className="text-center px-3 py-2.5 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('employees', 'cancelPct')}>
+                        {t('rep_emp_col_cancel_pct')} <SortIcon table="employees" col="cancelPct" />
                       </th>
                       <th className="text-center px-3 py-2.5 font-medium text-text-secondary">{t('rep_emp_col_last_sale')}</th>
                       <th className="text-center px-3 py-2.5 font-medium text-text-secondary">{t('rep_emp_col_target_pct')}</th>
@@ -830,11 +830,11 @@ const EmployeesTab = ({ ctx }) => {
                 <Modal open title={t('rep_emp_time_analysis')} subtitle={t('rep_emp_time_analysis_sub')} size="xl" onClose={closeModal}>
                   <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
                     <div className="flex gap-2">
-                      {[{key:'daily', label:t('rep_emp_modal_work_hours_daily')}, {key:'monthly', label:t('rep_emp_modal_work_hours_monthly')}].map(t => (
-                        <button key={t.key} onClick={() => setHourTab(t.key)}
+                      {[{key:'daily', label:t('rep_emp_modal_work_hours_daily')}, {key:'monthly', label:t('rep_emp_modal_work_hours_monthly')}].map(tab => (
+                        <button key={tab.key} onClick={() => setHourTab(tab.key)}
                           className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                            hourTab === t.key ? 'bg-accent-red text-white' : 'bg-bg-tertiary text-text-secondary hover:text-text-primary border border-border'
-                          }`}>{t.label}</button>
+                            hourTab === tab.key ? 'bg-accent-red text-white' : 'bg-bg-tertiary text-text-secondary hover:text-text-primary border border-border'
+                          }`}>{tab.label}</button>
                       ))}
                     </div>
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
