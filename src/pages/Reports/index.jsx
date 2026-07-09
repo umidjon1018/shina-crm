@@ -1050,21 +1050,17 @@ export const Reports = () => {
   })
 
   const employeeStats = useMemo(() => {
-    const fallbackEmployees = [
-      { id:1, name:'Umidjon', role:'admin',   phone:'', hiredAt:'2024-01-01', salary:3000000, isActive:true },
-      { id:2, name:'Sardor',  role:'manager', phone:'', hiredAt:'2024-03-15', salary:2500000, isActive:true },
-      { id:3, name:'Jasur',   role:'seller',  phone:'', hiredAt:'2024-06-01', salary:2000000, isActive:true },
-    ]
     const salesNames = [...new Set(MOCK_SALES.map(s => s.soldByName?.trim().toLowerCase()).filter(Boolean))]
-    const storeHasSalesIds = (storeEmployees || []).some(e =>
-      e.name && salesNames.includes(e.name.trim().toLowerCase())
-    )
-    const baseList = (storeEmployees && storeEmployees.length > 0 && storeHasSalesIds)
-      ? storeEmployees
-      : [
-          ...fallbackEmployees,
-          ...(storeEmployees || []).filter(e => !fallbackEmployees.some(f => String(f.id) === String(e.id)))
-        ]
+    // storeEmployees + savdolarda bor lekin ro'yxatda yo'q nomlarni virtual xodim sifatida qo'sh
+    const storeEmpNames = new Set((storeEmployees || []).map(e => e.name?.trim().toLowerCase()).filter(Boolean))
+    const extraSellers = salesNames
+      .filter(n => !storeEmpNames.has(n))
+      .map((n, i) => ({
+        id: `seller_${n}`,
+        name: MOCK_SALES.find(s => s.soldByName?.trim().toLowerCase() === n)?.soldByName || n,
+        role: 'seller', phone: '', hiredAt: '', salary: 0, isActive: true, _virtual: true,
+      }))
+    const baseList = [...(storeEmployees || []), ...extraSellers]
     const EMPLOYEES_DATA = selectedShopId === 'all'
       ? baseList
       : baseList.filter(e => e.name && salesNames.includes(e.name.trim().toLowerCase()))
