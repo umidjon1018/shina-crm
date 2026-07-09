@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList
 } from 'recharts'
 import { Activity, AlertTriangle, Award, ChevronDown, CircleX, Clock, Target, TrendingUp, Users } from 'lucide-react'
 import { C, DetailButton, GrowthBadge, Modal, ModalTable, MonthYearFilter, MonthlyDynamicsChart, fmtItems, fmtNum, fmtSoldAt, fmtUZS } from '../components/shared'
@@ -107,7 +107,10 @@ const EmployeesTab = ({ ctx }) => {
                     <XAxis type="number" hide />
                     <YAxis dataKey="name" type="category" fontSize={10} width={80} stroke="var(--text-muted)" />
                     <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }} formatter={v => empChartMetric === 'count' ? `${v} ${t('unit_pcs')}` : fmtUZS(v)} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} itemStyle={{ color: 'var(--text-primary)', fontSize: '12px' }} offset={10} isAnimationActive={false} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-                    <Bar dataKey="value" name={empChartMetric === 'total' ? t('col_amount') : empChartMetric === 'count' ? t('rep_emp_metric_count') : t('rep_emp_metric_profit')} fill={C.blue} radius={[0, 4, 4, 0]} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                    <Bar dataKey="value" name={empChartMetric === 'total' ? t('col_amount') : empChartMetric === 'count' ? t('rep_emp_metric_count') : t('rep_emp_metric_profit')} fill={C.blue} radius={[0, 4, 4, 0]} cursor={{ fill: 'rgba(255,255,255,0.05)' }}>
+                      <LabelList dataKey="value" position="insideRight" style={{ fill: '#fff', fontSize: 11, fontWeight: 700 }}
+                        formatter={v => empChartMetric === 'count' ? `${v} ta` : fmtUZS(v)} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
