@@ -354,7 +354,7 @@ const FinanceTab = ({ ctx }) => {
                       {m.invPayment > 0 && (
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-text-muted text-xs">{t('rep_fin_flow_supplier_payment')}</span>
-                          <span className="text-accent-green text-xs">+{fmtUZS(m.invPayment)}</span>
+                          <span className="text-accent-red text-xs">−{fmtUZS(m.invPayment)}</span>
                         </div>
                       )}
                       <div className="flex items-center justify-between mb-1">

@@ -2262,7 +2262,7 @@ export default {
   rep_fin_col_paid: 'Оплачено',
   rep_fin_col_debt: 'Остаток долга',
   rep_fin_col_commission: 'Комиссия',
-  rep_fin_cash_flow_desc: 'Доход − (Магазин + Оплата товара + Возврат капитала)',
+  rep_fin_cash_flow_desc: 'Торговая маржа − Оплата поставщику − Расходы = Операционный поток',
   rep_fin_last_3_months: 'Последние 3 месяца',
   rep_fin_all_months: 'Все месяцы ({{count}})',
   rep_fin_legend_total_expense: 'Всего расход',

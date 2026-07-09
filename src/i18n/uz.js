@@ -2271,7 +2271,7 @@ export default {
   rep_fin_col_paid: 'To\'langan',
   rep_fin_col_debt: 'Qoldiq qarz',
   rep_fin_col_commission: 'Komissiya',
-  rep_fin_cash_flow_desc: 'Daromad − (Do\'kon + Tovar to\'lovi + Kapital qaytarish)',
+  rep_fin_cash_flow_desc: 'Savdo marjasi − Yetkazuvchi to\'lovi − Xarajatlar = Operatsion oqim',
   rep_fin_last_3_months: 'Oxirgi 3 oy',
   rep_fin_all_months: 'Barcha oylar ({{count}})',
   rep_fin_legend_total_expense: 'Jami chiqim',
