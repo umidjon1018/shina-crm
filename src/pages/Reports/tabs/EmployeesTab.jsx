@@ -561,8 +561,12 @@ const EmployeesTab = ({ ctx }) => {
                               isAnimationActive={false}
                               wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
                             <Legend iconType="circle" />
-                            <Bar dataKey="Sotuv"  fill={C.blue}  radius={[4,4,0,0]} name={t('rep_emp_modal_performance_sales_legend')} />
-                            <Bar dataKey="Foyda"  fill={C.green} radius={[4,4,0,0]} name={t('rep_emp_modal_performance_profit_legend')} />
+                            <Bar dataKey="Sotuv"  fill={C.blue}  radius={[4,4,0,0]} name={t('rep_emp_modal_performance_sales_legend')}>
+                              <LabelList dataKey="Sotuv" position="insideTop" dy={6} style={{ fill:'#fff', fontSize:11, fontWeight:700 }} formatter={v => v > 0 ? fmtUZS(v) : ''} />
+                            </Bar>
+                            <Bar dataKey="Foyda"  fill={C.green} radius={[4,4,0,0]} name={t('rep_emp_modal_performance_profit_legend')}>
+                              <LabelList dataKey="Foyda" position="insideTop" dy={6} style={{ fill:'#fff', fontSize:11, fontWeight:700 }} formatter={v => v > 0 ? fmtUZS(v) : ''} />
+                            </Bar>
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
