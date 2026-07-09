@@ -1055,8 +1055,10 @@ export const Reports = () => {
       { id:2, name:'Sardor',  role:'manager', phone:'', hiredAt:'2024-03-15', salary:2500000, isActive:true },
       { id:3, name:'Jasur',   role:'seller',  phone:'', hiredAt:'2024-06-01', salary:2000000, isActive:true },
     ]
-    const salesIds = [...new Set(MOCK_SALES.map(s => String(s.soldBy)).filter(Boolean))]
-    const storeHasSalesIds = (storeEmployees || []).some(e => salesIds.includes(String(e.id)))
+    const salesNames = [...new Set(MOCK_SALES.map(s => s.soldByName?.trim().toLowerCase()).filter(Boolean))]
+    const storeHasSalesIds = (storeEmployees || []).some(e =>
+      e.name && salesNames.includes(e.name.trim().toLowerCase())
+    )
     const baseList = (storeEmployees && storeEmployees.length > 0 && storeHasSalesIds)
       ? storeEmployees
       : [
@@ -1065,7 +1067,7 @@ export const Reports = () => {
         ]
     const EMPLOYEES_DATA = selectedShopId === 'all'
       ? baseList
-      : baseList.filter(e => salesIds.includes(String(e.id)))
+      : baseList.filter(e => e.name && salesNames.includes(e.name.trim().toLowerCase()))
     const EMPLOYEE_TARGETS = (storeEmployeeTargets && Object.keys(storeEmployeeTargets).length > 0)
       ? storeEmployeeTargets
       : { 1:{'2026-03':5000000,'2026-04':6000000,'2026-05':7000000}, 2:{'2026-03':4000000,'2026-04':5000000,'2026-05':6000000}, 3:{'2026-03':3000000,'2026-04':3500000,'2026-05':4000000} }
@@ -1089,12 +1091,22 @@ export const Reports = () => {
     const shopReturns = selectedShopId === 'all' ? MOCK_RETURNS : MOCK_RETURNS.filter(r => r.shopId === selectedShopId)
 
     // Har xodim uchun statistika
+    // soldByName bo'yicha moslashtirish (users.id vs employees.id to'qnashuvini oldini olish)
+    const matchSale = (s, emp) =>
+      s.soldByName && emp.name
+        ? s.soldByName.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        : String(s.soldBy) === String(emp.id)
+    const matchReturn = (r, emp) =>
+      r.processedByName && emp.name
+        ? r.processedByName.trim().toLowerCase() === emp.name.trim().toLowerCase()
+        : String(r.processedBy) === String(emp.id)
+
     const empStats = EMPLOYEES_DATA.map(emp => {
-      const empCompleted = completed.filter(s => String(s.soldBy) === String(emp.id))
-      const empCancelled = cancelled.filter(s => String(s.soldBy) === String(emp.id))
+      const empCompleted = completed.filter(s => matchSale(s, emp))
+      const empCancelled = cancelled.filter(s => matchSale(s, emp))
       // MOCK_RETURNS ham qo'shamiz - qaytarish va almashtirish
-      const empReturns = shopReturns.filter(r => String(r.processedBy) === String(emp.id))
-      const empAll       = allSales.filter(s => String(s.soldBy) === String(emp.id))
+      const empReturns = shopReturns.filter(r => matchReturn(r, emp))
+      const empAll       = allSales.filter(s => matchSale(s, emp))
 
       const totalSales   = empCompleted.reduce((s,x) => s+x.total, 0)
       const totalProfit  = empCompleted.reduce((s,x) => s+getSaleProfit(x), 0)
@@ -1120,14 +1132,14 @@ export const Reports = () => {
       const monthly = MONTHS.map((m, i) => {
         const prevIdx   = EMP_MONTHS_ASC.indexOf(m) - 1
         const prev      = prevIdx >= 0 ? EMP_MONTHS_ASC[prevIdx] : null
-        const mSales    = MOCK_SALES.filter(s => String(s.soldBy)===String(emp.id) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(m))
+        const mSales    = MOCK_SALES.filter(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(m))
         const mTotal    = mSales.reduce((s,x) => s+x.total, 0)
         const mProfit   = mSales.reduce((s,x) => s+getSaleProfit(x), 0)
         const mCount    = mSales.length
         const mTarget   = EMPLOYEE_TARGETS[emp.id]?.[m] || 0
         const mTargetPct = mTarget > 0 ? Math.round(mTotal/mTarget*100) : null
         const prevSales = prev
-          ? MOCK_SALES.filter(s => String(s.soldBy)===String(emp.id) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(prev))
+          ? MOCK_SALES.filter(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(prev))
           : []
         const prevTotal = prevSales.reduce((s,x)=>s+x.total,0)
         return {
@@ -1150,7 +1162,7 @@ export const Reports = () => {
       // KPI hisoblash
       const curMonth = new Date().toISOString().slice(0, 7)
       const curTarget = EMPLOYEE_TARGETS[emp.id]?.[curMonth] || 0
-      const curSales  = MOCK_SALES.filter(s => String(s.soldBy)===String(emp.id) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(curMonth))
+      const curSales  = MOCK_SALES.filter(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(curMonth))
       const curTotal  = curSales.reduce((s,x)=>s+x.total,0)
       const targetScore   = curTarget > 0 ? Math.round((curTotal/curTarget)*60) : 0
       const cancelPenalty = Math.min(30, cancelPct * 3)
@@ -1175,7 +1187,7 @@ export const Reports = () => {
     // Oylik faollik tarixi
     const monthlyActivity = [...MONTHS].reverse().map(m => {
       const activeEmps = EMPLOYEES_DATA.filter(emp =>
-        MOCK_SALES.some(s => String(s.soldBy)===String(emp.id) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(m))
+        MOCK_SALES.some(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(m))
       )
       return { name: monthNames[m], month: m, count: activeEmps.length, emps: activeEmps.map(e=>e.name) }
     })
@@ -1186,9 +1198,9 @@ export const Reports = () => {
     const cancelledSaleIds = new Set(cancelled.map(s => s.id))
     const cancelByEmp = EMPLOYEES_DATA.map(emp => {
       const empCancelled = [
-        ...cancelled.filter(s => String(s.soldBy) === String(emp.id)),
+        ...cancelled.filter(s => matchSale(s, emp)),
         ...periodReturns
-          .filter(r => String(r.processedBy) === String(emp.id) && !cancelledSaleIds.has(r.originalSaleId))
+          .filter(r => matchReturn(r, emp) && !cancelledSaleIds.has(r.originalSaleId))
           .map(r => {
             // Eski tovar summasi — moliyaviy "yo'qotilgan" summa
             const oldItemsTotal = (r.returnedItems || []).reduce((s, i) => s + (i.salePrice || 0) * (i.qty || 1), 0)
