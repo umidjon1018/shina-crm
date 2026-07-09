@@ -275,7 +275,7 @@ const Pagination = ({ total, pageSize, page, onPageChange }) => {
   )
 }
 
-const ModalTable = ({ columns, data, pageSize = 10, emptyText, initialSortKey = 'soldAt', initialSortDir = 'desc' }) => {
+const ModalTable = ({ columns, data, pageSize = 10, emptyText, initialSortKey = 'soldAt', initialSortDir = 'desc', rowStyle }) => {
   const { t } = useTranslation()
   const [page, setPage]         = React.useState(1)
   const [sortKey, setSortKey]   = React.useState(initialSortKey)
@@ -354,7 +354,7 @@ const ModalTable = ({ columns, data, pageSize = 10, emptyText, initialSortKey = 
           </thead>
           <tbody className="divide-y divide-border/50">
             {paged.map((row, idx) => (
-              <tr key={row.id || idx} className="hover:bg-bg-tertiary transition-colors">
+              <tr key={row.id || idx} className="hover:bg-bg-tertiary transition-colors" style={rowStyle ? rowStyle(row) : {}}>
                 {columns.map(col => (
                   <td key={col.key} className={`px-4 py-3 whitespace-nowrap text-${col.align || 'left'} ${col.tdClass || ''}`}>
                     {col.render ? col.render(row) : row[col.key] ?? '—'}

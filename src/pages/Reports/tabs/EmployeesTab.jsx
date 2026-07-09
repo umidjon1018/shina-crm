@@ -47,7 +47,7 @@ const EmployeesTab = ({ ctx }) => {
     USD_RATE,
     storeInstallmentOrgs, storeMonthlyTargets, storeEmployeeTargets,
     storeCompanyName,
-    MOCK_SALES, MOCK_CUSTOMERS,
+    MOCK_SALES, MOCK_CUSTOMERS, MOCK_RETURNS,
   } = ctx
 
   return (
@@ -696,6 +696,23 @@ const EmployeesTab = ({ ctx }) => {
                       .map(s => ({ ...s, _rowKind: 'exchange' }))
                     const allRows = [...cancelledRows, ...exchangeRows]
                       .sort((a, b) => (b.soldAt || '').localeCompare(a.soldAt || ''))
+
+                    // Exchange juftlari uchun fon rangi (HistoryTab kabi)
+                    const palette = [
+                      'rgba(59,130,246,0.15)', 'rgba(139,92,246,0.15)', 'rgba(20,184,166,0.15)',
+                      'rgba(249,115,22,0.13)', 'rgba(236,72,153,0.13)', 'rgba(99,102,241,0.15)'
+                    ]
+                    const pairColors = {}
+                    let pidx = 0
+                    ;(MOCK_RETURNS || []).forEach(ret => {
+                      if (ret.type === 'exchange' && ret.originalSaleId && ret.exchangeSaleId) {
+                        const color = palette[pidx % palette.length]
+                        pairColors[String(ret.originalSaleId)] = color
+                        pairColors[String(ret.exchangeSaleId)] = color
+                        pidx++
+                      }
+                    })
+                    const rowStyle = (r) => pairColors[String(r.id)] ? { backgroundColor: pairColors[String(r.id)] } : {}
                     if (allRows.length === 0) return null
                     // Bekor qiluvchi boshqa xodim bo'lganmi?
                     const hasDiffCanceller = allRows.some(
@@ -709,20 +726,18 @@ const EmployeesTab = ({ ctx }) => {
                         <ModalTable
                           data={allRows}
                           pageSize={8}
+                          rowStyle={rowStyle}
                           columns={[
                             { key:'soldAt',       label:t('col_date'),  render: r => fmtSoldAt(r.soldAt) },
                             { key:'customerName', label:t('col_customer'), render: r => <span className="font-medium text-text-primary">{r.customerName}</span> },
-                            { key:'total',        label:t('col_amount'), align:'right', render: r => (
-                              <span className="font-bold" style={{ color: r._rowKind === 'exchange' ? C.green : C.red }}>
-                                {fmtUZS(r.total)}
-                              </span>
-                            )},
+                            { key:'total',        label:t('col_amount'), align:'right', render: r => {
+                              const isExch = r._rowKind === 'exchange' || r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange'
+                              return <span className="font-bold" style={{ color: isExch ? C.green : C.red }}>{fmtUZS(r.total)}</span>
+                            }},
                             { key:'cancelReason', label:t('col_reason'), render: r => {
-                              if (r._rowKind === 'exchange') {
-                                return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
-                              }
+                              const isExch = r._rowKind === 'exchange' || r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange'
+                              if (isExch) return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
                               const LABELS = {
-                                almashtirish:          t('col_exchange'),
                                 narx_mos_emas:         t('sl_cancel_r_price'),
                                 tovar_yoq:             t('rep_emp_modal_cancelled_reason_out_of_stock'),
                                 mijoz_fikr_ozgartirdi: t('rep_emp_modal_cancelled_reason_changed_mind'),
