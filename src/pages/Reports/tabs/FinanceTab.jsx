@@ -942,7 +942,7 @@ const FinanceTab = ({ ctx }) => {
                             <td className="px-3 py-2.5 font-semibold text-text-primary whitespace-nowrap">{m.name}</td>
                             <td className="px-2 py-2.5 text-right text-accent-green font-semibold whitespace-nowrap">{m.margin > 0 ? '+'+fmtUZS(m.margin) : '—'}</td>
                             <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.qarz > 0 ? '−'+fmtUZS(m.qarz) : '—'}</td>
-                            <td className="px-2 py-2.5 text-right text-accent-green whitespace-nowrap">{m.invPayment > 0 ? '+'+fmtUZS(m.invPayment) : '—'}</td>
+                            <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.invPayment > 0 ? '−'+fmtUZS(m.invPayment) : '—'}</td>
                             <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.shopExp > 0 ? '−'+fmtUZS(m.shopExp) : '—'}</td>
                             <td className="px-2 py-2.5 text-right font-bold whitespace-nowrap" style={{ color: m.operatsion>=0?C.teal:C.red }}>{m.operatsion>=0?'+':''}{fmtUZS(m.operatsion)}</td>
                             <td className="px-2 py-2.5 text-right whitespace-nowrap" style={{ color: m.moliyaviy>0?C.blue:m.moliyaviy<0?C.red:'var(--text-muted)' }}>{m.moliyaviy!==0?(m.moliyaviy>0?'+':'')+fmtUZS(m.moliyaviy):'—'}</td>
@@ -962,7 +962,7 @@ const FinanceTab = ({ ctx }) => {
                           <td className="px-3 py-2.5 text-text-secondary uppercase whitespace-nowrap">{t('rep_fin_total_row')}</td>
                           <td className="px-2 py-2.5 text-right text-accent-green whitespace-nowrap">{totMar>0?'+'+fmtUZS(totMar):'—'}</td>
                           <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{totQar>0?'−'+fmtUZS(totQar):'—'}</td>
-                          <td className="px-2 py-2.5 text-right text-accent-green whitespace-nowrap">{totInv>0?'+'+fmtUZS(totInv):'—'}</td>
+                          <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{totInv>0?'−'+fmtUZS(totInv):'—'}</td>
                           <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{totExp>0?'−'+fmtUZS(totExp):'—'}</td>
                           <td className="px-2 py-2.5 text-right whitespace-nowrap" style={{ color: totOp>=0?C.teal:C.red }}>{totOp>=0?'+':''}{fmtUZS(totOp)}</td>
                           <td className="px-2 py-2.5 text-right whitespace-nowrap" style={{ color: totMol>=0?C.blue:C.red }}>{totMol!==0?(totMol>0?'+':'')+fmtUZS(totMol):'—'}</td>
