@@ -2251,7 +2251,7 @@ export default {
   rep_fin_roi: 'ROI (Окупаемость инвестиций)',
   rep_fin_roi_desc: 'Прибыль от продаж / Привлеченный капитал',
   rep_fin_cash_balance: 'Ориентировочный баланс кассы',
-  rep_fin_cash_balance_desc: 'Доход от продаж − Расходы (выбранный период)',
+  rep_fin_cash_balance_desc: 'Продажи + Капитал − Расходы − Оплата − Остаток рассрочки (период)',
   rep_fin_next_month_fixed_exp: 'Прогноз постоянных расходов на следующий месяц',
   rep_fin_installment_org_report: 'Отчет кредитных организаций',
   rep_fin_installment_status_desc: 'Статус рассрочек и комиссия',

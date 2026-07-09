@@ -1309,8 +1309,12 @@ export const Reports = () => {
                              .reduce((s,c) => s + c.amountUZS, 0)
     const allSalesRevenue = periodSales.reduce((s,x) => s+x.total, 0)
     const allExpenses     = periodExp.reduce((s,x) => s+x.amountUZS, 0)
-    // Naqd qo'lda: sotuv + jalb − qaytarish − xarajat − supplier to'lov − to'lanmagan nasiya
-    const cashBalance     = allSalesRevenue + periodJalb - periodCapRet - allExpenses - periodInvPay - installmentReceivable
+    // Faqat tanlangan davr sotuvlaridagi to'lanmagan nasiya qoldig'i
+    const periodInstDebt  = periodSales
+      .filter(s => s.paymentType === 'installment')
+      .reduce((s,x) => s + (x.installmentDebt || 0), 0)
+    // Naqd qo'lda: sotuv + jalb − qaytarish − xarajat − supplier to'lov − nasiya qoldig'i
+    const cashBalance     = allSalesRevenue + periodJalb - periodCapRet - allExpenses - periodInvPay - periodInstDebt
 
     // Keyingi oy uchun doimiy xarajatlar (expenseType === 'fixed')
     const lastMonth = MONTHS.find(m => MOCK_EXPENSES.some(e => e.date && e.date.startsWith(m) && e.expenseType === 'fixed')) || MONTHS[0]

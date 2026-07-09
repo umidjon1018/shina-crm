@@ -2260,7 +2260,7 @@ export default {
   rep_fin_roi: 'ROI (Investitsiya daromadi)',
   rep_fin_roi_desc: 'Sotuv foydasi / Jalb qilingan kapital',
   rep_fin_cash_balance: 'Taxminiy kassa balansi',
-  rep_fin_cash_balance_desc: 'Sotuv daromadi − Xarajatlar (tanlangan davr)',
+  rep_fin_cash_balance_desc: 'Sotuv + Kapital jalb − Xarajat − To\'lov − Nasiya qoldig\'i (tanlangan davr)',
   rep_fin_next_month_fixed_exp: 'Keyingi oy doimiy xarajat bashorati',
   rep_fin_installment_org_report: 'Nasiya tashkilotlari hisoboti',
   rep_fin_installment_status_desc: 'Muddatli to\'lovlar holati va komissiya',
