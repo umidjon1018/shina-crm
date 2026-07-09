@@ -1099,8 +1099,8 @@ export const Reports = () => {
       const totalSales   = empCompleted.reduce((s,x) => s+x.total, 0)
       const totalProfit  = empCompleted.reduce((s,x) => s+getSaleProfit(x), 0)
       const salesCount   = empCompleted.length
-      const cancelCount  = empCancelled.length + empReturns.length
-      const cancelPct    = (empAll.length + empReturns.length) > 0 ? Math.round(cancelCount/(empAll.length + empReturns.length)*100) : 0
+      const cancelCount  = empCancelled.length
+      const cancelPct    = empAll.length > 0 ? Math.round(cancelCount / empAll.length * 100) : 0
       const avgCheck     = salesCount > 0 ? Math.round(totalSales/salesCount) : 0
       const newCustomers = empCompleted.filter(s => s.isNewCustomer).length
       const discountSales = empCompleted.filter(s => s.discount > 0)
