@@ -108,7 +108,7 @@ const EmployeesTab = ({ ctx }) => {
                     <YAxis dataKey="name" type="category" fontSize={10} width={80} stroke="var(--text-muted)" />
                     <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }} formatter={v => empChartMetric === 'count' ? `${v} ${t('unit_pcs')}` : fmtUZS(v)} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} itemStyle={{ color: 'var(--text-primary)', fontSize: '12px' }} offset={10} isAnimationActive={false} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
                     <Bar dataKey="value" name={empChartMetric === 'total' ? t('col_amount') : empChartMetric === 'count' ? t('rep_emp_metric_count') : t('rep_emp_metric_profit')} fill={C.blue} radius={[0, 4, 4, 0]} cursor={{ fill: 'rgba(255,255,255,0.05)' }}>
-                      <LabelList dataKey="value" position="insideRight" style={{ fill: '#fff', fontSize: 11, fontWeight: 700 }}
+                      <LabelList dataKey="value" position="insideRight" dx={-12} style={{ fill: '#fff', fontSize: 13, fontWeight: 700 }}
                         formatter={v => empChartMetric === 'count' ? `${v} ta` : fmtUZS(v)} />
                     </Bar>
                   </BarChart>
