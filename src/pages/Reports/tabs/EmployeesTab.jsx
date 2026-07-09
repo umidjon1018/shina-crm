@@ -446,11 +446,13 @@ const EmployeesTab = ({ ctx }) => {
 
             {/* === MODAL: Bekor qilingan — xodim bo'yicha === */}
             {modal === 'cancelByEmpModal' && (() => {
+              const isExchangeRow = x => x.cancelReason === 'almashtirish' || x.cancelReason === 'exchange' || x._isExchange
+              const calcLost = (det) => det.filter(x => !isExchangeRow(x)).reduce((s,x)=>s+(x.subtotal||x.total||0),0)
               const filtered = modalFilter === 'all'
                 ? employeeStats.cancelByEmp
                 : employeeStats.cancelByEmp.map(e => {
                     const det = e.details.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
-                    return { ...e, details: det, cancelCount: det.length, lostRevenue: det.reduce((s,x)=>s+(x.subtotal||x.total||0),0) }
+                    return { ...e, details: det, cancelCount: det.length, lostRevenue: calcLost(det) }
                   }).filter(e => e.cancelCount > 0)
               const totalLost = filtered.reduce((s,e) => s + e.lostRevenue, 0)
               const totalCount = filtered.reduce((s,e) => s + e.cancelCount, 0)

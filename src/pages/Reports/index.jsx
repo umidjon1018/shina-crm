@@ -1211,7 +1211,7 @@ export const Reports = () => {
       return {
         ...emp,
         cancelCount: empCancelled.length,
-        lostRevenue: empCancelled.reduce((s,x) => s+(x.subtotal||x.total||0), 0),
+        lostRevenue: empCancelled.filter(x => x.cancelReason !== 'almashtirish' && x.cancelReason !== 'exchange' && !x._isExchange).reduce((s,x) => s+(x.subtotal||x.total||0), 0),
         topReason: Object.entries(reasons).sort((a,b)=>b[1]-a[1])[0]?.[0] || null,
         details: empCancelled,
       }
