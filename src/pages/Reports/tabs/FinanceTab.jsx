@@ -319,7 +319,7 @@ const FinanceTab = ({ ctx }) => {
                 </div>
                 <div className="h-[220px] w-full mb-5">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={financeStats.monthlyCashFlow}>
+                    <LineChart data={showAllCfMonths ? financeStats.monthlyCashFlow : financeStats.monthlyCashFlow.slice(-3)}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                       <XAxis dataKey="name" fontSize={11} stroke="var(--text-muted)" />
                       <YAxis hide />
