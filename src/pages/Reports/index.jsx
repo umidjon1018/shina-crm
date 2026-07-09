@@ -1358,26 +1358,24 @@ export const Reports = () => {
       const jalb      = MOCK_CAPITAL.filter(c => c.type === 'inject' && c.date && c.date.startsWith(m)).reduce((s,c) => s + c.amountUZS, 0)
       const capReturn = MOCK_CAPITAL.filter(c => c.type === 'return' && c.date && c.date.startsWith(m)).reduce((s,c) => s + c.amountUZS, 0)
 
-      // Operatsion real holat: marja + to'lov − yangi qarz − xarajat
-      // (yangi qarz: ombordagi majburiyat; to'lov: qarzni kamaytiradi; marja: sotuv foydasi)
-      const operatsion = margin + invPayment - qarz - shopExp
+      // Operatsion: sotuv foydasi − supplier to'lov − do'kon xarajatlari
+      const operatsion = margin - invPayment - shopExp
       const moliyaviy  = jalb - capReturn
       const net        = operatsion + moliyaviy
 
       const calcNet = (mo) => {
         const ms = MOCK_SALES.filter(s=>s.status!=='cancelled'&&s.soldAt&&s.soldAt.startsWith(mo))
         const mg = ms.reduce((s,x)=>s+getSaleProfit(x)-(x.installmentCommissionAmount||0),0)
-        const q  = MOCK_INCOME_BATCHES.filter(b=>b.receivedAt&&b.receivedAt.startsWith(mo)).reduce((s,b)=>s+(b.totalUZS_atEntry||0),0)
         const ip = MOCK_INCOME_BATCHES.flatMap(b=>(b.payments||[])).filter(p=>p.date&&p.date.startsWith(mo)).reduce((s,p)=>s+(p.amountUZS||0),0)
         const e  = MOCK_EXPENSES.filter(x=>x.date&&x.date.startsWith(mo)).reduce((s,x)=>s+x.amountUZS,0)
         const j  = MOCK_CAPITAL.filter(c=>c.type==='inject'&&c.date&&c.date.startsWith(mo)).reduce((s,c)=>s+c.amountUZS,0)
         const cr = MOCK_CAPITAL.filter(c=>c.type==='return'&&c.date&&c.date.startsWith(mo)).reduce((s,c)=>s+c.amountUZS,0)
-        return (mg + ip - q - e) + (j - cr)
+        return (mg - ip - e) + (j - cr)
       }
       const prevNet = prev ? calcNet(prev) : null
 
-      // Jami chiqim (grafik uchun manfiy qiymat sifatida)
-      const chiqim = -(qarz + shopExp - invPayment)
+      // Jami chiqim (grafik uchun): supplier to'lov + do'kon xarajatlari
+      const chiqim = -(invPayment + shopExp)
 
       return {
         name: monthNames[m], month: m,
