@@ -478,7 +478,7 @@ export const Reports = () => {
     const acquiredCount = acquiredStock.length
     const acquiredValue = acquiredStock.reduce((s, x) => s + (x.acquiredPrice || 0), 0)
 
-    const allInStock = filterByPeriod(MOCK_USED_STOCK.filter(u => u.status === 'in_stock'), 'acquiredAt')
+    const allInStock = MOCK_USED_STOCK.filter(u => u.status === 'in_stock')
     const inStockCount = allInStock.length
     const inStockValue = allInStock.reduce((s, x) => s + (x.acquiredPrice || 0), 0)
 
