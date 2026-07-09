@@ -926,14 +926,14 @@ const FinanceTab = ({ ctx }) => {
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border text-[11px]">
                           <th className="text-left px-3 py-2.5 font-medium text-text-secondary whitespace-nowrap">{t('rep_fin_col_month')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium text-accent-green whitespace-nowrap">{t('col_margin')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium text-accent-red whitespace-nowrap">{t('col_new_product')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium text-accent-green whitespace-nowrap">{t('rep_fin_col_payment')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium text-accent-red whitespace-nowrap">{t('rep_fin_col_expense')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: C.teal }}>{t('rep_fin_category_operating')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: C.blue }}>{t('rep_fin_category_financial')}</th>
-                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: '#F4A261' }}>{t('rep_fin_flow_monthly_net')}</th>
-                          <th className="text-center px-2 py-2.5 font-medium text-text-secondary whitespace-nowrap">{t('rep_fin_col_growth')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium text-accent-green whitespace-nowrap">{t('rep_fin_cf_margin')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium text-accent-red whitespace-nowrap">{t('rep_fin_cf_new_batch')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium text-accent-red whitespace-nowrap">{t('rep_fin_cf_supplier_pay')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium text-accent-red whitespace-nowrap">{t('rep_fin_cf_shop_exp')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: C.teal }}>{t('rep_fin_cf_operating')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: C.blue }}>{t('rep_fin_cf_financial')}</th>
+                          <th className="text-right px-2 py-2.5 font-medium whitespace-nowrap" style={{ color: '#F4A261' }}>{t('rep_fin_cf_net')}</th>
+                          <th className="text-center px-2 py-2.5 font-medium text-text-secondary whitespace-nowrap">{t('rep_fin_cf_growth')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
