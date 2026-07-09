@@ -730,10 +730,9 @@ const EmployeesTab = ({ ctx }) => {
                           columns={[
                             { key:'soldAt',       label:t('col_date'),  render: r => fmtSoldAt(r.soldAt) },
                             { key:'customerName', label:t('col_customer'), render: r => <span className="font-medium text-text-primary">{r.customerName}</span> },
-                            { key:'total',        label:t('col_amount'), align:'right', render: r => {
-                              const isExch = r._rowKind === 'exchange' || r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange'
-                              return <span className="font-bold" style={{ color: isExch ? C.green : C.red }}>{fmtUZS(r.total)}</span>
-                            }},
+                            { key:'total',        label:t('col_amount'), align:'right', render: r => (
+                              <span className="font-bold" style={{ color: r._rowKind === 'exchange' ? C.green : C.red }}>{fmtUZS(r.total)}</span>
+                            )},
                             { key:'cancelReason', label:t('col_reason'), render: r => {
                               const isExch = r._rowKind === 'exchange' || r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange'
                               if (isExch) return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
