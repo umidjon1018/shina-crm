@@ -734,8 +734,7 @@ const EmployeesTab = ({ ctx }) => {
                               <span className="font-bold" style={{ color: r._rowKind === 'exchange' ? C.green : C.red }}>{fmtUZS(r.total)}</span>
                             )},
                             { key:'cancelReason', label:t('col_reason'), render: r => {
-                              const isExch = r._rowKind === 'exchange' || r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange'
-                              if (isExch) return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
+                              if (r._rowKind === 'exchange') return <span className="text-xs font-medium text-accent-green">{t('col_exchange')}</span>
                               const LABELS = {
                                 narx_mos_emas:         t('sl_cancel_r_price'),
                                 tovar_yoq:             t('rep_emp_modal_cancelled_reason_out_of_stock'),
