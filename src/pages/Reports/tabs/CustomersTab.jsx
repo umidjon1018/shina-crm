@@ -455,7 +455,7 @@ const CustomersTab = ({ ctx }) => {
                     <div className="mt-4 bg-accent-orange/5 border border-accent-orange/20 rounded-xl px-4 py-3">
                       <p className="text-accent-orange text-xs font-bold">
                         {t('rep_cust_promo_used_prefix')}{c.discountSales.length}{t('rep_times_dot_suffix')}
-                        {t('rep_cust_saved_amount_prefix')}{fmtUZS(c.discountSales.reduce((s,x) => s+(x.subtotal-x.total), 0))}
+                        {t('rep_cust_saved_amount_prefix')}{fmtUZS(c.discountSales.reduce((s,x) => s+((x.subtotal||x.total||0)-(x.total||0)), 0))}
                       </p>
                     </div>
                   )}
