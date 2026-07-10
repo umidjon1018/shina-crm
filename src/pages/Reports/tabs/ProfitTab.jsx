@@ -326,7 +326,10 @@ const ProfitTab = ({ ctx }) => {
                         { key:'customerName', label:t('col_customer'),           render: r => <span className="font-medium text-text-primary text-xs">{r.customerName}</span> },
                         { key:'soldByName',   label:t('col_employee'),           render: r => <span className="text-xs text-text-secondary">{r.soldByName||'—'}</span> },
                         { key:'purchasePrice',label:t('rep_profit_purchase_price'),       align:'right', render: r => {
-                          const total = r.items?.reduce((s,i) => s+(i.purchasePrice||0)*(i.qty||1), 0)||0
+                          const total = r.items?.reduce((s,i) => {
+                            const pp = i.purchasePrice || Math.round((i.price || i.salePrice || 0) * 0.8)
+                            return s + pp * (i.qty || 1)
+                          }, 0)||0
                           return <span className="text-text-secondary text-xs">{fmtUZS(total)}</span>
                         }},
                         { key:'total',        label:t('rep_profit_sale_price'),  align:'right', render: r => <span className="text-text-primary text-xs">{fmtUZS(r.total)}</span> },
