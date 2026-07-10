@@ -4,7 +4,7 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts'
-import { AlertTriangle, Award, DollarSign, Package, Recycle, ShoppingCart, TrendingUp, Wallet } from 'lucide-react'
+import { AlertTriangle, Award, CreditCard, DollarSign, Package, Recycle, ShoppingCart, TrendingUp, Wallet } from 'lucide-react'
 import { C, Modal, ModalTable, fmtItems, fmtNum, fmtSoldAt, fmtUZS } from '../components/shared'
 import { getUsedSaleProfit } from '../../../utils/profitHelpers'
 
@@ -43,6 +43,7 @@ const UsedTab = ({ ctx }) => {
     usedSoldMonth, setUsedSoldMonth,
     usedScrappedMonth, setUsedScrappedMonth,
     usedMarginMonth, setUsedMarginMonth,
+    usedInstallmentMonth, setUsedInstallmentMonth,
     usedChartCategories,
     getMonthlySalesChart,
     USD_RATE,
@@ -76,6 +77,9 @@ const UsedTab = ({ ctx }) => {
               </div>
               <div className="cursor-pointer" onClick={() => openModal('usedMarginModal')}>
                 <StatCard icon={Award} label={t('rep_bu_card_margin')} value={usedData.totalRevenue > 0 ? `${Math.round(usedData.totalProfit / usedData.totalRevenue * 100)}%` : '—'} sub={t('rep_bu_card_margin_sub')} color="bg-yellow-500/10 text-yellow-500" />
+              </div>
+              <div className="cursor-pointer" onClick={() => openModal('usedInstallmentModal')}>
+                <StatCard icon={CreditCard} label={t('rep_bu_card_installment')} value={fmtUZS(usedData.instDebt)} sub={t('rep_bu_card_installment_sub', { count: usedData.instCount })} color="bg-purple-500/10 text-purple-500" />
               </div>
             </div>
 
@@ -294,6 +298,43 @@ const UsedTab = ({ ctx }) => {
                       { key: 'scrapPrice', label: t('rep_bu_col_scrap_price'), align: 'right', render: r => fmtUZS(r.scrapPrice ?? r.sellPrice ?? 0) },
                       { key: 'scrapBuyer', label: t('rep_bu_col_buyer'), render: r => r.scrapBuyer || (r.soldSaleId ? t('rep_bu_scrap_sale_label') : '—') },
                       { key: 'scrapNote', label: t('col_note'), sortable: false, render: r => <span className="text-text-secondary text-xs">{r.scrapNote || (r.soldSaleId ? t('rep_bu_scrap_sale_label') : '—')}</span> },
+                    ]}
+                  />
+                </Modal>
+              )
+            })()}
+
+            {modal === 'usedInstallmentModal' && (() => {
+              const filtered = filterUsedByMonth(usedData.instSales, 'soldAt', usedInstallmentMonth)
+              const totalDebt = filtered.reduce((s, x) => s + (x.installmentDebt || 0), 0)
+              const totalPaid = filtered.reduce((s, x) => s + (x.installmentPaidAmount || 0), 0)
+              return (
+                <Modal open title={t('rep_bu_modal_installment_title')} subtitle={t('rep_bu_modal_installment_sub')} size="3xl" onClose={closeModal}>
+                  <div className="mb-4 flex items-center justify-between gap-3 flex-wrap text-xs text-text-muted">
+                    <span>
+                      {t('rep_bu_modal_inst_debt')}: <span className="font-bold text-purple-500">{fmtUZS(totalDebt)}</span>
+                      {' · '}
+                      {t('rep_bu_modal_inst_paid')}: <span className="font-bold text-accent-green">{fmtUZS(totalPaid)}</span>
+                    </span>
+                    <MonthFilterSelect value={usedInstallmentMonth} onChange={setUsedInstallmentMonth} />
+                  </div>
+                  <ModalTable
+                    data={filtered}
+                    pageSize={10}
+                    columns={[
+                      { key: 'soldAt',              label: t('col_date'),         render: r => <span className="text-text-secondary text-xs">{r.soldAt?.slice(0,10)}</span> },
+                      { key: 'customerName',         label: t('col_customer'),     render: r => <span className="font-medium text-text-primary">{r.customerName}</span> },
+                      { key: 'items',               label: t('mgmt_tab_products'), sortable: false, render: r => <span className="text-text-secondary text-xs">{(r.items||[]).map(i => i.name).join(', ')}</span> },
+                      { key: 'total',               label: t('col_total_sum'),    align: 'right', render: r => <span className="font-bold text-text-primary">{fmtUZS(r.total)}</span> },
+                      { key: 'installmentPaidAmount', label: t('rep_fin_col_paid'), align: 'right', render: r => <span className="font-bold text-accent-green">{fmtUZS(r.installmentPaidAmount || 0)}</span> },
+                      { key: 'installmentDebt',     label: t('rep_fin_col_debt_rem'), align: 'right', render: r => <span className={`font-bold ${(r.installmentDebt||0) > 0 ? 'text-accent-orange' : 'text-accent-green'}`}>{fmtUZS(r.installmentDebt || 0)}</span> },
+                      { key: 'installmentDueDate',  label: t('rep_fin_col_next_pay'), align: 'center', render: r => {
+                        const due = r.installmentDueDate
+                        const today = new Date().toISOString().slice(0,10)
+                        return <span className={`text-xs ${due && due < today ? 'text-accent-red font-bold' : 'text-text-secondary'}`}>{due || '—'}</span>
+                      }},
+                      { key: 'installmentOrgName',  label: t('rep_fin_col_installment'), render: r => <span className="text-text-secondary text-xs">{r.installmentOrgName || '—'}</span> },
+                      { key: 'soldByName',          label: t('col_employee'),     render: r => <span className="text-text-secondary text-xs">{r.soldByName || '—'}</span> },
                     ]}
                   />
                 </Modal>

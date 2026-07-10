@@ -202,6 +202,7 @@ export const Reports = () => {
   const [usedSoldMonth, setUsedSoldMonth] = useState('all')
   const [usedScrappedMonth, setUsedScrappedMonth] = useState('all')
   const [usedMarginMonth, setUsedMarginMonth] = useState('all')
+  const [usedInstallmentMonth, setUsedInstallmentMonth] = useState('all')
 
   const [sortConfig, setSortConfig] = useState({ key: null, dir: 'asc', table: null })
 
@@ -492,10 +493,15 @@ export const Reports = () => {
     const scrappedCount = allScrapped.length
     const scrappedValue = allScrapped.reduce((s, x) => s + (x.acquiredPrice || 0), 0)
 
+    const instSales = completedUsed.filter(s => s.paymentType === 'installment')
+    const instDebt  = instSales.reduce((s, x) => s + (x.installmentDebt || 0), 0)
+    const instCount = instSales.length
+
     return {
       allUsedSales, completedUsed, totalRevenue, totalProfit, salesCount,
       acquiredStock, acquiredCount, acquiredValue, inStockCount, inStockValue, allInStock, soldCount, allSold,
       scrappedCount, scrappedValue, allScrapped,
+      instSales, instDebt, instCount,
     }
   }, [period, filterByPeriod, MOCK_USED_SALES, MOCK_USED_STOCK])
 
@@ -1757,6 +1763,7 @@ export const Reports = () => {
     usedSoldMonth, setUsedSoldMonth,
     usedScrappedMonth, setUsedScrappedMonth,
     usedMarginMonth, setUsedMarginMonth,
+    usedInstallmentMonth, setUsedInstallmentMonth,
     usedChartCategories,
     getMonthlySalesChart,
     USD_RATE,
