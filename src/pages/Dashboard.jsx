@@ -77,9 +77,10 @@ export const Dashboard = () => {
       ? shopIncomeBatches.reduce((s, b) => s + (b.debtUSD || 0), 0)
       : 0
 
-    const customers = selectedShopId === 'all'
-      ? MOCK_CUSTOMERS.length
-      : MOCK_CUSTOMERS.filter(c => c.shopId === selectedShopId).length
+    const customerIds = selectedShopId === 'all'
+      ? new Set(MOCK_CUSTOMERS.map(c => c.id))
+      : new Set(shopSales.filter(s => s.customerId).map(s => s.customerId))
+    const customers = customerIds.size
 
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date()
@@ -108,7 +109,7 @@ export const Dashboard = () => {
       if (!p.isActive) return false
       if (!shopBatchesArr.some(b => b.productId === p.id)) return false
       const stock = MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length
-      return stock <= p.lowStockThreshold
+      return p.lowStockThreshold != null && stock <= p.lowStockThreshold
     }).map(p => ({
       ...p,
       currentStock: MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length
@@ -214,9 +215,10 @@ export const Dashboard = () => {
                     {' · '}{t('pay_' + sale.paymentType) || sale.paymentType}
                   </p>
                 </div>
-                <span className={`text-sm font-semibold ${sale.status === 'cancelled' ? 'text-text-muted line-through' : 'text-green-500'}`}>
-                  {fmt(sale.total)} {t('dash_so_m')}
-                </span>
+                {sale.status === 'cancelled'
+                ? <span className="text-xs bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-medium">{t('cancelled') || 'Bekor'}</span>
+                : <span className="text-sm font-semibold text-green-500">{fmt(sale.total)} {t('dash_so_m')}</span>
+              }
               </div>
             ))}
           </div>

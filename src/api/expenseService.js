@@ -8,9 +8,12 @@ const map = (e) => ({
   amount: Number(e.amount) || 0,
   currency: e.currency || 'UZS',
   usdRate: e.usd_rate ? Number(e.usd_rate) : null,
-  amountUzs: Number(e.amount_uzs) || Number(e.amount) || 0,
+  amountUZS: Number(e.amount_uzs) || Number(e.amount) || 0,
   date: e.date || '',
+  period: e.period || '',
   note: e.note || '',
+  responsibleName: e.responsible_name || '',
+  employeeId: e.employee_id ? String(e.employee_id) : '',
   createdAt: e.created_at || '',
 })
 
@@ -28,11 +31,14 @@ export const addExpense = async (expenseData) => {
     amount: expenseData.amount,
     currency: expenseData.currency,
     usd_rate: expenseData.usdRate,
-    amount_uzs: expenseData.amountUzs,
+    amount_uzs: expenseData.amountUZS,
     date: expenseData.date,
+    period: expenseData.period || null,
     note: expenseData.note,
+    responsible_name: expenseData.responsibleName,
+    employee_id: expenseData.employeeId || null,
   })
-  return map(data)
+  return { success: true, expense: map(data) }
 }
 
 export const updateExpense = async (id, expenseData) => {
@@ -42,11 +48,14 @@ export const updateExpense = async (id, expenseData) => {
     amount: expenseData.amount,
     currency: expenseData.currency,
     usd_rate: expenseData.usdRate,
-    amount_uzs: expenseData.amountUzs,
+    amount_uzs: expenseData.amountUZS,
     date: expenseData.date,
+    period: expenseData.period || null,
     note: expenseData.note,
+    responsible_name: expenseData.responsibleName,
+    employee_id: expenseData.employeeId || null,
   })
-  return map(data)
+  return { success: true, expense: map(data) }
 }
 
 export const deleteExpense = async (id) => {

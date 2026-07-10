@@ -33,7 +33,7 @@ const BatchesTab = ({ ctx }) => {
     filter2Status, setFilter2Status, page2, setPage2,
     PAGE_SIZE, deletePaymentConfirm, setDeletePaymentConfirm,
     usdRate, productCategories, bump,
-    paged1, totalPages1, paged2, totalPages2,
+    paged1, totalPages1, total1, paged2, totalPages2, total2,
     getSupplierName,
     inventoryCheck, allMatch,
     MOCK_PRODUCTS,
@@ -204,7 +204,7 @@ const BatchesTab = ({ ctx }) => {
               {totalPages1 > 1 && (
                 <div className="flex items-center justify-between px-2 py-3">
                   <p className="text-xs text-text-muted">
-                    Sahifa {page1} - {totalPages1} &nbsp; {Array.from({ length: totalPages1 }, (_, i) => i + 1)
+                    {Math.min(page1 * PAGE_SIZE, total1)} / {total1} ta &nbsp; {Array.from({ length: totalPages1 }, (_, i) => i + 1)
                       .filter(p => p === 1 || p === totalPages1 || Math.abs(p - page1) <= 1)
                       .reduce((acc, p, idx, arr) => { if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...'); acc.push(p); return acc }, [])
                       .map((p, idx) => p === '...'
@@ -539,7 +539,7 @@ const BatchesTab = ({ ctx }) => {
               {totalPages2 > 1 && (
                 <div className="flex items-center justify-between px-2 py-3">
                   <p className="text-xs text-text-muted">
-                    Sahifa {page2} - {totalPages2} &nbsp; {Array.from({ length: totalPages2 }, (_, i) => i + 1)
+                    {Math.min(page2 * PAGE_SIZE, total2)} / {total2} ta &nbsp; {Array.from({ length: totalPages2 }, (_, i) => i + 1)
                       .filter(p => p === 1 || p === totalPages2 || Math.abs(p - page2) <= 1)
                       .reduce((acc, p, idx, arr) => { if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...'); acc.push(p); return acc }, [])
                       .map((p, idx) => p === '...'

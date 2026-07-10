@@ -39,18 +39,18 @@ const SupplierPaymentsTab = () => {
           productName: batch.productName,
           supplierId: batch.supplierId,
           supplierName: resolveSupplierName(batch),
-          amountUSD: pay.amountUSD,
-          usdRate: pay.usdRate,
-          amountUZS: pay.amountUZS,
+          amountUSD: pay.amountUSD || 0,
+          usdRate: pay.usdRate || 0,
+          amountUZS: pay.amountUZS || 0,
           type: pay.type,
           note: pay.note,
           noteRu: pay.noteRu,
-          shopId: batch.shopId || 'shop1',
+          shopId: batch.shopId,
         })
       })
     })
     return list.sort((a, b) => new Date(b.date) - new Date(a.date))
-  }, [])
+  }, [MOCK_INCOME_BATCHES, MOCK_SUPPLIERS])
 
   const months = useMemo(() => {
     const s = new Set(allPayments.map(p => p.date.slice(0, 7)))
@@ -156,7 +156,11 @@ const SupplierPaymentsTab = () => {
                             {pay.type === 'cash_uzs' ? t('exp_pay_cash_uzs') : pay.type === 'cash_usd' ? t('exp_pay_cash_usd') : pay.type === 'transfer' ? t('exp_pay_bank') : pay.type}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-text-secondary max-w-[140px] truncate text-xs">{(i18n.language === 'ru' ? pay.noteRu || pay.note : pay.note) || '—'}</td>
+                        <td className="px-4 py-2.5 text-text-secondary max-w-[140px] truncate text-xs">{(() => {
+                          const raw = pay.note || ''
+                          if (raw === "Dastlabki tolov" || raw === "Dastlabki to'lov") return t('pay_note_initial')
+                          return raw || '—'
+                        })()}</td>
                         <td className="px-4 py-2.5 text-right font-semibold text-text-primary whitespace-nowrap">
                           ${fmtNum(pay.amountUSD)}
                           <span className="text-text-secondary text-xs ml-1">@ {fmtNum(pay.usdRate)}</span>

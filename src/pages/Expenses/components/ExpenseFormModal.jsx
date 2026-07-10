@@ -33,7 +33,7 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
     usdRate: '12700',
     date: today(),
     period: '',
-    responsibleName: currentUser.name,
+    responsibleName: currentUser.fullName || currentUser.username || '',
     note: '',
     shopId: defaultShopId || shops[0]?.id || 'shop1',
     expenseType: 'fixed',
@@ -195,8 +195,37 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
             <label className="text-text-secondary text-sm mb-1.5 block">
               {t('exp_form_period')} <span className="text-text-secondary opacity-60">{t('exp_form_period_optional')}</span>
             </label>
-            <input type="month" value={form.period} onChange={e => set('period', e.target.value)}
-              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red" />
+            <div className="flex gap-2">
+              <select
+                value={form.period ? form.period.split('-')[1] : ''}
+                onChange={e => {
+                  const year = form.period ? form.period.split('-')[0] : new Date().getFullYear()
+                  set('period', e.target.value ? `${year}-${e.target.value}` : '')
+                }}
+                className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red cursor-pointer"
+              >
+                <option value="">{t('exp_form_period_none') || '— oy —'}</option>
+                {(t('exp_month_names', { returnObjects: true })).map((name, i) => (
+                  <option key={i} value={String(i + 1).padStart(2, '0')}>{name}</option>
+                ))}
+              </select>
+              <select
+                value={form.period ? form.period.split('-')[0] : ''}
+                onChange={e => {
+                  const month = form.period ? form.period.split('-')[1] : '01'
+                  set('period', e.target.value ? `${e.target.value}-${month}` : '')
+                }}
+                className="w-28 bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red cursor-pointer"
+              >
+                <option value="">— yil —</option>
+                {[2024, 2025, 2026, 2027].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              {form.period && (
+                <button onClick={() => set('period', '')} className="px-3 py-2.5 text-text-secondary hover:text-accent-red transition-colors text-sm">✕</button>
+              )}
+            </div>
             <p className="text-text-secondary text-xs mt-1">{t('exp_form_period_hint')}</p>
           </div>
           {/* Mas'ul */}

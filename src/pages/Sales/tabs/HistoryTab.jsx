@@ -168,7 +168,7 @@ const HistoryTab = ({ ctx }) => {
 
         {filteredSalesForHistory.length > 15 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-text-muted">{t('sl_page_info', { page: historyPage, total: Math.ceil(filteredSalesForHistory.length / 15) })}</p>
+            <p className="text-xs text-text-muted">{Math.min(historyPage * 15, filteredSalesForHistory.length)} / {filteredSalesForHistory.length} ta</p>
             <div className="flex gap-2">
               <button disabled={historyPage === 1} onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
                 className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_prev')}</button>

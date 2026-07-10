@@ -37,6 +37,7 @@ const mapBatch = (b) => ({
     amountUZS: Number(p.amount_uzs) || 0,
     type: p.type || 'cash_uzs',
     note: p.note || '',
+    noteRu: p.note_ru || '',
   })),
 })
 

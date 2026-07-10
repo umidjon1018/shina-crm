@@ -240,7 +240,7 @@ const Income = () => {
     PAGE_SIZE, deletePaymentConfirm, setDeletePaymentConfirm,
     usdRate, productCategories, bump,
     onDeleteSupplier,
-    paged1, totalPages1, paged2, totalPages2,
+    paged1, totalPages1, total1: filtered1.length, paged2, totalPages2, total2: filtered2.length,
     getSupplierName,
     inventoryCheck, allMatch,
     MOCK_PRODUCTS,
