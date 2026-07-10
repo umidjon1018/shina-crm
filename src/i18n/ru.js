@@ -2392,7 +2392,7 @@ export default {
   rep_bu_card_margin: 'Средняя маржа',
   rep_bu_card_margin_sub: 'Прибыль / Сумма продаж',
   rep_bu_card_installment: 'Долг рассрочки',
-  rep_bu_card_installment_sub: '{count} продаж Б/У в рассрочку',
+  rep_bu_card_installment_sub: '{{count}} продаж Б/У в рассрочку',
   rep_bu_modal_installment_title: 'Б/У Рассрочки',
   rep_bu_modal_installment_sub: 'Б/У товары, проданные в рассрочку',
   rep_bu_modal_inst_debt: 'Остаток долга',

@@ -2401,7 +2401,7 @@ export default {
   rep_bu_card_margin: 'O\'rtacha marja',
   rep_bu_card_margin_sub: 'Foyda / Sotuv summasi',
   rep_bu_card_installment: 'Muddatli to\'lov qarzi',
-  rep_bu_card_installment_sub: '{count} ta B/U nasiya sotuv',
+  rep_bu_card_installment_sub: '{{count}} ta B/U nasiya sotuv',
   rep_bu_modal_installment_title: 'B/U Muddatli to\'lovlar',
   rep_bu_modal_installment_sub: 'Muddatli to\'lov bilan sotilgan B/U tovarlar',
   rep_bu_modal_inst_debt: 'Qolgan qarz',
