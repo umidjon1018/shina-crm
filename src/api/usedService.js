@@ -32,8 +32,8 @@ const mapSale = (s) => ({
   id: s.id || `USED-SALE-${s._dbId}`,
   soldByName: s.soldByName || s.sellerName || '',
   installmentTermMonths: s.installmentTermMonths ?? null,
-  installmentOrgId: s.installmentOrgId ?? null,
-  installmentOrgName: s.installmentOrgName ?? null,
+  installmentOrgId: s.installmentOrgId ?? s.installment_org ?? null,
+  installmentOrgName: s.installmentOrgName ?? s.installment_org_name ?? null,
   isUsedSale: true,
 })
 
