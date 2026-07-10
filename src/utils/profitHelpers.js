@@ -1,7 +1,7 @@
 export const getSaleProfit = (s) => {
   if (!s || !s.items) return 0
   return s.items.reduce((acc, it) => {
-    const purchasePrice = it.purchasePrice || Math.round((it.price || it.salePrice || 0) * 0.8)
+    const purchasePrice = it.purchasePrice || 0
     const salePrice = it.price || it.salePrice || 0
     const salePriceAfterDiscount = Math.round(salePrice * (1 - (s.discount || 0) / 100))
     return acc + (salePriceAfterDiscount - purchasePrice) * (it.qty || 1)
