@@ -204,6 +204,7 @@ export const useSalesState = () => {
   const [selectedPayoutSaleId, setSelectedPayoutSaleId] = useState(null)
   const [payoutSuccess, setPayoutSuccess] = useState(false)
   const [installmentSearch, setInstallmentSearch] = useState('')
+  const [installmentTypeFilter, setInstallmentTypeFilter] = useState('all')
   const [inlinePaySaleId, setInlinePaySaleId] = useState(null)
   const [inlinePayAmount, setInlinePayAmount] = useState('')
   const [inlinePaySuccess, setInlinePaySuccess] = useState(false)
@@ -1433,6 +1434,11 @@ export const useSalesState = () => {
     return combined
       .filter(s => s.paymentType === 'installment' && s.status !== 'cancelled')
       .filter(s => {
+        if (installmentTypeFilter === 'new') return !s.isUsedSale
+        if (installmentTypeFilter === 'used') return !!s.isUsedSale
+        return true
+      })
+      .filter(s => {
         if (installmentMonthFilter === 'all') return true;
         if (!s.soldAt) return false;
         const date = new Date(s.soldAt);
@@ -1447,7 +1453,7 @@ export const useSalesState = () => {
         const barcodes = (s.items?.map(i => i.barcode).join(' ') || '').toLowerCase()
         return name.includes(q) || items.includes(q) || barcodes.includes(q)
       })
-  }, [salesList, usedSalesList, installmentMonthFilter, installmentSearch, selectedShopId]);
+  }, [salesList, usedSalesList, installmentMonthFilter, installmentSearch, installmentTypeFilter, selectedShopId]);
 
   const enrichedInstallmentSales = useMemo(() => {
     return filteredInstallmentSales.map(s => {
@@ -1560,7 +1566,7 @@ export const useSalesState = () => {
     exchangeItems, setExchangeItems, alertModal, setAlertModal,
     detailedOrg, setDetailedOrg, orgMonthFilter, setOrgMonthFilter,
     payoutAmount, setPayoutAmount, selectedPayoutSaleId, setSelectedPayoutSaleId,
-    payoutSuccess, setPayoutSuccess, installmentSearch, setInstallmentSearch,
+    payoutSuccess, setPayoutSuccess, installmentSearch, setInstallmentSearch, installmentTypeFilter, setInstallmentTypeFilter,
     inlinePaySaleId, setInlinePaySaleId, inlinePayAmount, setInlinePayAmount,
     inlinePaySuccess, setInlinePaySuccess,
     customerPayModal, setCustomerPayModal, customerPayAmount, setCustomerPayAmount,

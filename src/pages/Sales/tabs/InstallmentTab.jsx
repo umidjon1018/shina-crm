@@ -10,7 +10,7 @@ const InstallmentTab = ({ ctx }) => {
   const som = t('unit_som')
   const {
     installmentMonthFilter, setInstallmentMonthFilter, installmentMonthOptions, formatMonthValue,
-    installmentSearch, setInstallmentSearch,
+    installmentSearch, setInstallmentSearch, installmentTypeFilter, setInstallmentTypeFilter,
     filteredInstallmentSales, sortedInstallmentSales,
     installmentSalesPage, setInstallmentSalesPage,
     installmentSortField, installmentSortOrder, handleInstallmentSort,
@@ -53,6 +53,14 @@ const InstallmentTab = ({ ctx }) => {
               <input type="text" value={installmentSearch} onChange={e => { setInstallmentSearch(e.target.value); setInstallmentSalesPage(1) }}
                 placeholder={t('sl_inst_search_ph')}
                 className="pl-8 pr-3 py-1.5 bg-bg-tertiary border border-border text-text-primary rounded-xl text-xs font-medium focus:outline-none focus:border-accent-red w-52" />
+            </div>
+            <div className="flex items-center gap-1 bg-bg-tertiary border border-border rounded-xl p-1">
+              {[['all', 'Barchasi'], ['new', 'Yangi'], ['used', 'Eski']].map(([val, label]) => (
+                <button key={val} onClick={() => { setInstallmentTypeFilter(val); setInstallmentSalesPage(1) }}
+                  className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${installmentTypeFilter === val ? 'bg-accent-red text-white' : 'text-text-muted hover:text-text-primary'}`}>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
           <div className="text-xs text-text-muted">{t('sl_inst_total', { n: filteredInstallmentSales.length })}</div>
@@ -151,7 +159,7 @@ const InstallmentTab = ({ ctx }) => {
 
         {sortedInstallmentSales.length > 20 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-text-muted">{t('sl_page_info', { page: installmentSalesPage, total: Math.ceil(sortedInstallmentSales.length / 20) })}</p>
+            <p className="text-xs text-text-muted">{Math.min(installmentSalesPage * 20, sortedInstallmentSales.length)} / {sortedInstallmentSales.length} ta</p>
             <div className="flex gap-2">
               <button disabled={installmentSalesPage === 1} onClick={() => setInstallmentSalesPage(p => Math.max(1, p - 1))}
                 className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_prev')}</button>

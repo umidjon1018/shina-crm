@@ -86,7 +86,7 @@ const Sales = () => {
     filteredCancelledReturns, sortedReturnsHistory,
     returnsHistoryPage, setReturnsHistoryPage,
     installmentMonthFilter, setInstallmentMonthFilter, installmentMonthOptions,
-    installmentSearch, setInstallmentSearch,
+    installmentSearch, setInstallmentSearch, installmentTypeFilter, setInstallmentTypeFilter,
     filteredInstallmentSales, sortedInstallmentSales,
     installmentSalesPage, setInstallmentSalesPage,
     installmentSortField, installmentSortOrder, handleInstallmentSort,
@@ -207,7 +207,7 @@ const Sales = () => {
           returnsMonthFilter, setReturnsMonthFilter, returnsMonthOptions,
           // installment
           installmentMonthFilter, setInstallmentMonthFilter, installmentMonthOptions,
-          installmentSearch, setInstallmentSearch,
+          installmentSearch, setInstallmentSearch, installmentTypeFilter, setInstallmentTypeFilter,
           filteredInstallmentSales, sortedInstallmentSales,
           installmentSalesPage, setInstallmentSalesPage,
           installmentSortField, installmentSortOrder, handleInstallmentSort,
