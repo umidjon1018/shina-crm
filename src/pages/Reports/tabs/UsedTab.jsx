@@ -333,7 +333,7 @@ const UsedTab = ({ ctx }) => {
                         const today = new Date().toISOString().slice(0,10)
                         return <span className={`text-xs ${due && due < today ? 'text-accent-red font-bold' : 'text-text-secondary'}`}>{due || '—'}</span>
                       }},
-                      { key: 'installmentOrgName',  label: t('rep_fin_col_installment'), render: r => <span className="text-text-secondary text-xs">{r.installmentOrgName || '—'}</span> },
+                      { key: 'installmentOrgName',  label: t('rep_fin_col_installment'), render: r => { const orgName = r.installmentOrgName || (storeInstallmentOrgs || []).find(o => o.id === r.installmentOrgId)?.name || null; return <span className="text-text-secondary text-xs">{orgName || '—'}</span> } },
                       { key: 'soldByName',          label: t('col_employee'),     render: r => <span className="text-text-secondary text-xs">{r.soldByName || '—'}</span> },
                     ]}
                   />
