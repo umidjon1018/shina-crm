@@ -11,6 +11,7 @@ const mapItem = (i) => ({
   price: Number(i.price) || 0,
   salePrice: Number(i.price) || 0,
   purchasePrice: Number(i.purchase_price) || 0,
+  qty: Number(i.qty) || 1,
   barcode: i.barcode || null,
   saleId: String(i.sale_id),
 })
