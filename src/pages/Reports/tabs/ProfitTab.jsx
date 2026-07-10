@@ -258,7 +258,7 @@ const ProfitTab = ({ ctx }) => {
                     <div className="flex items-center justify-between mb-5">
                       <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                       <span className="text-text-muted text-xs">
-                        {t('wh_in_total')}: <span className="font-bold text-accent-green">{fmtUZS(filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0))}</span>
+                        {t('wh_in_total')}: {(() => { const total = filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0); return <span className={`font-bold ${total >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(total)}</span> })()}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-6">
@@ -336,7 +336,7 @@ const ProfitTab = ({ ctx }) => {
                             {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment') }[r.paymentType]}
                           </span>
                         )},
-                        { key:'profit',       label:t('col_net_profit'),          align:'right', render: r => <span className="font-bold text-accent-green">{fmtUZS(getSaleProfit(r))}</span> },
+                        { key:'profit',       label:t('col_net_profit'),          align:'right', render: r => { const p = getSaleProfit(r); return <span className={`font-bold ${p >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(p)}</span> } },
                       ]}
                     />
                   </Modal>
