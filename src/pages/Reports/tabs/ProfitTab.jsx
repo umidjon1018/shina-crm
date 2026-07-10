@@ -333,7 +333,7 @@ const ProfitTab = ({ ctx }) => {
                         { key:'qty',          label:t('rep_col_qty'), align:'center', render: r => <span className="font-bold">{r.items?.reduce((s,i)=>s+(i.qty||1),0)||1}</span> },
                         { key:'paymentType',  label:t('rep_col_pay_type'), align:'center', render: r => (
                           <span className="px-2 py-0.5 rounded bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
-                            {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('pay_transfer') }[r.paymentType] || r.paymentType || '—'}
+                            {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_hist_pay_bank') }[r.paymentType] || r.paymentType || '—'}
                           </span>
                         )},
                         { key:'profit',       label:t('col_net_profit'),          align:'right', render: r => { const p = getSaleProfit(r); return <span className={`font-bold ${p >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(p)}</span> } },
