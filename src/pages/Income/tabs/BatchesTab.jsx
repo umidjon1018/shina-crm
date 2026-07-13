@@ -417,12 +417,8 @@ const BatchesTab = ({ ctx }) => {
                                                     ? { ...b, promoPassToCustomer: newVal }
                                                     : b
                                                 ))
-                                                togglePromoPassToCustomer(batch.id).catch(() => {
-                                                  setBatches(prev => prev.map(b =>
-                                                    b.id === batch.id
-                                                      ? { ...b, promoPassToCustomer: !newVal }
-                                                      : b
-                                                  ))
+                                                togglePromoPassToCustomer(batch.id).catch(err => {
+                                                  console.error('promo-pass toggle error:', err?.response?.data || err?.message)
                                                 })
                                               }}
                                               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
