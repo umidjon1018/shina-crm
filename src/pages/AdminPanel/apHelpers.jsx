@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Users, Monitor, ClipboardList, Store, Settings } from 'lucide-react'
+import { Users, Monitor, ClipboardList, Store, Settings, Bot } from 'lucide-react'
 
 const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr']
 const MONTHS_RU = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря']
@@ -41,6 +41,7 @@ const TABS = [
   { id: 'devices',   labelKey: 'adm_tab_devices',   icon: Monitor },
   { id: 'audit',     labelKey: 'adm_tab_audit',      icon: ClipboardList },
   { id: 'shops',     labelKey: 'mgmt_tab_shops',     icon: Store },
+  { id: 'ai_agents', labelKey: 'adm_tab_ai_agents',  icon: Bot },
   { id: 'settings',  labelKey: 'adm_tab_settings',   icon: Settings },
 ]
 const PAGE_SIZE = 15

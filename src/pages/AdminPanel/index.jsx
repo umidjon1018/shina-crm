@@ -7,6 +7,7 @@ import DevicesTab from './tabs/DevicesTab'
 import AuditTab from './tabs/AuditTab'
 import SettingsTab from './tabs/SettingsTab'
 import ShopsTab from './tabs/ShopsTab'
+import AiAgentsTab from './tabs/AiAgentsTab'
 
 export const AdminPanel = () => {
   const { t } = useTranslation()
@@ -39,6 +40,7 @@ export const AdminPanel = () => {
           {activeTab === 'devices'    && <DevicesTab />}
           {activeTab === 'audit'      && <AuditTab />}
           {activeTab === 'shops'      && <ShopsTab />}
+          {activeTab === 'ai_agents'  && <AiAgentsTab />}
           {activeTab === 'settings'   && <SettingsTab />}
         </motion.div>
       </AnimatePresence>

@@ -1281,6 +1281,7 @@ export default {
   adm_tab_devices: 'Устройства',
   adm_tab_audit: 'Журнал аудита',
   adm_tab_settings: 'Настройки',
+  adm_tab_ai_agents: 'AI Агенты',
   adm_role_admin: 'Администратор',
   adm_role_manager: 'Менеджер',
   adm_role_seller: 'Продавец',

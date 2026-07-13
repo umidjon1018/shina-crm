@@ -1288,6 +1288,7 @@ export default {
   adm_tab_devices: 'Qurilmalar',
   adm_tab_audit: 'Audit log',
   adm_tab_settings: 'Sozlamalar',
+  adm_tab_ai_agents: 'AI Agentlar',
   adm_role_admin: 'Admin',
   adm_role_manager: 'Boshqaruvchi',
   adm_role_seller: 'Sotuvchi',
