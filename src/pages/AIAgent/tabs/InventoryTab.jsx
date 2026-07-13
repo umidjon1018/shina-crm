@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Package, Zap, CheckCircle, MessageSquare, Activity } from 'lucide-react'
+import AiChat from '../components/AiChat'
 import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
@@ -231,6 +232,33 @@ function InventoryTab({ aiData = {} }) {
           <Activity size={15} className="text-[#E63946]" /> {t('ai_recent_actions')}
         </h3>
         <AgentActivityFeed agentId="inventory" />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+          <MessageSquare size={15} className="text-[#E63946]" /> AI Agent — Ombor maslahatchi
+        </h3>
+        <AiChat
+          agentId="product-agent"
+          systemPrompt={`Sen GoodTires omborxona va tovar agentisan.
+
+📦 Hozirgi zaxira holati:
+${inventoryData.slice(0, 15).map(d =>
+  `  ${d.product.name} (${d.product.brand}): ${d.stock} dona qoldi, 30 kunda ${d.soldLast30} ta sotilgan${d.daysLeft !== null ? `, ${d.daysLeft} kun yetadi` : ''}`
+).join('\n')}
+
+⚠️ Tavsiya kerak bo'lganlar:
+${inventoryData.filter(d => d.recommendation).map(d =>
+  `  ${d.product.name}: ${d.stock} dona, holat: ${d.recommendation.type}`
+).join('\n') || '  Hozircha yo\'q'}
+
+Qoidalar:
+- O'zbek tilida qisqa va aniq javob ber
+- Buyurtma, zaxira, mavsum bo'yicha amaliy maslahat ber
+- Markdown ishlatma`}
+          placeholder="Zaxira, buyurtma, mavsum haqida so'rang..."
+          colorClass="accent-red"
+        />
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
-import { BarChart3, TrendingUp, MessageSquare, Send, AlertTriangle, Star, Info, Bell, CheckCircle, X, Zap } from 'lucide-react'
+import { BarChart3, TrendingUp, AlertTriangle, Star, Info, Bell, CheckCircle, X, Zap } from 'lucide-react'
+import AiChat from '../components/AiChat'
 import { useTranslation } from 'react-i18next'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
@@ -20,8 +21,6 @@ function SalesTab({ aiData = {} }) {
   const { sales: _allSales = [], products: MOCK_PRODUCTS = [], batches: MOCK_INCOME_BATCHES = [] } = aiData
   const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
   const MOCK_EXPENSES = []
-  const [chatInput, setChatInput] = useState('')
-  const [chatMessages, setChatMessages] = useState([])
   const [insightRead, setInsightRead] = useState(new Set())
   const [insightDeleted, setInsightDeleted] = useState(new Set())
   const [insightPage, setInsightPage] = useState(0)
@@ -101,32 +100,23 @@ function SalesTab({ aiData = {} }) {
     })
   }, [insights, addActivity])
 
-  const sendChat = () => {
-    const text = chatInput.trim()
-    if (!text) return
-    setChatInput('')
-    const lower = text.toLowerCase()
-    let reply = ''
-    if (lower.includes('marja') || lower.includes('foyda') || lower.includes('margin') || lower.includes('\u043c\u0430\u0440\u0436\u0430') || lower.includes('\u043f\u0440\u0438\u0431\u044b\u043b\u044c')) {
-      const top = brandData[0]
-      reply = t('ai_chat_reply_margin', { margin: avgMargin, brand: top?.brand || '\u2014', brandMargin: top?.margin || '\u2014', profit: fmtNum(totalProfit, t), som })
-    } else if (lower.includes('savdo') || lower.includes('sotish') || lower.includes('tushum') || lower.includes('\u043f\u0440\u043e\u0434\u0430\u0436\u0438') || lower.includes('\u043f\u0440\u043e\u0434\u0430\u0436')) {
-      reply = t('ai_chat_reply_sales', { revenue: fmtNum(totalRevenue, t), som, count: completedSales.length, brand: brandData[0]?.brand || '\u2014', qty: brandData[0]?.qty || 0 })
-    } else if (lower.includes('qaytarish') || lower.includes('return') || lower.includes('bekor') || lower.includes('\u0432\u043e\u0437\u0432\u0440\u0430\u0442') || lower.includes('\u043e\u0442\u043c\u0435\u043d')) {
-      reply = t('ai_chat_reply_returns', { count: cancelledSales.length, rate: returnRate })
-    } else if (lower.includes('kapital') || lower.includes('pul') || lower.includes('balans') || lower.includes('\u043a\u0430\u043f\u0438\u0442\u0430\u043b') || lower.includes('\u0431\u0430\u043b\u0430\u043d\u0441')) {
-      reply = t('ai_chat_reply_capital', { sign: capitalState > 0 ? '+' : '', amount: fmtNum(capitalState, t), som, revenue: fmtNum(totalRevenue, t), cost: fmtNum(totalCost, t), expenses: fmtNum(totalExpensesUZS, t) })
-    } else if (lower.includes('xarajat') || lower.includes('chiqim') || lower.includes('\u0440\u0430\u0441\u0445\u043e\u0434') || lower.includes('\u0437\u0430\u0442\u0440\u0430\u0442')) {
-      const biggest = [...MOCK_EXPENSES].sort((a, b) => (b.amountUZS || 0) - (a.amountUZS || 0))[0]
-      reply = t('ai_chat_reply_expenses', { total: fmtNum(totalExpensesUZS, t), som, count: MOCK_EXPENSES.length, name: biggest?.note || '\u2014', amount: fmtNum(biggest?.amountUZS || 0, t) })
-    } else if (brandData.some(b => lower.includes(b.brand.toLowerCase()))) {
-      const found = brandData.find(b => lower.includes(b.brand.toLowerCase()))
-      reply = t('ai_chat_reply_brand', { brand: found.brand, qty: found.qty, margin: found.margin, profit: fmtNum(found.profit, t), som })
-    } else {
-      reply = t('ai_chat_reply_unknown')
-    }
-    setChatMessages(prev => [...prev, { role: 'user', text }, { role: 'assistant', text: reply }])
-  }
+  const salesSystemPrompt = useMemo(() => `Sen GoodTires shina do'koni uchun savdo tahlilchisi agentisan.
+
+\ud83d\udcca Hozirgi savdo ma'lumotlari:
+- Jami sotuvlar: ${completedSales.length} ta (bekor: ${cancelledSales.length} ta, ${returnRate}%)
+- Umumiy tushum: ${fmtNum(totalRevenue, t)} so'm
+- Sof foyda: ${fmtNum(totalProfit, t)} so'm
+- O'rtacha marja: ${avgMargin}%
+- Kapital holati: ${fmtNum(capitalState, t)} so'm
+
+\ud83c\udfc6 Brend bo'yicha marja (top 5):
+${brandData.slice(0, 5).map(b => `  ${b.brand}: ${b.qty} ta sotilgan, marja ${b.margin}%, foyda ${fmtNum(b.profit, t)} so'm`).join('\n')}
+
+Qoidalar:
+- O'zbek tilida qisqa va aniq javob ber
+- Raqamlarni so'm yoki % bilan ko'rsat
+- Amaliy tavsiyalar ber
+- Markdown ishlatma`, [completedSales.length, totalRevenue, totalProfit, avgMargin, capitalState, brandData])
 
   return (
     <div className="space-y-6">
@@ -244,36 +234,12 @@ function SalesTab({ aiData = {} }) {
         )
       })()}
 
-      <div className="border border-border rounded-xl overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-border bg-bg-secondary flex items-center gap-2">
-          <MessageSquare size={13} className="text-[#22c55e]" />
-          <span className="text-xs font-medium text-text-primary">{t('ai_chat_ask')}</span>
-        </div>
-        <div className="p-3 space-y-2 max-h-48 overflow-y-auto">
-          {chatMessages.length === 0 && (
-            <p className="text-xs text-text-muted text-center py-3">{t('ai_chat_hint')}</p>
-          )}
-          {chatMessages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${m.role === 'user' ? 'bg-[#22c55e]/20 text-text-primary' : 'bg-bg-secondary text-text-primary'}`}>
-                {m.text}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="px-3 py-2.5 border-t border-border flex gap-2">
-          <input
-            value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && sendChat()}
-            placeholder={t('ai_chat_placeholder')}
-            className="flex-1 bg-bg-primary border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-[#22c55e]/50"
-          />
-          <button onClick={sendChat} className="p-1.5 rounded-lg bg-[#22c55e]/20 hover:bg-[#22c55e]/30 text-[#22c55e] transition-colors">
-            <Send size={13} />
-          </button>
-        </div>
-      </div>
+      <AiChat
+        agentId="sales-agent"
+        systemPrompt={salesSystemPrompt}
+        placeholder="Savdo, marja, foyda haqida so'rang..."
+        colorClass="accent-green"
+      />
     </div>
   )
 }

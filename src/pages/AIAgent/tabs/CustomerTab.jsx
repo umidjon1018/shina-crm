@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import DateMaskInput from '../../../components/DateMaskInput'
 import { MessageSquare, Gift, Filter, CheckCircle, ShoppingCart, Bell } from 'lucide-react'
+import AiChat from '../components/AiChat'
 import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
@@ -245,6 +246,35 @@ function CustomerTab({ aiData = {} }) {
           </div>
         </div>
       </Modal>
+
+      <div className="mt-6">
+        <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+          <MessageSquare size={15} className="text-[#f97316]" /> AI Agent — Mijoz muloqoti
+        </h3>
+        <AiChat
+          agentId="customer-agent"
+          systemPrompt={`Sen GoodTires shina do'koni mijozlar bilan ishlash agentisan.
+
+👥 Mijozlar statistikasi:
+- Jami mijozlar: ${shopCustomers.length} ta
+- VIP/Loyal: ${promoSegment.length} ta
+- Yaqin kunlarda tug'ilgan kuni: ${birthdaySoon.length} ta mijoz
+- ${birthdaySoon.slice(0, 3).map(c => `  ${c.name} (${getDaysUntilBirthday(c.birthDate)} kun)`).join(', ')}
+
+Qila olasanlar:
+- Xabar shablonlari yozish (tug'ilgan kun, aksiya, eslatma)
+- Mijozni segmentlash va qaytarishga undash
+- Shikoyat hal qilish skriptlari
+- Loyallik dasturi bo'yicha maslahat
+
+Qoidalar:
+- O'zbek tilida professional va do'stona javob ber
+- Tayyor xabar shabloni so'ralsa — to'liq matn yaz
+- Markdown ishlatma`}
+          placeholder="Mijoz xabari, shablon, maslahat so'rang..."
+          colorClass="accent-orange"
+        />
+      </div>
     </div>
   )
 }

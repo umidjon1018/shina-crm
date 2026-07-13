@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import AiChat from '../components/AiChat'
 import DateMaskInput from '../../../components/DateMaskInput'
 import { motion } from 'framer-motion'
 import {
@@ -857,6 +858,36 @@ function MarketingTab({ aiData = {} }) {
           </button>
         </div>
       </Modal>
+
+      <div className="mt-6">
+        <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+          <Zap size={15} className="text-[#f97316]" /> AI Agent — Marketing va kontent
+        </h3>
+        <AiChat
+          agentId="pr-agent"
+          systemPrompt={`Sen GoodTires shina do'koni marketing va PR agentisan.
+
+🏪 Do'kon haqida:
+- Nomi: GoodTires
+- Mahsulotlar: avtomobil shinasi, disk va aksessuarlar
+- Mijozlar soni: ${shopCustomers.length} ta
+- Top mahsulotlar: ${MOCK_PRODUCTS.slice(0, 5).map(p => p.name).join(', ')}
+
+📱 Qila olasanlar:
+- Instagram post va story matni yozish
+- Aksiya va chegirma e'lonlari
+- Mavsumiy reklama kampaniyalari
+- Mijozlarni qaytarishga undash xabarlari
+- Brend ovozi va uslub
+
+Qoidalar:
+- O'zbek tilida yozasan
+- Post so'ralsa — emoji bilan, qisqa va jalb etarli
+- Markdown ishlatma`}
+          placeholder="Post matni, aksiya e'loni, reklama so'rang..."
+          colorClass="accent-orange"
+        />
+      </div>
     </div>
   )
 }
