@@ -21,6 +21,7 @@ import {
 import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
+import { getIncomeBatches } from '../../api/incomeService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -99,6 +100,7 @@ export const useSalesState = () => {
 
   // Faol aksiyalar
   const [activePromos, setActivePromos] = useState([])
+  const [batchPromos, setBatchPromos] = useState([]) // promoPassToCustomer = true bo'lgan batchlar
   useEffect(() => {
     getPromotions().then(list => {
       const today = new Date().toISOString().slice(0, 10)
@@ -107,6 +109,9 @@ export const useSalesState = () => {
         (!p.startDate || p.startDate <= today) &&
         (!p.endDate || p.endDate >= today)
       ))
+    }).catch(() => {})
+    getIncomeBatches().then(list => {
+      setBatchPromos(list.filter(b => b.promoPassToCustomer && b.promoDiscount > 0))
     }).catch(() => {})
   }, [])
 
@@ -269,9 +274,14 @@ export const useSalesState = () => {
 
   // Savat bo'yicha eng yuqori aksiya chegirmasini topish
   const promoDiscount = useMemo(() => {
-    if (!activePromos.length || !cartItems.length) return 0
+    if (!cartItems.length) return 0
     const today = new Date().toISOString().slice(0, 10)
     let best = 0
+    // Batch promos (yetkazib beruvchi chegirmasi mijozlarga uzatilgan)
+    for (const b of batchPromos) {
+      const matches = cartItems.some(c => String(c.product.id) === String(b.productId))
+      if (matches && b.promoDiscount > best) best = b.promoDiscount
+    }
     for (const p of activePromos) {
       if (p.shopId !== 'all' && p.shopId !== selectedShopId) continue
       if (p.type === 'product') {
@@ -286,7 +296,7 @@ export const useSalesState = () => {
       }
     }
     return best
-  }, [activePromos, cartItems, selectedShopId])
+  }, [activePromos, batchPromos, cartItems, selectedShopId])
 
   const effectiveDiscount = loyaltyDiscountApplied
     ? (loyaltyDiscountPercent || 25)
