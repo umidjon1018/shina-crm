@@ -82,7 +82,7 @@ const PromotionsTab = ({ ctx }) => {
     MOCK_PRODUCTS,
   } = ctx
 
-  const supplierPromos = batches.filter(b => b.promoDiscount)
+  const supplierPromos = batches.filter(b => b.promoDiscount && b.promoPassToCustomer)
 
   return (
           <motion.div key="promotions" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">

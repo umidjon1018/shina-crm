@@ -27,6 +27,7 @@ const mapBatch = (b) => ({
   notes: b.notes || null,
   promoDiscount: b.promo_discount ? Number(b.promo_discount) : null,
   promoNote: b.promo_note || null,
+  promoPassToCustomer: b.promo_pass_to_customer ?? false,
   receivedAt: b.received_at || b.created_at || '',
   receivedByName: b.received_by_name || '',
   payments: (b.payments || []).map(p => ({
@@ -151,6 +152,11 @@ export const updateSupplier = async (id, supplierData) => {
 
 export const deleteSupplier = async (id) => {
   const { data } = await api.delete(`/api/suppliers/${id}`)
+  return data
+}
+
+export const togglePromoPassToCustomer = async (batchId) => {
+  const { data } = await api.patch(`/api/batches/${batchId}/promo-pass`)
   return data
 }
 

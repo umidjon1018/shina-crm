@@ -1,7 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle } from 'lucide-react'
+import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle, Users } from 'lucide-react'
+import { togglePromoPassToCustomer } from '../../../api/incomeService'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPaymentRateDiff } from '../components/incHelpers'
 
@@ -390,17 +391,44 @@ const BatchesTab = ({ ctx }) => {
                                     <div className="flex items-center justify-between">
                                       <h4 className="text-xs font-extrabold uppercase tracking-widest text-text-muted">{t('inc_payment_history')}</h4>
                                       {batch.promoDiscount && (
-                                        <div className="bg-accent-orange/10 border border-accent-orange/30 rounded-xl px-4 py-3 space-y-1">
+                                        <div className="bg-accent-orange/10 border border-accent-orange/30 rounded-xl px-4 py-3 space-y-2">
                                           <div className="flex items-center gap-2">
                                             <span className="text-sm">🎁</span>
                                             <span className="text-sm font-bold text-accent-orange">{t('inc_promo_label')}: {batch.promoDiscount}%</span>
                                           </div>
-                                          <p className="text-xs text-text-secondary">{batch.promoNote}</p>
+                                          {batch.promoNote && <p className="text-xs text-text-secondary">{batch.promoNote}</p>}
                                           <p className="text-xs text-text-muted">
                                             {t('inc_promo_note')}
                                             {batch.totalUSD && ` ${t('inc_promo_savings')}: $${(batch.totalUSD * batch.promoDiscount / 100).toFixed(0)}`}
                                             {batch.totalUZS_atEntry && ` (${formatPrice(batch.totalUZS_atEntry * batch.promoDiscount / 100)} ${t('unit_som')})`}
                                           </p>
+                                          {/* Mijozlarga uzatish toggle */}
+                                          <div className="flex items-center justify-between pt-1 border-t border-accent-orange/20">
+                                            <div className="flex items-center gap-1.5">
+                                              <Users size={12} className="text-text-muted" />
+                                              <span className="text-xs text-text-secondary">Mijozlarga ham qo'llash</span>
+                                            </div>
+                                            <button
+                                              onClick={async () => {
+                                                await togglePromoPassToCustomer(batch.id)
+                                                setBatches(prev => prev.map(b =>
+                                                  b.id === batch.id
+                                                    ? { ...b, promoPassToCustomer: !b.promoPassToCustomer }
+                                                    : b
+                                                ))
+                                              }}
+                                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                                batch.promoPassToCustomer ? 'bg-accent-green' : 'bg-bg-tertiary border border-border'
+                                              }`}
+                                            >
+                                              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                                                batch.promoPassToCustomer ? 'translate-x-4' : 'translate-x-0.5'
+                                              }`} />
+                                            </button>
+                                          </div>
+                                          {batch.promoPassToCustomer && (
+                                            <p className="text-[10px] text-accent-green font-medium">✓ Aksiyalar tabida ko'rinmoqda</p>
+                                          )}
                                         </div>
                                       )}
                                     </div>
