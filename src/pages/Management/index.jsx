@@ -854,7 +854,7 @@ export const Management = () => {
                         <option value="all">{t('emp_all_time')}</option>
                         {Array.from(new Set(
                           MOCK_SALES
-                            .filter(s => String(s.soldBy) === String(selectedEmployee.id))
+                            .filter(s => selectedEmployee.name && s.soldByName ? s.soldByName.trim().toLowerCase() === selectedEmployee.name.trim().toLowerCase() : String(s.soldBy) === String(selectedEmployee.id))
                             .map(s => (s.soldAt || '').slice(0, 7))
                             .filter(Boolean)
                         )).sort((a,b) => b.localeCompare(a)).map(m => (
@@ -864,7 +864,8 @@ export const Management = () => {
                     </div>
 
                     {(() => {
-                      const allEmpSales = MOCK_SALES.filter(s => String(s.soldBy) === String(selectedEmployee.id))
+                      const matchEmpSale = (s) => selectedEmployee.name && s.soldByName ? s.soldByName.trim().toLowerCase() === selectedEmployee.name.trim().toLowerCase() : String(s.soldBy) === String(selectedEmployee.id)
+                      const allEmpSales = MOCK_SALES.filter(s => matchEmpSale(s))
                       const filtered = statsMonth === 'all'
                         ? allEmpSales
                         : allEmpSales.filter(s => (s.soldAt || '').startsWith(statsMonth))
@@ -896,12 +897,12 @@ export const Management = () => {
                       const lastSale = sorted[0] || null
 
                       // Boshqa sotuvchiga o'tgan (barcha vaqt uchun, filter qilinmaydi)
-                      const allEmpCompleted = MOCK_SALES.filter(s => String(s.soldBy) === String(selectedEmployee.id) && s.status !== 'cancelled')
+                      const allEmpCompleted = MOCK_SALES.filter(s => matchEmpSale(s) && s.status !== 'cancelled')
                       const empCustomerIds = new Set(allEmpCompleted.filter(s => s.customerId).map(s => s.customerId))
                       const transferred = [...empCustomerIds].filter(cId => {
                         return MOCK_SALES.some(s =>
                           s.customerId === cId &&
-                          String(s.soldBy) !== String(selectedEmployee.id) &&
+                          !matchEmpSale(s) &&
                           s.status !== 'cancelled'
                         )
                       })
@@ -1119,10 +1120,11 @@ export const Management = () => {
                         </button>
                       </div>
                       {(() => {
-                        const empSales = MOCK_SALES.filter(s => String(s.soldBy) === String(selectedEmployee.id) && s.status !== 'cancelled')
+                        const _matchEmp = (s) => selectedEmployee.name && s.soldByName ? s.soldByName.trim().toLowerCase() === selectedEmployee.name.trim().toLowerCase() : String(s.soldBy) === String(selectedEmployee.id)
+                        const empSales = MOCK_SALES.filter(s => _matchEmp(s) && s.status !== 'cancelled')
                         const empCustomerIds = new Set(empSales.filter(s => s.customerId).map(s => s.customerId))
                         const transferredList = [...empCustomerIds].map(cId => {
-                          const laterSales = MOCK_SALES.filter(s => s.customerId === cId && String(s.soldBy) !== String(selectedEmployee.id) && s.status !== 'cancelled')
+                          const laterSales = MOCK_SALES.filter(s => s.customerId === cId && !_matchEmp(s) && s.status !== 'cancelled')
                           if (laterSales.length === 0) return null
                           const customer = MOCK_CUSTOMERS.find(c => c.id === cId)
                           const lastSeller = laterSales.sort((a,b) => new Date(b.soldAt||0) - new Date(a.soldAt||0))[0]
