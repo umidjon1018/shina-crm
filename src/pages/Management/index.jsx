@@ -138,7 +138,7 @@ export const Management = () => {
 
   // Local state — saqlash bosilganda updateSettings chaqiriladi
   const [loyaltyForm, setLoyaltyForm] = useState({
-    loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent
+    loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits
   })
   const [discountForm, setDiscountForm] = useState({
     discountSmallMax, discountMediumMax

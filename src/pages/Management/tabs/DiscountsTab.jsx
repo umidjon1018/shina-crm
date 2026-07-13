@@ -211,15 +211,15 @@ const DiscountsTab = ({ ctx }) => {
                         {editingSilverVisits ? (
                           <input
                             type="number"
-                            defaultValue={silverVisits || 5}
+                            defaultValue={loyaltyForm.silverVisits ?? silverVisits ?? 5}
                             onKeyDown={e => {
                               if (e.key === 'Enter') {
-                                updateSettings({ silverVisits: Number(e.target.value) })
+                                setLoyaltyForm(f => ({ ...f, silverVisits: Number(e.target.value) }))
                                 setEditingSilverVisits(false)
                               }
                             }}
                             onBlur={e => {
-                              updateSettings({ silverVisits: Number(e.target.value) })
+                              setLoyaltyForm(f => ({ ...f, silverVisits: Number(e.target.value) }))
                               setEditingSilverVisits(false)
                             }}
                             className="w-16 px-2 py-0.5 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none font-bold"
@@ -231,7 +231,7 @@ const DiscountsTab = ({ ctx }) => {
                             className="cursor-pointer border-b border-dashed border-accent-blue text-accent-blue font-bold px-1"
                             title={t('mgmt_loyalty_edit_tooltip')}
                           >
-                            {t('mgmt_loyalty_visits_unit', { n: silverVisits || 5 })}
+                            {loyaltyForm.silverVisits ?? silverVisits ?? 5} tashrif ✏️
                           </span>
                         )}
                       </td>
@@ -244,33 +244,8 @@ const DiscountsTab = ({ ctx }) => {
                     {/* Gold */}
                     <tr className="hover:bg-bg-tertiary/20 transition-colors">
                       <td className="px-4 py-3 font-semibold text-text-primary">Gold</td>
-                      <td className="px-4 py-3 text-text-primary">
-                        {editingGoldVisits ? (
-                          <input
-                            type="number"
-                            defaultValue={loyaltyVisitsRequired || 10}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                updateSettings({ loyaltyVisitsRequired: Number(e.target.value) })
-                                setEditingGoldVisits(false)
-                              }
-                            }}
-                            onBlur={e => {
-                              updateSettings({ loyaltyVisitsRequired: Number(e.target.value) })
-                              setEditingGoldVisits(false)
-                            }}
-                            className="w-16 px-2 py-0.5 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none font-bold"
-                            autoFocus
-                          />
-                        ) : (
-                          <span
-                            onClick={() => setEditingGoldVisits(true)}
-                            className="cursor-pointer border-b border-dashed border-accent-blue text-accent-blue font-bold px-1"
-                            title={t('mgmt_loyalty_edit_tooltip')}
-                          >
-                            {t('mgmt_loyalty_visits_unit', { n: loyaltyVisitsRequired || 10 })}
-                          </span>
-                        )}
+                      <td className="px-4 py-3 text-text-primary font-bold text-accent-blue">
+                        {loyaltyForm.loyaltyVisitsRequired} tashrif
                       </td>
                       <td className="px-4 py-3">
                         <span className="w-3.5 h-3.5 rounded-full bg-[#FFD700] inline-block align-middle mr-2" />
