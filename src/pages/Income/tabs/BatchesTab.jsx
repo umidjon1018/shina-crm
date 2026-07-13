@@ -409,14 +409,21 @@ const BatchesTab = ({ ctx }) => {
                                               <span className="text-xs text-text-secondary">Mijozlarga ham qo'llash</span>
                                             </div>
                                             <button
-                                              onClick={async (e) => {
+                                              onClick={(e) => {
                                                 e.stopPropagation()
-                                                await togglePromoPassToCustomer(batch.id)
+                                                const newVal = !batch.promoPassToCustomer
                                                 setBatches(prev => prev.map(b =>
                                                   b.id === batch.id
-                                                    ? { ...b, promoPassToCustomer: !b.promoPassToCustomer }
+                                                    ? { ...b, promoPassToCustomer: newVal }
                                                     : b
                                                 ))
+                                                togglePromoPassToCustomer(batch.id).catch(() => {
+                                                  setBatches(prev => prev.map(b =>
+                                                    b.id === batch.id
+                                                      ? { ...b, promoPassToCustomer: !newVal }
+                                                      : b
+                                                  ))
+                                                })
                                               }}
                                               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
                                                 batch.promoPassToCustomer ? 'bg-accent-green' : 'bg-bg-tertiary border border-border'
