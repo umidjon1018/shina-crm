@@ -409,7 +409,8 @@ const BatchesTab = ({ ctx }) => {
                                               <span className="text-xs text-text-secondary">Mijozlarga ham qo'llash</span>
                                             </div>
                                             <button
-                                              onClick={async () => {
+                                              onClick={async (e) => {
+                                                e.stopPropagation()
                                                 await togglePromoPassToCustomer(batch.id)
                                                 setBatches(prev => prev.map(b =>
                                                   b.id === batch.id
