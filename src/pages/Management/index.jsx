@@ -1044,7 +1044,11 @@ export const Management = () => {
                         ? MANAGER_VIOLATIONS
                         : SELLER_VIOLATIONS
 
-                      const empNotifs = notifications.filter(n => String(n.sellerId) === String(selectedEmployee.id))
+                      const empNotifs = notifications.filter(n =>
+                        selectedEmployee.name && n.sellerName
+                          ? n.sellerName.trim().toLowerCase() === selectedEmployee.name.trim().toLowerCase()
+                          : String(n.sellerId) === String(selectedEmployee.id)
+                      )
                       const byType = {}
                       applicableTypes.forEach(type => {
                         byType[type] = empNotifs.filter(n => n.type === type).length
