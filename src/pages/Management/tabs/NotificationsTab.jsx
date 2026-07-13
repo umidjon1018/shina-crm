@@ -2,7 +2,8 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, AlertTriangle, Bell, BellOff, CheckCircle, Clock, Eye, EyeOff, Filter, Info, Search, ShieldAlert, Trash2, User, X } from 'lucide-react'
-import { severityConfig, VIOLATION_LABELS, VIOLATION_FILTER_KEYS, typeLabel } from '../components/mgmtHelpers'
+import { severityConfig, VIOLATION_FILTER_KEYS } from '../components/mgmtHelpers'
+import { getItemStatus } from '../../../utils/itemStatus'
 
 const NotificationsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
