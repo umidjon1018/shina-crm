@@ -1001,6 +1001,7 @@ export default {
   mgmt_loyalty_edit_tooltip: "Tahrirlash uchun bosing",
   mgmt_save_settings: 'SOZLAMALARNI SAQLASH',
   mgmt_saved: '✅ SAQLANDI',
+  mgmt_promo_type_category: 'Kategoriya',
   mgmt_promo_type_product: 'Mahsulot',
   mgmt_promo_type_qty: 'Miqdor',
   mgmt_promo_add: "Aksiya qo'shish",

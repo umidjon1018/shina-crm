@@ -995,6 +995,7 @@ export default {
   mgmt_loyalty_edit_tooltip: 'Нажмите для редактирования',
   mgmt_save_settings: 'СОХРАНИТЬ НАСТРОЙКИ',
   mgmt_saved: '✅ СОХРАНЕНО',
+  mgmt_promo_type_category: 'Категория',
   mgmt_promo_type_product: 'Товар',
   mgmt_promo_type_qty: 'Количество',
   mgmt_promo_add: 'Добавить акцию',
