@@ -17,7 +17,7 @@ const NewSaleTab = ({ ctx }) => {
     filteredCustomers, setShowNewCustomerModal,
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent,
     loyaltyDiscountApplied, setLoyaltyDiscountApplied, customerHasLoyalty,
-    discountPercent, maxDiscount, effectiveDiscount, discountAmount, handleDiscountChange,
+    discountPercent, maxDiscount, effectiveDiscount, promoDiscount, discountAmount, handleDiscountChange,
     pendingDiscountReqId, setPendingDiscountReqId, discountSmallMax, updateNotification,
     paymentType, setPaymentType, installmentOrgId, setInstallmentOrgId,
     installmentTermMonths, setInstallmentTermMonths, installmentOrganizations,
@@ -442,6 +442,12 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
               <span className="text-text-primary font-medium">{formatPrice(subtotal, som)}</span>
             </div>
+            {promoDiscount > 0 && !loyaltyDiscountApplied && (
+              <div className="flex justify-between text-xs">
+                <span className="text-accent-orange font-bold">🏷️ Aksiya -{promoDiscount}%</span>
+                <span className="text-accent-orange font-medium">-{formatPrice(subtotal * promoDiscount / 100, som)}</span>
+              </div>
+            )}
             {effectiveDiscount > 0 && paymentType !== 'installment' && (
               <div className="flex justify-between text-xs">
                 <span className="text-accent-red">{loyaltyDiscountApplied ? t('sl_ns_loyalty_discount_row', { n: effectiveDiscount }) : t('sl_ns_discount_row', { n: effectiveDiscount })}</span>

@@ -20,6 +20,7 @@ import {
 } from '../../api/salesService'
 import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
+import { getPromotions } from '../../api/promotionService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -95,6 +96,19 @@ export const useSalesState = () => {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Faol aksiyalar
+  const [activePromos, setActivePromos] = useState([])
+  useEffect(() => {
+    getPromotions().then(list => {
+      const today = new Date().toISOString().slice(0, 10)
+      setActivePromos(list.filter(p =>
+        p.isActive &&
+        (!p.startDate || p.startDate <= today) &&
+        (!p.endDate || p.endDate >= today)
+      ))
+    }).catch(() => {})
+  }, [])
 
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -252,7 +266,31 @@ export const useSalesState = () => {
   }, [returnSale])
 
   const maxDiscount = isPrivileged(user?.role) ? 30 : (discountMediumMax || 15)
-  const effectiveDiscount = loyaltyDiscountApplied ? (loyaltyDiscountPercent || 25) : discountPercent
+
+  // Savat bo'yicha eng yuqori aksiya chegirmasini topish
+  const promoDiscount = useMemo(() => {
+    if (!activePromos.length || !cartItems.length) return 0
+    const today = new Date().toISOString().slice(0, 10)
+    let best = 0
+    for (const p of activePromos) {
+      if (p.shopId !== 'all' && p.shopId !== selectedShopId) continue
+      if (p.type === 'product') {
+        const matches = cartItems.some(c => String(c.product.id) === String(p.targetId))
+        if (matches && p.discountPercent > best) best = p.discountPercent
+      } else if (p.type === 'category') {
+        const matches = cartItems.some(c => String(c.product.category) === String(p.targetId))
+        if (matches && p.discountPercent > best) best = p.discountPercent
+      } else if (p.type === 'qty') {
+        const totalQty = cartItems.reduce((s, c) => s + 1, 0)
+        if (totalQty >= (p.minQty || 1) && p.discountPercent > best) best = p.discountPercent
+      }
+    }
+    return best
+  }, [activePromos, cartItems, selectedShopId])
+
+  const effectiveDiscount = loyaltyDiscountApplied
+    ? (loyaltyDiscountPercent || 25)
+    : Math.max(discountPercent, promoDiscount)
   const customerHasLoyalty = selectedCustomer?.loyaltyLevel === 'gold' && (loyaltyDiscountPercent || 0) > 0
 
   // Calculations
@@ -1577,7 +1615,7 @@ export const useSalesState = () => {
     returnsMonthFilter, setReturnsMonthFilter, returnsHistoryMonthFilter, setReturnsHistoryMonthFilter, returnsSortField, setReturnsSortField, returnsSortOrder, setReturnsSortOrder,
     profitMonthFilter, setProfitMonthFilter, profitTypeFilter, setProfitTypeFilter, profitSearch, setProfitSearch, profitSortField, setProfitSortField, profitSortOrder, setProfitSortOrder,
     installmentMonthFilter, setInstallmentMonthFilter, installmentSortField, setInstallmentSortField, installmentSortOrder, setInstallmentSortOrder,
-    maxDiscount, effectiveDiscount, customerHasLoyalty, subtotal, discountAmount, total,
+    maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     addNextItemOfProduct, updateGroupSalePrice,
     handleSubmitSale, handleDiscountChange, handleSendDiscountRequest,

@@ -144,13 +144,23 @@ const PromotionsTab = ({ ctx }) => {
                 <tbody className="divide-y divide-border">
                   {promos.map(p => {
                     const isExpiredP = p.endDate && p.endDate < new Date().toISOString().slice(0,10)
+                    const targetLabel = p.type === 'product'
+                      ? (MOCK_PRODUCTS.find(x => String(x.id) === String(p.targetId))?.name || p.targetId || '—')
+                      : p.type === 'category'
+                      ? (productCategories.find(x => String(x.id) === String(p.targetId))?.label || p.targetId || '—')
+                      : '—'
                     return (
                       <tr key={p.id} className={`hover:bg-bg-tertiary/20 transition-colors ${isExpiredP ? 'opacity-50' : ''}`}>
                         <td className="px-4 py-3 font-semibold text-text-primary">{p.name}</td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-blue/10 text-accent-blue">
-                            {(() => { const pt = PROMO_TYPES_MG.find(x => x.key === p.type); return pt ? t(pt.labelKey) : p.type })()}
-                          </span>
+                          <div>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent-blue/10 text-accent-blue">
+                              {(() => { const pt = PROMO_TYPES_MG.find(x => x.key === p.type); return pt ? t(pt.labelKey) : p.type })()}
+                            </span>
+                            {p.type !== 'qty' && (
+                              <p className="text-xs text-text-secondary mt-1">{targetLabel}</p>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3 font-bold text-accent-red">{p.discountPercent}%</td>
                         <td className="px-4 py-3 text-xs text-text-muted whitespace-nowrap">
