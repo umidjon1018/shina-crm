@@ -255,13 +255,9 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
                 <X size={14} />
               </button>
               <button
-                onClick={() => higgsfieldConnected ? onSendHighsfield(sc.id) : null}
-                title={higgsfieldConnected ? 'Higgsfield ga yuborish' : 'Admin panelda Higgsfield API kalitini kiriting'}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                  higgsfieldConnected
-                    ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20 cursor-pointer'
-                    : 'bg-bg-secondary text-text-muted border-border cursor-not-allowed opacity-50'
-                }`}>
+                onClick={() => onSendHighsfield(sc.id)}
+                title="Higgsfield ga yuborib video tayyorlash"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20 cursor-pointer transition-colors">
                 <Film size={12} /> Video tayyorla
               </button>
             </>
@@ -353,6 +349,7 @@ function MarketingTab({ aiData = {} }) {
   const [rmInput, setRmInput]   = useState({ '1oy': '', '3oy': '', '6oy': '' })
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingScenario, setEditingScenario] = useState(null)
+  const [higgsfieldError, setHiggsfieldError] = useState(null)
 
   const {
     customers: MOCK_CUSTOMERS = [],
@@ -463,26 +460,35 @@ VAZIFALAR:
     const sc = scenarios.find(s => s.id === id)
     if (!sc) return
     setVideoGenerating(id)
+    setHiggsfieldError(null)
     try {
       const prompt = sc.script || sc.title
-      const { requestId } = await generateVideo(prompt)
-      if (!requestId) throw new Error('requestId kelmadi')
-      // Polling: har 8 soniyada bir marta, max 20 marta
+      const res = await generateVideo(prompt)
+      const requestId = res?.requestId
+      if (!requestId) throw new Error('requestId kelmadi — Higgsfield javobi noto\'g\'ri')
       let attempts = 0
       const poll = async () => {
-        if (attempts++ > 20) return
-        const { status, videoUrl } = await getVideoStatus(requestId)
-        if (status === 'completed' && videoUrl) {
-          setVideoReady(id, videoUrl)
-        } else if (status === 'failed') {
-          updateScenario(id, { status: 'approved' }) // qayta approved ga qaytarish
-        } else {
-          setTimeout(poll, 8000)
+        if (attempts++ > 20) {
+          updateScenario(id, { status: 'approved' })
+          setHiggsfieldError('Video 160 soniyada tayyor bo\'lmadi. Qayta urinib ko\'ring.')
+          return
         }
+        try {
+          const { status, videoUrl } = await getVideoStatus(requestId)
+          if (status === 'completed' && videoUrl) {
+            setVideoReady(id, videoUrl)
+          } else if (status === 'failed') {
+            updateScenario(id, { status: 'approved' })
+            setHiggsfieldError('Higgsfield video yaratishda xato. Skriptni qisqartiring.')
+          } else {
+            setTimeout(poll, 8000)
+          }
+        } catch { setTimeout(poll, 8000) }
       }
       setTimeout(poll, 8000)
-    } catch {
+    } catch (err) {
       updateScenario(id, { status: 'approved' })
+      setHiggsfieldError(err?.response?.data?.error || err?.message || 'Higgsfield API xatosi')
     }
   }
 
@@ -577,6 +583,14 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq.`}
                 </div>
               ))}
             </div>
+
+            {/* Higgsfield xato */}
+            {higgsfieldError && (
+              <div className="flex items-center gap-2 text-xs text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-xl px-3 py-2">
+                <AlertCircle size={13} /> {higgsfieldError}
+                <button onClick={() => setHiggsfieldError(null)} className="ml-auto"><X size={12} /></button>
+              </div>
+            )}
 
             {/* AI Senariy Generator */}
             <AiScenarioGenerator
