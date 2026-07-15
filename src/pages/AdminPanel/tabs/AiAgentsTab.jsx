@@ -48,17 +48,12 @@ const TOOL_LABELS = {
 const AGENT_TOOLS = {
   'sales-agent':    ['get_sales_summary', 'get_customer_debts', 'get_profit_by_brand', 'get_recent_returns', 'get_supplier_debts', 'get_expenses_summary', 'get_capital_summary', 'get_discounts_summary'],
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
-  'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_discounts_summary'],
+  'pr-agent':       ['get_sales_summary', 'get_profit_by_brand', 'get_top_products', 'get_discounts_summary', 'get_customer_debts', 'get_expenses_summary', 'get_recent_returns'],
   'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
   'staff-agent':    ['get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
 }
 
 const INTEGRATION_CONFIG = {
-  'pr-agent': [
-    { key: 'higgsfield.apiKey',  label: 'Higgsfield API kalit',   type: 'password', placeholder: 'hf-...' },
-    { key: 'higgsfield.enabled', label: 'Higgsfield yoqilgan',    type: 'toggle' },
-    { key: 'instagram.enabled',  label: 'Instagram post yoqilgan', type: 'toggle' },
-  ],
   'customer-agent': [
     { key: 'telegram.botToken',  label: 'Telegram Bot Token',     type: 'password', placeholder: '123456:ABC...' },
     { key: 'telegram.enabled',   label: 'Telegram xabarlar yoqilgan', type: 'toggle' },
