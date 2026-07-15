@@ -64,17 +64,27 @@ export const useAgentActivityStore = create(
     (set, get) => ({
       activities: INITIAL_ACTIVITIES,
 
-      addActivity: (activity) => set(state => ({
-        activities: [
-          {
-            id: 'act-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-            timestamp: new Date().toISOString(),
-            read: false,
-            ...activity,
-          },
-          ...state.activities,
-        ],
-      })),
+      addActivity: (activity) => set(state => {
+        const today = new Date().toISOString().slice(0, 10)
+        const isDuplicate = state.activities.some(a =>
+          a.agentId === activity.agentId &&
+          a.type === activity.type &&
+          a.message === activity.message &&
+          a.timestamp?.slice(0, 10) === today
+        )
+        if (isDuplicate) return state
+        return {
+          activities: [
+            {
+              id: 'act-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+              timestamp: new Date().toISOString(),
+              read: false,
+              ...activity,
+            },
+            ...state.activities,
+          ],
+        }
+      }),
 
       markAsRead: (id) => set(state => ({
         activities: state.activities.map(a => a.id === id ? { ...a, read: true } : a),
