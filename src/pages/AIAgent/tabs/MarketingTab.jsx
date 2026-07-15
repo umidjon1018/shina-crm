@@ -468,9 +468,9 @@ VAZIFALAR:
       if (!requestId) throw new Error('requestId kelmadi — Higgsfield javobi noto\'g\'ri')
       let attempts = 0
       const poll = async () => {
-        if (attempts++ > 20) {
+        if (attempts++ > 40) {
           updateScenario(id, { status: 'approved' })
-          setHiggsfieldError('Video 160 soniyada tayyor bo\'lmadi. Qayta urinib ko\'ring.')
+          setHiggsfieldError('Video 400 soniyada tayyor bo\'lmadi. Kling panelida tekshiring.')
           return
         }
         try {
