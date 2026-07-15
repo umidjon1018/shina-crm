@@ -191,31 +191,45 @@ const ProfitTab = ({ ctx }) => {
                   ? usedList
                   : usedList.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
                 const filtered = [...newFiltered, ...usedFiltered].sort((a,b)=>(b.soldAt||'').localeCompare(a.soldAt||''))
-                const totalAmt = filtered.reduce((s,x) => s + (x.total||0), 0)
+                const newAmt = newFiltered.reduce((s,x) => s + (x.total||0), 0)
+                const usedAmt = usedFiltered.reduce((s,x) => s + (x.total||0), 0)
+                const totalAmt = newAmt + usedAmt
+
+                // Oylik chart: yangi + B/U alohida
+                const combinedChart = profitStats.monthlyChart.map(m => {
+                  const usedMonth = usedList.filter(s => s.soldAt && s.soldAt.startsWith(m.month))
+                  const sotuv_bu = usedMonth.reduce((s,x) => s + (x.total||0), 0)
+                  return { ...m, sotuv_bu }
+                })
+
                 return (
                   <Modal open title={t('rep_modal_profit_sales_title')} subtitle={t('rep_modal_profit_sales_sub')} size="xl" onClose={closeModal}>
                     <div className="flex items-center justify-between mb-5">
                       <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
-                      <span className="text-text-muted text-xs">{filtered.length} {t('unit_pcs')} {t('rep_monthly_sales_suffix')} · {fmtUZS(totalAmt)}</span>
+                      <div className="flex items-center gap-2 text-xs flex-wrap justify-end">
+                        <span className="px-2 py-0.5 rounded-full bg-accent-blue/10 text-accent-blue font-bold">{newFiltered.length} Yangi · {fmtUZS(newAmt)}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 font-bold">{usedFiltered.length} B/U · {fmtUZS(usedAmt)}</span>
+                        <span className="text-text-muted">{filtered.length} {t('unit_pcs')} · {fmtUZS(totalAmt)}</span>
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-6">
-                      {[...profitStats.monthlyChart].reverse().map(m => (
+                      {[...combinedChart].reverse().map(m => (
                         <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{m.name}</p>
-                          <p className="font-syne font-bold text-text-primary text-lg">{fmtUZS(m.sotuv)}</p>
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-text-muted text-xs">{t('rep_profit_expense_prefix')} {fmtUZS(m.xarajat)}</span>
-                            {m.growthSotuv !== null && <GrowthBadge current={m.sotuv} previous={m.sotuv / (1 + m.growthSotuv/100)} />}
+                          <p className="font-syne font-bold text-text-primary text-lg">{fmtUZS(m.sotuv + m.sotuv_bu)}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-[10px] text-accent-blue">Yangi: {fmtUZS(m.sotuv)}</span>
+                            {m.sotuv_bu > 0 && <span className="text-[10px] text-amber-400">B/U: {fmtUZS(m.sotuv_bu)}</span>}
                           </div>
                         </div>
                       ))}
                     </div>
-                    {/* Sotuv vs Xarajat mini-grafik */}
+                    {/* Sotuv: Yangi vs B/U ustunlar */}
                     <div className="mb-4">
-                      <p className="text-text-secondary text-sm font-medium mb-2">{t('rep_modal_profit_sales_sub')}</p>
-                      <div className="h-[160px] w-full">
+                      <p className="text-text-secondary text-sm font-medium mb-2">Yangi va B/U sotuv taqqoslash</p>
+                      <div className="h-[180px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={profitStats.monthlyChart}>
+                          <BarChart data={combinedChart}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                             <XAxis dataKey="name" fontSize={10} stroke="var(--text-muted)" />
                             <YAxis hide />
@@ -229,13 +243,13 @@ const ProfitTab = ({ ctx }) => {
                               formatter={v => fmtUZS(v)}
                             />
                             <Legend iconType="circle" iconSize={8} />
-                            <Bar dataKey="sotuv"   fill={C.blue}  radius={[4,4,0,0]} name={t('rep_chart_sales')} />
-                            <Bar dataKey="xarajat" fill={C.red}   radius={[4,4,0,0]} name={t('rep_chart_expense')} />
+                            <Bar dataKey="sotuv"    fill={C.blue}   radius={[4,4,0,0]} name="Yangi sotuv" />
+                            <Bar dataKey="sotuv_bu" fill="#f59e0b"  radius={[4,4,0,0]} name="B/U sotuv" />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </div>
-                    <MonthlyDynamicsChart data={profitStats.monthlyChart} dataKey="sotuv" color={C.blue} formatter={v => fmtUZS(v)} name={t('rep_chart_sales')} />
+                    <MonthlyDynamicsChart data={combinedChart} dataKey="sotuv" color={C.blue} formatter={v => fmtUZS(v)} name="Yangi sotuv" />
                     <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_profit_sales_list')}</p>
                     <ModalTable
                       data={filtered}
