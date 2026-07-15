@@ -22,7 +22,7 @@ const PRIORITY_STYLES = {
 function KpiSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      {[...Array(4)].map((_, i) => (
+      {[...Array(8)].map((_, i) => (
         <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4 animate-pulse">
           <div className="h-3 bg-bg-tertiary rounded w-2/3 mb-3" />
           <div className="h-6 bg-bg-tertiary rounded w-4/5 mb-2" />
@@ -94,7 +94,11 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
 
       {/* KPIs */}
       {kpis.length > 0 && (
-        <div className={`grid gap-3 ${kpis.length <= 3 ? 'grid-cols-' + kpis.length : 'grid-cols-2 md:grid-cols-4'}`}>
+        <div className={`grid gap-3 ${
+          kpis.length <= 2 ? 'grid-cols-2' :
+          kpis.length <= 4 ? 'grid-cols-2 md:grid-cols-4' :
+          'grid-cols-2 md:grid-cols-4'
+        }`}>
           {kpis.map((kpi, i) => (
             <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4">
               <p className="text-text-secondary text-sm mb-2">{kpi.label}</p>

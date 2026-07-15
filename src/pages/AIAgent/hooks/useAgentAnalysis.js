@@ -3,10 +3,10 @@ import { streamChat } from '../../../api/aiService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useDataStore } from '../../../store/dataStore'
 
-// Max 4 KPI, 3 alert, 2 insight, 3 recommendation — token limiti uchun qisqa
+// Max 8 KPI, 5 alert, 3 insight, 4 recommendation
 const JSON_INSTRUCTION = `
 
-Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 4 kpi, 3 alert, 2 insight, 3 recommendation:
+Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 8 kpi, 5 alert, 3 insight, 4 recommendation:
 {"kpis":[{"label":"...","value":"...","sub":"...","status":"good|warning|danger|neutral"}],"alerts":[{"severity":"danger|warning|info","message":"..."}],"insights":[{"title":"...","description":"..."}],"recommendations":[{"priority":"high|medium|low","action":"...","reason":"..."}]}`
 
 const CACHE_PREFIX = 'ai_analysis_v2_'
