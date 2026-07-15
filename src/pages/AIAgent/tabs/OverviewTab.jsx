@@ -29,7 +29,7 @@ function OverviewTab({ onTabChange, aiData = {} }) {
     const shopBatches = selectedShopId === 'all' ? _allBatches : _allBatches.filter(b => b.shopId === selectedShopId)
     const shopBatchIds = new Set(shopBatches.map(b => b.id))
     const getShopStock = (productId) => MOCK_ITEMS.filter(i => i.productId === productId && i.status === 'in_stock' && (selectedShopId === 'all' || shopBatchIds.has(i.batchId))).length
-    const completedSales = MOCK_SALES.filter(s => s.status === 'completed' && !s._isExchange)
+    const completedSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && !s._isExchange)
     const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0)
     const inventoryItems = MOCK_PRODUCTS.filter(p => shopBatches.some(b => b.productId === p.id)).map(p => ({ ...p, stock: getShopStock(p.id) }))
     const lowStock = inventoryItems.filter(p => p.stock <= (p.lowStockThreshold || 3)).length
