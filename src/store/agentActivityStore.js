@@ -98,6 +98,8 @@ export const useAgentActivityStore = create(
         activities: state.activities.filter(a => a.id !== id),
       })),
 
+      clearAllActivities: () => set({ activities: [] }),
+
       getActivitiesByAgent: (agentId) => {
         return get().activities.filter(
           a => a.agentId === agentId || a.relatedAgentId === agentId

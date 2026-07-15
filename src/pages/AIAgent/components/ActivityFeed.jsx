@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle, Bell, X } from 'lucide-react'
+import { CheckCircle, Bell, X, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { TAB_COLORS, TYPE_COLORS, TYPE_LABEL_KEYS, AGENT_LABEL_KEYS, fmtTime } from '../aiHelpers'
@@ -9,7 +9,7 @@ const FEED_PAGE_SIZE = 5
 
 function AgentActivityFeed({ agentId }) {
   const { t } = useTranslation()
-  const { activities, getActivitiesByAgent, markAsRead, markAllAsRead, deleteActivity } = useAgentActivityStore()
+  const { activities, getActivitiesByAgent, markAsRead, markAllAsRead, deleteActivity, clearAllActivities } = useAgentActivityStore()
   const [page, setPage] = useState(0)
 
   const list = agentId ? getActivitiesByAgent(agentId) : activities
@@ -27,14 +27,22 @@ function AgentActivityFeed({ agentId }) {
         <span className="text-xs text-text-muted">
           {list.length} {t('ai_feed_messages')}{unreadCount > 0 ? ` · ${unreadCount} ${t('ai_feed_unread')}` : ''}
         </span>
-        {unreadCount > 0 && (
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-xs px-2.5 py-1 rounded-lg border border-border hover:bg-bg-secondary text-text-muted transition-colors flex items-center gap-1"
+            >
+              <CheckCircle size={11} /> {t('ai_mark_all_read')}
+            </button>
+          )}
           <button
-            onClick={markAllAsRead}
-            className="text-xs px-2.5 py-1 rounded-lg border border-border hover:bg-bg-secondary text-text-muted transition-colors flex items-center gap-1"
+            onClick={clearAllActivities}
+            className="text-xs px-2.5 py-1 rounded-lg border border-[#E63946]/30 hover:bg-[#E63946]/10 text-[#E63946] transition-colors flex items-center gap-1"
           >
-            <CheckCircle size={11} /> {t('ai_mark_all_read')}
+            <Trash2 size={11} /> Barchasini o'chir
           </button>
-        )}
+        </div>
       </div>
       <div className="space-y-2">
         {shown.map(a => (
