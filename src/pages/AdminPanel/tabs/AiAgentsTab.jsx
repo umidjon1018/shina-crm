@@ -121,6 +121,10 @@ function AgentCard({ agent, onSave }) {
         integrations:  form.integrations,
         is_active:     form.isActive,
       })
+      // pr-agent integratsiyalari MarketingTab da ishlatiladi
+      if (agent.slug === 'pr-agent') {
+        try { localStorage.setItem('goodtires-pr-integrations', JSON.stringify(form.integrations)) } catch {}
+      }
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {

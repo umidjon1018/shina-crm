@@ -1,23 +1,144 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, FileText, Video, Plus, Check, X, ChevronDown, ChevronUp, Film, Clock, Trash2, Edit3, Map, CheckCircle2 } from 'lucide-react'
+import { TrendingUp, FileText, Video, Plus, Check, X, ChevronDown, ChevronUp, Film, Clock, Trash2, Edit3, Map, CheckCircle2, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import { useMarketingStore } from '../../../store/marketingStore'
+import { streamChat } from '../../../api/aiService'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
 // Status config
 const STATUS = {
-  draft:            { label: 'Qoralama',          cls: 'bg-bg-secondary text-text-muted border-border' },
-  approved:         { label: 'Tasdiqlangan',       cls: 'bg-green-500/15 text-green-400 border-green-500/30' },
+  draft:            { label: 'Qoralama',            cls: 'bg-bg-secondary text-text-muted border-border' },
+  approved:         { label: 'Tasdiqlangan',         cls: 'bg-green-500/15 text-green-400 border-green-500/30' },
   video_generating: { label: 'Video tayyorlanmoqda', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
-  video_ready:      { label: 'Video tayyor',       cls: 'bg-accent-blue/15 text-accent-blue border-accent-blue/30' },
-  posted:           { label: 'Joylandi',           cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30' },
+  video_ready:      { label: 'Video tayyor',         cls: 'bg-accent-blue/15 text-accent-blue border-accent-blue/30' },
+  posted:           { label: 'Joylandi',             cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30' },
 }
 
+// Higgsfield / Instagram ulanishini tekshirish (admin saqlaganda localStorage ga yoziladi)
+function getPrIntegrations() {
+  try { return JSON.parse(localStorage.getItem('goodtires-pr-integrations') || '{}') } catch { return {} }
+}
+
+// ─── AI Senariy Generator ────────────────────────────────────────────────────
+function AiScenarioGenerator({ context, onAdd, agentId }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [count, setCount] = useState(null)
+  const abortRef = useRef(false)
+
+  const generate = async () => {
+    setLoading(true)
+    setError(null)
+    setCount(null)
+    abortRef.current = false
+
+    const prompt = `Sen marketing agentisan. Quyidagi do'kon ma'lumotlari asosida ${context.count ?? 3} ta Instagram video senariysi yoz.
+
+DO'KON MA'LUMOTLARI:
+Fasl: ${context.season} | Oy: ${context.month}-oy
+Eng tez sotiladigan: ${context.topFast || 'ma\'lumot yo\'q'}
+Eng sekin sotiladigan: ${context.topSlow || 'ma\'lumot yo\'q'}
+Zaxirada bor, hech sotilmagan: ${context.unsold || 'yo\'q'}
+Mijozlar: VIP ${context.vip}, Sodiq ${context.loyal}, Yangi ${context.newCustomers}
+Faol aksiyalar: ${context.promos || 'yo\'q'}
+
+MUHIM:
+- Senar sotiladigan yoki omborda qotib qolgan tovarlarni prioritet qil
+- Har bir senariy 15-30 soniyalik reel uchun
+- Script o'zbek tilida, sodda va ta'sirchan
+- Caption ham o'zbek tilida
+
+Faqat quyidagi JSON array formatida javob ber, boshqa matn yozma:
+[{"title":"...","targetProduct":"...","targetAudience":"...","script":"[0-5 sek] ...\\n[5-15 sek] ...\\n[15-25 sek] ...\\n[25-30 sek] ...","caption":"...","hashtags":"#goodtires #shina #toshkent"}]`
+
+    let fullText = ''
+    await streamChat({
+      agentId,
+      messages: [{ role: 'user', content: prompt }],
+      onToken: (t) => { if (!abortRef.current) fullText += t },
+      onDone: () => {
+        if (abortRef.current) return
+        try {
+          const start = fullText.indexOf('[')
+          const end = fullText.lastIndexOf(']')
+          if (start === -1 || end <= start) throw new Error('JSON topilmadi')
+          const arr = JSON.parse(fullText.slice(start, end + 1))
+          if (!Array.isArray(arr) || arr.length === 0) throw new Error('Bo\'sh massiv')
+          arr.forEach(sc => onAdd(sc))
+          setCount(arr.length)
+        } catch (e) {
+          setError('AI javobini o\'qishda xato. Qayta urinib ko\'ring.')
+        }
+        setLoading(false)
+      },
+      onError: (err) => {
+        if (!abortRef.current) setError(String(err))
+        setLoading(false)
+      },
+    })
+  }
+
+  return (
+    <div className="p-4 border border-[#f97316]/30 rounded-2xl bg-[#f97316]/5 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[#f97316] flex items-center gap-2">
+            <Sparkles size={15} /> AI senariy generatsiyasi
+          </p>
+          <p className="text-xs text-text-muted mt-1">
+            AI do'kon ma'lumotlarini tahlil qilib, sekin sotiladigan va zaxiradagi tovarlar uchun
+            Instagram reel senariylar yozadi.
+          </p>
+        </div>
+        {count !== null && (
+          <span className="flex-shrink-0 text-xs px-2 py-1 rounded-lg bg-green-500/15 text-green-400 border border-green-500/20">
+            +{count} ta senariy qo'shildi ✓
+          </span>
+        )}
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-accent-red bg-accent-red/10 rounded-xl px-3 py-2">
+          <AlertCircle size={13} /> {error}
+        </div>
+      )}
+
+      <div className="flex items-center gap-3">
+        <select
+          defaultValue="3"
+          onChange={e => { context.count = Number(e.target.value) }}
+          className="bg-bg-secondary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[#f97316]/50"
+        >
+          <option value="2">2 ta senariy</option>
+          <option value="3">3 ta senariy</option>
+          <option value="5">5 ta senariy</option>
+        </select>
+        <button
+          onClick={generate}
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#f97316] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {loading
+            ? <><Loader2 size={15} className="animate-spin" /> AI yozmoqda...</>
+            : <><Sparkles size={15} /> AI senariy yozdirish</>}
+        </button>
+      </div>
+
+      {loading && (
+        <p className="text-xs text-text-muted animate-pulse">
+          AI sekin sotiladigan tovarlarni tahlil qilib, ssenariylar yozmoqda...
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ─── Manual Scenario Form ────────────────────────────────────────────────────
 function ScenarioForm({ onSave, initial = null, onCancel }) {
   const [title, setTitle]       = useState(initial?.title || '')
   const [product, setProduct]   = useState(initial?.targetProduct || '')
@@ -50,7 +171,7 @@ function ScenarioForm({ onSave, initial = null, onCancel }) {
       <div>
         <label className="text-xs text-text-secondary mb-1 block">Video skript (15-30 soniya) *</label>
         <textarea value={script} onChange={e => setScript(e.target.value)} rows={5}
-          placeholder="Video uchun skript matni. Masalan:&#10;[0-3 sek] Do'kon exteryeri, logotip&#10;[3-10 sek] Tovar yaqindan ko'rsatiladi...&#10;[10-20 sek] Narx va aksiya e'lon qilinadi&#10;[20-30 sek] CTA: Manzil va telefon"
+          placeholder="Video uchun skript matni. Masalan:&#10;[0-5 sek] Do'kon exteryeri, logotip&#10;[5-15 sek] Tovar yaqindan ko'rsatiladi...&#10;[15-25 sek] Narx va aksiya e'lon qilinadi&#10;[25-30 sek] CTA: Manzil va telefon"
           className="w-full bg-bg-primary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-orange resize-none" />
       </div>
       <div>
@@ -80,16 +201,29 @@ function ScenarioForm({ onSave, initial = null, onCancel }) {
   )
 }
 
+// ─── Scenario Card ────────────────────────────────────────────────────────────
 function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfield, onPostInstagram }) {
   const [expanded, setExpanded] = useState(false)
   const st = STATUS[sc.status] || STATUS.draft
-  const higgsfieldConnected = false  // TODO: settingsStore dan aiApiKey || integrations.higgsfield.enabled
-  const instagramConnected  = false  // TODO: make.com webhook ulanganda true
+  const integrations = getPrIntegrations()
+  const higgsfieldConnected = !!(integrations.higgsfield?.enabled && integrations.higgsfield?.apiKey)
+  const instagramConnected  = !!(integrations.makeWebhook?.enabled && integrations.makeWebhook?.url)
 
   return (
-    <div className="border border-border rounded-2xl overflow-hidden">
+    <div className={`border rounded-2xl overflow-hidden ${sc.aiGenerated ? 'border-[#f97316]/40' : 'border-border'}`}>
+      {/* AI belgisi */}
+      {sc.aiGenerated && (
+        <div className="flex items-center gap-1.5 px-4 py-1.5 bg-[#f97316]/8 border-b border-[#f97316]/20">
+          <Sparkles size={11} className="text-[#f97316]" />
+          <span className="text-[10px] text-[#f97316] font-medium">AI tomonidan yaratildi</span>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-bg-secondary/50 transition-colors" onClick={() => setExpanded(e => !e)}>
+      <div
+        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-bg-secondary/50 transition-colors"
+        onClick={() => setExpanded(e => !e)}
+      >
         <div className="w-9 h-9 rounded-xl bg-[#f97316]/10 border border-[#f97316]/20 flex items-center justify-center flex-shrink-0">
           <FileText size={15} className="text-[#f97316]" />
         </div>
@@ -116,12 +250,12 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
           )}
           {sc.status === 'approved' && (
             <>
-              <button onClick={() => onReject(sc.id)} className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-muted transition-colors text-xs px-2" title="Qayta qoralamaga">
+              <button onClick={() => onReject(sc.id)} className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-muted transition-colors" title="Qayta qoralamaga">
                 <X size={14} />
               </button>
               <button
                 onClick={() => higgsfieldConnected ? onSendHighsfield(sc.id) : null}
-                title={higgsfieldConnected ? 'Higgsfield ga yuborish' : 'Higgsfield API ulanmagan'}
+                title={higgsfieldConnected ? 'Higgsfield ga yuborish' : 'Admin panelda Higgsfield API kalitini kiriting'}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   higgsfieldConnected
                     ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20 cursor-pointer'
@@ -134,7 +268,7 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
           {sc.status === 'video_ready' && !sc.instagramPosted && (
             <button
               onClick={() => instagramConnected ? onPostInstagram(sc.id) : null}
-              title={instagramConnected ? 'Instagramga joylash' : 'Instagram ulanmagan (make.com kerak)'}
+              title={instagramConnected ? 'Instagramga joylash' : 'Admin panelda make.com webhook URL kiriting'}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 instagramConnected
                   ? 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20 cursor-pointer'
@@ -168,7 +302,7 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
               </div>
               {sc.caption && (
                 <div>
-                  <p className="text-xs text-text-secondary mb-1 flex items-center gap-1"><Film size={11} /> Caption</p>
+                  <p className="text-xs text-text-secondary mb-1">Caption</p>
                   <p className="text-sm text-text-primary bg-bg-primary border border-border rounded-xl p-3 whitespace-pre-wrap">{sc.caption}</p>
                 </div>
               )}
@@ -184,14 +318,15 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
                   <video src={sc.videoUrl} controls className="w-full rounded-xl border border-border max-h-64" />
                 </div>
               )}
+              {/* Ulanish eslatmalari */}
               {!higgsfieldConnected && sc.status === 'approved' && (
                 <p className="text-xs text-text-muted bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-3 py-2">
-                  ⚡ Higgsfield API ulangandan keyin "Video tayyorla" tugmasi ishlaydi
+                  ⚡ Admin panel → AI Agentlar → PR/Marketing agenti → Higgsfield API kalit kiriting
                 </p>
               )}
               {!instagramConnected && sc.status === 'video_ready' && (
                 <p className="text-xs text-text-muted bg-purple-500/5 border border-purple-500/20 rounded-xl px-3 py-2">
-                  📸 make.com + Instagram ulangandan keyin "Joylash" tugmasi ishlaydi
+                  📸 Admin panel → AI Agentlar → PR/Marketing agenti → make.com webhook URL kiriting
                 </p>
               )}
             </div>
@@ -202,11 +337,16 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
   )
 }
 
+// ─── Main MarketingTab ────────────────────────────────────────────────────────
 function MarketingTab({ aiData = {} }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { scenarios, addScenario, updateScenario, deleteScenario, approveScenario, rejectScenario, setVideoGenerating, setVideoReady, setInstagramPosted, roadmapItems, addRoadmapItem, toggleRoadmapItem, deleteRoadmapItem } = useMarketingStore()
+  const {
+    scenarios, addScenario, updateScenario, deleteScenario,
+    approveScenario, rejectScenario, setVideoGenerating, setVideoReady,
+    setInstagramPosted, roadmapItems, addRoadmapItem, toggleRoadmapItem, deleteRoadmapItem,
+  } = useMarketingStore()
 
   const [activeSection, setActiveSection] = useState('analysis')
   const [rmInput, setRmInput]   = useState({ '1oy': '', '3oy': '', '6oy': '' })
@@ -226,7 +366,6 @@ function MarketingTab({ aiData = {} }) {
   const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(s => String(s.shopId) === String(selectedShopId))
   const MOCK_SALES   = filterShop(_allSales).filter(s => s.status !== 'cancelled')
   const MOCK_BATCHES = filterShop(_allBatches)
-  const MOCK_USED    = _allUsedSales.filter(s => s.status !== 'cancelled')
 
   const currentMonth = new Date().getMonth() + 1
   const thisMonthKey = new Date().toISOString().slice(0, 7)
@@ -263,6 +402,24 @@ function MarketingTab({ aiData = {} }) {
   const activePromos = MOCK_PROMOTIONS.filter(p => p.isActive)
   const inventoryAlerts = getActivitiesByAgent('inventory').filter(a => a.type === 'ALERT').slice(0, 3)
   const customerAlerts  = getActivitiesByAgent('customer').filter(a => a.type === 'ALERT').slice(0, 2)
+
+  // AI generator uchun kontekst obyekti (mutable ref — select onChange to'g'ri ishlashi uchun)
+  const aiContextRef = useRef({})
+  aiContextRef.current = {
+    count: aiContextRef.current.count ?? 3,
+    season: seasonLabel,
+    month: currentMonth,
+    topFast: topFast.map(p => `${p.name}${p.brand ? ' (' + p.brand + ')' : ''}: ${p.total} ta`).join(', ') || 'yo\'q',
+    topSlow: topSlow.map(p => `${p.name}${p.brand ? ' (' + p.brand + ')' : ''}: ${p.total} ta`).join(', ') || 'yo\'q',
+    unsold: unsoldProducts.map(p => `${p.name}${p.brand ? ' (' + p.brand + ')' : ''}`).join(', ') || 'yo\'q',
+    vip: vipCount, loyal: loyalCount, newCustomers: newCount,
+    promos: activePromos.map(p => p.name).join(', ') || 'yo\'q',
+  }
+
+  // Senariy qo'shish (AI bayrog'i bilan)
+  const handleAddAiScenario = (sc) => {
+    addScenario({ ...sc, aiGenerated: true })
+  }
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'pr-agent',
@@ -314,6 +471,7 @@ VAZIFALAR:
   const draftCount    = scenarios.filter(s => s.status === 'draft').length
   const approvedCount = scenarios.filter(s => s.status === 'approved').length
   const videoCount    = scenarios.filter(s => ['video_ready', 'posted'].includes(s.status)).length
+  const aiCount       = scenarios.filter(s => s.aiGenerated).length
 
   const doneCount = roadmapItems.filter(r => r.done).length
   const SECTIONS = [
@@ -340,15 +498,15 @@ VAZIFALAR:
       </div>
 
       <AnimatePresence mode="wait">
+        {/* ── TAHLIL ── */}
         {activeSection === 'analysis' && (
           <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#f97316]" />
 
-            {/* AI tavsiya → senariyga aylantirish eslatmasi */}
             {analysis && !analysis.raw && analysis.recommendations?.length > 0 && (
               <div className="p-4 border border-[#f97316]/20 rounded-2xl bg-[#f97316]/5">
                 <p className="text-xs text-[#f97316] font-medium mb-2">💡 AI tavsiyalardan senariy yasash</p>
-                <p className="text-xs text-text-muted">AI taklif qilgan senariylarni "Ssenariylar" bo'limiga qo'shib, tasdiqlash va video tayyorlash jarayonini boshlang.</p>
+                <p className="text-xs text-text-muted">AI taklif qilgan ssenariylarni "Ssenariylar" bo'limiga qo'shib, tasdiqlash va video tayyorlash jarayonini boshlang.</p>
                 <button onClick={() => setActiveSection('scenarios')}
                   className="mt-2 text-xs text-[#f97316] hover:underline flex items-center gap-1">
                   Ssenariylarga o'tish <FileText size={11} />
@@ -369,19 +527,21 @@ Mijozlar: VIP ${vipCount} | Sodiq ${loyalCount} | Yangi ${newCount}
 Faol aksiyalar: ${activePromos.length} ta
 Ssenariylar: ${scenarios.length} ta (qoralama: ${draftCount}, tasdiqlangan: ${approvedCount})
 
-JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strategiyasi haqida savollarga javob ber.`}
+JAVOB USLUBI: O'zbek tilida, ijodiy va aniq.`}
               placeholder="Marketing, senariylar, aksiyalar haqida so'rang..." />
           </motion.div>
         )}
 
+        {/* ── SSENARIYLAR ── */}
         {activeSection === 'scenarios' && (
           <motion.div key="scenarios" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             {/* Statistika */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               {[
-                { label: 'Qoralama', value: draftCount, cls: 'text-text-muted' },
+                { label: 'Qoralama',     value: draftCount,    cls: 'text-text-muted' },
                 { label: 'Tasdiqlangan', value: approvedCount, cls: 'text-green-400' },
-                { label: 'Video tayyor', value: videoCount, cls: 'text-accent-blue' },
+                { label: 'Video tayyor', value: videoCount,    cls: 'text-accent-blue' },
+                { label: 'AI yaratgan',  value: aiCount,       cls: 'text-[#f97316]' },
               ].map(s => (
                 <div key={s.label} className="border border-border rounded-2xl p-3 bg-bg-secondary text-center">
                   <p className={`text-xl font-bold ${s.cls}`}>{s.value}</p>
@@ -390,11 +550,18 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
               ))}
             </div>
 
-            {/* Yangi senariy tugmasi / forma */}
+            {/* AI Senariy Generator */}
+            <AiScenarioGenerator
+              context={aiContextRef.current}
+              onAdd={handleAddAiScenario}
+              agentId="pr-agent"
+            />
+
+            {/* Manual qo'shish */}
             {!showAddForm && !editingScenario && (
               <button onClick={() => setShowAddForm(true)}
-                className="w-full py-3 border border-dashed border-[#f97316]/40 rounded-2xl text-sm text-[#f97316] hover:bg-[#f97316]/5 transition-colors flex items-center justify-center gap-2">
-                <Plus size={15} /> Yangi senariy qo'shish
+                className="w-full py-3 border border-dashed border-border rounded-2xl text-sm text-text-muted hover:text-[#f97316] hover:border-[#f97316]/40 hover:bg-[#f97316]/5 transition-colors flex items-center justify-center gap-2">
+                <Plus size={15} /> Qo'lda senariy qo'shish
               </button>
             )}
             {showAddForm && (
@@ -409,7 +576,7 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
               <div className="py-12 text-center text-text-muted text-sm border border-border rounded-2xl">
                 <FileText size={32} className="mx-auto mb-3 opacity-30" />
                 <p>Hozircha senariy yo'q.</p>
-                <p className="text-xs mt-1">AI tahlildan kelib chiqib senariy qo'shing yoki AI chat dan so'rang.</p>
+                <p className="text-xs mt-1 opacity-70">AI senariy yozdirish tugmasini bosing yoki qo'lda qo'shing.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -428,13 +595,14 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
           </motion.div>
         )}
 
+        {/* ── VIDEOLAR ── */}
         {activeSection === 'videos' && (
           <motion.div key="videos" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             {videoCount === 0 ? (
               <div className="py-12 text-center text-text-muted text-sm border border-border rounded-2xl">
                 <Video size={32} className="mx-auto mb-3 opacity-30" />
                 <p>Hali tayyor video yo'q.</p>
-                <p className="text-xs mt-1">Senariyni tasdiqlang → Higgsfield ulangandan keyin video yarating.</p>
+                <p className="text-xs mt-1">Senariyni tasdiqlang → Admin panelda Higgsfield API ulang → Video yarating.</p>
                 <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-xs text-yellow-400">
                   <Film size={12} /> Higgsfield API ulanishi kutilmoqda
                 </div>
@@ -455,6 +623,8 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
             )}
           </motion.div>
         )}
+
+        {/* ── YO'L XARITASI ── */}
         {activeSection === 'roadmap' && (
           <motion.div key="roadmap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             <p className="text-xs text-text-muted">AI tahlil asosida yoki qo'lda rejalar kiriting. Bajarilganlarni belgilang.</p>
@@ -474,8 +644,6 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
                         <span className="text-xs text-text-muted">{done}/{items.length} bajarildi</span>
                       )}
                     </div>
-
-                    {/* Mavjud itemlar */}
                     <div className="space-y-2">
                       {items.map(r => (
                         <div key={r.id} className="flex items-start gap-2 group">
@@ -489,8 +657,6 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
                         </div>
                       ))}
                     </div>
-
-                    {/* Yangi reja qo'shish */}
                     <div className="flex gap-2">
                       <input
                         value={rmInput[phase]}
@@ -511,7 +677,7 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
                             setRmInput(prev => ({ ...prev, [phase]: '' }))
                           }
                         }}
-                        className={`px-2 py-1.5 rounded-xl text-xs font-medium ${color} border ${border} hover:${bg} transition-colors`}
+                        className={`px-2 py-1.5 rounded-xl text-xs font-medium ${color} border ${border} transition-colors`}
                       >
                         <Plus size={13} />
                       </button>
@@ -521,7 +687,7 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strat
               })}
             </div>
 
-            {/* AI tavsiyalaridan avtomatik qo'shish */}
+            {/* AI tavsiyalaridan yo'l xaritasiga qo'shish */}
             {analysis && !analysis.raw && analysis.recommendations?.length > 0 && (
               <div className="p-4 border border-[#f97316]/20 rounded-2xl bg-[#f97316]/5">
                 <p className="text-xs text-[#f97316] font-medium mb-3">🤖 AI tavsiyalari — yo'l xaritasiga qo'shish</p>
