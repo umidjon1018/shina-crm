@@ -489,8 +489,30 @@ VAZIFALAR:
     setVideoGenerating(id)
     setHiggsfieldError(null)
     try {
-      const prompt = sc.script || sc.title
-      const res = await generateVideo(prompt)
+      // 1-qadam: skriptni inglizcha tasviriy promptga o'girish
+      let videoPrompt = sc.script || sc.title
+      try {
+        let converted = ''
+        await streamChat({
+          agentId: 'pr-agent',
+          messages: [{
+            role: 'user',
+            content: `Convert this advertising script into a single cinematic English video prompt for AI video generation (max 200 words). Focus on visual elements only: camera angles, lighting, movement, objects, colors, atmosphere. No text overlays, no subtitles. The product is a tire/wheel for cars.
+
+Script: ${sc.script || sc.title}
+Product: ${sc.targetProduct || 'car tire'}
+
+Reply with ONLY the English video prompt, nothing else.`
+          }],
+          onToken: t => { converted += t },
+          onDone: () => {},
+          onError: () => {},
+        })
+        if (converted.trim().length > 20) videoPrompt = converted.trim()
+      } catch {}
+
+      // 2-qadam: Kling ga yuborish
+      const res = await generateVideo(videoPrompt)
       const requestId = res?.requestId
       if (!requestId) throw new Error('requestId kelmadi — Higgsfield javobi noto\'g\'ri')
       let attempts = 0
