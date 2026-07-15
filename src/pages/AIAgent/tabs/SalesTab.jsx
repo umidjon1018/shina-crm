@@ -25,7 +25,7 @@ function SalesTab({ aiData = {} }) {
   const [insightDeleted, setInsightDeleted] = useState(new Set())
   const [insightPage, setInsightPage] = useState(0)
 
-  const completedSales = useMemo(() => MOCK_SALES.filter(s => s.status !== 'cancelled'), [version, selectedShopId])
+  const completedSales = useMemo(() => MOCK_SALES.filter(s => s.status !== 'cancelled' && !s._isExchange), [version, selectedShopId])
   const cancelledSales = useMemo(() => MOCK_SALES.filter(s => s.status === 'cancelled'), [version, selectedShopId])
   const totalExpensesUZS = useMemo(() => MOCK_EXPENSES.reduce((s, e) => s + (e.amountUZS || e.amount || 0), 0), [version, selectedShopId])
 
