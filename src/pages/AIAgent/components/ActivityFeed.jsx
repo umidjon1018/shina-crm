@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle, Bell, X, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ function AgentActivityFeed({ agentId }) {
   const { t } = useTranslation()
   const { activities, getActivitiesByAgent, markAsRead, markAllAsRead, deleteActivity, clearAllActivities } = useAgentActivityStore()
   const [page, setPage] = useState(0)
+  const [confirmClear, setConfirmClear] = useState(false)
 
   const list = agentId ? getActivitiesByAgent(agentId) : activities
   const totalPages = Math.max(1, Math.ceil(list.length / FEED_PAGE_SIZE))
@@ -36,12 +37,26 @@ function AgentActivityFeed({ agentId }) {
               <CheckCircle size={11} /> {t('ai_mark_all_read')}
             </button>
           )}
-          <button
-            onClick={() => { if (window.confirm(`${list.length} ta xabarning barchasini o'chirasizmi?`)) clearAllActivities() }}
-            className="text-xs px-2.5 py-1 rounded-lg border border-[#E63946]/30 hover:bg-[#E63946]/10 text-[#E63946] transition-colors flex items-center gap-1"
-          >
-            <Trash2 size={11} /> Barchasini o'chir
-          </button>
+          {confirmClear ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-text-muted">{list.length} ta o'chirilsinmi?</span>
+              <button
+                onClick={() => { clearAllActivities(); setConfirmClear(false) }}
+                className="text-xs px-2 py-0.5 rounded bg-[#E63946] text-white hover:bg-[#E63946]/80 transition-colors"
+              >Ha</button>
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="text-xs px-2 py-0.5 rounded border border-border text-text-muted hover:bg-bg-secondary transition-colors"
+              >Yo'q</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmClear(true)}
+              className="text-xs px-2.5 py-1 rounded-lg border border-[#E63946]/30 hover:bg-[#E63946]/10 text-[#E63946] transition-colors flex items-center gap-1"
+            >
+              <Trash2 size={11} /> Barchasini o'chir
+            </button>
+          )}
         </div>
       </div>
       <div className="space-y-2">
