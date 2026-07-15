@@ -207,7 +207,7 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
   const [expanded, setExpanded] = useState(false)
   const st = STATUS[sc.status] || STATUS.draft
   const integrations = getPrIntegrations()
-  const higgsfieldConnected = !!(integrations.higgsfield?.enabled && integrations.higgsfield?.apiKey)
+  const higgsfieldConnected = !!integrations.higgsfield?.enabled
   const instagramConnected  = !!(integrations.makeWebhook?.enabled && integrations.makeWebhook?.url)
 
   return (
