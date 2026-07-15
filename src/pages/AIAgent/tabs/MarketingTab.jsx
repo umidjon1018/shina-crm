@@ -7,6 +7,7 @@ import { useShopStore } from '../../../store/shopStore'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import { useMarketingStore } from '../../../store/marketingStore'
 import { streamChat } from '../../../api/aiService'
+import { generateVideo, getVideoStatus } from '../../../api/higgsfieldService'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
@@ -458,6 +459,33 @@ VAZIFALAR:
     }
   }, [analysis])
 
+  const handleSendHighsfield = async (id) => {
+    const sc = scenarios.find(s => s.id === id)
+    if (!sc) return
+    setVideoGenerating(id)
+    try {
+      const prompt = sc.script || sc.title
+      const { requestId } = await generateVideo(prompt)
+      if (!requestId) throw new Error('requestId kelmadi')
+      // Polling: har 8 soniyada bir marta, max 20 marta
+      let attempts = 0
+      const poll = async () => {
+        if (attempts++ > 20) return
+        const { status, videoUrl } = await getVideoStatus(requestId)
+        if (status === 'completed' && videoUrl) {
+          setVideoReady(id, videoUrl)
+        } else if (status === 'failed') {
+          updateScenario(id, { status: 'approved' }) // qayta approved ga qaytarish
+        } else {
+          setTimeout(poll, 8000)
+        }
+      }
+      setTimeout(poll, 8000)
+    } catch {
+      updateScenario(id, { status: 'approved' })
+    }
+  }
+
   const handleSaveScenario = (data) => {
     if (editingScenario) {
       updateScenario(editingScenario.id, data)
@@ -586,7 +614,7 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq.`}
                     onReject={rejectScenario}
                     onDelete={deleteScenario}
                     onEdit={s => { setEditingScenario(s); setShowAddForm(false) }}
-                    onSendHighsfield={setVideoGenerating}
+                    onSendHighsfield={handleSendHighsfield}
                     onPostInstagram={setInstagramPosted}
                   />
                 ))}
@@ -615,7 +643,7 @@ JAVOB USLUBI: O'zbek tilida, ijodiy va aniq.`}
                     onReject={rejectScenario}
                     onDelete={deleteScenario}
                     onEdit={s => { setEditingScenario(s); setActiveSection('scenarios') }}
-                    onSendHighsfield={setVideoGenerating}
+                    onSendHighsfield={handleSendHighsfield}
                     onPostInstagram={setInstagramPosted}
                   />
                 ))}
