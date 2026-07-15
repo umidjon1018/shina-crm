@@ -9,79 +9,183 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni savdo tahlilchisi agentisan. Berilgan savdo ma'lumotlarini tahlil qilib, aniq KPI, ogohlantirishlar, tahlil natijalari va tavsiyalar bilan JSON formatida javob berasan. Faqat o'zbek tilida yoz. Raqamlarni so'm yoki % bilan ko'rsat.`
+const SYSTEM_PROMPT = `Sen GoodTires shina do'koni moliyaviy tahlil agentisan. Kirim, sotuv, xarajat, qarz, jalb qilingan mablag'lar va chegirmalar bo'yicha to'liq moliyaviy ko'rinish berib, eng muhim KPI, ogohlantirishlar, tahlil va tavsiyalar bilan JSON formatida javob berasan. Faqat o'zbek tilida yoz. Raqamlarni so'm yoki % bilan ko'rsat.`
 
 function SalesTab({ aiData = {} }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { sales: _allSales = [], products: MOCK_PRODUCTS = [], batches: MOCK_INCOME_BATCHES = [], usedSales: _allUsedSales = [] } = aiData
-  const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
-  const MOCK_USED_COMPLETED = _allUsedSales.filter(s => s.status !== 'cancelled')
 
-  const completedSales = MOCK_SALES.filter(s => s.status !== 'cancelled')
-  const cancelledSales = MOCK_SALES.filter(s => s.status === 'cancelled')
-  // Haqiqiy bekor (pul qaytarilgan) vs almashtirish (exchange)
-  const realCancelled = cancelledSales.filter(s => !s._isExchange)
-  const exchanged = cancelledSales.filter(s => s._isExchange)
-  const totalNewRevenue = completedSales.reduce((s, x) => s + x.total, 0)
-  const totalUsedRevenue = MOCK_USED_COMPLETED.reduce((s, x) => s + (x.total || 0), 0)
-  const totalRevenue = totalNewRevenue + totalUsedRevenue
-  const totalNewProfit = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
-  const totalUsedProfit = MOCK_USED_COMPLETED.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
-  const totalProfit = totalNewProfit + totalUsedProfit
-  const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0
-  const returnRate = MOCK_SALES.length > 0 ? ((realCancelled.length / MOCK_SALES.length) * 100).toFixed(1) : 0
+  const {
+    sales: _allSales = [],
+    usedSales: _allUsedSales = [],
+    batches: _allBatches = [],
+    expenses: _allExpenses = [],
+    capital: _allCapital = [],
+    customers: MOCK_CUSTOMERS = [],
+    promotions: MOCK_PROMOTIONS = [],
+  } = aiData
 
-  const brandData = useMemo(() => {
-    const map = {}
-    completedSales.forEach(sale => sale.items.forEach(item => {
-      if (!item.purchasePrice) return
-      const brand = MOCK_PRODUCTS.find(p => p.id === item.productId)?.brand || 'Boshqa'
-      if (!map[brand]) map[brand] = { brand, qty: 0, revenue: 0, cost: 0 }
-      map[brand].qty++
-      map[brand].revenue += item.salePrice
-      map[brand].cost += item.purchasePrice
-    }))
-    return Object.values(map).map(b => ({
-      ...b,
-      margin: b.revenue > 0 ? ((b.revenue - b.cost) / b.revenue * 100).toFixed(1) : 0,
-      profit: b.revenue - b.cost,
-    })).sort((a, b) => b.profit - a.profit)
-  }, [completedSales, version])
+  const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(x => String(x.shopId) === String(selectedShopId))
 
-  // To'lov turi bo'yicha
+  const MOCK_SALES        = filterShop(_allSales)
+  const MOCK_USED_SALES   = filterShop(_allUsedSales)
+  const MOCK_BATCHES      = filterShop(_allBatches)
+  const MOCK_EXPENSES     = filterShop(_allExpenses)
+  const MOCK_CAPITAL      = filterShop(_allCapital)
+
+  const completedSales    = MOCK_SALES.filter(s => s.status !== 'cancelled')
+  const cancelledSales    = MOCK_SALES.filter(s => s.status === 'cancelled')
+  const realCancelled     = cancelledSales.filter(s => !s._isExchange)
+  const exchanged         = cancelledSales.filter(s => s._isExchange)
+  const usedCompleted     = MOCK_USED_SALES.filter(s => s.status !== 'cancelled')
+
+  // ---- SOTUV ----
+  const newRevenue  = completedSales.reduce((s, x) => s + (x.total || 0), 0)
+  const usedRevenue = usedCompleted.reduce((s, x) => s + (x.total || 0), 0)
+  const totalRevenue = newRevenue + usedRevenue
+
+  const newProfit  = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  const usedProfit = usedCompleted.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  const totalProfit = newProfit + usedProfit
+
+  const avgMargin   = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0
+  const returnRate  = MOCK_SALES.length > 0 ? ((realCancelled.length / MOCK_SALES.length) * 100).toFixed(1) : 0
+
+  // To'lov turi
   const payStats = useMemo(() => {
-    const map = {}
-    completedSales.forEach(s => { map[s.paymentType] = (map[s.paymentType] || 0) + 1 })
+    const map = { cash: 0, card: 0, installment: 0 }
+    ;[...completedSales, ...usedCompleted].forEach(s => { if (map[s.paymentType] !== undefined) map[s.paymentType]++ })
     return map
+  }, [completedSales, usedCompleted])
+
+  // Nasiya qarzlari (sotuv)
+  const installmentSales    = completedSales.filter(s => s.paymentType === 'installment')
+  const installmentDebt     = installmentSales.reduce((s, x) => s + (x.remainingDebt ?? 0), 0)
+  const installmentReceived = installmentSales.reduce((s, x) => s + ((x.total || 0) - (x.remainingDebt ?? 0)), 0)
+
+  // ---- KIRIM (Batches) ----
+  const totalIncomeUSD     = MOCK_BATCHES.reduce((s, b) => s + (b.totalUSD || 0), 0)
+  const totalPaidUSD       = MOCK_BATCHES.reduce((s, b) => s + (b.paidUSD || 0), 0)
+  const totalDebtUSD       = MOCK_BATCHES.reduce((s, b) => s + (b.debtUSD || 0), 0)
+  const unpaidBatches      = MOCK_BATCHES.filter(b => b.paymentStatus !== 'paid')
+  const supplierMap        = useMemo(() => {
+    const m = {}
+    MOCK_BATCHES.forEach(b => {
+      const name = b.supplierName || 'Noma\'lum'
+      if (!m[name]) m[name] = { name, totalUSD: 0, paidUSD: 0, debtUSD: 0, count: 0 }
+      m[name].totalUSD += b.totalUSD || 0
+      m[name].paidUSD  += b.paidUSD  || 0
+      m[name].debtUSD  += b.debtUSD  || 0
+      m[name].count++
+    })
+    return Object.values(m).sort((a, b) => b.debtUSD - a.debtUSD)
+  }, [MOCK_BATCHES])
+
+  // ---- XARAJATLAR ----
+  const totalExpenses   = MOCK_EXPENSES.reduce((s, e) => s + (e.amountUZS || 0), 0)
+  const salaryExp       = MOCK_EXPENSES.filter(e => e.categoryId === '1' || (e.note || '').toLowerCase().includes('oylik')).reduce((s, e) => s + (e.amountUZS || 0), 0)
+  const rentExp         = MOCK_EXPENSES.filter(e => e.categoryId === '2' || (e.note || '').toLowerCase().includes('ijara')).reduce((s, e) => s + (e.amountUZS || 0), 0)
+  const otherExp        = totalExpenses - salaryExp - rentExp
+
+  // ---- KAPITAL / JALB QILINGAN PULLAR ----
+  const invested   = MOCK_CAPITAL.filter(c => c.type === 'invested').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  const withdrawn  = MOCK_CAPITAL.filter(c => c.type === 'withdrawn').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  const loan       = MOCK_CAPITAL.filter(c => c.type === 'loan').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  const loanRepaid = MOCK_CAPITAL.filter(c => c.type === 'loan_repaid').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  const netCapital = invested - withdrawn + loan - loanRepaid
+
+  // ---- CHEGIRMALAR / AKSIYALAR ----
+  const discountLoss = useMemo(() => {
+    let loss = 0
+    completedSales.forEach(s => s.items?.forEach(i => {
+      if (i.discountAmount) loss += i.discountAmount
+    }))
+    return loss
   }, [completedSales])
 
-  // Oxirgi oy sotuv
-  const thisMonth = new Date().toISOString().slice(0, 7)
+  const loyaltyDiscountLoss = useMemo(() => {
+    let loss = 0
+    completedSales.forEach(s => {
+      if (s.loyaltyDiscount) loss += s.loyaltyDiscount
+    })
+    return loss
+  }, [completedSales])
+
+  // Filiallar bo'yicha
+  const shopBreakdown = useMemo(() => {
+    if (selectedShopId !== 'all') return []
+    const m = {}
+    ;[..._allSales.filter(s => s.status !== 'cancelled'), ..._allUsedSales.filter(s => s.status !== 'cancelled')].forEach(s => {
+      const sid = s.shopId || 'unknown'
+      const sname = s.shopName || `Do'kon ${sid}`
+      if (!m[sid]) m[sid] = { sid, name: sname, sales: 0, revenue: 0, profit: 0 }
+      m[sid].sales++
+      m[sid].revenue += s.total || 0
+      m[sid].profit  += getSaleProfit(s)
+    })
+    return Object.values(m).sort((a, b) => b.revenue - a.revenue)
+  }, [_allSales, _allUsedSales, selectedShopId])
+
+  // Shu oy
+  const thisMonth     = new Date().toISOString().slice(0, 7)
   const thisMonthSales = completedSales.filter(s => s.soldAt?.startsWith(thisMonth))
-  const thisMonthRev = thisMonthSales.reduce((s, x) => s + x.total, 0)
+  const thisMonthRev   = thisMonthSales.reduce((s, x) => s + x.total, 0)
+
+  const enabled = MOCK_SALES.length > 0 || MOCK_BATCHES.length > 0 || MOCK_EXPENSES.length > 0
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'sales-agent',
     systemPrompt: SYSTEM_PROMPT,
-    enabled: MOCK_SALES.length > 0 || MOCK_USED_COMPLETED.length > 0,
-    buildPrompt: () => `SAVDO TAHLILI MA'LUMOTLARI:
+    enabled,
+    buildPrompt: () => {
+      const shopLines = shopBreakdown.length > 1
+        ? `\nFILIALLAR BO'YICHA:\n${shopBreakdown.map((sh, i) => `${i+1}. ${sh.name}: ${sh.sales} ta sotuv, ${fmtNum(sh.revenue, t)} so'm tushum, ${fmtNum(sh.profit, t)} so'm foyda`).join('\n')}`
+        : ''
 
-Jami sotuvlar: ${completedSales.length} ta yangi + ${MOCK_USED_COMPLETED.length} ta B/U = ${completedSales.length + MOCK_USED_COMPLETED.length} ta
-Bekor (pul qaytarilgan): ${realCancelled.length} ta
-Almashtirish (exchange): ${exchanged.length} ta
-Umumiy tushum: ${fmtNum(totalRevenue, t)} so'm (yangi: ${fmtNum(totalNewRevenue, t)}, B/U: ${fmtNum(totalUsedRevenue, t)})
-Sof foyda: ${fmtNum(totalProfit, t)} so'm (yangi: ${fmtNum(totalNewProfit, t)}, B/U: ${fmtNum(totalUsedProfit, t)})
-O'rtacha marja: ${avgMargin}%
-Shu oy sotuv: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
-To'lov usuli: naqd ${payStats.cash||0} ta, karta ${payStats.card||0} ta, nasiya ${payStats.installment||0} ta
+      return `MOLIYAVIY TAHLIL MA'LUMOTLARI:
 
-Brend tahlili (top-${Math.min(5, brandData.length)}):
-${brandData.slice(0, 5).map((b, i) => `${i+1}. ${b.brand}: ${b.qty} ta, ${b.margin}% marja, ${fmtNum(b.profit, t)} so'm foyda`).join('\n')}
-Past marja (<20%): ${brandData.filter(b => parseFloat(b.margin) < 20).map(b => b.brand + ' (' + b.margin + '%)').join(', ') || 'yo\'q'}`,
-    deps: [version, selectedShopId, completedSales.length, totalRevenue],
+📦 KIRIM (YETKAZIB BERUVCHILAR):
+- Jami kirim: $${totalIncomeUSD.toFixed(0)} USD
+- To'langan: $${totalPaidUSD.toFixed(0)} | Qarz: $${totalDebtUSD.toFixed(0)}
+- To'lanmagan partiyalar: ${unpaidBatches.length} ta
+${supplierMap.slice(0, 4).map((s, i) => `  ${i+1}. ${s.name}: $${s.totalUSD.toFixed(0)} (qarz: $${s.debtUSD.toFixed(0)})`).join('\n')}
+
+💰 SOTUV:
+- Jami: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta
+- Tushum: ${fmtNum(totalRevenue, t)} so'm (yangi: ${fmtNum(newRevenue, t)}, B/U: ${fmtNum(usedRevenue, t)})
+- Sof foyda: ${fmtNum(totalProfit, t)} so'm (yangi: ${fmtNum(newProfit, t)}, B/U: ${fmtNum(usedProfit, t)})
+- Marja: ${avgMargin}%
+- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
+- Bekor (pul qaytarilgan): ${realCancelled.length} ta | Almashtirish: ${exchanged.length} ta
+- Bekor foizi: ${returnRate}%
+- Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
+
+📋 NASIYA QARZLARI (sotuv):
+- Nasiya savdolar: ${installmentSales.length} ta
+- Qabul qilingan: ${fmtNum(installmentReceived, t)} so'm
+- Qolgan qarz: ${fmtNum(installmentDebt, t)} so'm
+
+💸 XARAJATLAR:
+- Jami: ${fmtNum(totalExpenses, t)} so'm
+- Oyliklar: ${fmtNum(salaryExp, t)} so'm | Ijara: ${fmtNum(rentExp, t)} so'm | Boshqa: ${fmtNum(otherExp, t)} so'm
+- Sof pul oqimi (foyda - xarajat): ${fmtNum(totalProfit - totalExpenses, t)} so'm
+
+🏦 JALB QILINGAN MABLAG'LAR:
+- Kiritilgan kapital: ${fmtNum(invested, t)} so'm
+- Olingan qarz: ${fmtNum(loan, t)} so'm | Qaytarilgan: ${fmtNum(loanRepaid, t)} so'm
+- Chiqarilgan: ${fmtNum(withdrawn, t)} so'm
+- Sof kapital: ${fmtNum(netCapital, t)} so'm
+
+🎁 CHEGIRMALAR VA AKSIYALAR:
+- Chegirma evaziga yo'qotilgan: ${fmtNum(discountLoss, t)} so'm
+- Sodiqlik bonus yo'qotishlari: ${fmtNum(loyaltyDiscountLoss, t)} so'm
+- Aksiyalar soni: ${MOCK_PROMOTIONS.length} ta
+- Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length}, sodiq: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length})
+${shopLines}`
+    },
+    deps: [version, selectedShopId, completedSales.length, totalRevenue, totalExpenses, MOCK_BATCHES.length],
   })
 
   useEffect(() => {
@@ -91,13 +195,15 @@ Past marja (<20%): ${brandData.filter(b => parseFloat(b.margin) < 20).map(b => b
     }
   }, [analysis])
 
-  const chatSystemPrompt = `Sen GoodTires shina do'koni savdo tahlilchisi agentisan.
+  const chatSystemPrompt = `Sen GoodTires moliyaviy tahlil agentisan.
 
-📊 Savdo holati:
-- Jami tushum: ${fmtNum(totalRevenue, t)} so'm (${completedSales.length + MOCK_USED_COMPLETED.length} ta sotuv)
+📊 Joriy holat:
+- Sotuv tushumi: ${fmtNum(totalRevenue, t)} so'm (${completedSales.length + usedCompleted.length} ta sotuv)
 - Sof foyda: ${fmtNum(totalProfit, t)} so'm, marja ${avgMargin}%
-- Bekor: ${cancelledSales.length} ta (${returnRate}%)
-- Eng foydali brend: ${brandData[0]?.brand || '—'} (${brandData[0]?.margin || 0}% marja)
+- Kirim qarzi: $${totalDebtUSD.toFixed(0)} USD (${unpaidBatches.length} ta partiya)
+- Xarajatlar: ${fmtNum(totalExpenses, t)} so'm
+- Nasiya qoldig'i: ${fmtNum(installmentDebt, t)} so'm
+- Sof kapital: ${fmtNum(netCapital, t)} so'm
 
 O'zbek tilida qisqa va amaliy javob ber.`
 
