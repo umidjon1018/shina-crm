@@ -9,7 +9,7 @@ const JSON_INSTRUCTION = `
 Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 8 kpi, 5 alert, 3 insight, 4 recommendation:
 {"kpis":[{"label":"...","value":"...","sub":"...","status":"good|warning|danger|neutral"}],"alerts":[{"severity":"danger|warning|info","message":"..."}],"insights":[{"title":"...","description":"..."}],"recommendations":[{"priority":"high|medium|low","action":"...","reason":"..."}]}`
 
-const CACHE_PREFIX = 'ai_analysis_v3_'
+const CACHE_PREFIX = 'ai_analysis_v4_'
 
 function getCache(agentId, autoRunHour = 23) {
   try {
