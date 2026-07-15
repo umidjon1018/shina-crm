@@ -706,7 +706,7 @@ export const Reports = () => {
 
   // --- TAB 3: PROFIT ---
   const profitStats = useMemo(() => {
-    const filteredSales    = filterByPeriod(MOCK_SALES, 'soldAt').filter(s => s.status !== 'cancelled')
+    const filteredSales    = filterByPeriod(MOCK_SALES, 'soldAt').filter(s => s.status !== 'cancelled' && !s._isExchange)
     const filteredExpenses = filterByPeriod(MOCK_EXPENSES, 'date')
     const totalSalesAmt    = filteredSales.reduce((s, x) => s + x.total, 0)
     const totalProfit      = filteredSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
