@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info } from 'lucide-react'
+import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
 import { getAiAgents, updateAiAgent, getAvailableTools } from '../../../api/aiAgentsService'
+import { useSettingsStore } from '../../../store/settingsStore'
+import { clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 
 const AGENT_ICONS = {
   'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-accent-green/30' },
@@ -289,6 +291,14 @@ export default function AiAgentsTab() {
   const [availableTools, setAvailableTools] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [cacheCleared, setCacheCleared] = useState(false)
+  const { aiAutoAnalysisHour, setAiAutoAnalysisHour } = useSettingsStore()
+
+  const handleClearCache = () => {
+    clearAllAnalysisCache()
+    setCacheCleared(true)
+    setTimeout(() => setCacheCleared(false), 2000)
+  }
 
   useEffect(() => {
     Promise.all([getAiAgents(), getAvailableTools()])
@@ -321,6 +331,39 @@ export default function AiAgentsTab() {
         <Bot size={16} className="text-accent-green" />
         <h2 className="text-sm font-semibold text-text-primary">AI Agentlar sozlamalari</h2>
         <span className="text-xs text-text-muted">— har bir agentni alohida sozlang</span>
+      </div>
+
+      {/* Kunlik tahlil vaqti */}
+      <div className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-2 flex-1">
+          <Clock size={14} className="text-amber-400" />
+          <div>
+            <p className="text-sm font-medium text-text-primary">Kunlik avtomatik tahlil vaqti</p>
+            <p className="text-xs text-text-muted mt-0.5">AI agentlar har kuni shu vaqtda ma'lumotlarni tahlil qiladi. Kesh yangilanadi.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            value={aiAutoAnalysisHour}
+            onChange={e => setAiAutoAnalysisHour(e.target.value)}
+            className="bg-bg-primary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-amber-400/50"
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+            ))}
+          </select>
+          <button
+            onClick={handleClearCache}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-colors ${
+              cacheCleared
+                ? 'border-accent-green/30 bg-accent-green/10 text-accent-green'
+                : 'border-border text-text-muted hover:text-accent-red hover:border-accent-red/30'
+            }`}
+          >
+            <Trash2 size={12} />
+            {cacheCleared ? 'Tozalandi ✓' : 'Keshni tozalash'}
+          </button>
+        </div>
       </div>
       {agents.map(agent => (
         <AgentCard

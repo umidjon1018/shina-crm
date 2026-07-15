@@ -188,6 +188,8 @@ export const useSettingsStore = create(
       aiModel: 'claude-sonnet',
       aiMonthlyLimit: 0, // 0 = cheklanmagan
       aiAgentEnabled: true,
+      aiAutoAnalysisHour: 23, // Kunlik avtomatik tahlil vaqti (soat, 0-23)
+      setAiAutoAnalysisHour: (h) => set({ aiAutoAnalysisHour: Number(h) }),
       setAiApiKey: (key) => set({ aiApiKey: key }),
       setAiApiProvider: (provider) => set({ aiApiProvider: provider }),
       setAiModel: (model) => set({ aiModel: model }),
