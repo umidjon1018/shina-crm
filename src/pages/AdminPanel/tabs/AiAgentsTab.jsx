@@ -20,12 +20,15 @@ const MODELS = [
 ]
 
 const TOOL_LABELS = {
-  get_sales_summary:   'Savdo statistikasi',
-  get_low_stock:       'Kam zaxirali tovarlar',
-  get_customer_debts:  'Nasiyador mijozlar',
-  get_top_products:    'Eng ko\'p sotilgan tovarlar',
-  get_profit_by_brand: 'Brend bo\'yicha foyda',
-  get_recent_returns:  'So\'nggi bekor sotuvlar',
+  get_sales_summary:    'Savdo statistikasi',
+  get_low_stock:        'Kam zaxirali tovarlar',
+  get_customer_debts:   'Nasiyador mijozlar',
+  get_top_products:     'Eng ko\'p sotilgan tovarlar',
+  get_profit_by_brand:  'Brend bo\'yicha foyda',
+  get_recent_returns:   'So\'nggi bekor sotuvlar',
+  get_supplier_debts:   'Yetkazib beruvchilar qarzi',
+  get_expenses_summary: 'Xarajatlar xulosasi',
+  get_capital_summary:  'Jalb qilingan mablag\'lar',
 }
 
 const INTEGRATION_CONFIG = {
