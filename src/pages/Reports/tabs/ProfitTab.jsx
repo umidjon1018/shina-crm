@@ -52,6 +52,15 @@ const ProfitTab = ({ ctx }) => {
     MOCK_USED_SALES,
   } = ctx
 
+  // Oylik yangi+B/U birlashgan chart ma'lumoti
+  const combinedMonthlyChart = React.useMemo(() => {
+    const usedAll = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled')
+    return profitStats.monthlyChart.map(m => {
+      const sotuv_bu = usedAll.filter(s => s.soldAt && s.soldAt.startsWith(m.month)).reduce((s,x) => s + (x.total||0), 0)
+      return { ...m, sotuv_bu, sotuv_total: m.sotuv + sotuv_bu }
+    })
+  }, [profitStats.monthlyChart, MOCK_USED_SALES])
+
   return (
           !isPrivileged ? <LockedTab /> : (
             <>
@@ -115,15 +124,16 @@ const ProfitTab = ({ ctx }) => {
                   </div>
                   <div className="h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={profitStats.monthlyChart}>
+                      <BarChart data={combinedMonthlyChart}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                         <XAxis dataKey="name" fontSize={10} stroke="var(--text-muted)" />
                         <YAxis hide />
-                        <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} itemStyle={{ color: 'var(--text-primary)', fontSize: '12px' }} offset={10} isAnimationActive={false} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
+                        <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--text-primary)' }} itemStyle={{ color: 'var(--text-primary)', fontSize: '12px' }} offset={10} isAnimationActive={false} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} formatter={v => fmtUZS(v)} />
                         <Legend iconType="circle" />
-                        <Bar dataKey="sotuv" fill={C.blue} radius={[4, 4, 0, 0]} name={t('rep_chart_sales')} />
-                        <Bar dataKey="xarajat" fill={C.red} radius={[4, 4, 0, 0]} name={t('rep_chart_expense')} />
-                        <Bar dataKey="foyda" fill={C.green} radius={[4, 4, 0, 0]} name={t('rep_profit_gross_label')} />
+                        <Bar dataKey="sotuv"    fill={C.blue}   radius={[4,4,0,0]} name="Yangi sotuv" />
+                        <Bar dataKey="sotuv_bu" fill="#f59e0b"  radius={[4,4,0,0]} name="B/U sotuv" />
+                        <Bar dataKey="xarajat"  fill={C.red}    radius={[4,4,0,0]} name={t('rep_chart_expense')} />
+                        <Bar dataKey="foyda"    fill={C.green}  radius={[4,4,0,0]} name={t('rep_profit_gross_label')} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -522,10 +532,12 @@ const ProfitTab = ({ ctx }) => {
                 const filtSales = modalFilter === 'all'
                   ? MOCK_SALES.filter(s => s.status !== 'cancelled')
                   : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+                const filtUsed = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled' &&
+                  (modalFilter === 'all' || (s.soldAt && s.soldAt.startsWith(modalFilter))))
                 const filtExp = modalFilter === 'all'
                   ? MOCK_EXPENSES
                   : MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(modalFilter))
-                const filtSalesAmt = filtSales.reduce((s,x) => s+x.total, 0)
+                const filtSalesAmt = filtSales.reduce((s,x) => s+x.total, 0) + filtUsed.reduce((s,x) => s+(x.total||0), 0)
                 const filtBreakEven = filtExp.reduce((s,x) => s+x.amountUZS, 0)
                 const filtPct = filtBreakEven > 0 ? Math.min(100, Math.round(filtSalesAmt/filtBreakEven*100)) : 0
 
@@ -582,17 +594,20 @@ const ProfitTab = ({ ctx }) => {
                       </thead>
                       <tbody className="divide-y divide-border/50">
                         {(msd==='desc' ? [...filteredMonths_BE].sort((a,b)=>b.localeCompare(a)) : [...filteredMonths_BE].sort((a,b)=>a.localeCompare(b))).map(m => {
-                          const mData = profitStats.monthlyChart.find(x => x.month === m)
+                          const mData = combinedMonthlyChart.find(x => x.month === m)
                           if (!mData) return null
                           return (
                             <tr key={m} className="hover:bg-bg-tertiary transition-colors">
                               <td className="px-4 py-3 font-medium text-text-primary">{monthNames_BE[m]}</td>
                               <td className="px-4 py-3 text-right text-text-secondary">{fmtUZS(mData.xarajat)}</td>
-                              <td className="px-4 py-3 text-right font-bold text-text-primary">{fmtUZS(mData.sotuv)}</td>
+                              <td className="px-4 py-3 text-right font-bold text-text-primary">
+                                {fmtUZS(mData.sotuv_total)}
+                                {mData.sotuv_bu > 0 && <span className="block text-[10px] text-amber-400 font-normal">+{fmtUZS(mData.sotuv_bu)} B/U</span>}
+                              </td>
                               <td className="px-4 py-3 text-right font-bold text-accent-green">{fmtUZS(mData.foyda || 0)}</td>
                               <td className="px-4 py-3 text-center">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${mData.sotuv >= mData.xarajat ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
-                                  {mData.sotuv >= mData.xarajat ? t('rep_profit_status_ok') : t('rep_profit_status_fail')}
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${mData.sotuv_total >= mData.xarajat ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
+                                  {mData.sotuv_total >= mData.xarajat ? t('rep_profit_status_ok') : t('rep_profit_status_fail')}
                                 </span>
                               </td>
                             </tr>
@@ -709,8 +724,17 @@ const ProfitTab = ({ ctx }) => {
                 <Modal open title={t('rep_modal_profit_dyn_title')} subtitle={t('rep_modal_profit_dyn_sub')} size="xl" onClose={closeModal}>
                   {/* Yillik summary */}
                   <div className="grid grid-cols-4 gap-3 mb-6">
+                    <div className="bg-bg-tertiary rounded-xl p-4">
+                      <p className="text-text-muted text-xs mb-1">{t('rep_profit_total_sales_label')}</p>
+                      <p className="font-syne font-bold text-lg" style={{ color: C.blue }}>
+                        {fmtUZS(combinedMonthlyChart.reduce((s,m) => s + m.sotuv_total, 0))}
+                      </p>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        <span className="text-[10px] text-accent-blue">Yangi: {fmtUZS(combinedMonthlyChart.reduce((s,m)=>s+m.sotuv,0))}</span>
+                        <span className="text-[10px] text-amber-400">B/U: {fmtUZS(combinedMonthlyChart.reduce((s,m)=>s+m.sotuv_bu,0))}</span>
+                      </div>
+                    </div>
                     {[
-                      { label:t('rep_profit_total_sales_label'), key:'sotuv',   color: C.blue },
                       { label:t('rep_profit_total_exp_label'),   key:'xarajat', color: C.red },
                       { label:t('col_gross_profit'), key:'foyda',   color: C.green },
                       { label:t('col_net_profit'),   key:'sof',     color: C.teal },
@@ -726,7 +750,7 @@ const ProfitTab = ({ ctx }) => {
                   {/* Grafik */}
                   <div className="h-[280px] w-full mb-6">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={profitStats.monthlyChart}>
+                      <BarChart data={combinedMonthlyChart}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                         <XAxis dataKey="name" fontSize={11} stroke="var(--text-muted)" />
                         <YAxis hide />
@@ -739,10 +763,11 @@ const ProfitTab = ({ ctx }) => {
                           isAnimationActive={false}
                           wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
                         <Legend iconType="circle" />
-                        <Bar dataKey="sotuv"   fill={C.blue}  radius={[4,4,0,0]} name={t('rep_chart_sales')} />
-                        <Bar dataKey="xarajat" fill={C.red}   radius={[4,4,0,0]} name={t('rep_chart_expense')} />
-                        <Bar dataKey="foyda"   fill={C.green} radius={[4,4,0,0]} name={t('rep_profit_gross_label')} />
-                        <Bar dataKey="sof"     fill={C.teal}  radius={[4,4,0,0]} name={t('col_net_profit')} />
+                        <Bar dataKey="sotuv"    fill={C.blue}   radius={[4,4,0,0]} name="Yangi sotuv" />
+                        <Bar dataKey="sotuv_bu" fill="#f59e0b"  radius={[4,4,0,0]} name="B/U sotuv" />
+                        <Bar dataKey="xarajat"  fill={C.red}    radius={[4,4,0,0]} name={t('rep_chart_expense')} />
+                        <Bar dataKey="foyda"    fill={C.green}  radius={[4,4,0,0]} name={t('rep_profit_gross_label')} />
+                        <Bar dataKey="sof"      fill={C.teal}   radius={[4,4,0,0]} name={t('col_net_profit')} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -752,7 +777,9 @@ const ProfitTab = ({ ctx }) => {
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
                           <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.blue }}>{t('rep_chart_sales')}</th>
+                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.blue }}>Yangi sotuv</th>
+                          <th className="text-right px-4 py-3 font-medium" style={{ color: '#f59e0b' }}>B/U sotuv</th>
+                          <th className="text-right px-4 py-3 font-medium text-text-secondary">Jami sotuv</th>
                           <th className="text-right px-4 py-3 font-medium" style={{ color: C.red }}>{t('rep_chart_expense')}</th>
                           <th className="text-right px-4 py-3 font-medium" style={{ color: C.green }}>{t('rep_profit_gross_label')}</th>
                           <th className="text-right px-4 py-3 font-medium" style={{ color: C.teal }}>{t('col_net_profit')}</th>
@@ -760,10 +787,12 @@ const ProfitTab = ({ ctx }) => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
-                        {sortMonths(profitStats.monthlyChart).map(m => (
+                        {sortMonths(combinedMonthlyChart).map(m => (
                           <tr key={m.month} className="hover:bg-bg-tertiary transition-colors">
                             <td className="px-4 py-3 font-medium text-text-primary">{m.name}</td>
-                            <td className="px-4 py-3 text-right text-text-primary">{fmtUZS(m.sotuv)}</td>
+                            <td className="px-4 py-3 text-right text-accent-blue">{fmtUZS(m.sotuv)}</td>
+                            <td className="px-4 py-3 text-right text-amber-400">{fmtUZS(m.sotuv_bu)}</td>
+                            <td className="px-4 py-3 text-right font-bold text-text-primary">{fmtUZS(m.sotuv_total)}</td>
                             <td className="px-4 py-3 text-right text-accent-red">{fmtUZS(m.xarajat)}</td>
                             <td className="px-4 py-3 text-right text-accent-green font-bold">{fmtUZS(m.foyda)}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: m.sof>=0?C.teal:C.red }}>{fmtUZS(m.sof)}</td>
