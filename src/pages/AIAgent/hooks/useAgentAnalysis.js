@@ -43,8 +43,13 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
       onDone: () => {
         if (runIdRef.current !== id) return
         try {
-          const m = fullText.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, fullText]
-          setAnalysis(JSON.parse((m[1] || fullText).trim()))
+          const start = fullText.indexOf('{')
+          const end = fullText.lastIndexOf('}')
+          if (start !== -1 && end > start) {
+            setAnalysis(JSON.parse(fullText.slice(start, end + 1)))
+          } else {
+            setAnalysis({ raw: fullText })
+          }
         } catch {
           setAnalysis({ raw: fullText })
         }
