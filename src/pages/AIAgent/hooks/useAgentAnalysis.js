@@ -2,23 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { streamChat } from '../../../api/aiService'
 import { useSettingsStore } from '../../../store/settingsStore'
 
+// Max 4 KPI, 3 alert, 2 insight, 3 recommendation — token limiti uchun qisqa
 const JSON_INSTRUCTION = `
 
-Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma:
-{
-  "kpis": [
-    { "label": "...", "value": "...", "sub": "...", "status": "good|warning|danger|neutral" }
-  ],
-  "alerts": [
-    { "severity": "danger|warning|info", "message": "..." }
-  ],
-  "insights": [
-    { "title": "...", "description": "..." }
-  ],
-  "recommendations": [
-    { "priority": "high|medium|low", "action": "...", "reason": "..." }
-  ]
-}`
+Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 4 kpi, 3 alert, 2 insight, 3 recommendation:
+{"kpis":[{"label":"...","value":"...","sub":"...","status":"good|warning|danger|neutral"}],"alerts":[{"severity":"danger|warning|info","message":"..."}],"insights":[{"title":"...","description":"..."}],"recommendations":[{"priority":"high|medium|low","action":"...","reason":"..."}]}`
 
 const CACHE_PREFIX = 'ai_analysis_v2_'
 
@@ -29,7 +17,6 @@ function getCache(agentId, autoRunHour = 23) {
     const { analysis, date, cachedAt } = JSON.parse(raw)
     const today = new Date().toISOString().slice(0, 10)
     if (date !== today) return null
-    // If current time >= autoRunHour and cache was created before autoRunHour → stale
     const currentHour = new Date().getHours()
     if (cachedAt) {
       const cacheHour = new Date(cachedAt).getHours()
@@ -59,6 +46,68 @@ export function clearAllAnalysisCache() {
   } catch {}
 }
 
+// Tries to close a truncated JSON string by balancing braces/brackets
+function repairJSON(text) {
+  const start = text.indexOf('{')
+  if (start === -1) return null
+  let t = text.slice(start)
+  // Remove trailing incomplete key or value (cut at last complete comma or bracket)
+  // Find the deepest safely parseable prefix
+  const stack = []
+  let inStr = false
+  let esc = false
+  let lastSafePos = 0
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i]
+    if (esc) { esc = false; continue }
+    if (c === '\\' && inStr) { esc = true; continue }
+    if (c === '"') { inStr = !inStr; continue }
+    if (inStr) continue
+    if (c === '{' || c === '[') stack.push(c === '{' ? '}' : ']')
+    else if (c === '}' || c === ']') {
+      if (stack.length && stack[stack.length - 1] === c) {
+        stack.pop()
+        if (stack.length === 0) lastSafePos = i + 1
+      }
+    }
+  }
+  // If JSON is truncated, close all open brackets
+  if (stack.length > 0) {
+    // Trim to last comma-safe position to avoid partial key/value
+    let trimmed = t
+    // Remove incomplete last token (find last , or { or [ before the cut)
+    const lastComma = Math.max(t.lastIndexOf(','), t.lastIndexOf('['), t.lastIndexOf('{'))
+    if (lastComma > 0 && lastComma < t.length - 1) {
+      trimmed = t.slice(0, lastComma)
+    }
+    // Close any open string
+    const checkStack = []
+    let cs = false, ce = false
+    for (const ch of trimmed) {
+      if (ce) { ce = false; continue }
+      if (ch === '\\' && cs) { ce = true; continue }
+      if (ch === '"') { cs = !cs; continue }
+      if (cs) continue
+      if (ch === '{' || ch === '[') checkStack.push(ch === '{' ? '}' : ']')
+      else if (ch === '}' || ch === ']') checkStack.pop()
+    }
+    if (cs) trimmed += '"'
+    trimmed += checkStack.reverse().join('')
+    try {
+      const r = JSON.parse(trimmed)
+      if (r && typeof r === 'object' && !Array.isArray(r)) return r
+    } catch {}
+  }
+  // Otherwise use the last complete portion
+  if (lastSafePos > 0) {
+    try {
+      const r = JSON.parse(t.slice(0, lastSafePos))
+      if (r && typeof r === 'object' && !Array.isArray(r)) return r
+    } catch {}
+  }
+  return null
+}
+
 // Tries multiple strategies to extract JSON from AI response text
 function parseAnalysis(text) {
   const strategies = [
@@ -81,6 +130,12 @@ function parseAnalysis(text) {
       const s = stripped.indexOf('{'), e = stripped.lastIndexOf('}')
       if (s === -1 || e <= s) throw new Error('no braces')
       return JSON.parse(stripped.slice(s, e + 1))
+    },
+    // 5. Repair truncated JSON (token limit hit)
+    () => {
+      const r = repairJSON(text)
+      if (!r) throw new Error('repair failed')
+      return r
     },
   ]
   for (const fn of strategies) {
@@ -128,7 +183,6 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
           setAnalysis(parsed)
           setError(null)
         } else {
-          // Show raw text so user sees something useful
           setAnalysis({ raw: fullText || 'Javob bo\'sh qaytdi. Qayta urinib ko\'ring.' })
         }
         setLoading(false)
