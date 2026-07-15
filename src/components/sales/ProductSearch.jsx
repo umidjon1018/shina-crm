@@ -4,6 +4,7 @@ import { Search, AlertCircle, X, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
+import { checkReservation } from '../../api/reservationService'
 import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
 import i18n from '../../i18n'
@@ -66,7 +67,7 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
     setResults(found)
   }, [query, allowSold, salesItems, MOCK_PRODUCTS, MOCK_ITEMS])
 
-  const handleAdd = (product) => {
+  const handleAdd = async (product) => {
     setWarning(null)
 
     const allItems = MOCK_ITEMS.filter(i => i.productId === product.id)
@@ -86,6 +87,17 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
     if (!item) {
       setWarning({ type: 'in_cart', message: t('sl_ps_msg_in_cart') })
       return
+    }
+
+    // Bron tekshiruv
+    if (!allowSold) {
+      const resCheck = await checkReservation(item.id)
+      if (resCheck.reserved) {
+        const rv = resCheck.reservation
+        const until = new Date(rv.reserved_until).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+        setWarning({ type: 'reserved', message: `Bu tovar ${rv.customer_name || 'mijoz'} tomonidan soat ${until} gacha bron qilingan` })
+        return
+      }
     }
 
     if (!allowSold && item.barcodeStatus === 'active') {

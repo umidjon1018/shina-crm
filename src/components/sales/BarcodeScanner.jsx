@@ -4,6 +4,7 @@ import { Barcode, Camera, X, AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { BrowserMultiFormatReader } from '@zxing/library'
 import { findItemByBarcode } from '../../api/itemService'
+import { checkReservation } from '../../api/reservationService'
 
 const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, notificationSettings }) => {
   const { t } = useTranslation()
@@ -66,6 +67,18 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
       setError({ type: 'not_found', message: t('sl_bc_err_no_product') })
       setTimeout(() => setError(null), 4000)
       return
+    }
+
+    // Bron tekshiruv
+    if (!allowSold) {
+      const resCheck = await checkReservation(anyItem.id)
+      if (resCheck.reserved) {
+        const rv = resCheck.reservation
+        const until = new Date(rv.reserved_until).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+        setError({ type: 'reserved', message: `Bu tovar ${rv.customer_name || 'mijoz'} tomonidan soat ${until} gacha bron qilingan` })
+        setTimeout(() => setError(null), 6000)
+        return
+      }
     }
 
     if (!allowSold && anyItem.barcodeStatus === 'active') {
