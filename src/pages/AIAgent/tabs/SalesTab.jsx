@@ -112,11 +112,12 @@ function SalesTab({ aiData = {} }) {
 \ud83c\udfc6 Brend bo'yicha marja (top 5):
 ${brandData.slice(0, 5).map(b => `  ${b.brand}: ${b.qty} ta sotilgan, marja ${b.margin}%, foyda ${fmtNum(b.profit, t)} so'm`).join('\n')}
 
-Qoidalar:
-- O'zbek tilida qisqa va aniq javob ber
-- Raqamlarni so'm yoki % bilan ko'rsat
-- Amaliy tavsiyalar ber
-- Markdown ishlatma`, [completedSales.length, totalRevenue, totalProfit, avgMargin, capitalState, brandData])
+MUHIM QOIDALAR:
+- To'liq, to'g'ri o'zbek adabiy tilida yoz. Grammatika: ega + to'ldiruvchi + kesim tartibida.
+- "Bu mahsulot ko'p sotiladi" — to'g'ri. "Ko'p sotiladi bu mahsulot" — NOTO'G'RI.
+- Raqamlarni so'm yoki % bilan ko'rsat.
+- Markdown ishlatishingiz mumkin: **qalin**, - ro'yxat, ## sarlavha.
+- Qisqa va amaliy tavsiyalar ber.`, [completedSales.length, totalRevenue, totalProfit, avgMargin, capitalState, brandData])
 
   return (
     <div className="space-y-6">

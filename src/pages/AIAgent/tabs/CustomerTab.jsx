@@ -267,10 +267,11 @@ Qila olasanlar:
 - Shikoyat hal qilish skriptlari
 - Loyallik dasturi bo'yicha maslahat
 
-Qoidalar:
-- O'zbek tilida professional va do'stona javob ber
-- Tayyor xabar shabloni so'ralsa — to'liq matn yaz
-- Markdown ishlatma`}
+MUHIM QOIDALAR:
+- To'liq, to'g'ri o'zbek adabiy tilida yoz. Grammatika: ega + to'ldiruvchi + kesim tartibida.
+- Professional va do'stona ohangda yoz.
+- Tayyor xabar shabloni so'ralsa — to'liq matn yaz.
+- Markdown ishlatishingiz mumkin: **qalin**, - ro'yxat, ## sarlavha.`}
           placeholder="Mijoz xabari, shablon, maslahat so'rang..."
           colorClass="accent-orange"
         />

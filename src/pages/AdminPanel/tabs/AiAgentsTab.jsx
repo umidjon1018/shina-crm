@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react'
-import { Bot, TrendingUp, Package, Megaphone, MessageSquare, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info } from 'lucide-react'
+import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info } from 'lucide-react'
 import { getAiAgents, updateAiAgent, getAvailableTools } from '../../../api/aiAgentsService'
 
 const AGENT_ICONS = {
-  'sales-agent':    { Icon: TrendingUp, color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-accent-green/30' },
-  'product-agent':  { Icon: Package,    color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-accent-red/30' },
-  'pr-agent':       { Icon: Megaphone,  color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-accent-orange/30' },
-  'customer-agent': { Icon: MessageSquare, color: 'text-accent-blue', bg: 'bg-accent-blue/10',  border: 'border-accent-blue/30' },
+  'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-accent-green/30' },
+  'product-agent':  { Icon: Package,      color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-accent-red/30' },
+  'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-accent-orange/30' },
+  'customer-agent': { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-accent-blue/30' },
+  'staff-agent':    { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-purple-400/30' },
 }
 
 const MODELS = [
   { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 — Tez, arzon' },
-  { value: 'claude-sonnet-4-5',         label: 'Claude Sonnet 4.5 — Muvozanatli' },
-  { value: 'claude-opus-4-8',           label: 'Claude Opus 4.8 — Eng kuchli' },
+  { value: 'claude-sonnet-4-6',         label: 'Claude Sonnet 4.6 — Yaxshi til sifati ⭐' },
+  { value: 'claude-sonnet-5',           label: 'Claude Sonnet 5 — Eng yangi' },
+  { value: 'claude-opus-4-8',           label: 'Claude Opus 4.8 — Eng kuchli, qimmat' },
 ]
 
 const TOOL_LABELS = {

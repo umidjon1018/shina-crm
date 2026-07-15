@@ -252,10 +252,11 @@ ${inventoryData.filter(d => d.recommendation).map(d =>
   `  ${d.product.name}: ${d.stock} dona, holat: ${d.recommendation.type}`
 ).join('\n') || '  Hozircha yo\'q'}
 
-Qoidalar:
-- O'zbek tilida qisqa va aniq javob ber
-- Buyurtma, zaxira, mavsum bo'yicha amaliy maslahat ber
-- Markdown ishlatma`}
+MUHIM QOIDALAR:
+- To'liq, to'g'ri o'zbek adabiy tilida yoz. Grammatika: ega + to'ldiruvchi + kesim tartibida.
+- "Bu tovar tez tugaydi" — to'g'ri. "Tez tugaydi bu tovar" — NOTO'G'RI.
+- Buyurtma, zaxira, mavsum bo'yicha amaliy maslahat ber.
+- Markdown ishlatishingiz mumkin: **qalin**, - ro'yxat, ## sarlavha.`}
           placeholder="Zaxira, buyurtma, mavsum haqida so'rang..."
           colorClass="accent-red"
         />

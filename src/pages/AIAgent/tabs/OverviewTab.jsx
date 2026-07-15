@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { TrendingUp, Megaphone, Users, Package, Activity } from 'lucide-react'
+import { TrendingUp, Megaphone, Users, Package, Activity, UserCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
@@ -62,15 +62,20 @@ function OverviewTab({ onTabChange, aiData = {} }) {
       },
       {
         id: 'customer', label: t('ai_agent_customer'), Icon: Users, color: TAB_COLORS.customer,
-        stat: (selectedShopId === 'all' ? MOCK_CUSTOMERS : MOCK_CUSTOMERS.filter(c => c.shopId === selectedShopId)).length + ' ' + t('unit_pcs'), sub: t('ai_active_clients'),
-        status: 'active', alerts: (selectedShopId === 'all' ? MOCK_CUSTOMERS : MOCK_CUSTOMERS.filter(c => c.shopId === selectedShopId)).filter(c => getDaysUntilBirthday(c.birthDate) <= 7).length,
+        stat: MOCK_CUSTOMERS.length + ' ' + t('unit_pcs'), sub: t('ai_active_clients'),
+        status: 'active', alerts: MOCK_CUSTOMERS.filter(c => getDaysUntilBirthday(c.birthDate) <= 7).length,
+      },
+      {
+        id: 'staff', label: t('ai_agent_staff'), Icon: UserCheck, color: TAB_COLORS.staff,
+        stat: '—', sub: t('ai_staff_activity'),
+        status: 'active', alerts: 0,
       },
     ]
   }, [activities, version, t, selectedShopId])
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {agentStats.map(({ id, label, Icon, color, stat, sub, status, alerts }) => (
           <button
             key={id}

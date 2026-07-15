@@ -880,10 +880,11 @@ function MarketingTab({ aiData = {} }) {
 - Mijozlarni qaytarishga undash xabarlari
 - Brend ovozi va uslub
 
-Qoidalar:
-- O'zbek tilida yozasan
-- Post so'ralsa — emoji bilan, qisqa va jalb etarli
-- Markdown ishlatma`}
+MUHIM QOIDALAR:
+- To'liq, to'g'ri o'zbek adabiy tilida yoz. Grammatika: ega + to'ldiruvchi + kesim tartibida.
+- Post matni so'ralsa — emoji bilan, qisqa va jalb etarli qilib yoz.
+- Grammatik xato bo'lmasin: "Yangi shina keldi!" — to'g'ri. "Keldi yangi shina!" — NOTO'G'RI.
+- Markdown ishlatishingiz mumkin: **qalin**, - ro'yxat.`}
           placeholder="Post matni, aksiya e'loni, reklama so'rang..."
           colorClass="accent-orange"
         />

@@ -9,11 +9,11 @@ const renderMarkdown = (text) => {
   let tableRows = []
 
   const flushTable = () => {
-    if (tableRows.length < 2) { tableRows.forEach((r, i) => result.push(<p key={`tp${i}`} className="text-xs">{r}</p>)); tableRows = []; return }
+    if (tableRows.length < 2) { tableRows.forEach((r, i) => result.push(<p key={`md-tp${i}`} className="text-xs">{r}</p>)); tableRows = []; return }
     const headers = tableRows[0].split('|').map(h => h.trim()).filter(Boolean)
     const rows = tableRows.slice(2).map(r => r.split('|').map(c => c.trim()).filter(Boolean))
     result.push(
-      <div key={`tbl${result.length}`} className="overflow-x-auto my-1">
+      <div key={`md-tbl${result.length}`} className="overflow-x-auto my-1">
         <table className="text-xs border-collapse w-full">
           <thead><tr>{headers.map((h,i) => <th key={i} className="border border-border px-2 py-1 text-left font-semibold bg-bg-tertiary">{h}</th>)}</tr></thead>
           <tbody>{rows.map((r,i) => <tr key={i}>{r.map((c,j) => <td key={j} className="border border-border px-2 py-1">{c}</td>)}</tr>)}</tbody>
@@ -28,52 +28,58 @@ const renderMarkdown = (text) => {
     if (tableRows.length) flushTable()
 
     if (/^###\s/.test(line)) {
-      result.push(<p key={i} className="font-bold text-xs mt-2">{line.replace(/^###\s/, '')}</p>)
+      result.push(<p key={`md-${i}`} className="font-bold text-xs mt-2">{line.replace(/^###\s/, '')}</p>)
     } else if (/^##\s/.test(line)) {
-      result.push(<p key={i} className="font-bold text-sm mt-2">{line.replace(/^##\s/, '')}</p>)
+      result.push(<p key={`md-${i}`} className="font-bold text-sm mt-2">{line.replace(/^##\s/, '')}</p>)
     } else if (/^#\s/.test(line)) {
-      result.push(<p key={i} className="font-bold text-sm mt-2">{line.replace(/^#\s/, '')}</p>)
+      result.push(<p key={`md-${i}`} className="font-bold text-sm mt-2">{line.replace(/^#\s/, '')}</p>)
     } else if (/^[-*]\s/.test(line)) {
       const inner = line.replace(/^[-*]\s/, '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-      result.push(<div key={i} className="flex gap-1.5 text-xs"><span className="mt-0.5 flex-shrink-0">•</span><span dangerouslySetInnerHTML={{ __html: inner }} /></div>)
+      result.push(<div key={`md-${i}`} className="flex gap-1.5 text-xs"><span className="mt-0.5 flex-shrink-0">•</span><span dangerouslySetInnerHTML={{ __html: inner }} /></div>)
     } else if (line.trim() === '') {
-      result.push(<div key={i} className="h-1" />)
+      result.push(<div key={`md-${i}`} className="h-1" />)
     } else {
       const inner = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code class="bg-bg-tertiary px-1 rounded text-[10px]">$1</code>')
-      result.push(<p key={i} className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: inner }} />)
+      result.push(<p key={`md-${i}`} className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: inner }} />)
     }
   })
   if (tableRows.length) flushTable()
   return result
 }
 
-const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green' }) => {
+const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt }) => {
   const { chats, createChat, addMessage, updateLastMessage, deleteChat } = useAiStore()
   const [chatId, setChatId] = useState(null)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
+  const [activeModel, setActiveModel] = useState(null)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  const streamingRef = useRef(false)
+  const autoSentRef = useRef(false)
 
   useEffect(() => {
     const existing = chats.find(c => c.agentId === agentId)
     if (existing) setChatId(existing.id)
     else setChatId(createChat(agentId))
+    autoSentRef.current = false
   }, [agentId])
 
   const chat = chats.find(c => c.id === chatId)
   const messages = chat?.messages || []
 
+  // Faqat streaming paytida scroll — tab switch da scroll bo'lmasin
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length, messages[messages.length - 1]?.content])
+    if (streamingRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages[messages.length - 1]?.content])
 
-  const send = async () => {
-    if (!input.trim() || streaming || !chatId) return
-    const text = input.trim()
-    setInput('')
+  const sendText = async (text, silent = false) => {
+    if (!text.trim() || streaming || !chatId) return
+    streamingRef.current = true
     setStreaming(true)
-    inputRef.current?.focus()
+    if (!silent) inputRef.current?.focus()
 
     addMessage(chatId, 'user', text)
     const assistantMsgId = addMessage(chatId, 'assistant', '')
@@ -84,18 +90,37 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
     let accumulated = ''
     await streamChat({
       messages: history,
+      agentId,
       systemPrompt,
+      onModel: (m) => setActiveModel(m),
       onToken: (token) => {
         accumulated += token
         updateLastMessage(chatId, accumulated)
       },
-      onDone: () => setStreaming(false),
+      onDone: () => { setStreaming(false); streamingRef.current = false },
       onError: (err) => {
         updateLastMessage(chatId, `❌ Xato: ${err}`)
         setStreaming(false)
+        streamingRef.current = false
       },
     })
   }
+
+  const send = async () => {
+    if (!input.trim()) return
+    const text = input.trim()
+    setInput('')
+    await sendText(text)
+  }
+
+  // autoPrompt: tab birinchi ochilganda, chat bo'sh bo'lsa avtomatik yuborish
+  useEffect(() => {
+    if (!autoPrompt || !chatId || autoSentRef.current) return
+    const chat = chats.find(c => c.id === chatId)
+    if (!chat || chat.messages.length > 0) return
+    autoSentRef.current = true
+    sendText(autoPrompt, true)
+  }, [chatId])
 
   const clearChat = () => {
     if (!chatId) return
@@ -118,6 +143,11 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
         <div className="flex items-center gap-2">
           <Bot size={13} className="text-text-muted" />
           <span className="text-xs font-medium text-text-secondary">AI Agent</span>
+          {activeModel && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-tertiary text-text-muted border border-border font-mono">
+              {activeModel.replace(/-\d{8,}.*$/, '').replace('claude-', '')}
+            </span>
+          )}
         </div>
         {messages.length > 0 && (
           <button onClick={clearChat} className="p-1 rounded hover:bg-bg-tertiary text-text-muted hover:text-text-primary transition-colors">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, TrendingUp, Package, Megaphone, Users } from 'lucide-react'
+import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TAB_COLORS, TAB_AGENT_KEYS, TAB_DESC_KEYS } from './aiHelpers'
 import { getSales } from '../../api/salesService'
@@ -13,6 +13,7 @@ import SalesTab from './tabs/SalesTab'
 import InventoryTab from './tabs/InventoryTab'
 import MarketingTab from './tabs/MarketingTab'
 import CustomerTab from './tabs/CustomerTab'
+import StaffTab from './tabs/StaffTab'
 
 export const AIAgent = () => {
   const { t } = useTranslation()
@@ -23,15 +24,16 @@ export const AIAgent = () => {
     Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches()])
       .then(([sales, customers, products, items, batches]) => {
         setAiData({ sales, customers, products, items, batches })
-      }).catch(() => {})
+      }).catch((err) => console.error('[AIAgent] data load xatosi:', err))
   }, [])
 
   const TABS = [
     { id: 'overview',  label: t('ai_tab_overview'), Icon: Activity,   color: TAB_COLORS.overview },
     { id: 'sales',     label: t('ai_tab_sales'),    Icon: TrendingUp, color: TAB_COLORS.sales },
-    { id: 'inventory', label: t('warehouse'),Icon: Package,    color: TAB_COLORS.inventory },
+    { id: 'inventory', label: t('warehouse'),        Icon: Package,    color: TAB_COLORS.inventory },
     { id: 'marketing', label: t('ai_tab_marketing'),Icon: Megaphone,  color: TAB_COLORS.marketing },
     { id: 'customer',  label: t('ai_tab_customer'), Icon: Users,      color: TAB_COLORS.customer },
+    { id: 'staff',     label: t('ai_tab_staff'),    Icon: UserCheck,  color: TAB_COLORS.staff },
   ]
 
   const tab = TABS.find(tb => tb.id === activeTab)
@@ -85,6 +87,7 @@ export const AIAgent = () => {
             {activeTab === 'inventory' && <InventoryTab aiData={aiData} />}
             {activeTab === 'marketing' && <MarketingTab aiData={aiData} />}
             {activeTab === 'customer'  && <CustomerTab aiData={aiData} />}
+            {activeTab === 'staff'     && <StaffTab aiData={aiData} />}
           </motion.div>
         </AnimatePresence>
       </div>
