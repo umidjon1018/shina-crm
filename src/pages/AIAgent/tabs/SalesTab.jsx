@@ -151,13 +151,14 @@ function SalesTab({ aiData = {} }) {
 ${supplierMap.slice(0, 4).map((s, i) => `  ${i+1}. ${s.name}: $${s.totalUSD.toFixed(0)} (qarz: $${s.debtUSD.toFixed(0)})`).join('\n')}
 
 💰 SOTUV:
-- Jami: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta
+- Tugallangan: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta
+- Bekor (pul qaytarilgan — savdo hisoblanmaydi): ${realCancelled.length} ta
+- Almashtirish (bekor emas, yangi sotuv boʻldi): ${exchanged.length} ta
+- Bekor foizi: ${returnRate}% (${realCancelled.length} ta haqiqiy bekor / ${completedSales.length + realCancelled.length + exchanged.length} ta yangi sotuv urinish)
 - Tushum: ${fmtNum(totalRevenue, t)} so'm (yangi: ${fmtNum(newRevenue, t)}, B/U: ${fmtNum(usedRevenue, t)})
 - Sof foyda: ${fmtNum(totalProfit, t)} so'm (yangi: ${fmtNum(newProfit, t)}, B/U: ${fmtNum(usedProfit, t)})
 - Marja: ${avgMargin}%
 - To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
-- Bekor (pul qaytarilgan): ${realCancelled.length} ta | Almashtirish: ${exchanged.length} ta
-- Bekor foizi: ${returnRate}%
 - Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
 
 📋 NASIYA QARZLARI (sotuv):

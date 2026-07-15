@@ -232,8 +232,9 @@ ${atRisk.map(p => `- ${p.name}: oxirgi ${p.lastSaleDate?.slice(0,10)}, jami ${p.
 💰 CHEGIRMAGA SEZGIR:
 ${topDiscount.map(p => `- ${p.name}: ${p.discountUsed.toLocaleString()} so'm chegirma, ${p.totalOrders} xarid`).join('\n') || 'yo\'q'}
 
-❌ BEKOR: ${cancelledSales.length} ta | Almashtirish: ${exchangedSales.length} ta
-Sabablar: ${Object.entries(cancelReasons).sort((a,b) => b[1]-a[1]).slice(0,3).map(([r,n]) => `${r}(${n})`).join(', ') || 'yo\'q'}
+❌ HAQIQIY BEKOR (pul qaytarilgan): ${cancelledSales.length} ta — bekor foizi: ${((cancelledSales.length / Math.max(1, completedSales.length + cancelledSales.length)) * 100).toFixed(1)}%
+🔄 ALMASHTIRISH (bu BEKOR EMAS — tovar almashtirildi, yangi sotuv yaratildi): ${exchangedSales.length} ta
+Bekor sabablari: ${Object.entries(cancelReasons).sort((a,b) => b[1]-a[1]).slice(0,3).map(([r,n]) => `${r}(${n})`).join(', ') || 'yo\'q'}
 
 📦 FAOL BRONLAR: ${reservations.length} ta
 🎯 FAOL AKSIYALAR: ${activePromos.length > 0 ? activePromos.map(p => p.name).join(', ') : 'yo\'q'}

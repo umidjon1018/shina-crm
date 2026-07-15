@@ -26,7 +26,7 @@ function StaffTab({ aiData = {} }) {
       const sid = sale.soldBy || 'unknown'
       const name = sale.soldByName || sale.cashierName || 'Noma\'lum'
       if (!map[sid]) map[sid] = { id: sid, name, sales: 0, revenue: 0, profit: 0, cancelled: 0 }
-      if (sale.status === 'cancelled') map[sid].cancelled++
+      if (sale.status === 'cancelled' && !sale._isExchange) map[sid].cancelled++
       else {
         map[sid].sales++
         map[sid].revenue += sale.total || 0
@@ -52,7 +52,7 @@ Umumiy tushum: ${fmtNum(totalRevenue, t)} so'm
 Bu oy sotuvlar: ${thisMonthSales.length} ta
 
 XODIM REYTINGI (tushum bo'yicha):
-${staffStats.map((s, i) => `${i+1}. ${s.name}: ${s.sales} ta sotuv, ${fmtNum(s.revenue, t)} so'm, ${fmtNum(s.profit, t)} so'm foyda, ${s.cancelled} ta bekor`).join('\n')}
+${staffStats.map((s, i) => `${i+1}. ${s.name}: ${s.sales} ta sotuv, ${fmtNum(s.revenue, t)} so'm, ${fmtNum(s.profit, t)} so'm foyda, ${s.cancelled} ta HAQIQIY BEKOR (almashtirish hisobsiz)`).join('\n')}
 
 ${staffStats.length > 1 ? `Eng samarali: ${staffStats[0].name} (${fmtNum(staffStats[0].revenue, t)} so'm)
 Eng ko'p bekor: ${[...staffStats].sort((a,b) => b.cancelled - a.cancelled)[0].name} (${[...staffStats].sort((a,b) => b.cancelled - a.cancelled)[0].cancelled} ta bekor)` : ''}`,

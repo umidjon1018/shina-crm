@@ -269,7 +269,7 @@ function MarketingTab({ aiData = {} }) {
     buildPrompt: () => `MARKETING VA KONTENT STRATEGIYASI MA'LUMOTLARI:
 
 📅 FASL VA DAVR: ${currentMonth}-oy, fasl: ${seasonLabel}
-Bu oy sotuv: ${thisMonthRev.toLocaleString()} so'm | O'tgan oy: ${lastMonthRev.toLocaleString()} so'm | O'sish: ${revGrowth}%
+Bu oy sotilgan: ${MOCK_SALES.filter(s => s.soldAt?.startsWith(thisMonthKey)).length} ta | O'tgan oy: ${MOCK_SALES.filter(s => s.soldAt?.startsWith(lastMonthKey)).length} ta | O'sish: ${revGrowth}%
 
 🚀 ENG TEZ SOTILADIGAN (upsell uchun):
 ${topFast.map((p, i) => `${i+1}. ${p.name} (${p.brand}): jami ${p.total} ta, bu oy ${p.thisMonth} ta`).join('\n') || 'yo\'q'}
