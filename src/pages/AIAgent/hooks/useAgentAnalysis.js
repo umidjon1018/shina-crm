@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { streamChat } from '../../../api/aiService'
 import { useSettingsStore } from '../../../store/settingsStore'
+import { useDataStore } from '../../../store/dataStore'
 
 // Max 4 KPI, 3 alert, 2 insight, 3 recommendation — token limiti uchun qisqa
 const JSON_INSTRUCTION = `
@@ -182,6 +183,7 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
           setCache(agentId, parsed)
           setAnalysis(parsed)
           setError(null)
+          useDataStore.getState().bump()
         } else {
           setAnalysis({ raw: fullText || 'Javob bo\'sh qaytdi. Qayta urinib ko\'ring.' })
         }
