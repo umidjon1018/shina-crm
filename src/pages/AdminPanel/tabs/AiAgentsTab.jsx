@@ -33,6 +33,15 @@ const TOOL_LABELS = {
   get_barcodes_summary:  'Barkodlar holati',
 }
 
+// Har agent uchun qaysi toollar ko'rinishi kerak
+const AGENT_TOOLS = {
+  'sales-agent':    ['get_sales_summary', 'get_customer_debts', 'get_profit_by_brand', 'get_recent_returns', 'get_supplier_debts', 'get_expenses_summary', 'get_capital_summary', 'get_discounts_summary'],
+  'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
+  'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_discounts_summary'],
+  'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary'],
+  'staff-agent':    ['get_sales_summary', 'get_top_products'],
+}
+
 const INTEGRATION_CONFIG = {
   'pr-agent': [
     { key: 'higgsfield.apiKey',  label: 'Higgsfield API kalit',   type: 'password', placeholder: 'hf-...' },
@@ -63,7 +72,8 @@ function setNestedValue(obj, path, value) {
   return result
 }
 
-function AgentCard({ agent, availableTools, onSave }) {
+function AgentCard({ agent, onSave }) {
+  const availableTools = AGENT_TOOLS[agent.slug] || []
   const [form, setForm] = useState({
     systemPrompt: agent.systemPrompt || '',
     knowledge:    agent.knowledge || '',
@@ -374,7 +384,6 @@ export default function AiAgentsTab() {
         <AgentCard
           key={agent.id}
           agent={agent}
-          availableTools={availableTools}
           onSave={handleSave}
         />
       ))}
