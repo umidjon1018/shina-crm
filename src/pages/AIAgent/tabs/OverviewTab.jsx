@@ -22,15 +22,17 @@ function OverviewTab({ onTabChange, aiData = {} }) {
   const { activities } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { sales: _allSales = [], products: MOCK_PRODUCTS = [], items: MOCK_ITEMS = [], batches: _allBatches = [], customers: MOCK_CUSTOMERS = [] } = aiData
+  const { sales: _allSales = [], products: MOCK_PRODUCTS = [], items: MOCK_ITEMS = [], batches: _allBatches = [], customers: MOCK_CUSTOMERS = [], usedSales: _allUsedSales = [] } = aiData
   const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
+  const MOCK_USED_SALES = _allUsedSales.filter(s => s.status !== 'cancelled')
 
   const agentStats = useMemo(() => {
     const shopBatches = selectedShopId === 'all' ? _allBatches : _allBatches.filter(b => b.shopId === selectedShopId)
     const shopBatchIds = new Set(shopBatches.map(b => b.id))
     const getShopStock = (productId) => MOCK_ITEMS.filter(i => i.productId === productId && i.status === 'in_stock' && (selectedShopId === 'all' || shopBatchIds.has(i.batchId))).length
     const completedSales = MOCK_SALES.filter(s => s.status !== 'cancelled')
-    const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0)
+    const usedRevenue = MOCK_USED_SALES.reduce((s, x) => s + (x.total || 0), 0)
+    const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0) + usedRevenue
     const inventoryItems = MOCK_PRODUCTS.filter(p => shopBatches.some(b => b.productId === p.id)).map(p => ({ ...p, stock: getShopStock(p.id) }))
     const lowStock = inventoryItems.filter(p => p.stock <= (p.lowStockThreshold || 3)).length
 
@@ -47,7 +49,7 @@ function OverviewTab({ onTabChange, aiData = {} }) {
     return [
       {
         id: 'sales', label: t('ai_agent_sales'), Icon: TrendingUp, color: TAB_COLORS.sales,
-        stat: fmtNum(totalRevenue, t) + ' ' + t('unit_som'), sub: `${completedSales.length} ${t('ai_sales_count')}`,
+        stat: fmtNum(totalRevenue, t) + ' ' + t('unit_som'), sub: `${completedSales.length + MOCK_USED_SALES.length} ${t('ai_sales_count')}`,
         status: lowMarginBrands > 0 ? 'attention' : 'active', alerts: lowMarginBrands,
       },
       {
@@ -71,7 +73,7 @@ function OverviewTab({ onTabChange, aiData = {} }) {
         status: 'active', alerts: 0,
       },
     ]
-  }, [activities, version, t, selectedShopId])
+  }, [activities, version, t, selectedShopId, aiData])
 
   return (
     <div className="space-y-6">

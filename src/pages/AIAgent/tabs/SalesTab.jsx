@@ -18,8 +18,9 @@ function SalesTab({ aiData = {} }) {
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { sales: _allSales = [], products: MOCK_PRODUCTS = [], batches: MOCK_INCOME_BATCHES = [] } = aiData
+  const { sales: _allSales = [], products: MOCK_PRODUCTS = [], batches: MOCK_INCOME_BATCHES = [], usedSales: _allUsedSales = [] } = aiData
   const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
+  const MOCK_USED_COMPLETED = _allUsedSales.filter(s => s.status !== 'cancelled')
   const MOCK_EXPENSES = []
   const [insightRead, setInsightRead] = useState(new Set())
   const [insightDeleted, setInsightDeleted] = useState(new Set())
@@ -49,7 +50,7 @@ function SalesTab({ aiData = {} }) {
     })).sort((a, b) => b.profit - a.profit)
   }, [completedSales, version])
 
-  const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0)
+  const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0) + MOCK_USED_COMPLETED.reduce((s, x) => s + (x.total || 0), 0)
   const totalCost = completedSales.reduce((sum, sale) => sum + sale.items.reduce((s, i) => s + (i.purchasePrice || 0), 0), 0)
   const totalProfit = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
   const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0

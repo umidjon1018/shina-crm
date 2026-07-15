@@ -8,6 +8,7 @@ import { getCustomers } from '../../api/customerService'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
 import { getIncomeBatches } from '../../api/incomeService'
+import { getUsedSales } from '../../api/usedService'
 import OverviewTab from './tabs/OverviewTab'
 import SalesTab from './tabs/SalesTab'
 import InventoryTab from './tabs/InventoryTab'
@@ -19,11 +20,11 @@ export const AIAgent = () => {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
 
-  const [aiData, setAiData] = useState({ sales: [], customers: [], products: [], items: [], batches: [] })
+  const [aiData, setAiData] = useState({ sales: [], customers: [], products: [], items: [], batches: [], usedSales: [] })
   useEffect(() => {
-    Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches()])
-      .then(([sales, customers, products, items, batches]) => {
-        setAiData({ sales, customers, products, items, batches })
+    Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches(), getUsedSales()])
+      .then(([sales, customers, products, items, batches, usedSales]) => {
+        setAiData({ sales, customers, products, items, batches, usedSales })
       }).catch((err) => console.error('[AIAgent] data load xatosi:', err))
   }, [])
 
