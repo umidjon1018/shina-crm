@@ -37,7 +37,7 @@ function AgentActivityFeed({ agentId }) {
             </button>
           )}
           <button
-            onClick={clearAllActivities}
+            onClick={() => { if (window.confirm(`${list.length} ta xabarning barchasini o'chirasizmi?`)) clearAllActivities() }}
             className="text-xs px-2.5 py-1 rounded-lg border border-[#E63946]/30 hover:bg-[#E63946]/10 text-[#E63946] transition-colors flex items-center gap-1"
           >
             <Trash2 size={11} /> Barchasini o'chir
