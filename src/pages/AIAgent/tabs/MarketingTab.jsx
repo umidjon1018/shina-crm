@@ -73,9 +73,7 @@ function MarketingTab({ aiData = {} }) {
     return hasStock && !productVelocity.find(pv => pv.name === p.name)
   }).slice(0, 5)
 
-  const activePromos   = MOCK_PROMOTIONS.filter(p => p.isActive)
-  const totalExpenses  = MOCK_EXPENSES.reduce((s, e) => s + (e.amountUZS || 0), 0)
-  const netCashFlow    = totalProfit - totalExpenses
+  const activePromos    = MOCK_PROMOTIONS.filter(p => p.isActive)
   const inventoryAlerts = getActivitiesByAgent('inventory').filter(a => a.type === 'ALERT').slice(0, 3)
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
