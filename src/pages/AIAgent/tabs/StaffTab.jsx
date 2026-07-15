@@ -16,12 +16,14 @@ function StaffTab({ aiData = {} }) {
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { sales: _allSales = [] } = aiData
+  const { sales: _allSales = [], usedSales: _allUsedSales = [] } = aiData
   const MOCK_SALES = selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)
+  const MOCK_USED_COMPLETED = _allUsedSales.filter(s => s.status !== 'cancelled')
 
   const staffStats = useMemo(() => {
     const map = {}
-    MOCK_SALES.forEach(sale => {
+    const allSales = [...MOCK_SALES, ...MOCK_USED_COMPLETED]
+    allSales.forEach(sale => {
       const sid = sale.soldBy || 'unknown'
       const name = sale.soldByName || sale.cashierName || 'Noma\'lum'
       if (!map[sid]) map[sid] = { id: sid, name, sales: 0, revenue: 0, profit: 0, cancelled: 0 }
@@ -33,7 +35,7 @@ function StaffTab({ aiData = {} }) {
       }
     })
     return Object.values(map).sort((a, b) => b.revenue - a.revenue)
-  }, [MOCK_SALES, version])
+  }, [MOCK_SALES, MOCK_USED_COMPLETED, version])
 
   const totalRevenue = staffStats.reduce((s, x) => s + x.revenue, 0)
   const totalSales = staffStats.reduce((s, x) => s + x.sales, 0)

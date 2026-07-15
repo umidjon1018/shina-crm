@@ -22,10 +22,17 @@ function SalesTab({ aiData = {} }) {
 
   const completedSales = MOCK_SALES.filter(s => s.status !== 'cancelled')
   const cancelledSales = MOCK_SALES.filter(s => s.status === 'cancelled')
-  const totalRevenue = completedSales.reduce((s, x) => s + x.total, 0) + MOCK_USED_COMPLETED.reduce((s, x) => s + (x.total || 0), 0)
-  const totalProfit = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  // Haqiqiy bekor (pul qaytarilgan) vs almashtirish (exchange)
+  const realCancelled = cancelledSales.filter(s => !s._isExchange)
+  const exchanged = cancelledSales.filter(s => s._isExchange)
+  const totalNewRevenue = completedSales.reduce((s, x) => s + x.total, 0)
+  const totalUsedRevenue = MOCK_USED_COMPLETED.reduce((s, x) => s + (x.total || 0), 0)
+  const totalRevenue = totalNewRevenue + totalUsedRevenue
+  const totalNewProfit = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  const totalUsedProfit = MOCK_USED_COMPLETED.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  const totalProfit = totalNewProfit + totalUsedProfit
   const avgMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0
-  const returnRate = MOCK_SALES.length > 0 ? ((cancelledSales.length / MOCK_SALES.length) * 100).toFixed(1) : 0
+  const returnRate = MOCK_SALES.length > 0 ? ((realCancelled.length / MOCK_SALES.length) * 100).toFixed(1) : 0
 
   const brandData = useMemo(() => {
     const map = {}
@@ -63,20 +70,17 @@ function SalesTab({ aiData = {} }) {
     buildPrompt: () => `SAVDO TAHLILI MA'LUMOTLARI:
 
 Jami sotuvlar: ${completedSales.length} ta yangi + ${MOCK_USED_COMPLETED.length} ta B/U = ${completedSales.length + MOCK_USED_COMPLETED.length} ta
-Bekor sotuvlar: ${cancelledSales.length} ta (${returnRate}%)
-Umumiy tushum: ${fmtNum(totalRevenue, t)} so'm
-  - Yangi tovar: ${fmtNum(completedSales.reduce((s,x)=>s+x.total,0), t)} so'm
-  - B/U tovar: ${fmtNum(MOCK_USED_COMPLETED.reduce((s,x)=>s+(x.total||0),0), t)} so'm
-Sof foyda (yangi): ${fmtNum(totalProfit, t)} so'm
+Bekor (pul qaytarilgan): ${realCancelled.length} ta
+Almashtirish (exchange): ${exchanged.length} ta
+Umumiy tushum: ${fmtNum(totalRevenue, t)} so'm (yangi: ${fmtNum(totalNewRevenue, t)}, B/U: ${fmtNum(totalUsedRevenue, t)})
+Sof foyda: ${fmtNum(totalProfit, t)} so'm (yangi: ${fmtNum(totalNewProfit, t)}, B/U: ${fmtNum(totalUsedProfit, t)})
 O'rtacha marja: ${avgMargin}%
 Shu oy sotuv: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
-
 To'lov usuli: naqd ${payStats.cash||0} ta, karta ${payStats.card||0} ta, nasiya ${payStats.installment||0} ta
 
-Brend tahlili (foyda bo'yicha top-${Math.min(7, brandData.length)}):
-${brandData.slice(0, 7).map((b, i) => `${i+1}. ${b.brand}: ${b.qty} ta sotilgan, ${b.margin}% marja, ${fmtNum(b.profit, t)} so'm foyda`).join('\n')}
-
-Past marja brendlar (<20%): ${brandData.filter(b => parseFloat(b.margin) < 20).map(b => b.brand + ' (' + b.margin + '%)').join(', ') || 'yo\'q'}`,
+Brend tahlili (top-${Math.min(5, brandData.length)}):
+${brandData.slice(0, 5).map((b, i) => `${i+1}. ${b.brand}: ${b.qty} ta, ${b.margin}% marja, ${fmtNum(b.profit, t)} so'm foyda`).join('\n')}
+Past marja (<20%): ${brandData.filter(b => parseFloat(b.margin) < 20).map(b => b.brand + ' (' + b.margin + '%)').join(', ') || 'yo\'q'}`,
     deps: [version, selectedShopId, completedSales.length, totalRevenue],
   })
 

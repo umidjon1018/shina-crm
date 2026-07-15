@@ -16,12 +16,15 @@ function MarketingTab({ aiData = {} }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { customers: MOCK_CUSTOMERS = [], sales: _allSales = [], products: MOCK_PRODUCTS = [] } = aiData
+  const { customers: MOCK_CUSTOMERS = [], sales: _allSales = [], products: MOCK_PRODUCTS = [], usedSales: _allUsedSales = [] } = aiData
   const MOCK_SALES = (selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId)).filter(s => s.status !== 'cancelled')
+  const MOCK_USED_COMPLETED = _allUsedSales.filter(s => s.status !== 'cancelled')
 
   const currentMonth = new Date().getMonth() + 1
-  const thisMonthSales = MOCK_SALES.filter(s => s.soldAt?.startsWith(new Date().toISOString().slice(0, 7)))
-  const thisMonthRev = thisMonthSales.reduce((s, x) => s + x.total, 0)
+  const thisMonthKey = new Date().toISOString().slice(0, 7)
+  const thisMonthSales = MOCK_SALES.filter(s => s.soldAt?.startsWith(thisMonthKey))
+  const thisMonthUsed = MOCK_USED_COMPLETED.filter(s => s.soldAt?.startsWith(thisMonthKey))
+  const thisMonthRev = thisMonthSales.reduce((s, x) => s + x.total, 0) + thisMonthUsed.reduce((s, x) => s + (x.total || 0), 0)
 
   // Segmentlar
   const vipCount = MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length
@@ -50,7 +53,7 @@ function MarketingTab({ aiData = {} }) {
     buildPrompt: () => `MARKETING TAHLILI MA'LUMOTLARI:
 
 Hozirgi oy: ${currentMonth}-oy (${currentMonth >= 3 && currentMonth <= 8 ? 'YOZ' : 'QIŠ'} fasl)
-Bu oy sotuv: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
+Bu oy sotuv: ${fmtNum(thisMonthRev, t)} so'm (yangi: ${thisMonthSales.length} ta, B/U: ${thisMonthUsed.length} ta)
 Rejalangan postlar: ${plannedPosts} ta
 
 MIJOZ SEGMENTLARI:
