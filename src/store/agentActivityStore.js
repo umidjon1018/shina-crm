@@ -67,7 +67,7 @@ export const useAgentActivityStore = create(
       addActivity: (activity) => set(state => ({
         activities: [
           {
-            id: 'act-' + Date.now(),
+            id: 'act-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
             timestamp: new Date().toISOString(),
             read: false,
             ...activity,

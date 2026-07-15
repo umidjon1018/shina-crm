@@ -1,6 +1,6 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
-export const streamChat = async ({ messages, systemPrompt, onToken, onDone, onError }) => {
+export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onModel, onDone, onError }) => {
   const token = localStorage.getItem('shina_token')
 
   let response
@@ -11,7 +11,7 @@ export const streamChat = async ({ messages, systemPrompt, onToken, onDone, onEr
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ messages, systemPrompt }),
+      body: JSON.stringify({ messages, agentId, systemPrompt }),
     })
   } catch (err) {
     onError?.('Server bilan aloqa yo\'q')
@@ -46,6 +46,7 @@ export const streamChat = async ({ messages, systemPrompt, onToken, onDone, onEr
       try {
         const parsed = JSON.parse(data)
         if (parsed.error) { onError?.(parsed.error); return }
+        else if (parsed.model) onModel?.(parsed.model)
         else if (parsed.text) onToken?.(parsed.text)
       } catch {}
     }
