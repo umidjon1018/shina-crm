@@ -56,8 +56,10 @@ const ProfitTab = ({ ctx }) => {
   const combinedMonthlyChart = React.useMemo(() => {
     const usedAll = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled')
     return profitStats.monthlyChart.map(m => {
-      const sotuv_bu = usedAll.filter(s => s.soldAt && s.soldAt.startsWith(m.month)).reduce((s,x) => s + (x.total||0), 0)
-      return { ...m, sotuv_bu, sotuv_total: m.sotuv + sotuv_bu }
+      const monthUsed = usedAll.filter(s => s.soldAt && s.soldAt.startsWith(m.month))
+      const sotuv_bu  = monthUsed.reduce((s,x) => s + (x.total||0), 0)
+      const foyda_bu  = monthUsed.reduce((s,x) => s + getUsedSaleProfit(x) - (x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0)
+      return { ...m, sotuv_bu, sotuv_total: m.sotuv + sotuv_bu, foyda_bu, foyda_total: m.foyda + foyda_bu, sof_total: m.sof + foyda_bu }
     })
   }, [profitStats.monthlyChart, MOCK_USED_SALES])
 
@@ -734,18 +736,28 @@ const ProfitTab = ({ ctx }) => {
                         <span className="text-[10px] text-amber-400">B/U: {fmtUZS(combinedMonthlyChart.reduce((s,m)=>s+m.sotuv_bu,0))}</span>
                       </div>
                     </div>
-                    {[
-                      { label:t('rep_profit_total_exp_label'),   key:'xarajat', color: C.red },
-                      { label:t('col_gross_profit'), key:'foyda',   color: C.green },
-                      { label:t('col_net_profit'),   key:'sof',     color: C.teal },
-                    ].map(item => (
-                      <div key={item.key} className="bg-bg-tertiary rounded-xl p-4">
-                        <p className="text-text-muted text-xs mb-1">{item.label}</p>
-                        <p className="font-syne font-bold text-lg" style={{ color: item.color }}>
-                          {fmtUZS(profitStats.monthlyChart.reduce((s,m) => s+m[item.key], 0))}
-                        </p>
+                    <div className="bg-bg-tertiary rounded-xl p-4">
+                      <p className="text-text-muted text-xs mb-1">{t('rep_profit_total_exp_label')}</p>
+                      <p className="font-syne font-bold text-lg" style={{ color: C.red }}>
+                        {fmtUZS(combinedMonthlyChart.reduce((s,m) => s+m.xarajat, 0))}
+                      </p>
+                    </div>
+                    <div className="bg-bg-tertiary rounded-xl p-4">
+                      <p className="text-text-muted text-xs mb-1">{t('col_gross_profit')}</p>
+                      <p className="font-syne font-bold text-lg" style={{ color: C.green }}>
+                        {fmtUZS(combinedMonthlyChart.reduce((s,m) => s+m.foyda_total, 0))}
+                      </p>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        <span className="text-[10px] text-accent-green">Yangi: {fmtUZS(combinedMonthlyChart.reduce((s,m)=>s+m.foyda,0))}</span>
+                        <span className="text-[10px] text-amber-400">B/U: {fmtUZS(combinedMonthlyChart.reduce((s,m)=>s+m.foyda_bu,0))}</span>
                       </div>
-                    ))}
+                    </div>
+                    <div className="bg-bg-tertiary rounded-xl p-4">
+                      <p className="text-text-muted text-xs mb-1">{t('col_net_profit')}</p>
+                      <p className="font-syne font-bold text-lg" style={{ color: C.teal }}>
+                        {fmtUZS(combinedMonthlyChart.reduce((s,m) => s+m.sof_total, 0))}
+                      </p>
+                    </div>
                   </div>
                   {/* Grafik */}
                   <div className="h-[280px] w-full mb-6">
@@ -763,11 +775,11 @@ const ProfitTab = ({ ctx }) => {
                           isAnimationActive={false}
                           wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
                         <Legend iconType="circle" />
-                        <Bar dataKey="sotuv"    fill={C.blue}   radius={[4,4,0,0]} name="Yangi sotuv" />
-                        <Bar dataKey="sotuv_bu" fill="#f59e0b"  radius={[4,4,0,0]} name="B/U sotuv" />
-                        <Bar dataKey="xarajat"  fill={C.red}    radius={[4,4,0,0]} name={t('rep_chart_expense')} />
-                        <Bar dataKey="foyda"    fill={C.green}  radius={[4,4,0,0]} name={t('rep_profit_gross_label')} />
-                        <Bar dataKey="sof"      fill={C.teal}   radius={[4,4,0,0]} name={t('col_net_profit')} />
+                        <Bar dataKey="sotuv"       fill={C.blue}   radius={[4,4,0,0]} name="Yangi sotuv" />
+                        <Bar dataKey="sotuv_bu"    fill="#f59e0b"  radius={[4,4,0,0]} name="B/U sotuv" />
+                        <Bar dataKey="xarajat"     fill={C.red}    radius={[4,4,0,0]} name={t('rep_chart_expense')} />
+                        <Bar dataKey="foyda_total" fill={C.green}  radius={[4,4,0,0]} name={t('rep_profit_gross_label')} />
+                        <Bar dataKey="sof_total"   fill={C.teal}   radius={[4,4,0,0]} name={t('col_net_profit')} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -794,8 +806,8 @@ const ProfitTab = ({ ctx }) => {
                             <td className="px-4 py-3 text-right text-amber-400">{fmtUZS(m.sotuv_bu)}</td>
                             <td className="px-4 py-3 text-right font-bold text-text-primary">{fmtUZS(m.sotuv_total)}</td>
                             <td className="px-4 py-3 text-right text-accent-red">{fmtUZS(m.xarajat)}</td>
-                            <td className="px-4 py-3 text-right text-accent-green font-bold">{fmtUZS(m.foyda)}</td>
-                            <td className="px-4 py-3 text-right font-bold" style={{ color: m.sof>=0?C.teal:C.red }}>{fmtUZS(m.sof)}</td>
+                            <td className="px-4 py-3 text-right text-accent-green font-bold">{fmtUZS(m.foyda_total)}</td>
+                            <td className="px-4 py-3 text-right font-bold" style={{ color: m.sof_total>=0?C.teal:C.red }}>{fmtUZS(m.sof_total)}</td>
                             <td className="px-4 py-3 text-center">
                               {m.growthSof !== null
                                 ? <GrowthBadge current={m.sof} previous={m.sof/(1+m.growthSof/100)} />
