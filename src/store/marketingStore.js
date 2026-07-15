@@ -10,7 +10,7 @@ export const useMarketingStore = create(
       addScenario: (scenario) => set(state => ({
         scenarios: [
           {
-            id: 'sc-' + Date.now(),
+            id: 'sc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
             status: 'draft',
             createdAt: new Date().toISOString(),
             approvedAt: null,
