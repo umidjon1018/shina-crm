@@ -5,10 +5,10 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 
 const AGENT_ICONS = {
-  'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-accent-green/30' },
-  'product-agent':  { Icon: Package,      color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-accent-red/30' },
-  'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-accent-orange/30' },
-  'customer-agent': { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-accent-blue/30' },
+  'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-border' },
+  'product-agent':  { Icon: Package,      color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-border' },
+  'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-border' },
+  'customer-agent': { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-border' },
   'staff-agent':    { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-border' },
 }
 
