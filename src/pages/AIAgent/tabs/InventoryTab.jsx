@@ -42,7 +42,7 @@ function InventoryTab({ aiData = {} }) {
   const totalItems = inventoryData.reduce((s, p) => s + p.stock, 0)
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
-    agentId: 'inventory-agent',
+    agentId: 'product-agent',
     systemPrompt: SYSTEM_PROMPT,
     enabled: inventoryData.length > 0,
     buildPrompt: () => `INVENTAR TAHLILI MA'LUMOTLARI:
@@ -90,7 +90,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#E63946]"
       />
-      <AiChat agentId="inventory-agent" systemPrompt={chatSystemPrompt} colorClass="accent-red" />
+      <AiChat agentId="product-agent" systemPrompt={chatSystemPrompt} colorClass="accent-red" />
     </div>
   )
 }

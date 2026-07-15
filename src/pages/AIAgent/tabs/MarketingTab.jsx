@@ -44,7 +44,7 @@ function MarketingTab({ aiData = {} }) {
   const plannedPosts = MOCK_CALENDAR?.length || 0
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
-    agentId: 'marketing-agent',
+    agentId: 'pr-agent',
     systemPrompt: SYSTEM_PROMPT,
     enabled: true,
     buildPrompt: () => `MARKETING TAHLILI MA'LUMOTLARI:
@@ -95,7 +95,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#f97316]"
       />
-      <AiChat agentId="marketing-agent" systemPrompt={chatSystemPrompt} colorClass="accent-orange" />
+      <AiChat agentId="pr-agent" systemPrompt={chatSystemPrompt} colorClass="accent-orange" />
     </div>
   )
 }

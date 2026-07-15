@@ -9,8 +9,8 @@ import AgentActivityFeed from '../components/ActivityFeed'
 
 const AGENT_IDS = {
   sales:     'sales-agent',
-  inventory: 'inventory-agent',
-  marketing: 'marketing-agent',
+  inventory: 'product-agent',
+  marketing: 'pr-agent',
   customer:  'customer-agent',
   staff:     'staff-agent',
 }
