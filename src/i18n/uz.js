@@ -1439,6 +1439,7 @@ export default {
   // AI Agent
   ai_tab_overview: 'Umumiy holat',
   ai_tab_sales: 'Savdo',
+  ai_tab_inventory: 'Tovar bazasi',
   ai_tab_marketing: 'Marketing',
   ai_tab_customer: 'Mijozlar',
   ai_tab_staff: 'Xodimlar',

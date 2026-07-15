@@ -34,7 +34,7 @@ export const AIAgent = () => {
   const TABS = [
     { id: 'overview',  label: t('ai_tab_overview'), Icon: Activity,   color: TAB_COLORS.overview },
     { id: 'sales',     label: t('ai_tab_sales'),    Icon: TrendingUp, color: TAB_COLORS.sales },
-    { id: 'inventory', label: t('warehouse'),        Icon: Package,    color: TAB_COLORS.inventory },
+    { id: 'inventory', label: t('ai_tab_inventory'),  Icon: Package,    color: TAB_COLORS.inventory },
     { id: 'marketing', label: t('ai_tab_marketing'),Icon: Megaphone,  color: TAB_COLORS.marketing },
     { id: 'customer',  label: t('ai_tab_customer'), Icon: Users,      color: TAB_COLORS.customer },
     { id: 'staff',     label: t('ai_tab_staff'),    Icon: UserCheck,  color: TAB_COLORS.staff },
