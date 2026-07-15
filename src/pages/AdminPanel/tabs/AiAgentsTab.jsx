@@ -30,6 +30,7 @@ const TOOL_LABELS = {
   get_expenses_summary:  'Xarajatlar xulosasi',
   get_capital_summary:   'Jalb qilingan mablag\'lar',
   get_discounts_summary: 'Chegirmalar, aksiyalar va sodiqlik',
+  get_barcodes_summary:  'Barkodlar holati',
 }
 
 const INTEGRATION_CONFIG = {
