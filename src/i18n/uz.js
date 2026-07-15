@@ -1453,6 +1453,7 @@ export default {
   ai_status_active: 'Faol',
   ai_status_attention: 'Diqqat talab',
   ai_status_paused: "To'xtatilgan",
+  ai_type_alert: 'Ogohlantirish',
   ai_type_recommendation: 'Tavsiya',
   ai_type_analysis: 'Tahlil',
   ai_type_booking: 'Bron',

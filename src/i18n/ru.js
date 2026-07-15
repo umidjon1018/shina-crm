@@ -1442,6 +1442,7 @@ export default {
   ai_status_active: 'Активен',
   ai_status_attention: 'Требует внимания',
   ai_status_paused: 'Приостановлен',
+  ai_type_alert: 'Предупреждение',
   ai_type_recommendation: 'Рекомендация',
   ai_type_analysis: 'Анализ',
   ai_type_booking: 'Бронь',
