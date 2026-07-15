@@ -48,7 +48,7 @@ const SalesTab = ({ ctx }) => {
     USD_RATE,
     storeInstallmentOrgs, storeMonthlyTargets, storeEmployeeTargets,
     storeCompanyName, storeProductCategories,
-    MOCK_SALES, MOCK_PRODUCTS, MOCK_USED_SALES,
+    MOCK_SALES, MOCK_PRODUCTS,
   } = ctx
 
   return (
@@ -428,24 +428,17 @@ const SalesTab = ({ ctx }) => {
             </div>
       {modal === 'salesTotalModal' && (() => {
         const monthlyData = getMonthlySalesChart()
-        const usedSales = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled')
-        const filteredNew = (modalFilter === 'all'
+        const filtered = (modalFilter === 'all'
           ? MOCK_SALES.filter(s => s.status !== 'cancelled')
           : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
-        )
-        const filteredUsed = (modalFilter === 'all'
-          ? usedSales
-          : usedSales.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
-        )
-        const filtered = [...filteredNew, ...filteredUsed].sort((a,b) => (b.soldAt||'').localeCompare(a.soldAt||''))
-        const totalAmt = filtered.reduce((s, x) => s + (x.total || 0), 0)
+        ).sort((a,b) => b.total - a.total)
 
         return (
           <Modal open title={t('rep_sales_modal_title')} subtitle={t('rep_sales_modal_sub')} size="xl" onClose={closeModal}>
             {/* Filtr */}
             <div className="flex items-center justify-between mb-5">
               <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
-              <span className="text-text-muted text-xs">{filtered.length} {t('unit_pcs')} {t('rep_monthly_sales_suffix')} · {fmtUZS(totalAmt)}</span>
+              <span className="text-text-muted text-xs">{filtered.length} {t('unit_pcs')} {t('rep_monthly_sales_suffix')}</span>
             </div>
 
             {/* Oylik dinamika */}
@@ -481,15 +474,15 @@ const SalesTab = ({ ctx }) => {
               pageSize={10}
               columns={[
                 { key:'soldAt',       label:t('col_date'),      render: r => <span className="whitespace-nowrap text-xs">{fmtSoldAt(r.soldAt)}</span> },
-                { key:'items',        label:t('col_product'),      render: r => <span className="text-xs text-text-secondary">{r.isUsedSale ? (r.items?.[0]?.name || '—') : fmtItems(r.items)}{r.isUsedSale && <span className="ml-1 px-1 py-0.5 rounded bg-amber-400/10 text-amber-400 text-[9px] font-bold">B/U</span>}</span> },
+                { key:'items',        label:t('col_product'),      render: r => <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span> },
                 { key:'customerName', label:t('col_customer'),      render: r => (
                   <span className="font-medium text-text-primary text-xs">
                     {r.customerName}
                     {r.isNewCustomer && <span className="ml-1 px-1 py-0.5 rounded bg-accent-blue/10 text-accent-blue text-[9px] font-bold">{t('rep_new_badge', 'YANGI')}</span>}
                   </span>
                 )},
-                { key:'soldByName',   label:t('col_employee'),      render: r => <span className="text-xs text-text-secondary">{r.soldByName || r.soldBy || '—'}</span> },
-                { key:'qty',          label:t('rep_col_qty'), align:'center', render: r => <span className="font-bold">{r.items?.reduce((s,i)=>s+(i.qty||1),0) || r.qty || 1}</span> },
+                { key:'soldByName',   label:t('col_employee'),      render: r => <span className="text-xs text-text-secondary">{r.soldByName || '—'}</span> },
+                { key:'qty',          label:t('rep_col_qty'), align:'center', render: r => <span className="font-bold">{r.items?.reduce((s,i)=>s+(i.qty||1),0) || 1}</span> },
                 { key:'discount',     label:t('col_discount'), align:'center', render: r => r.discount > 0
                   ? <span className="text-accent-orange font-bold text-xs">-{r.discount}%</span>
                   : <span className="text-text-muted">—</span>
