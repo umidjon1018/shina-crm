@@ -46,13 +46,13 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
     return (
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <Loader2 size={14} className={`animate-spin ${accentColor}`} />
-          <span className="text-sm text-text-muted">AI agent tahlil qilmoqda...</span>
+          <Loader2 size={16} className={`animate-spin ${accentColor}`} />
+          <span className="text-sm text-text-secondary">AI agent tahlil qilmoqda...</span>
         </div>
         <KpiSkeleton />
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-10 bg-bg-secondary border border-border rounded-xl animate-pulse" />
+            <div key={i} className="h-12 bg-bg-secondary border border-border rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -63,8 +63,8 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
     return (
       <div className="bg-[#E63946]/10 border border-[#E63946]/30 rounded-xl p-4 mb-6 flex items-center justify-between">
         <span className="text-[#E63946] text-sm">{error}</span>
-        <button onClick={refresh} className="flex items-center gap-1 text-xs text-[#E63946] hover:underline">
-          <RefreshCw size={12} /> Qayta urinish
+        <button onClick={refresh} className="flex items-center gap-1.5 text-sm text-[#E63946] hover:underline">
+          <RefreshCw size={14} /> Qayta urinish
         </button>
       </div>
     )
@@ -80,15 +80,15 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
     <div className="mb-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-text-muted flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] inline-block" />
+        <span className="text-sm text-text-secondary flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />
           AI tahlil tayyor
         </span>
         <button
           onClick={refresh}
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary transition-colors"
+          className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
         >
-          <RefreshCw size={12} /> Yangilash
+          <RefreshCw size={13} /> Yangilash
         </button>
       </div>
 
@@ -97,11 +97,11 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
         <div className={`grid gap-3 ${kpis.length <= 3 ? 'grid-cols-' + kpis.length : 'grid-cols-2 md:grid-cols-4'}`}>
           {kpis.map((kpi, i) => (
             <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4">
-              <p className="text-text-muted text-xs mb-1.5">{kpi.label}</p>
-              <p className={`font-syne font-bold text-xl ${STATUS_STYLES[kpi.status] || 'text-text-primary'}`}>
+              <p className="text-text-secondary text-sm mb-2">{kpi.label}</p>
+              <p className={`font-syne font-bold text-2xl ${STATUS_STYLES[kpi.status] || 'text-text-primary'}`}>
                 {kpi.value}
               </p>
-              {kpi.sub && <p className="text-text-muted text-xs mt-1">{kpi.sub}</p>}
+              {kpi.sub && <p className="text-text-secondary text-sm mt-1.5">{kpi.sub}</p>}
             </div>
           ))}
         </div>
@@ -113,9 +113,9 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
           {alerts.map((alert, i) => {
             const s = SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.info
             return (
-              <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${s.bg}`}>
-                <s.Icon size={14} className={`${s.text} mt-0.5 flex-shrink-0`} />
-                <span className={`text-sm ${s.text}`}>{alert.message}</span>
+              <div key={i} className={`flex items-start gap-3 p-3.5 rounded-xl border ${s.bg}`}>
+                <s.Icon size={16} className={`${s.text} mt-0.5 flex-shrink-0`} />
+                <span className={`text-sm font-medium ${s.text}`}>{alert.message}</span>
               </div>
             )
           })}
@@ -126,16 +126,16 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
       {(insights.length > 0 || recommendations.length > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {insights.length > 0 && (
-            <div className="bg-bg-secondary border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Lightbulb size={14} className="text-amber-400" />
-                <span className="text-sm font-semibold text-text-primary">Tahlil natijalari</span>
+            <div className="bg-bg-secondary border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Lightbulb size={16} className="text-amber-400" />
+                <span className="text-base font-semibold text-text-primary">Tahlil natijalari</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {insights.map((ins, i) => (
                   <div key={i}>
-                    <p className="text-xs font-semibold text-text-primary">{ins.title}</p>
-                    <p className="text-xs text-text-muted mt-0.5">{ins.description}</p>
+                    <p className="text-sm font-semibold text-text-primary">{ins.title}</p>
+                    <p className="text-sm text-text-secondary mt-1 leading-relaxed">{ins.description}</p>
                   </div>
                 ))}
               </div>
@@ -143,20 +143,20 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
           )}
 
           {recommendations.length > 0 && (
-            <div className="bg-bg-secondary border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Zap size={14} className={accentColor} />
-                <span className="text-sm font-semibold text-text-primary">Tavsiyalar</span>
+            <div className="bg-bg-secondary border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap size={16} className={accentColor} />
+                <span className="text-base font-semibold text-text-primary">Tavsiyalar</span>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 {recommendations.map((rec, i) => {
                   const p = PRIORITY_STYLES[rec.priority] || PRIORITY_STYLES.medium
                   return (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${p.dot} mt-1.5 flex-shrink-0`} />
+                    <div key={i} className="flex items-start gap-2.5">
+                      <div className={`w-2 h-2 rounded-full ${p.dot} mt-2 flex-shrink-0`} />
                       <div>
-                        <p className="text-xs text-text-primary">{rec.action}</p>
-                        {rec.reason && <p className="text-[10px] text-text-muted mt-0.5">{rec.reason}</p>}
+                        <p className="text-sm font-medium text-text-primary">{rec.action}</p>
+                        {rec.reason && <p className="text-sm text-text-secondary mt-0.5 leading-relaxed">{rec.reason}</p>}
                       </div>
                     </div>
                   )
