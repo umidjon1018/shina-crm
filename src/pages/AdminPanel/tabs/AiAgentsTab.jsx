@@ -26,9 +26,10 @@ const TOOL_LABELS = {
   get_top_products:     'Eng ko\'p sotilgan tovarlar',
   get_profit_by_brand:  'Brend bo\'yicha foyda',
   get_recent_returns:   'So\'nggi bekor sotuvlar',
-  get_supplier_debts:   'Yetkazib beruvchilar qarzi',
-  get_expenses_summary: 'Xarajatlar xulosasi',
-  get_capital_summary:  'Jalb qilingan mablag\'lar',
+  get_supplier_debts:    'Yetkazib beruvchilar qarzi',
+  get_expenses_summary:  'Xarajatlar xulosasi',
+  get_capital_summary:   'Jalb qilingan mablag\'lar',
+  get_discounts_summary: 'Chegirmalar, aksiyalar va sodiqlik',
 }
 
 const INTEGRATION_CONFIG = {
