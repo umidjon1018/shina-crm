@@ -31,6 +31,8 @@ const TOOL_LABELS = {
   get_capital_summary:   'Jalb qilingan mablag\'lar',
   get_discounts_summary: 'Chegirmalar, aksiyalar va sodiqlik',
   get_barcodes_summary:  'Barkodlar holati',
+  search_products:       'Tovar qidirish (Instagram/Telegram savollari uchun)',
+  create_reservation:    'Tovar bron qilish (Ombor agentiga buyruq)',
 }
 
 // Har agent uchun qaysi toollar ko'rinishi kerak
@@ -38,7 +40,7 @@ const AGENT_TOOLS = {
   'sales-agent':    ['get_sales_summary', 'get_customer_debts', 'get_profit_by_brand', 'get_recent_returns', 'get_supplier_debts', 'get_expenses_summary', 'get_capital_summary', 'get_discounts_summary'],
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_discounts_summary'],
-  'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary'],
+  'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
   'staff-agent':    ['get_sales_summary', 'get_top_products'],
 }
 
