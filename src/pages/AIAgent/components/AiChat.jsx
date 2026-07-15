@@ -3,6 +3,50 @@ import { Send, Bot, User, Loader2, Trash2 } from 'lucide-react'
 import { useAiStore } from '../../../store/aiStore'
 import { streamChat } from '../../../api/aiService'
 
+const renderMarkdown = (text) => {
+  const lines = text.split('\n')
+  const result = []
+  let tableRows = []
+
+  const flushTable = () => {
+    if (tableRows.length < 2) { tableRows.forEach((r, i) => result.push(<p key={`tp${i}`} className="text-xs">{r}</p>)); tableRows = []; return }
+    const headers = tableRows[0].split('|').map(h => h.trim()).filter(Boolean)
+    const rows = tableRows.slice(2).map(r => r.split('|').map(c => c.trim()).filter(Boolean))
+    result.push(
+      <div key={`tbl${result.length}`} className="overflow-x-auto my-1">
+        <table className="text-xs border-collapse w-full">
+          <thead><tr>{headers.map((h,i) => <th key={i} className="border border-border px-2 py-1 text-left font-semibold bg-bg-tertiary">{h}</th>)}</tr></thead>
+          <tbody>{rows.map((r,i) => <tr key={i}>{r.map((c,j) => <td key={j} className="border border-border px-2 py-1">{c}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+    )
+    tableRows = []
+  }
+
+  lines.forEach((line, i) => {
+    if (line.trim().startsWith('|')) { tableRows.push(line); return }
+    if (tableRows.length) flushTable()
+
+    if (/^###\s/.test(line)) {
+      result.push(<p key={i} className="font-bold text-xs mt-2">{line.replace(/^###\s/, '')}</p>)
+    } else if (/^##\s/.test(line)) {
+      result.push(<p key={i} className="font-bold text-sm mt-2">{line.replace(/^##\s/, '')}</p>)
+    } else if (/^#\s/.test(line)) {
+      result.push(<p key={i} className="font-bold text-sm mt-2">{line.replace(/^#\s/, '')}</p>)
+    } else if (/^[-*]\s/.test(line)) {
+      const inner = line.replace(/^[-*]\s/, '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      result.push(<div key={i} className="flex gap-1.5 text-xs"><span className="mt-0.5 flex-shrink-0">•</span><span dangerouslySetInnerHTML={{ __html: inner }} /></div>)
+    } else if (line.trim() === '') {
+      result.push(<div key={i} className="h-1" />)
+    } else {
+      const inner = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code class="bg-bg-tertiary px-1 rounded text-[10px]">$1</code>')
+      result.push(<p key={i} className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: inner }} />)
+    }
+  })
+  if (tableRows.length) flushTable()
+  return result
+}
+
 const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green' }) => {
   const { chats, createChat, addMessage, updateLastMessage, deleteChat } = useAiStore()
   const [chatId, setChatId] = useState(null)
@@ -68,7 +112,7 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
   const c = colorMap[colorClass] || colorMap['accent-green']
 
   return (
-    <div className="flex flex-col h-96 bg-bg-secondary rounded-xl border border-border overflow-hidden">
+    <div className="flex flex-col h-[600px] bg-bg-secondary rounded-xl border border-border overflow-hidden">
       {/* header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -98,13 +142,13 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
                 ? <User size={10} className={`text-${colorClass}`} />
                 : <Bot size={10} className="text-text-muted" />}
             </div>
-            <div className={`max-w-[82%] px-3 py-2 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${
+            <div className={`max-w-[82%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
               m.role === 'user'
                 ? `${c.user} text-text-primary`
                 : 'bg-bg-primary border border-border text-text-primary'
             }`}>
               {m.content
-                ? m.content
+                ? (m.role === 'assistant' ? <div className="space-y-0.5">{renderMarkdown(m.content)}</div> : m.content)
                 : (streaming && m.role === 'assistant'
                     ? <span className="flex items-center gap-1 text-text-muted"><Loader2 size={11} className="animate-spin" /> Yozmoqda...</span>
                     : null)}
