@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, FileText, Video, Plus, Check, X, ChevronDown, ChevronUp, Film, Clock, Trash2, Edit3 } from 'lucide-react'
+import { TrendingUp, FileText, Video, Plus, Check, X, ChevronDown, ChevronUp, Film, Clock, Trash2, Edit3, Map, CheckCircle2 } from 'lucide-react'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
@@ -206,9 +206,10 @@ function MarketingTab({ aiData = {} }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const { scenarios, addScenario, updateScenario, deleteScenario, approveScenario, rejectScenario, setVideoGenerating, setVideoReady, setInstagramPosted } = useMarketingStore()
+  const { scenarios, addScenario, updateScenario, deleteScenario, approveScenario, rejectScenario, setVideoGenerating, setVideoReady, setInstagramPosted, roadmapItems, addRoadmapItem, toggleRoadmapItem, deleteRoadmapItem } = useMarketingStore()
 
   const [activeSection, setActiveSection] = useState('analysis')
+  const [rmInput, setRmInput]   = useState({ '1oy': '', '3oy': '', '6oy': '' })
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingScenario, setEditingScenario] = useState(null)
 
@@ -314,10 +315,12 @@ VAZIFALAR:
   const approvedCount = scenarios.filter(s => s.status === 'approved').length
   const videoCount    = scenarios.filter(s => ['video_ready', 'posted'].includes(s.status)).length
 
+  const doneCount = roadmapItems.filter(r => r.done).length
   const SECTIONS = [
     { id: 'analysis',  label: 'Tahlil',      Icon: TrendingUp },
     { id: 'scenarios', label: `Ssenariylar${scenarios.length ? ` (${scenarios.length})` : ''}`, Icon: FileText },
     { id: 'videos',    label: `Videolar${videoCount ? ` (${videoCount})` : ''}`, Icon: Video },
+    { id: 'roadmap',   label: `Yo'l xaritasi${roadmapItems.length ? ` (${doneCount}/${roadmapItems.length})` : ''}`, Icon: Map },
   ]
 
   return (
@@ -434,6 +437,100 @@ VAZIFALAR:
                     onPostInstagram={setInstagramPosted}
                   />
                 ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+        {activeSection === 'roadmap' && (
+          <motion.div key="roadmap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+            <p className="text-xs text-text-muted">AI tahlil asosida yoki qo'lda rejalar kiriting. Bajarilganlarni belgilang.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { phase: '1oy',  label: '1 Oy',  color: 'text-[#22c55e]', border: 'border-[#22c55e]/30', bg: 'bg-[#22c55e]/5' },
+                { phase: '3oy',  label: '3 Oy',  color: 'text-[#f97316]', border: 'border-[#f97316]/30', bg: 'bg-[#f97316]/5' },
+                { phase: '6oy',  label: '6 Oy',  color: 'text-accent-blue', border: 'border-accent-blue/30', bg: 'bg-accent-blue/5' },
+              ].map(({ phase, label, color, border, bg }) => {
+                const items = roadmapItems.filter(r => r.phase === phase)
+                const done  = items.filter(r => r.done).length
+                return (
+                  <div key={phase} className={`rounded-2xl border ${border} ${bg} p-4 space-y-3`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-semibold ${color}`}>{label} rejasi</span>
+                      {items.length > 0 && (
+                        <span className="text-xs text-text-muted">{done}/{items.length} bajarildi</span>
+                      )}
+                    </div>
+
+                    {/* Mavjud itemlar */}
+                    <div className="space-y-2">
+                      {items.map(r => (
+                        <div key={r.id} className="flex items-start gap-2 group">
+                          <button onClick={() => toggleRoadmapItem(r.id)} className={`mt-0.5 flex-shrink-0 ${r.done ? color : 'text-text-muted'}`}>
+                            <CheckCircle2 size={15} />
+                          </button>
+                          <span className={`text-sm flex-1 leading-snug ${r.done ? 'line-through text-text-muted' : 'text-text-primary'}`}>{r.text}</span>
+                          <button onClick={() => deleteRoadmapItem(r.id)} className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-[#E63946] transition-all flex-shrink-0">
+                            <X size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Yangi reja qo'shish */}
+                    <div className="flex gap-2">
+                      <input
+                        value={rmInput[phase]}
+                        onChange={e => setRmInput(prev => ({ ...prev, [phase]: e.target.value }))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && rmInput[phase].trim()) {
+                            addRoadmapItem(phase, rmInput[phase].trim())
+                            setRmInput(prev => ({ ...prev, [phase]: '' }))
+                          }
+                        }}
+                        placeholder="Reja qo'shish..."
+                        className="flex-1 bg-bg-primary border border-border rounded-xl px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-[#f97316]/50"
+                      />
+                      <button
+                        onClick={() => {
+                          if (rmInput[phase].trim()) {
+                            addRoadmapItem(phase, rmInput[phase].trim())
+                            setRmInput(prev => ({ ...prev, [phase]: '' }))
+                          }
+                        }}
+                        className={`px-2 py-1.5 rounded-xl text-xs font-medium ${color} border ${border} hover:${bg} transition-colors`}
+                      >
+                        <Plus size={13} />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* AI tavsiyalaridan avtomatik qo'shish */}
+            {analysis && !analysis.raw && analysis.recommendations?.length > 0 && (
+              <div className="p-4 border border-[#f97316]/20 rounded-2xl bg-[#f97316]/5">
+                <p className="text-xs text-[#f97316] font-medium mb-3">🤖 AI tavsiyalari — yo'l xaritasiga qo'shish</p>
+                <div className="space-y-2">
+                  {analysis.recommendations.map((rec, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
+                        rec.priority === 'high' ? 'bg-[#E63946]/10 text-[#E63946]' :
+                        rec.priority === 'medium' ? 'bg-amber-400/10 text-amber-400' :
+                        'bg-[#22c55e]/10 text-[#22c55e]'
+                      }`}>{rec.priority === 'high' ? 'Shoshilinch' : rec.priority === 'medium' ? "O'rta" : 'Keyinroq'}</span>
+                      <span className="text-xs text-text-secondary flex-1">{rec.action}</span>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {['1oy','3oy','6oy'].map(ph => (
+                          <button key={ph} onClick={() => addRoadmapItem(ph, rec.action)}
+                            className="text-xs px-2 py-0.5 rounded border border-border text-text-muted hover:bg-bg-secondary transition-colors">
+                            +{ph}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>

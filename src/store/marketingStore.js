@@ -5,6 +5,7 @@ export const useMarketingStore = create(
   persist(
     (set, get) => ({
       scenarios: [],
+      roadmapItems: [], // { id, phase: '1oy'|'3oy'|'6oy', text, done, createdAt }
 
       addScenario: (scenario) => set(state => ({
         scenarios: [
@@ -40,6 +41,17 @@ export const useMarketingStore = create(
           s.id === id ? { ...s, status: 'draft' } : s
         ),
       })),
+
+      addRoadmapItem: (phase, text) => set(state => ({
+        roadmapItems: [...state.roadmapItems, { id: 'rm-' + Date.now(), phase, text, done: false, createdAt: new Date().toISOString() }],
+      })),
+      toggleRoadmapItem: (id) => set(state => ({
+        roadmapItems: state.roadmapItems.map(r => r.id === id ? { ...r, done: !r.done } : r),
+      })),
+      deleteRoadmapItem: (id) => set(state => ({
+        roadmapItems: state.roadmapItems.filter(r => r.id !== id),
+      })),
+      setRoadmapItems: (items) => set({ roadmapItems: items }),
 
       // Higgsfield ulanganda chaqiriladi
       setVideoGenerating: (id) => set(state => ({

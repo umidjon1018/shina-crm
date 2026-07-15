@@ -9,7 +9,7 @@ const AGENT_ICONS = {
   'product-agent':  { Icon: Package,      color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-accent-red/30' },
   'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-accent-orange/30' },
   'customer-agent': { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-accent-blue/30' },
-  'staff-agent':    { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-purple-400/30' },
+  'staff-agent':    { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-border' },
 }
 
 const MODELS = [
@@ -41,7 +41,7 @@ const AGENT_TOOLS = {
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_discounts_summary'],
   'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
-  'staff-agent':    ['get_sales_summary', 'get_top_products'],
+  'staff-agent':    ['get_discounts_summary'],
 }
 
 const INTEGRATION_CONFIG = {
