@@ -9,7 +9,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni xodimlar samaradorligi agentisan. Berilgan xodim savdo ma'lumotlarini tahlil qilib, kim yaxshi ishlayotgani, kim qo'shimcha e'tibor talab qilishi va rag'batlantirish bo'yicha aniq JSON formatida javob berasan. Faqat o'zbek tilida yoz.`
 
 function StaffTab({ aiData = {} }) {
   const { t } = useTranslation()
@@ -44,7 +43,6 @@ function StaffTab({ aiData = {} }) {
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'staff-agent',
-    systemPrompt: SYSTEM_PROMPT,
     enabled: staffStats.length > 0,
     buildPrompt: () => `XODIMLAR SAMARADORLIGI MA'LUMOTLARI:
 
@@ -68,14 +66,6 @@ Eng ko'p bekor: ${[...staffStats].sort((a,b) => b.cancelled - a.cancelled)[0].na
   }, [analysis])
 
   const top = staffStats[0]
-  const chatSystemPrompt = `Sen GoodTires xodimlar samaradorligi agentisan.
-
-Xodimlar holati:
-- Jami ${staffStats.length} ta xodim, ${totalSales} ta sotuv
-- Eng yaxshi: ${top?.name || '—'} (${fmtNum(top?.revenue || 0, t)} so'm)
-- Bu oy: ${thisMonthSales.length} ta sotuv
-
-O'zbek tilida qisqa javob ber.`
 
   return (
     <div className="space-y-6">
@@ -86,7 +76,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#a855f7]"
       />
-      <AiChat agentId="staff-agent" systemPrompt={chatSystemPrompt} colorClass="accent-purple" />
+      <AiChat agentId="staff-agent" colorClass="accent-purple" />
     </div>
   )
 }

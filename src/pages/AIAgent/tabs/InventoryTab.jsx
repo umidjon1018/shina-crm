@@ -8,7 +8,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni ombor va zaxira tahlilchisi agentisan. Berilgan inventar ma'lumotlarini tahlil qilib, zaxira holati, qayta buyurtma tavsiyalari va fasl o'zgarishlari bo'yicha aniq JSON formatida javob berasan. Faqat o'zbek tilida yoz.`
 
 function InventoryTab({ aiData = {} }) {
   const { t } = useTranslation()
@@ -43,7 +42,6 @@ function InventoryTab({ aiData = {} }) {
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'product-agent',
-    systemPrompt: SYSTEM_PROMPT,
     enabled: inventoryData.length > 0,
     buildPrompt: () => `INVENTAR TAHLILI MA'LUMOTLARI:
 
@@ -70,16 +68,6 @@ Hozirgi fasl: ${currentMonth >= 3 && currentMonth <= 8 ? 'YOZ (yozgi shinalar fa
     }
   }, [analysis])
 
-  const chatSystemPrompt = `Sen GoodTires ombor agentisan.
-
-Inventar holati:
-- Faol mahsulotlar: ${inventoryData.length} ta
-- Jami zaxira: ${totalItems} ta
-- Kam zaxira: ${lowStock.length} ta mahsulot
-- Tugagan: ${criticalStock.length} ta
-- Hozirgi oy: ${currentMonth}
-
-O'zbek tilida qisqa javob ber.`
 
   return (
     <div className="space-y-6">
@@ -90,7 +78,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#E63946]"
       />
-      <AiChat agentId="product-agent" systemPrompt={chatSystemPrompt} colorClass="accent-red" />
+      <AiChat agentId="product-agent" colorClass="accent-red" />
     </div>
   )
 }

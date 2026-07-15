@@ -8,7 +8,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni mijozlar munosabatlari agentisan. Berilgan mijoz ma'lumotlarini tahlil qilib, mijoz segmentatsiyasi, loyallik holati, tug'ilgan kunlar va nasiya bo'yicha aniq JSON formatida javob berasan. Faqat o'zbek tilida yoz.`
 
 function getDaysUntilBirthday(birthDate) {
   if (!birthDate) return 999
@@ -47,7 +46,6 @@ function CustomerTab({ aiData = {} }) {
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'customer-agent',
-    systemPrompt: SYSTEM_PROMPT,
     enabled: shopCustomers.length > 0,
     buildPrompt: () => `MIJOZLAR TAHLILI MA'LUMOTLARI:
 
@@ -75,15 +73,6 @@ ${installmentCustomers.sort((a,b) => b.installmentDebt - a.installmentDebt).slic
     }
   }, [analysis])
 
-  const chatSystemPrompt = `Sen GoodTires mijozlar munosabatlari agentisan.
-
-Mijoz holati:
-- Jami: ${totalCustomers} ta mijoz
-- VIP: ${vipCustomers.length} ta
-- Nasiya qaydlar: ${installmentCustomers.length} ta (${fmtNum(totalDebt, t)} so'm)
-- Tug'ilgan kun yaqin: ${birthdaySoon.length} ta
-
-O'zbek tilida qisqa javob ber.`
 
   return (
     <div className="space-y-6">
@@ -94,7 +83,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#3b82f6]"
       />
-      <AiChat agentId="customer-agent" systemPrompt={chatSystemPrompt} colorClass="accent-blue" />
+      <AiChat agentId="customer-agent" colorClass="accent-blue" />
     </div>
   )
 }

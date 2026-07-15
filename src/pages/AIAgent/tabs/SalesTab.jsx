@@ -9,45 +9,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni MOLIYAVIY TAHLIL AGENTISAN.
-
-VAZIFANG:
-Quyidagi 6 yo'nalishni tahlil qilib, eng muhim ko'rsatkichlarni JSON formatida ber:
-
-1. KIRIM VA YETKAZIB BERUVCHILAR
-   - Umumiy kirim summasi (USD), to'langan va qolgan qarz
-   - Qaysi yetkazib beruvchiga qancha qarz bor — kimga birinchi to'lash kerak
-   - Muddati o'tgan qarzlar bo'lsa — ogohlantir
-
-2. SOTUV TAHLILI
-   - Yangi + B/U tovar sotuvlari birga: soni, tushum, sof foyda, marja %
-   - Nasiya savdolar: nechta, qabul qilingan pul, qolgan qarz
-   - Bekor sotuvlar (pul qaytarilgan) vs almashtirishlar — alohida ko'rsat
-   - Shu oy vs oldingi oy tendentsiyasi
-
-3. XARAJATLAR TAHLILI
-   - Oyliklar, ijara, boshqa xarajatlar — taqsimot va foizi
-   - Sof pul oqimi: foyda minus xarajatlar
-   - Xarajat foydaning qancha %ini eyapti
-
-4. JALB QILINGAN MABLAG'LAR
-   - Kiritilgan kapital, olingan qarzlar, chiqarilgan pullar
-   - Sof kapital holati — ijobiy yoki salbiy
-
-5. CHEGIRMALAR VA SODIQLIK
-   - Chegirmalar tufayli yo'qotilgan summa
-   - Sodiqlik bonuslari sarfi
-   - Bu yo'qotishlar savdo hajmini qancha oshirdi (samaradorligi)
-
-6. FILIALLAR (agar bir nechta do'kon bo'lsa)
-   - Har bir filial: sotuv, tushum, foyda — qaysi biri yaxshi/yomon ishlaydi
-
-QOIDALAR:
-- Faqat o'zbek tilida yoz
-- Raqamlarni so'm yoki % yoki $ bilan ko'rsat
-- KPI da eng muhim 6-8 ta ko'rsatkich ber
-- Ogohlantirishlarda faqat haqiqiy muammo bo'lsa yoz (bo'sh bo'lsa yozma)
-- Tavsiyalar aniq va amalga oshirish mumkin bo'lsin`
 
 function SalesTab({ aiData = {} }) {
   const { t } = useTranslation()
@@ -175,7 +136,6 @@ function SalesTab({ aiData = {} }) {
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'sales-agent',
-    systemPrompt: SYSTEM_PROMPT,
     enabled,
     buildPrompt: () => {
       const shopLines = shopBreakdown.length > 1
@@ -233,17 +193,6 @@ ${shopLines}`
     }
   }, [analysis])
 
-  const chatSystemPrompt = `Sen GoodTires moliyaviy tahlil agentisan.
-
-📊 Joriy holat:
-- Sotuv tushumi: ${fmtNum(totalRevenue, t)} so'm (${completedSales.length + usedCompleted.length} ta sotuv)
-- Sof foyda: ${fmtNum(totalProfit, t)} so'm, marja ${avgMargin}%
-- Kirim qarzi: $${totalDebtUSD.toFixed(0)} USD (${unpaidBatches.length} ta partiya)
-- Xarajatlar: ${fmtNum(totalExpenses, t)} so'm
-- Nasiya qoldig'i: ${fmtNum(installmentDebt, t)} so'm
-- Sof kapital: ${fmtNum(netCapital, t)} so'm
-
-O'zbek tilida qisqa va amaliy javob ber.`
 
   return (
     <div className="space-y-6">
@@ -254,7 +203,7 @@ O'zbek tilida qisqa va amaliy javob ber.`
         refresh={refresh}
         accentColor="text-[#22c55e]"
       />
-      <AiChat agentId="sales-agent" systemPrompt={chatSystemPrompt} colorClass="accent-green" />
+      <AiChat agentId="sales-agent" colorClass="accent-green" />
     </div>
   )
 }

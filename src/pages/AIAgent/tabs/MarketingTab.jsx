@@ -9,7 +9,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-const SYSTEM_PROMPT = `Sen GoodTires shina do'koni marketing va PR agentisan. Savdo ma'lumotlari, fasl holati va mijoz segmentatsiyasi asosida marketing strategiyasi, post rejalari va aksiyalar bo'yicha aniq JSON formatida javob berasan. Faqat o'zbek tilida yoz.`
 
 function MarketingTab({ aiData = {} }) {
   const { t } = useTranslation()
@@ -48,7 +47,6 @@ function MarketingTab({ aiData = {} }) {
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'pr-agent',
-    systemPrompt: SYSTEM_PROMPT,
     enabled: true,
     buildPrompt: () => `MARKETING TAHLILI MA'LUMOTLARI:
 
@@ -79,15 +77,6 @@ Marketing strategiyasi uchun: fasl, top mahsulotlar, VIP mijozlar va agentlar si
     }
   }, [analysis])
 
-  const chatSystemPrompt = `Sen GoodTires marketing agentisan.
-
-Holat:
-- ${MOCK_CUSTOMERS.length} ta mijoz (VIP: ${vipCount}, sodiq: ${loyalCount}, yangi: ${newCount})
-- Bu oy: ${fmtNum(thisMonthRev, t)} so'm sotuv
-- Hozirgi fasl: ${currentMonth >= 3 && currentMonth <= 8 ? 'Yoz' : 'Qish'}
-- Rejalangan postlar: ${plannedPosts} ta
-
-O'zbek tilida qisqa javob ber.`
 
   return (
     <div className="space-y-6">
@@ -98,7 +87,7 @@ O'zbek tilida qisqa javob ber.`
         refresh={refresh}
         accentColor="text-[#f97316]"
       />
-      <AiChat agentId="pr-agent" systemPrompt={chatSystemPrompt} colorClass="accent-orange" />
+      <AiChat agentId="pr-agent" colorClass="accent-orange" />
     </div>
   )
 }
