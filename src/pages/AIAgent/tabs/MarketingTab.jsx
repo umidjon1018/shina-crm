@@ -8,7 +8,6 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import { useMarketingStore } from '../../../store/marketingStore'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
-import { getSaleProfit } from '../../../utils/profitHelpers'
 
 function MarketingTab({ aiData = {} }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
@@ -29,44 +28,28 @@ function MarketingTab({ aiData = {} }) {
     batches: _allBatches = [],
     usedSales: _allUsedSales = [],
     promotions: MOCK_PROMOTIONS = [],
-    expenses: _allExpenses = [],
   } = aiData
 
   const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(s => String(s.shopId) === String(selectedShopId))
-  const MOCK_SALES     = filterShop(_allSales).filter(s => s.status !== 'cancelled')
+  const MOCK_SALES      = filterShop(_allSales).filter(s => s.status !== 'cancelled')
   const MOCK_USED_SALES = filterShop(_allUsedSales).filter(s => s.status !== 'cancelled')
-  const MOCK_BATCHES   = filterShop(_allBatches)
-  const MOCK_EXPENSES  = filterShop(_allExpenses)
+  const MOCK_BATCHES    = filterShop(_allBatches)
 
   const currentMonth  = new Date().getMonth() + 1
   const thisMonthKey  = new Date().toISOString().slice(0, 7)
   const lastMonthKey  = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7)
   const seasonLabel   = currentMonth >= 3 && currentMonth <= 8 ? 'YOZ' : 'QIŠ'
 
-  // Sotuv statistikasi
   const allCompleted   = [...MOCK_SALES, ...MOCK_USED_SALES]
-  const totalRevenue   = allCompleted.reduce((s, x) => s + (x.total || 0), 0)
-  const totalProfit    = allCompleted.reduce((s, x) => s + getSaleProfit(x), 0)
-  const avgMargin      = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0
-
   const thisMonthSales = allCompleted.filter(s => (s.soldAt || s.createdAt || '').startsWith(thisMonthKey))
   const lastMonthSales = allCompleted.filter(s => (s.soldAt || s.createdAt || '').startsWith(lastMonthKey))
-  const thisMonthRev   = thisMonthSales.reduce((s, x) => s + (x.total || 0), 0)
-  const lastMonthRev   = lastMonthSales.reduce((s, x) => s + (x.total || 0), 0)
-  const revGrowth      = lastMonthRev > 0 ? (((thisMonthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1) : 'n/a'
+  const lastMonthCount = lastMonthSales.length
+  const revGrowth      = lastMonthCount > 0 ? (((thisMonthSales.length - lastMonthCount) / lastMonthCount) * 100).toFixed(1) : 'n/a'
 
-  // Mijozlar tahlili
   const vipCount    = MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length
   const loyalCount  = MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length
   const newCount    = MOCK_CUSTOMERS.filter(c => !c.loyaltyLevel || c.loyaltyLevel === 'none').length
   const debtors     = MOCK_CUSTOMERS.filter(c => (c.installmentDebt || 0) > 0).length
-
-  // To'lov turi
-  const payStats = useMemo(() => {
-    const m = { cash: 0, card: 0, installment: 0 }
-    allCompleted.forEach(s => { if (m[s.paymentType] !== undefined) m[s.paymentType]++ })
-    return m
-  }, [allCompleted])
 
   // Tovar tezligi
   const productVelocity = useMemo(() => {
@@ -98,44 +81,37 @@ function MarketingTab({ aiData = {} }) {
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'pr-agent',
     enabled: MOCK_PRODUCTS.length > 0 || MOCK_SALES.length > 0,
-    buildPrompt: () => `Sen tajribali marketing menejeri va biznes strategistisan. Quyidagi do'kon ma'lumotlari asosida chuqur tahlil qil va aniq amaliy takliflar ber.
+    buildPrompt: () => `Sen GoodTires marketing agentisan. Quyidagi ma'lumotlar asosida brend, mijozlar oqimi va tovar aylanmasini yaxshilash bo'yicha aniq takliflar ber.
 
-📅 DAVR: ${currentMonth}-oy, fasl: ${seasonLabel}
+📅 FASL: ${seasonLabel} (${currentMonth}-oy)
 
-💰 MOLIYAVIY KO'RSATKICHLAR:
-- Jami tushum: ${totalRevenue.toLocaleString()} so'm
-- Sof foyda: ${totalProfit.toLocaleString()} so'm | Marja: ${avgMargin}%
-- Bu oy: ${thisMonthRev.toLocaleString()} so'm (${thisMonthSales.length} ta sotuv)
-- O'tgan oy: ${lastMonthRev.toLocaleString()} so'm (${lastMonthSales.length} ta sotuv)
-- O'sish: ${revGrowth}%
-- Sof pul oqimi (foyda - xarajat): ${netCashFlow.toLocaleString()} so'm
-- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
+📦 TOVAR AYLANMASI:
+Bu oy sotilgan: ${thisMonthSales.length} ta | O'tgan oy: ${lastMonthSales.length} ta | O'sish: ${revGrowth}%
 
-👥 MIJOZLAR (${MOCK_CUSTOMERS.length} ta jami):
-- VIP (gold): ${vipCount} ta
-- Sodiq (silver): ${loyalCount} ta
-- Yangi/oddiy: ${newCount} ta
-- Nasiyadorlar: ${debtors} ta
+ENG TEZ SOTILADIGAN (kuchaytirilsin):
+${topFast.map((p, i) => `${i+1}. ${p.name} (${p.brand}): bu oy ${p.thisMonth} ta, jami ${p.total} ta`).join('\n') || 'ma\'lumot yo\'q'}
 
-🚀 ENG TEZ SOTILADIGAN:
-${topFast.map((p, i) => `${i+1}. ${p.name} (${p.brand}): ${p.total} ta jami, bu oy ${p.thisMonth} ta`).join('\n') || 'ma\'lumot yo\'q'}
-
-🐢 ENG SEKIN SOTILADIGAN (diqqat kerak):
+ENG SEKIN SOTILADIGAN (kampaniya kerak!):
 ${topSlow.map((p, i) => `${i+1}. ${p.name} (${p.brand}): ${p.total} ta`).join('\n') || 'yo\'q'}
 
-📦 ZAXIRADA BOR, HECH SOTILMAGAN:
+ZAXIRADA BOR, HECH SOTILMAGAN (tezkor harakatlar kerak):
 ${unsoldProducts.map(p => `- ${p.name} (${p.brand || '—'})`).join('\n') || 'yo\'q'}
 
-🎯 FAOL AKSIYALAR: ${activePromos.map(p => p.name).join(', ') || 'yo\'q'}
-⚠️ OMBOR SIGNALLARI: ${inventoryAlerts.map(a => a.message).join('; ') || 'yo\'q'}
+👥 MIJOZLAR OQIMI (${MOCK_CUSTOMERS.length} ta jami):
+- VIP: ${vipCount} ta — ushlab qolish strategiyasi kerak
+- Sodiq: ${loyalCount} ta — VIP ga ko'tarilishi mumkin
+- Yangi/bir martalik: ${newCount} ta — qayta jalb kerak
+- Nasiyadorlar: ${debtors} ta — muloqot va eslatma strategiyasi
 
-TAHLIL QILING:
-1. Savdoni oshirish uchun eng muhim 3 ta qadamni bering
-2. Mijozlar oqimini ko'paytirish strategiyasi (VIP, yangi, nasiyadorlar bo'yicha)
-3. Sekin sotiladigan tovarlarni tezroq sotish yo'llari
-4. Narx/aksiya strategiyasi — foyda marjasini saqlab savdoni oshirish
-5. 1 oy, 3 oy, 6 oylik aniq o'sish rejasi`,
-    deps: [version, selectedShopId, MOCK_SALES.length, totalRevenue, MOCK_CUSTOMERS.length],
+🎯 FAOL AKSIYALAR: ${activePromos.map(p => p.name).join(', ') || 'hozircha yo\'q'}
+
+TAHLIL VA TAKLIFLAR:
+1. Qotib qolgan tovarlarni tezroq sotish uchun kampaniya g'oyalari
+2. Yangi mijozlarni jalb qilish va mavjudlarini ushlab qolish yo'llari
+3. GoodTires brendini ko'tarish — sodiqlik, referral, takroriy xarid
+4. Sezoniy marketing — ${seasonLabel} faslida qaysi tovar, qaysi auditoriya
+5. 1 oy, 3 oy, 6 oylik marketing yo'l xaritasi`,
+    deps: [version, selectedShopId, MOCK_SALES.length, MOCK_CUSTOMERS.length, topFast.length, unsoldProducts.length],
   })
 
   useEffect(() => {
@@ -145,21 +121,20 @@ TAHLIL QILING:
     }
   }, [analysis])
 
-  const systemPrompt = useMemo(() => `Sen tajribali MARKETING MENEJERI va biznes strategistisan — shina/g'ildirak do'kon CRM tizimida ishlaysan.
+  const systemPrompt = useMemo(() => `Sen GoodTires do'konining MARKETING AGENTI — brend, mijozlar oqimi va tovar aylanmasiga ixtisoslashgansa.
 
-=== JORIY DO'KON MA'LUMOTI ===
-Davr: ${currentMonth}-oy, fasl: ${seasonLabel}
-Bu oy sotilgan: ${thisMonthSales.length} ta | Tushum: ${thisMonthRev.toLocaleString()} so'm | O'sish: ${revGrowth}%
-Sof foyda: ${totalProfit.toLocaleString()} so'm | Marja: ${avgMargin}%
-Sof pul oqimi: ${netCashFlow.toLocaleString()} so'm
-Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${vipCount}, sodiq: ${loyalCount}, yangi: ${newCount}, nasiyador: ${debtors})
-Eng tez sotiladigan: ${topFast.slice(0,3).map(p => p.name).join(', ') || 'ma\'lumot yo\'q'}
+=== JORIY MARKETING MA'LUMOTI ===
+Fasl: ${seasonLabel} | Oy: ${currentMonth}
+Bu oy: ${thisMonthSales.length} ta sotuv | O'tgan oy: ${lastMonthSales.length} ta | O'sish: ${revGrowth}%
+Eng tez sotiladigan: ${topFast.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
 Eng sekin sotiladigan: ${topSlow.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
 Sotilmagan (zaxirada): ${unsoldProducts.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
+Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${vipCount}, sodiq: ${loyalCount}, yangi: ${newCount}, nasiyador: ${debtors})
 Faol aksiyalar: ${activePromos.length} ta
-To'lov: naqd ${payStats.cash}, karta ${payStats.card}, nasiya ${payStats.installment}
 
-VAZIFANG: Savdoni oshirish, mijozlar oqimini ko'paytirish, strategik reja tuzish. O'zbek tilida, aniq va amaliy tavsiyalar ber.`, [currentMonth, seasonLabel, thisMonthSales.length, thisMonthRev, revGrowth, totalProfit, avgMargin, netCashFlow, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors])
+SENGA TEGISHLI: Brend ko'tarish, mijoz jalb qilish/ushlab qolish, qotib qolgan tovarlarni sotish, sezoniy kampaniyalar.
+SENGA TEGISHLI EMAS: Moliyaviy tahlil, foyda/marja/xarajat hisob-kitoblari — bu Savdo agentining ishi.
+JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length])
 
   const doneCount = roadmapItems.filter(r => r.done).length
   const SECTIONS = [
