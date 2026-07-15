@@ -356,7 +356,21 @@ VAZIFALAR:
               </div>
             )}
 
-            <AiChat agentId="pr-agent" colorClass="accent-orange" />
+            <AiChat agentId="pr-agent" colorClass="accent-orange"
+              systemPrompt={`Sen MARKETING AGENTI — shina/g'ildirak do'kon CRM tizimining PR va kontent strategistisan.
+
+=== JORIY MARKETING MA'LUMOTI ===
+Fasl: ${seasonLabel} | Oy: ${currentMonth}
+Bu oy sotilgan: ${MOCK_SALES.filter(s => s.soldAt?.startsWith(thisMonthKey)).length} ta | O'tgan oy: ${MOCK_SALES.filter(s => s.soldAt?.startsWith(lastMonthKey)).length} ta | O'sish: ${revGrowth}%
+Eng tez sotiladigan: ${topFast.slice(0,3).map(p => p.name).join(', ') || 'ma\'lumot yo\'q'}
+Eng sekin sotiladigan: ${topSlow.slice(0,3).map(p => p.name).join(', ') || 'ma\'lumot yo\'q'}
+Sotilmagan (zaxirada bor): ${unsoldProducts.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
+Mijozlar: VIP ${vipCount} | Sodiq ${loyalCount} | Yangi ${newCount}
+Faol aksiyalar: ${activePromos.length} ta
+Ssenariylar: ${scenarios.length} ta (qoralama: ${draftCount}, tasdiqlangan: ${approvedCount})
+
+JAVOB USLUBI: O'zbek tilida, ijodiy va aniq. Marketing, kontent, Instagram strategiyasi haqida savollarga javob ber.`}
+              placeholder="Marketing, senariylar, aksiyalar haqida so'rang..." />
           </motion.div>
         )}
 

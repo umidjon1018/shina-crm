@@ -195,6 +195,25 @@ ${shopLines}`
   }, [analysis])
 
 
+  const salesSystemPrompt = useMemo(() => `Sen SAVDO AGENTI — shina/g'ildirak do'kon CRM tizimining moliyaviy tahlilchisisisan.
+
+=== JORIY MOLIYAVIY MA'LUMOT ===
+Sotuvlar: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta jami
+Tushum: ${totalRevenue.toLocaleString()} so'm (yangi: ${newRevenue.toLocaleString()}, B/U: ${usedRevenue.toLocaleString()})
+Sof foyda: ${totalProfit.toLocaleString()} so'm | Marja: ${avgMargin}%
+Bekor (haqiqiy): ${realCancelled.length} ta (${returnRate}%) | Almashtirish: ${exchanged.length} ta
+To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
+Shu oy: ${thisMonthSales.length} ta sotuv, ${thisMonthRev.toLocaleString()} so'm
+
+Kirim (yetkazib beruvchilar): $${totalIncomeUSD.toFixed(0)} USD | Qarz: $${totalDebtUSD.toFixed(0)}
+Nasiya qarz (sotuvdan): ${installmentDebt.toLocaleString()} so'm | Qabul qilingan: ${installmentReceived.toLocaleString()} so'm
+Xarajatlar: ${totalExpenses.toLocaleString()} so'm (oylik: ${salaryExp.toLocaleString()}, ijara: ${rentExp.toLocaleString()})
+Sof pul oqimi: ${(totalProfit - totalExpenses).toLocaleString()} so'm
+Kapital: kiritilgan ${invested.toLocaleString()}, chiqarilgan ${withdrawn.toLocaleString()}, qarz ${loan.toLocaleString()}, sof: ${netCapital.toLocaleString()} so'm
+Chegirma yo'qotish: ${discountLoss.toLocaleString()} so'm | Sodiqlik bonus: ${loyaltyDiscountLoss.toLocaleString()} so'm
+
+JAVOB USLUBI: O'zbek tilida, qisqa va aniq. Raqamlar bilan konkret misollar keltir.`, [completedSales.length, usedCompleted.length, totalRevenue, totalProfit, avgMargin, returnRate, totalExpenses, installmentDebt, netCapital])
+
   return (
     <div className="space-y-6">
       <AgentAnalysisPanel
@@ -204,7 +223,7 @@ ${shopLines}`
         refresh={refresh}
         accentColor="text-[#22c55e]"
       />
-      <AiChat agentId="sales-agent" colorClass="accent-green" />
+      <AiChat agentId="sales-agent" colorClass="accent-green" systemPrompt={salesSystemPrompt} placeholder="Savdo, foyda, xarajat haqida so'rang..." />
     </div>
   )
 }

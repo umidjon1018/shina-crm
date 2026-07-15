@@ -409,7 +409,19 @@ VAZIFALAR:
         )}
       </AnimatePresence>
 
-      <AiChat agentId="customer-agent" colorClass="accent-blue" />
+      <AiChat agentId="customer-agent" colorClass="accent-blue"
+        systemPrompt={`Sen MIJOZLAR AGENTI — shina/g'ildirak do'kon CRM tizimining mijoz muloqoti tahlilchisisisan.
+
+=== JORIY MIJOZLAR MA'LUMOTI ===
+Jami mijozlar: ${shopCustomers.length} ta | VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount}
+Nasiya qarzdor: ${debtors.length} ta, jami qarz: ${totalDebt.toLocaleString()} so'm
+7 kun ichida tug'ilgan kun: ${birthdaySoon7.length} ta | 30 kun: ${birthdaySoon30.length} ta
+Xavf ostida (6 oy kelmagan): ${atRisk.length} ta
+Faol bronlar: ${reservations.length} ta
+Tugallangan sotuvlar: ${completedSales.length} ta | Haqiqiy bekor: ${cancelledSales.length} ta
+
+JAVOB USLUBI: O'zbek tilida, qisqa va aniq. Mijozlar, sodiqlik, bronlar haqida savollarga javob ber.`}
+        placeholder="Mijozlar, bronlar, sodiqlik haqida so'rang..." />
 
       {reserveModal && (
         <ReservationModal

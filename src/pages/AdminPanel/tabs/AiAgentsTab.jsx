@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
-import { getAiAgents, updateAiAgent, getAvailableTools } from '../../../api/aiAgentsService'
+import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 
@@ -20,19 +20,28 @@ const MODELS = [
 ]
 
 const TOOL_LABELS = {
-  get_sales_summary:    'Savdo statistikasi',
-  get_low_stock:        'Kam zaxirali tovarlar',
-  get_customer_debts:   'Nasiyador mijozlar',
-  get_top_products:     'Eng ko\'p sotilgan tovarlar',
-  get_profit_by_brand:  'Brend bo\'yicha foyda',
-  get_recent_returns:   'So\'nggi bekor sotuvlar',
-  get_supplier_debts:    'Yetkazib beruvchilar qarzi',
-  get_expenses_summary:  'Xarajatlar xulosasi',
-  get_capital_summary:   'Jalb qilingan mablag\'lar',
-  get_discounts_summary: 'Chegirmalar, aksiyalar va sodiqlik',
-  get_barcodes_summary:  'Barkodlar holati',
-  search_products:       'Tovar qidirish (Instagram/Telegram savollari uchun)',
-  create_reservation:    'Tovar bron qilish (Ombor agentiga buyruq)',
+  // Savdo agenti
+  get_sales_summary:         'Savdo statistikasi',
+  get_profit_by_brand:       'Brend bo\'yicha foyda',
+  get_recent_returns:        'So\'nggi bekor sotuvlar',
+  get_supplier_debts:        'Yetkazib beruvchilar qarzi',
+  get_expenses_summary:      'Xarajatlar xulosasi',
+  get_capital_summary:       'Jalb qilingan mablag\'lar',
+  get_discounts_summary:     'Chegirmalar va aksiyalar xulosasi',
+  // Ombor agenti
+  get_low_stock:             'Kam zaxirali tovarlar',
+  get_top_products:          'Eng ko\'p sotilgan tovarlar',
+  get_barcodes_summary:      'Barkodlar holati',
+  // Mijozlar agenti
+  get_customer_debts:        'Nasiyador mijozlar ro\'yxati',
+  search_products:           'Tovar qidirish (savollarga javob)',
+  create_reservation:        'Tovar bron qilish',
+  // Xodimlar agenti
+  get_staff_performance:     'Xodim samaradorligi (sotuv, tushum, foyda)',
+  get_staff_discount_report: 'Xodim chegirma hisoboti (kim, kimga, necha marta)',
+  get_staff_violations:      'Qoida buzilishlari (narx, bekor sotuv)',
+  get_salary_info:           'Maosh va rol ma\'lumoti',
+  get_monthly_growth:        'Oy-oy sotuv o\'sishi',
 }
 
 // Har agent uchun qaysi toollar ko'rinishi kerak
@@ -41,7 +50,7 @@ const AGENT_TOOLS = {
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_discounts_summary'],
   'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
-  'staff-agent':    ['get_discounts_summary'],
+  'staff-agent':    ['get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
 }
 
 const INTEGRATION_CONFIG = {
@@ -101,19 +110,24 @@ function AgentCard({ agent, onSave }) {
 
   const handleSave = async () => {
     setSaving(true)
-    await onSave(agent.id, {
-      system_prompt: form.systemPrompt,
-      knowledge:     form.knowledge,
-      model:         form.model,
-      temperature:   form.temperature,
-      max_tokens:    form.maxTokens,
-      tools:         form.tools,
-      integrations:  form.integrations,
-      is_active:     form.isActive,
-    })
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    try {
+      await onSave(agent.id, {
+        system_prompt: form.systemPrompt,
+        knowledge:     form.knowledge,
+        model:         form.model,
+        temperature:   form.temperature,
+        max_tokens:    form.maxTokens,
+        tools:         form.tools,
+        integrations:  form.integrations,
+        is_active:     form.isActive,
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      // xato AiAgentsTab.saveError orqali ko'rsatiladi
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -305,9 +319,9 @@ function AgentCard({ agent, onSave }) {
 
 export default function AiAgentsTab() {
   const [agents, setAgents] = useState([])
-  const [availableTools, setAvailableTools] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [saveError, setSaveError] = useState(null)
   const [cacheCleared, setCacheCleared] = useState(false)
   const { aiAutoAnalysisHour, setAiAutoAnalysisHour } = useSettingsStore()
 
@@ -318,15 +332,21 @@ export default function AiAgentsTab() {
   }
 
   useEffect(() => {
-    Promise.all([getAiAgents(), getAvailableTools()])
-      .then(([a, t]) => { setAgents(a); setAvailableTools(t) })
+    getAiAgents()
+      .then(a => setAgents(a))
       .catch(e => setError(e?.response?.data?.error || e.message))
       .finally(() => setLoading(false))
   }, [])
 
   const handleSave = async (id, payload) => {
-    const updated = await updateAiAgent(id, payload)
-    setAgents(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a))
+    setSaveError(null)
+    try {
+      const updated = await updateAiAgent(id, payload)
+      setAgents(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a))
+    } catch (e) {
+      setSaveError(e?.response?.data?.error || e.message || 'Saqlashda xato')
+      throw e
+    }
   }
 
   if (loading) return (
@@ -382,6 +402,11 @@ export default function AiAgentsTab() {
           </button>
         </div>
       </div>
+      {saveError && (
+        <div className="p-3 bg-accent-red/10 border border-accent-red/30 rounded-xl text-sm text-accent-red">
+          {saveError}
+        </div>
+      )}
       {agents.map(agent => (
         <AgentCard
           key={agent.id}

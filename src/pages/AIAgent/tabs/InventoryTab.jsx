@@ -172,6 +172,19 @@ ${usedShopLines}`
     }
   }, [analysis])
 
+  const inventorySystemPrompt = useMemo(() => `Sen OMBOR AGENTI — shina/g'ildirak do'kon CRM tizimining ombor va tovar tahlilchisisisan.
+
+=== JORIY OMBOR MA'LUMOTI ===
+Partiyalar: ${MOCK_BATCHES.length} ta
+Birliklar: jami ${barcodeStats.total} ta, zaxirada ${barcodeStats.inStock} ta, sotilgan ${barcodeStats.sold} ta
+Barkod yo'q (sotilib ketmaydi!): ${barcodeStats.noBarcodeInStock} ta
+Faol mahsulot turlari: ${stockByProduct.length} ta
+Kam zaxira (limitdan past): ${lowStock.length} ta — ${lowStock.slice(0, 5).map(p => `${p.name}: ${p.stock} ta`).join(', ') || 'yo\'q'}
+Tugagan: ${zeroStock.length} ta
+B/U zaxira: ${usedInStock.length} ta | Sotilgan: ${usedCompleted.length} ta | Utilizatsiya: ${usedScrapped.length} ta
+
+JAVOB USLUBI: O'zbek tilida, qisqa va aniq. Ombor, tovar holati, barkodlar haqida savollarga javob ber.`, [MOCK_BATCHES.length, barcodeStats.inStock, barcodeStats.noBarcodeInStock, lowStock.length, zeroStock.length, usedInStock.length])
+
   return (
     <div className="space-y-6">
       <AgentAnalysisPanel
@@ -181,7 +194,7 @@ ${usedShopLines}`
         refresh={refresh}
         accentColor="text-[#E63946]"
       />
-      <AiChat agentId="product-agent" colorClass="accent-red" />
+      <AiChat agentId="product-agent" colorClass="accent-red" systemPrompt={inventorySystemPrompt} placeholder="Ombor, tovar zaxirasi, barkodlar haqida so'rang..." />
     </div>
   )
 }

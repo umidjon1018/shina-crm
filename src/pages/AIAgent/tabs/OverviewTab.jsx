@@ -15,7 +15,7 @@ const AGENT_IDS = {
   staff:     'staff-agent',
 }
 
-const CACHE_PREFIX = 'ai_analysis_v2_'
+const CACHE_PREFIX = 'ai_analysis_v4_'
 
 function readAgentCache(agentId) {
   try {
