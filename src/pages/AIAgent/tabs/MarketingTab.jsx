@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TrendingUp, FileText, Video, Plus, Check, X, ChevronDown, ChevronUp, Film, Clock, Trash2, Edit3, Map, CheckCircle2, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
@@ -202,6 +202,30 @@ function ScenarioForm({ onSave, initial = null, onCancel }) {
   )
 }
 
+// ─── Video Progress ───────────────────────────────────────────────────────────
+function VideoProgress() {
+  const [elapsed, setElapsed] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(s => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const pct = Math.min((elapsed / 300) * 100, 98)
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0')
+  const ss = String(elapsed % 60).padStart(2, '0')
+  return (
+    <div className="px-4 pb-3 space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="flex items-center gap-1.5 text-text-muted"><Loader2 size={11} className="animate-spin text-yellow-400" /> Video tayyorlanmoqda...</span>
+        <span className="tabular-nums text-yellow-400 font-mono">{mm}:{ss}</span>
+      </div>
+      <div className="h-1.5 bg-bg-secondary rounded-full overflow-hidden">
+        <div className="h-full bg-yellow-400 rounded-full transition-all duration-1000" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-[10px] text-text-muted">Odatda 3-5 daqiqa ketadi. Sahifani yopmang.</p>
+    </div>
+  )
+}
+
 // ─── Scenario Card ────────────────────────────────────────────────────────────
 function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfield, onPostInstagram }) {
   const [expanded, setExpanded] = useState(false)
@@ -280,6 +304,9 @@ function ScenarioCard({ sc, onApprove, onReject, onDelete, onEdit, onSendHighsfi
         </div>
         {expanded ? <ChevronUp size={15} className="text-text-muted flex-shrink-0" /> : <ChevronDown size={15} className="text-text-muted flex-shrink-0" />}
       </div>
+
+      {/* Video progress */}
+      {sc.status === 'video_generating' && <VideoProgress />}
 
       {/* Expanded content */}
       <AnimatePresence>
