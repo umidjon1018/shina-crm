@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
 import { useSettingsStore } from '../../../store/settingsStore'
-import { clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
+import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 
 const AGENT_ICONS = {
   'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-border' },
@@ -125,6 +125,7 @@ function AgentCard({ agent, onSave }) {
       if (agent.slug === 'pr-agent') {
         try { localStorage.setItem('goodtires-pr-integrations', JSON.stringify(form.integrations)) } catch {}
       }
+      clearAnalysisCache(agent.slug)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {
