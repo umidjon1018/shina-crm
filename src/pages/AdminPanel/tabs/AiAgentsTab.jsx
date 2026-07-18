@@ -55,10 +55,16 @@ const AGENT_TOOLS = {
 
 const INTEGRATION_CONFIG = {
   'customer-agent': [
-    { key: 'telegram.botToken',  label: 'Telegram Bot Token',     type: 'password', placeholder: '123456:ABC...' },
-    { key: 'telegram.enabled',   label: 'Telegram xabarlar yoqilgan', type: 'toggle' },
-    { key: 'makeWebhook.url',    label: 'make.com Webhook URL',   type: 'text',     placeholder: 'https://hook.make.com/...' },
-    { key: 'makeWebhook.enabled',label: 'Instagram DM yoqilgan',  type: 'toggle' },
+    { key: 'shop.name',            label: 'Do\'kon nomi',              type: 'text',     placeholder: 'GoodTires' },
+    { key: 'shop.address',         label: 'Do\'kon manzili',           type: 'text',     placeholder: 'Toshkent, Chilonzor, 14-kvartal' },
+    { key: 'shop.hours',           label: 'Ish vaqti',                 type: 'text',     placeholder: 'Dushanba–Shanba: 9:00–19:00' },
+    { key: 'shop.phone',           label: 'Telefon raqam',             type: 'text',     placeholder: '+998 90 123 45 67' },
+    { key: 'shop.locationUrl',     label: 'Telegram/Yandex lokatsiya', type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
+    { key: 'instagram.handle',     label: 'Instagram akkaunt',         type: 'text',     placeholder: '@goodtires_uz' },
+    { key: 'instagram.webhookUrl', label: 'make.com Webhook URL (DM bot)', type: 'text', placeholder: 'https://hook.make.com/...' },
+    { key: 'instagram.enabled',    label: 'Instagram DM bot yoqilgan', type: 'toggle' },
+    { key: 'telegram.botToken',    label: 'Telegram Bot Token',        type: 'password', placeholder: '123456:ABC...' },
+    { key: 'telegram.enabled',     label: 'Telegram bot yoqilgan',     type: 'toggle' },
   ],
   'pr-agent': [
     { key: 'instagram.handle',     label: 'Instagram akkaunt',       type: 'text',     placeholder: '@goodtires_uz' },
@@ -121,9 +127,11 @@ function AgentCard({ agent, onSave }) {
         integrations:  form.integrations,
         is_active:     form.isActive,
       })
-      // pr-agent integratsiyalari MarketingTab da ishlatiladi
       if (agent.slug === 'pr-agent') {
         try { localStorage.setItem('goodtires-pr-integrations', JSON.stringify(form.integrations)) } catch {}
+      }
+      if (agent.slug === 'customer-agent') {
+        try { localStorage.setItem('goodtires-customer-integrations', JSON.stringify(form.integrations)) } catch {}
       }
       clearAnalysisCache(agent.slug)
       setSaved(true)
