@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, Map, CheckCircle2, Plus, X } from 'lucide-react'
+import { TrendingUp, Map, CheckCircle2, Plus, X, RefreshCw, Heart, MessageCircle, AlertCircle, Link2 } from 'lucide-react'
+
+const IgIcon = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+    <circle cx="12" cy="12" r="4"/>
+    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+)
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
@@ -134,10 +142,73 @@ SENGA TEGISHLI: Brend ko'tarish, mijoz jalb qilish/ushlab qolish, qotib qolgan t
 SENGA TEGISHLI EMAS: Moliyaviy tahlil, foyda/marja/xarajat hisob-kitoblari — bu Savdo agentining ishi.
 JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length])
 
+  // Instagram integratsiya
+  const igConfig = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('goodtires-pr-integrations') || '{}') } catch { return {} }
+  }, [activeSection])
+  const igHandle  = igConfig?.instagram?.handle || ''
+  const igWebhook = igConfig?.instagram?.webhookUrl || ''
+  const igEnabled = igConfig?.instagram?.enabled || false
+
+  const [igData,    setIgData]    = useState(null)   // { username, followers, posts: [] }
+  const [igLoading, setIgLoading] = useState(false)
+  const [igError,   setIgError]   = useState(null)
+
+  const fetchIgData = async () => {
+    if (!igWebhook) return
+    setIgLoading(true)
+    setIgError(null)
+    try {
+      const res = await fetch(igWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_insights' }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      setIgData(data)
+    } catch (e) {
+      setIgError(e.message || 'Xato')
+    } finally {
+      setIgLoading(false)
+    }
+  }
+
+  const igSystemPrompt = useMemo(() => {
+    if (!igData) return null
+    const posts = igData.posts || []
+    const avgLikes    = posts.length ? Math.round(posts.reduce((s, p) => s + (p.likes || 0), 0) / posts.length) : 0
+    const avgComments = posts.length ? Math.round(posts.reduce((s, p) => s + (p.comments || 0), 0) / posts.length) : 0
+    const topPost     = [...posts].sort((a, b) => (b.likes || 0) - (a.likes || 0))[0]
+    const worstPost   = [...posts].sort((a, b) => (a.likes || 0) - (b.likes || 0))[0]
+    return `Sen GoodTires do'konining INSTAGRAM TAHLIL AGENTISAN.
+
+=== INSTAGRAM MA'LUMOTLARI ===
+Akkaunt: ${igData.username || igHandle}
+Obunachilar: ${igData.followers || 'noma\'lum'}
+Oxirgi ${posts.length} ta post:
+- O'rtacha like: ${avgLikes}
+- O'rtacha komment: ${avgComments}
+- Eng yaxshi post: "${topPost?.caption?.slice(0, 80) || '—'}" — ${topPost?.likes || 0} like
+- Eng kam ohvat olgan: "${worstPost?.caption?.slice(0, 80) || '—'}" — ${worstPost?.likes || 0} like
+
+POSTLAR RO'YXATI:
+${posts.slice(0, 10).map((p, i) => `${i+1}. ${p.likes || 0} ❤️ ${p.comments || 0} 💬 | ${(p.caption || '').slice(0, 60)}`).join('\n')}
+
+VAZIFANG: Ohvatni oshirish uchun aniq, amaliy tavsiyalar ber:
+- Qaysi turdagi kontentlar yaxshi ishlayapti
+- Qanday caption yozish kerak
+- Hashtag strategiyasi
+- Posting vaqti va chastotasi
+- Engagement oshirish yo'llari
+JAVOB: O'zbek tilida, qisqa va amaliy.`
+  }, [igData, igHandle])
+
   const doneCount = roadmapItems.filter(r => r.done).length
   const SECTIONS = [
-    { id: 'analysis', label: 'Tahlil',     Icon: TrendingUp },
-    { id: 'roadmap',  label: `Yo'l xaritasi${roadmapItems.length ? ` (${doneCount}/${roadmapItems.length})` : ''}`, Icon: Map },
+    { id: 'analysis',  label: 'Tahlil',     Icon: TrendingUp },
+    { id: 'roadmap',   label: `Yo'l xaritasi${roadmapItems.length ? ` (${doneCount}/${roadmapItems.length})` : ''}`, Icon: Map },
+    { id: 'instagram', label: 'Instagram',   Icon: IgIcon },
   ]
 
   return (
@@ -248,6 +319,122 @@ JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthS
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+        {/* ── INSTAGRAM ── */}
+        {activeSection === 'instagram' && (
+          <motion.div key="instagram" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+
+            {/* Akkaunt holati + yangilash */}
+            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${igEnabled && igHandle ? 'border-pink-500/30 bg-pink-500/5' : 'border-border bg-bg-secondary'}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${igEnabled && igHandle ? 'bg-pink-500/15' : 'bg-bg-primary border border-border'}`}>
+                <IgIcon size={18} className={igEnabled && igHandle ? 'text-pink-500' : 'text-text-muted'} />
+              </div>
+              <div className="flex-1 min-w-0">
+                {igEnabled && igHandle ? (
+                  <>
+                    <p className="text-sm font-semibold text-text-primary">{igHandle.startsWith('@') ? igHandle : `@${igHandle}`}</p>
+                    <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5"><Link2 size={10} /> make.com orqali ulangan</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-text-secondary">Instagram ulanmagan</p>
+                    <p className="text-xs text-text-muted mt-0.5">Admin panel → AI Agentlar → Marketing agenti → Integratsiyalar</p>
+                  </>
+                )}
+              </div>
+              {igEnabled && igWebhook && (
+                <button
+                  onClick={fetchIgData}
+                  disabled={igLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-pink-500/30 text-pink-500 text-xs font-medium hover:bg-pink-500/10 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw size={12} className={igLoading ? 'animate-spin' : ''} />
+                  {igLoading ? 'Yuklanmoqda...' : igData ? 'Yangilash' : 'Ma\'lumot olish'}
+                </button>
+              )}
+            </div>
+
+            {/* Xato */}
+            {igError && (
+              <div className="flex items-start gap-2 p-3 rounded-xl border border-accent-red/30 bg-accent-red/5">
+                <AlertCircle size={14} className="text-accent-red mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-accent-red">Webhook xatosi: {igError}</p>
+                  <p className="text-xs text-text-muted mt-0.5">make.com scenario da "Webhook Response" modulida <code className="bg-bg-secondary px-1 rounded">Access-Control-Allow-Origin: *</code> headerini qo'shing</p>
+                </div>
+              </div>
+            )}
+
+            {/* Ma'lumotlar kelgan bo'lsa */}
+            {igData && !igLoading && (
+              <>
+                {/* Statistika kartalari */}
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Obunachilar',    value: igData.followers?.toLocaleString('uz-UZ') || '—' },
+                    { label: 'O\'rtacha like',  value: igData.posts?.length ? Math.round(igData.posts.reduce((s,p) => s+(p.likes||0),0)/igData.posts.length) : '—' },
+                    { label: 'O\'rtacha izoh',  value: igData.posts?.length ? Math.round(igData.posts.reduce((s,p) => s+(p.comments||0),0)/igData.posts.length) : '—' },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="p-3 rounded-xl border border-pink-500/20 bg-pink-500/5 text-center">
+                      <p className="text-lg font-bold text-text-primary">{value}</p>
+                      <p className="text-xs text-text-muted mt-0.5">{label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Postlar ro'yxati */}
+                {igData.posts?.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-text-secondary">Oxirgi postlar</p>
+                    <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                      {igData.posts.slice(0, 10).map((post, i) => (
+                        <div key={post.id || i} className="flex items-start gap-3 p-3 rounded-xl bg-bg-secondary border border-border">
+                          <span className="text-xs text-text-muted w-4 flex-shrink-0 mt-0.5">{i+1}.</span>
+                          <p className="text-xs text-text-primary flex-1 leading-relaxed line-clamp-2">{post.caption || '(matn yo\'q)'}</p>
+                          <div className="flex items-center gap-2 flex-shrink-0 text-xs text-text-muted">
+                            <span className="flex items-center gap-1"><Heart size={11} className="text-pink-500" />{post.likes || 0}</span>
+                            <span className="flex items-center gap-1"><MessageCircle size={11} />{post.comments || 0}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI tahlil chat */}
+                {igSystemPrompt && (
+                  <AiChat
+                    agentId="pr-agent-ig"
+                    colorClass="accent-pink"
+                    systemPrompt={igSystemPrompt}
+                    placeholder="Instagram ohvatini oshirish, kontentlar, hashtaglar haqida so'rang..."
+                  />
+                )}
+              </>
+            )}
+
+            {/* Ma'lumot yo'q holati */}
+            {!igData && !igLoading && igEnabled && igWebhook && (
+              <div className="text-center py-10 text-text-muted">
+                <IgIcon size={32} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm">"Ma'lumot olish" tugmasini bosing</p>
+                <p className="text-xs mt-1">make.com Instagram dan so'nggi postlarni olib keladi</p>
+              </div>
+            )}
+
+            {/* Ulanmagan holat */}
+            {(!igEnabled || !igWebhook) && (
+              <div className="p-4 rounded-2xl border border-amber-400/20 bg-amber-400/5 flex items-start gap-3">
+                <AlertCircle size={15} className="text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-text-secondary space-y-1">
+                  <p className="font-medium text-text-primary">Sozlash kerak:</p>
+                  <p>1. make.com da scenario yarating: <strong>Webhook → Instagram: Get User Media → Webhook Response</strong></p>
+                  <p>2. Webhook Response da header qo'shing: <code className="bg-bg-secondary px-1 rounded">Access-Control-Allow-Origin: *</code></p>
+                  <p>3. Admin panel → AI Agentlar → PR-Agent → Integratsiyalar ga webhook URL va akkaunt kiriting</p>
                 </div>
               </div>
             )}
