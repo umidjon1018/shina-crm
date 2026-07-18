@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, Map, CheckCircle2, Plus, X } from 'lucide-react'
+import { TrendingUp, Map, CheckCircle2, Plus, X, Send, Link2, AlertCircle } from 'lucide-react'
+
+const IgIcon = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+    <circle cx="12" cy="12" r="4"/>
+    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+)
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
@@ -134,10 +142,41 @@ SENGA TEGISHLI: Brend ko'tarish, mijoz jalb qilish/ushlab qolish, qotib qolgan t
 SENGA TEGISHLI EMAS: Moliyaviy tahlil, foyda/marja/xarajat hisob-kitoblari — bu Savdo agentining ishi.
 JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length])
 
+  // Instagram integratsiya (make.com webhook orqali)
+  const igConfig = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('goodtires-pr-integrations') || '{}') } catch { return {} }
+  }, [activeSection])
+
+  const igHandle  = igConfig?.instagram?.handle || ''
+  const igWebhook = igConfig?.instagram?.webhookUrl || ''
+  const igEnabled = igConfig?.instagram?.enabled || false
+
+  const [igCaption, setIgCaption]   = useState('')
+  const [igHashtags, setIgHashtags] = useState('#GoodTires #shina #disk')
+  const [igStatus, setIgStatus]     = useState(null) // null | 'sending' | 'ok' | 'err'
+
+  const sendToInstagram = useCallback(async () => {
+    if (!igWebhook || igStatus === 'sending') return
+    setIgStatus('sending')
+    try {
+      await fetch(igWebhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caption: igCaption, hashtags: igHashtags, account: igHandle }),
+      })
+      setIgStatus('ok')
+      setTimeout(() => setIgStatus(null), 3000)
+    } catch {
+      setIgStatus('err')
+      setTimeout(() => setIgStatus(null), 3000)
+    }
+  }, [igWebhook, igCaption, igHashtags, igHandle, igStatus])
+
   const doneCount = roadmapItems.filter(r => r.done).length
   const SECTIONS = [
-    { id: 'analysis', label: 'Tahlil',     Icon: TrendingUp },
-    { id: 'roadmap',  label: `Yo'l xaritasi${roadmapItems.length ? ` (${doneCount}/${roadmapItems.length})` : ''}`, Icon: Map },
+    { id: 'analysis',  label: 'Tahlil',     Icon: TrendingUp },
+    { id: 'roadmap',   label: `Yo'l xaritasi${roadmapItems.length ? ` (${doneCount}/${roadmapItems.length})` : ''}`, Icon: Map },
+    { id: 'instagram', label: 'Instagram',   Icon: IgIcon },
   ]
 
   return (
@@ -250,6 +289,88 @@ JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthS
                   ))}
                 </div>
               </div>
+            )}
+          </motion.div>
+        )}
+        {/* ── INSTAGRAM ── */}
+        {activeSection === 'instagram' && (
+          <motion.div key="instagram" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+            {/* Ulangan akkaunt holati */}
+            <div className={`flex items-center gap-3 p-4 rounded-2xl border ${igEnabled && igHandle ? 'border-pink-500/30 bg-pink-500/5' : 'border-border bg-bg-secondary'}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${igEnabled && igHandle ? 'bg-pink-500/15' : 'bg-bg-primary border border-border'}`}>
+                <IgIcon size={18} className={igEnabled && igHandle ? 'text-pink-500' : 'text-text-muted'} />
+              </div>
+              <div className="flex-1 min-w-0">
+                {igEnabled && igHandle ? (
+                  <>
+                    <p className="text-sm font-semibold text-text-primary">{igHandle.startsWith('@') ? igHandle : `@${igHandle}`}</p>
+                    <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
+                      <Link2 size={10} /> make.com orqali ulangan
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-text-secondary">Instagram ulanmagan</p>
+                    <p className="text-xs text-text-muted mt-0.5">
+                      Admin panel → AI Agentlar → Marketing agenti → Integratsiyalar da sozlang
+                    </p>
+                  </>
+                )}
+              </div>
+              {igEnabled && igHandle && (
+                <span className="text-xs px-2 py-1 rounded-full bg-pink-500/15 text-pink-500 font-medium flex-shrink-0">Ulangan</span>
+              )}
+            </div>
+
+            {/* Post yuborish formasi */}
+            {igEnabled && igWebhook ? (
+              <div className="space-y-3 p-4 rounded-2xl border border-border bg-bg-primary">
+                <p className="text-xs font-medium text-text-secondary">Post yuborish</p>
+                <textarea
+                  value={igCaption}
+                  onChange={e => setIgCaption(e.target.value)}
+                  rows={4}
+                  placeholder="Post matni (caption)..."
+                  className="w-full bg-bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-pink-500/50 resize-none"
+                />
+                <input
+                  value={igHashtags}
+                  onChange={e => setIgHashtags(e.target.value)}
+                  placeholder="#hashtaglar..."
+                  className="w-full bg-bg-secondary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-pink-500/50"
+                />
+                <button
+                  onClick={sendToInstagram}
+                  disabled={!igCaption.trim() || igStatus === 'sending'}
+                  className={`w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-40 ${
+                    igStatus === 'ok'  ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' :
+                    igStatus === 'err' ? 'bg-accent-red/20 text-accent-red border border-accent-red/30' :
+                    'bg-pink-500 text-white hover:bg-pink-600'
+                  }`}
+                >
+                  {igStatus === 'sending' ? (
+                    <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Yuborilmoqda...</>
+                  ) : igStatus === 'ok' ? (
+                    <><CheckCircle2 size={15} /> make.com ga yuborildi ✓</>
+                  ) : igStatus === 'err' ? (
+                    <><AlertCircle size={15} /> Xato — webhook URL ni tekshiring</>
+                  ) : (
+                    <><Send size={14} /> make.com orqali yuborish</>
+                  )}
+                </button>
+                <p className="text-xs text-text-muted text-center">
+                  make.com scenario rasm qo'shish va Instagram ga post qiladi
+                </p>
+              </div>
+            ) : (
+              !igEnabled && (
+                <div className="p-4 rounded-2xl border border-amber-400/20 bg-amber-400/5 flex items-start gap-3">
+                  <AlertCircle size={15} className="text-amber-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-text-secondary">
+                    Admin panel → AI Agentlar → Marketing agenti (PR-Agent) → Integratsiyalar bo'limida Instagram handle, webhook URL kiriting va "Instagram ulangan" ni yoqing.
+                  </p>
+                </div>
+              )
             )}
           </motion.div>
         )}
