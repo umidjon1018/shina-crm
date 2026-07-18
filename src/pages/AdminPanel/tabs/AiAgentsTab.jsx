@@ -60,11 +60,6 @@ const INTEGRATION_CONFIG = {
     { key: 'makeWebhook.url',    label: 'make.com Webhook URL',   type: 'text',     placeholder: 'https://hook.make.com/...' },
     { key: 'makeWebhook.enabled',label: 'Instagram DM yoqilgan',  type: 'toggle' },
   ],
-  'pr-agent': [
-    { key: 'instagram.handle',     label: 'Instagram akkaunt',      type: 'text',     placeholder: '@goodtires_uz' },
-    { key: 'instagram.webhookUrl', label: 'make.com Webhook URL',   type: 'text',     placeholder: 'https://hook.make.com/...' },
-    { key: 'instagram.enabled',    label: 'Instagram ulangan',      type: 'toggle' },
-  ],
 }
 
 function getNestedValue(obj, path) {
