@@ -10,7 +10,7 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-function StaffTab({ aiData = {} }) {
+function StaffTab({ aiData = {}, agentConfig = null }) {
   const { t } = useTranslation()
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
@@ -192,8 +192,10 @@ function StaffTab({ aiData = {} }) {
       return `${e.name} (${e.role || '?'}): oylik ${e.salary?.toLocaleString()} so'm | Jami tushum: ${fmtNum(revenue, t)} so'm ${roi ? '| ' + roi : ''} | ishga kirgan: ${e.hiredAt || '?'}`
     })
 
+  const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
+
   // ─── Analysis prompt ────────────────────────────────────────────────────────
-  const buildPrompt = () => `XODIMLAR FAOLIYATI VA SAMARADORLIGI — TO'LIQ TAHLIL:
+  const buildPrompt = () => (agentConfig?.systemPrompt || "Sen GoodTires do'konining XODIMLAR AGENTISAN.") + `\n\nXODIMLAR FAOLIYATI VA SAMARADORLIGI — TO'LIQ TAHLIL:
 
 👥 UMUMIY KO'RSATKICHLAR:
 - Faol xodimlar: ${empList.length} ta | Tizimda faoliyat: ${staffStats.length} ta
@@ -238,6 +240,7 @@ VAZIFALAR:
 
   // ─── System prompt for AiChat ───────────────────────────────────────────────
   const systemPrompt = useMemo(() => {
+    const base = agentConfig?.systemPrompt || "Sen XODIMLAR AGENTI — shina/g'ildirak do'kon CRM tizimining xodimlar tahlilchisisisan."
     const staffLines = staffStats.map((e, i) => {
       const share = totalRevenue > 0 ? ((e.revenue / totalRevenue) * 100).toFixed(1) : 0
       const discRate = (e.sales + e.usedSales) > 0
@@ -271,7 +274,7 @@ VAZIFALAR:
       return `${e.name}: rol=${e.role || '?'}, maosh=${e.salary ? e.salary.toLocaleString() + ' so\'m/oy' : 'kiritilmagan'}, ishga kirgan=${e.hiredAt || '?'}, tushum=${stat ? fmtNum(stat.revenue, t) : '0'} so'm`
     }).join('\n')
 
-    return `Sen XODIMLAR AGENTI — shina/g'ildirak do'kon CRM tizimining xodimlar tahlilchisisisan.
+    return base + `
 
 MENING VAZIFALARIM:
 - Xodimlarning sotuv samaradorligini tahlil qilish (kim ko'p sotyapti, kim kam)
@@ -301,7 +304,7 @@ Shubhali patternlar: ${suspiciousDiscounts.length > 0 ? suspiciousDiscounts.map(
 - Raqamlar bilan konkret misol keltir
 - Muammo aniqlasang — sabab va yechim ayt
 - Agar xodim haqida so'rasalar — aniq raqamlar bilan javob ber`
-  }, [staffStats, empList, totalRevenue, totalSales, totalProfit, totalSalary, topDiscounter, suspiciousDiscounts, version])
+  }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), staffStats, empList, totalRevenue, totalSales, totalProfit, totalSalary, topDiscounter, suspiciousDiscounts, version])
 
   // ─── Auto analysis ──────────────────────────────────────────────────────────
   const { loading, analysis, error, refresh } = useAgentAnalysis({

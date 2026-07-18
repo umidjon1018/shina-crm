@@ -17,7 +17,7 @@ import { useMarketingStore } from '../../../store/marketingStore'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-function MarketingTab({ aiData = {} }) {
+function MarketingTab({ aiData = {}, agentConfig = null }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
@@ -125,10 +125,14 @@ function MarketingTab({ aiData = {} }) {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5)
   }, [MOCK_SALES, MOCK_PRODUCTS])
 
+  const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
+
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'pr-agent',
     enabled: MOCK_PRODUCTS.length > 0 || MOCK_SALES.length > 0,
-    buildPrompt: () => `Sen GoodTires shina va disk do'konining marketing menejeri/strategistisan. Quyidagi CRM ma'lumotlarini to'liq tahlil qilib, savdoni oshirish, yangi mijozlarni jalb qilish va mavjudlarini ushlab qolish bo'yicha aniq, amaliy reja tuz.
+    buildPrompt: () => {
+      const role = agentConfig?.systemPrompt || "Sen GoodTires shina va disk do'konining marketing menejeri/strategistisan. Quyidagi CRM ma'lumotlarini to'liq tahlil qilib, savdoni oshirish, yangi mijozlarni jalb qilish va mavjudlarini ushlab qolish bo'yicha aniq, amaliy reja tuz."
+      return role + `
 
 ━━━ DO'KON HOLATI ━━━
 Fasl: ${seasonLabel} (${currentMonth}-oy)
@@ -171,8 +175,9 @@ ${activePromos.length ? activePromos.map(p => `- ${p.name}`).join('\n') : 'Hozir
 4. QOTIB QOLGAN TOVARLAR: Ularni tezda sotish uchun kampaniya g'oyalari
 5. SEZONIY MARKETING: ${seasonLabel} faslida eng dolzarb harakatlar
 6. INSTAGRAM: Ohvatni oshirish, qanday kontentlar qo'yish, qachon post qilish
-7. YO'L XARITASI: 1 oy — tezkor harakatlar; 3 oy — o'rta muddatli; 6 oy — strategik`,
-    deps: [version, selectedShopId, MOCK_SALES.length, MOCK_CUSTOMERS.length, topFast.length, unsoldProducts.length, repeatCustomers, sourceCounts.length],
+7. YO'L XARITASI: 1 oy — tezkor harakatlar; 3 oy — o'rta muddatli; 6 oy — strategik`
+    },
+    deps: [version, selectedShopId, MOCK_SALES.length, MOCK_CUSTOMERS.length, topFast.length, unsoldProducts.length, repeatCustomers, sourceCounts.length, agentConfig?.tools?.join()],
   })
 
   useEffect(() => {
@@ -182,7 +187,9 @@ ${activePromos.length ? activePromos.map(p => `- ${p.name}`).join('\n') : 'Hozir
     }
   }, [analysis])
 
-  const systemPrompt = useMemo(() => `Sen GoodTires shina va disk do'konining MARKETING MENEJERI VA STRATEGISTISAN.
+  const systemPrompt = useMemo(() => {
+    const base = agentConfig?.systemPrompt || "Sen GoodTires shina va disk do'konining MARKETING MENEJERI VA STRATEGISTISAN."
+    return base + `
 
 === JORIY HOLAT ===
 Fasl: ${seasonLabel} (${currentMonth}-oy)
@@ -205,7 +212,8 @@ Faol aksiyalar: ${activePromos.length ? activePromos.map(p => p.name).join(', ')
 
 === CHEGARA ===
 Foyda/zarar/marja/xarajat hisob-kitoblari SENING ISHINGMAS — bu Savdo agentining vazifasi.
-JAVOB: O'zbek tilida, aniq va amaliy.`, [currentMonth, seasonLabel, monthTrend, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length, repeatCustomers, sourceCounts, topFast, topSlow, unsoldProducts])
+JAVOB: O'zbek tilida, aniq va amaliy.`
+  }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), currentMonth, seasonLabel, monthTrend, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length, repeatCustomers, sourceCounts, topFast, topSlow, unsoldProducts])
 
   // Instagram integratsiya
   const igConfig = useMemo(() => {

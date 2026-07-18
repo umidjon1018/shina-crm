@@ -6,7 +6,7 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
-function InventoryTab({ aiData = {} }) {
+function InventoryTab({ aiData = {}, agentConfig = null }) {
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
@@ -111,6 +111,7 @@ function InventoryTab({ aiData = {} }) {
   }, [_allUsedStock, selectedShopId])
 
   const enabled = stockByProduct.length > 0 || MOCK_USED_STOCK.length > 0
+  const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'product-agent',
@@ -118,51 +119,16 @@ function InventoryTab({ aiData = {} }) {
     buildPrompt: () => {
       const season = new Date().getMonth() + 1
       const seasonLabel = season >= 3 && season <= 8 ? 'YOZ' : 'QIŠ'
-
-      const shopLines = batchByShop.length > 1
-        ? `\nHAR BIR DO'KON OMBORI:\n${batchByShop.map((s, i) => `${i+1}. ${s.name}: ${s.count} ta partiya, ${s.totalQty} ta kirim, ${s.remaining} ta qoldi, ${s.suppliers} ta yetkazib beruvchi`).join('\n')}`
-        : ''
-
-      const usedShopLines = usedByShop.length > 1
-        ? `\nB/U DO'KON BO'YICHA:\n${usedByShop.map(s => `Do'kon ${s.sid}: ${s.inStock} ta zaxirada, ${s.sold} ta sotilgan, ${s.scrapped} ta utilizatsiya`).join('\n')}`
-        : ''
-
-      return `OMBOR TAHLILI MA'LUMOTLARI (moliyaviy emas — faqat son va holat):
-
-📦 KIRIM PARTIYALAR:
-- Jami partiyalar: ${MOCK_BATCHES.length} ta
-- Yetkazib beruvchilar: ${new Set(MOCK_BATCHES.map(b => b.supplierName).filter(Boolean)).size} ta
-${shopLines}
-
-🔖 BARKODLAR:
-- Jami birliklar: ${barcodeStats.total} ta
-- Zaxirada (in_stock): ${barcodeStats.inStock} ta
-- Sotilgan: ${barcodeStats.sold} ta
-- Barkod chiqarilmagan (zaxirada): ${barcodeStats.noBarcodeInStock} ta ← bular sotilib ketmaydi!
-- Chop etilgan: ${barcodeStats.printed} ta
-- Yuklab olingan: ${barcodeStats.downloaded} ta
-
-📊 YANGI TOVAR OMBORI:
-- Faol mahsulot turlari: ${stockByProduct.length} ta
-- Kam zaxira (limitdan past): ${lowStock.length} ta
-- Tugagan: ${zeroStock.length} ta
-- Hozirgi fasl: ${seasonLabel}
-
-KAM ZAXIRALILAR (top-8):
-${lowStock.slice(0, 8).map(p => `- ${p.name} (${p.brand}): ${p.stock} ta qoldi (min: ${p.minLimit}), fasl: ${p.season}`).join('\n') || 'yo\'q'}
-
-🔄 B/U TOVAR:
-- Zaxirada: ${usedInStock.length} ta
-- Sotilgan: ${usedCompleted.length} ta
-- Bekor (qaytarilgan): ${usedCancelled.length} ta
-- Almashtirish: ${usedExchanged.length} ta
-- Utilizatsiya qilingan: ${usedScrapped.length} ta
-
-B/U KATEGORIYALAR:
-${usedByCategory.map(c => `- ${c.cat}: ${c.inStock} zaxira, ${c.sold} sotilgan, ${c.scrapped} utilizatsiya`).join('\n') || 'ma\'lumot yo\'q'}
-${usedShopLines}`
+      const shopLines = batchByShop.length > 1 ? `\nHAR BIR DO'KON OMBORI:\n${batchByShop.map((s, i) => `${i+1}. ${s.name}: ${s.count} ta partiya, ${s.remaining} ta qoldi`).join('\n')}` : ''
+      const usedShopLines = usedByShop.length > 1 ? `\nB/U DO'KON BO'YICHA:\n${usedByShop.map(s => `Do'kon ${s.sid}: ${s.inStock} ta zaxirada, ${s.sold} ta sotilgan`).join('\n')}` : ''
+      const role = agentConfig?.systemPrompt || "Sen GoodTires do'konining OMBOR VA TOVAR AGENTISAN."
+      const parts = [role, '']
+      if (hasTool('get_top_products') || hasTool('get_low_stock')) parts.push(`📊 YANGI TOVAR OMBORI:\n- Faol tovar turlari: ${stockByProduct.length} ta | Fasl: ${seasonLabel}\n- Kam zaxira: ${lowStock.length} ta | Tugagan: ${zeroStock.length} ta\n${lowStock.slice(0,8).map(p=>`  - ${p.name} (${p.brand}): ${p.stock} ta (min: ${p.minLimit})`).join('\n')}${shopLines}`)
+      if (hasTool('get_barcodes_summary')) parts.push(`🔖 BARKODLAR:\n- Jami: ${barcodeStats.total} ta | Zaxirada: ${barcodeStats.inStock} ta | Sotilgan: ${barcodeStats.sold} ta\n- Barkod yo'q (sotilib ketmaydi!): ${barcodeStats.noBarcodeInStock} ta`)
+      parts.push(`🔄 B/U TOVAR:\n- Zaxirada: ${usedInStock.length} ta | Sotilgan: ${usedCompleted.length} ta | Utilizatsiya: ${usedScrapped.length} ta\n${usedByCategory.map(c=>`  - ${c.cat}: ${c.inStock} zaxira, ${c.sold} sotilgan`).join('\n')}${usedShopLines}`)
+      return parts.join('\n')
     },
-    deps: [version, selectedShopId, stockByProduct.length, MOCK_USED_STOCK.length, barcodeStats.total],
+    deps: [version, selectedShopId, stockByProduct.length, MOCK_USED_STOCK.length, barcodeStats.total, agentConfig?.tools?.join()],
   })
 
   useEffect(() => {
@@ -172,18 +138,14 @@ ${usedShopLines}`
     }
   }, [analysis])
 
-  const inventorySystemPrompt = useMemo(() => `Sen OMBOR AGENTI — shina/g'ildirak do'kon CRM tizimining ombor va tovar tahlilchisisisan.
-
-=== JORIY OMBOR MA'LUMOTI ===
-Partiyalar: ${MOCK_BATCHES.length} ta
-Birliklar: jami ${barcodeStats.total} ta, zaxirada ${barcodeStats.inStock} ta, sotilgan ${barcodeStats.sold} ta
-Barkod yo'q (sotilib ketmaydi!): ${barcodeStats.noBarcodeInStock} ta
-Faol mahsulot turlari: ${stockByProduct.length} ta
-Kam zaxira (limitdan past): ${lowStock.length} ta — ${lowStock.slice(0, 5).map(p => `${p.name}: ${p.stock} ta`).join(', ') || 'yo\'q'}
-Tugagan: ${zeroStock.length} ta
-B/U zaxira: ${usedInStock.length} ta | Sotilgan: ${usedCompleted.length} ta | Utilizatsiya: ${usedScrapped.length} ta
-
-JAVOB USLUBI: O'zbek tilida, qisqa va aniq. Ombor, tovar holati, barkodlar haqida savollarga javob ber.`, [MOCK_BATCHES.length, barcodeStats.inStock, barcodeStats.noBarcodeInStock, lowStock.length, zeroStock.length, usedInStock.length])
+  const inventorySystemPrompt = useMemo(() => {
+    const base = agentConfig?.systemPrompt || "Sen GoodTires do'konining OMBOR VA TOVAR AGENTISAN."
+    const ctx = []
+    if (hasTool('get_top_products') || hasTool('get_low_stock')) ctx.push(`Faol tovar turlari: ${stockByProduct.length} ta | Kam zaxira: ${lowStock.length} ta (${lowStock.slice(0,3).map(p=>`${p.name}: ${p.stock}`).join(', ')}) | Tugagan: ${zeroStock.length} ta`)
+    if (hasTool('get_barcodes_summary')) ctx.push(`Barkod: jami ${barcodeStats.total} ta, zaxirada ${barcodeStats.inStock} ta, barkod yo'q: ${barcodeStats.noBarcodeInStock} ta`)
+    ctx.push(`B/U: zaxirada ${usedInStock.length} ta, sotilgan ${usedCompleted.length} ta, utilizatsiya ${usedScrapped.length} ta`)
+    return base + (ctx.length ? '\n\n=== JORIY OMBOR HOLATI ===\n' + ctx.join('\n') : '')
+  }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), stockByProduct.length, lowStock.length, zeroStock.length, barcodeStats.inStock, barcodeStats.noBarcodeInStock, usedInStock.length])
 
   return (
     <div className="space-y-6">

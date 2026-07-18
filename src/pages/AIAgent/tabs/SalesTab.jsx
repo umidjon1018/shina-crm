@@ -10,7 +10,7 @@ import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
 
 
-function SalesTab({ aiData = {} }) {
+function SalesTab({ aiData = {}, agentConfig = null }) {
   const { t } = useTranslation()
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
@@ -133,58 +133,26 @@ function SalesTab({ aiData = {} }) {
   const thisMonthRev   = thisMonthSales.reduce((s, x) => s + x.total, 0)
 
   const enabled = MOCK_SALES.length > 0 || MOCK_BATCHES.length > 0 || MOCK_EXPENSES.length > 0
+  const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'sales-agent',
     enabled,
     buildPrompt: () => {
+      const role = agentConfig?.systemPrompt || "Sen GoodTires do'konining SAVDO VA MOLIYA AGENTISAN."
       const shopLines = shopBreakdown.length > 1
         ? `\nFILIALLAR BO'YICHA:\n${shopBreakdown.map((sh, i) => `${i+1}. ${sh.name}: ${sh.sales} ta sotuv, ${fmtNum(sh.revenue, t)} so'm tushum, ${fmtNum(sh.profit, t)} so'm foyda`).join('\n')}`
         : ''
-
-      return `MOLIYAVIY TAHLIL MA'LUMOTLARI:
-
-📦 KIRIM (YETKAZIB BERUVCHILAR):
-- Jami kirim: $${totalIncomeUSD.toFixed(0)} USD
-- To'langan: $${totalPaidUSD.toFixed(0)} | Qarz: $${totalDebtUSD.toFixed(0)}
-- To'lanmagan partiyalar: ${unpaidBatches.length} ta
-${supplierMap.slice(0, 4).map((s, i) => `  ${i+1}. ${s.name}: $${s.totalUSD.toFixed(0)} (qarz: $${s.debtUSD.toFixed(0)})`).join('\n')}
-
-💰 SOTUV:
-- Tugallangan: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta
-- Bekor (pul qaytarilgan — savdo hisoblanmaydi): ${realCancelled.length} ta
-- Almashtirish (bekor emas, yangi sotuv boʻldi): ${exchanged.length} ta
-- Bekor foizi: ${returnRate}% (${realCancelled.length} ta haqiqiy bekor / ${completedSales.length + realCancelled.length + exchanged.length} ta yangi sotuv urinish)
-- Tushum: ${fmtNum(totalRevenue, t)} so'm (yangi: ${fmtNum(newRevenue, t)}, B/U: ${fmtNum(usedRevenue, t)})
-- Sof foyda: ${fmtNum(totalProfit, t)} so'm (yangi: ${fmtNum(newProfit, t)}, B/U: ${fmtNum(usedProfit, t)})
-- Marja: ${avgMargin}%
-- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
-- Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)
-
-📋 NASIYA QARZLARI (sotuv):
-- Nasiya savdolar: ${installmentSales.length} ta
-- Qabul qilingan: ${fmtNum(installmentReceived, t)} so'm
-- Qolgan qarz: ${fmtNum(installmentDebt, t)} so'm
-
-💸 XARAJATLAR:
-- Jami: ${fmtNum(totalExpenses, t)} so'm
-- Oyliklar: ${fmtNum(salaryExp, t)} so'm | Ijara: ${fmtNum(rentExp, t)} so'm | Boshqa: ${fmtNum(otherExp, t)} so'm
-- Sof pul oqimi (foyda - xarajat): ${fmtNum(totalProfit - totalExpenses, t)} so'm
-
-🏦 JALB QILINGAN MABLAG'LAR:
-- Kiritilgan kapital: ${fmtNum(invested, t)} so'm
-- Olingan qarz: ${fmtNum(loan, t)} so'm | Qaytarilgan: ${fmtNum(loanRepaid, t)} so'm
-- Chiqarilgan: ${fmtNum(withdrawn, t)} so'm
-- Sof kapital: ${fmtNum(netCapital, t)} so'm
-
-🎁 CHEGIRMALAR VA AKSIYALAR:
-- Chegirma evaziga yo'qotilgan: ${fmtNum(discountLoss, t)} so'm
-- Sodiqlik bonus yo'qotishlari: ${fmtNum(loyaltyDiscountLoss, t)} so'm
-- Aksiyalar soni: ${MOCK_PROMOTIONS.length} ta
-- Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length}, sodiq: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length})
-${shopLines}`
+      const parts = [role, '']
+      if (hasTool('get_supplier_debts'))   parts.push(`📦 KIRIM (YETKAZIB BERUVCHILAR):\n- Jami kirim: $${totalIncomeUSD.toFixed(0)} USD\n- To'langan: $${totalPaidUSD.toFixed(0)} | Qarz: $${totalDebtUSD.toFixed(0)}\n- To'lanmagan partiyalar: ${unpaidBatches.length} ta\n${supplierMap.slice(0, 4).map((s, i) => `  ${i+1}. ${s.name}: $${s.totalUSD.toFixed(0)} (qarz: $${s.debtUSD.toFixed(0)})`).join('\n')}`)
+      if (hasTool('get_sales_summary'))    parts.push(`💰 SOTUV:\n- Tugallangan: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta\n- Bekor (pul qaytarilgan): ${realCancelled.length} ta | Almashtirish: ${exchanged.length} ta\n- Bekor foizi: ${returnRate}%\n- Tushum: ${fmtNum(totalRevenue, t)} so'm | Sof foyda: ${fmtNum(totalProfit, t)} so'm | Marja: ${avgMargin}%\n- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta\n- Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)${shopLines}`)
+      if (hasTool('get_customer_debts'))   parts.push(`📋 NASIYA QARZLARI:\n- Nasiya savdolar: ${installmentSales.length} ta\n- Qabul qilingan: ${fmtNum(installmentReceived, t)} so'm | Qolgan qarz: ${fmtNum(installmentDebt, t)} so'm`)
+      if (hasTool('get_expenses_summary')) parts.push(`💸 XARAJATLAR:\n- Jami: ${fmtNum(totalExpenses, t)} so'm\n- Oyliklar: ${fmtNum(salaryExp, t)} | Ijara: ${fmtNum(rentExp, t)} | Boshqa: ${fmtNum(otherExp, t)}\n- Sof pul oqimi: ${fmtNum(totalProfit - totalExpenses, t)} so'm`)
+      if (hasTool('get_capital_summary'))  parts.push(`🏦 KAPITAL:\n- Kiritilgan: ${fmtNum(invested, t)} | Chiqarilgan: ${fmtNum(withdrawn, t)} | Qarz: ${fmtNum(loan, t)} | Sof: ${fmtNum(netCapital, t)} so'm`)
+      if (hasTool('get_discounts_summary'))parts.push(`🎁 CHEGIRMALAR:\n- Yo'qotish: ${fmtNum(discountLoss, t)} so'm | Sodiqlik bonus: ${fmtNum(loyaltyDiscountLoss, t)} so'm\n- Aksiyalar: ${MOCK_PROMOTIONS.length} ta | Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length}, sodiq: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length})`)
+      return parts.join('\n')
     },
-    deps: [version, selectedShopId, completedSales.length, totalRevenue, totalExpenses, MOCK_BATCHES.length],
+    deps: [version, selectedShopId, completedSales.length, totalRevenue, totalExpenses, MOCK_BATCHES.length, agentConfig?.tools?.join()],
   })
 
   useEffect(() => {
@@ -195,24 +163,17 @@ ${shopLines}`
   }, [analysis])
 
 
-  const salesSystemPrompt = useMemo(() => `Sen SAVDO AGENTI — shina/g'ildirak do'kon CRM tizimining moliyaviy tahlilchisisisan.
-
-=== JORIY MOLIYAVIY MA'LUMOT ===
-Sotuvlar: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta jami
-Tushum: ${totalRevenue.toLocaleString()} so'm (yangi: ${newRevenue.toLocaleString()}, B/U: ${usedRevenue.toLocaleString()})
-Sof foyda: ${totalProfit.toLocaleString()} so'm | Marja: ${avgMargin}%
-Bekor (haqiqiy): ${realCancelled.length} ta (${returnRate}%) | Almashtirish: ${exchanged.length} ta
-To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta
-Shu oy: ${thisMonthSales.length} ta sotuv, ${thisMonthRev.toLocaleString()} so'm
-
-Kirim (yetkazib beruvchilar): $${totalIncomeUSD.toFixed(0)} USD | Qarz: $${totalDebtUSD.toFixed(0)}
-Nasiya qarz (sotuvdan): ${installmentDebt.toLocaleString()} so'm | Qabul qilingan: ${installmentReceived.toLocaleString()} so'm
-Xarajatlar: ${totalExpenses.toLocaleString()} so'm (oylik: ${salaryExp.toLocaleString()}, ijara: ${rentExp.toLocaleString()})
-Sof pul oqimi: ${(totalProfit - totalExpenses).toLocaleString()} so'm
-Kapital: kiritilgan ${invested.toLocaleString()}, chiqarilgan ${withdrawn.toLocaleString()}, qarz ${loan.toLocaleString()}, sof: ${netCapital.toLocaleString()} so'm
-Chegirma yo'qotish: ${discountLoss.toLocaleString()} so'm | Sodiqlik bonus: ${loyaltyDiscountLoss.toLocaleString()} so'm
-
-JAVOB USLUBI: O'zbek tilida, qisqa va aniq. Raqamlar bilan konkret misollar keltir.`, [completedSales.length, usedCompleted.length, totalRevenue, totalProfit, avgMargin, returnRate, totalExpenses, installmentDebt, netCapital])
+  const salesSystemPrompt = useMemo(() => {
+    const base = agentConfig?.systemPrompt || "Sen GoodTires do'konining SAVDO VA MOLIYA AGENTISAN."
+    const ctx = []
+    if (hasTool('get_sales_summary'))    ctx.push(`Sotuvlar: ${completedSales.length+usedCompleted.length} ta | Tushum: ${totalRevenue.toLocaleString()} so'm | Foyda: ${totalProfit.toLocaleString()} so'm | Marja: ${avgMargin}% | Bekor: ${realCancelled.length} ta (${returnRate}%) | Shu oy: ${thisMonthSales.length} ta`)
+    if (hasTool('get_supplier_debts'))   ctx.push(`Yetkazib beruvchi qarz: $${totalDebtUSD.toFixed(0)} USD (${unpaidBatches.length} ta to'lanmagan partiya)`)
+    if (hasTool('get_customer_debts'))   ctx.push(`Nasiya qarz: ${installmentDebt.toLocaleString()} so'm (${installmentSales.length} ta nasiya savdo)`)
+    if (hasTool('get_expenses_summary')) ctx.push(`Xarajatlar: ${totalExpenses.toLocaleString()} so'm | Sof oqim: ${(totalProfit-totalExpenses).toLocaleString()} so'm`)
+    if (hasTool('get_capital_summary'))  ctx.push(`Kapital: sof ${netCapital.toLocaleString()} so'm`)
+    if (hasTool('get_discounts_summary'))ctx.push(`Chegirma yo'qotish: ${discountLoss.toLocaleString()} so'm`)
+    return base + (ctx.length ? '\n\n=== JORIY HOLAT ===\n' + ctx.join('\n') : '')
+  }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), completedSales.length, usedCompleted.length, totalRevenue, totalProfit, avgMargin, returnRate, totalExpenses, installmentDebt, netCapital])
 
   return (
     <div className="space-y-6">

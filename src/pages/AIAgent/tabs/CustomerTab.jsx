@@ -121,7 +121,7 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
   )
 }
 
-function CustomerTab({ aiData = {} }) {
+function CustomerTab({ aiData = {}, agentConfig = null }) {
   const { addActivity } = useAgentActivityStore()
   const { version } = useDataStore()
   const { selectedShopId } = useShopStore()
@@ -210,10 +210,14 @@ function CustomerTab({ aiData = {} }) {
   cancelledSales.forEach(s => { const r = s.cancelReason || "Ko'rsatilmagan"; cancelReasons[r] = (cancelReasons[r] || 0) + 1 })
   const activePromos = MOCK_PROMOTIONS.filter(p => p.isActive)
 
+  const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
+
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'customer-agent',
     enabled: shopCustomers.length > 0,
-    buildPrompt: () => `MIJOZLAR TAHLILI — TO'LIQ MA'LUMOT:
+    buildPrompt: () => {
+      const role = agentConfig?.systemPrompt || "Sen GoodTires do'konining MIJOZLAR AGENTISAN."
+      return role + `\n\nMIJOZLAR TAHLILI — TO'LIQ MA'LUMOT:
 
 👥 UMUMIY:
 - Jami: ${shopCustomers.length} ta | VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount}
@@ -244,8 +248,9 @@ VAZIFALAR:
 2. Chegirmaga sezgirlarga optimal taklif
 3. Tug'ilgan kunlilarga Telegram tabrik xabari rejasi
 4. Bekor qilishlarning asosiy sababini bartaraf etish
-5. Marketing agenti bilan: sodiqlik + sarafanniy reklama rejasi`,
-    deps: [version, selectedShopId, shopCustomers.length, completedSales.length, reservations.length],
+5. Marketing agenti bilan: sodiqlik + sarafanniy reklama rejasi`
+    },
+    deps: [version, selectedShopId, shopCustomers.length, completedSales.length, reservations.length, agentConfig?.tools?.join()],
   })
 
   useEffect(() => {
@@ -410,7 +415,7 @@ VAZIFALAR:
       </AnimatePresence>
 
       <AiChat agentId="customer-agent" colorClass="accent-blue"
-        systemPrompt={`Sen MIJOZLAR AGENTI — shina/g'ildirak do'kon CRM tizimining mijoz muloqoti tahlilchisisisan.
+        systemPrompt={(agentConfig?.systemPrompt || "Sen GoodTires do'konining MIJOZLAR AGENTISAN.") + `
 
 === JORIY MIJOZLAR MA'LUMOTI ===
 Jami mijozlar: ${shopCustomers.length} ta | VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount}
