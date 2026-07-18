@@ -84,40 +84,95 @@ function MarketingTab({ aiData = {} }) {
   const activePromos    = MOCK_PROMOTIONS.filter(p => p.isActive)
   const inventoryAlerts = getActivitiesByAgent('inventory').filter(a => a.type === 'ALERT').slice(0, 3)
 
+  // Mijozlar manbalari tahlili
+  const sourceCounts = useMemo(() => {
+    const counts = {}
+    MOCK_SALES.forEach(s => {
+      const src = s.source || 'walk_in'
+      counts[src] = (counts[src] || 0) + 1
+    })
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])
+  }, [MOCK_SALES])
+
+  // Qayta kelgan mijozlar
+  const repeatCustomers = useMemo(() => {
+    const counts = {}
+    MOCK_SALES.forEach(s => { if (s.customerId) counts[s.customerId] = (counts[s.customerId] || 0) + 1 })
+    return Object.values(counts).filter(n => n > 1).length
+  }, [MOCK_SALES])
+
+  // So'nggi 3 oylik trend
+  const monthTrend = useMemo(() => {
+    const months = []
+    for (let i = 2; i >= 0; i--) {
+      const d = new Date(); d.setMonth(d.getMonth() - i)
+      const key = d.toISOString().slice(0, 7)
+      const label = `${d.getMonth() + 1}-oy`
+      const count = [...MOCK_SALES, ...MOCK_USED_SALES].filter(s => (s.soldAt || s.createdAt || '').startsWith(key) && s.status !== 'cancelled').length
+      months.push({ label, count })
+    }
+    return months
+  }, [MOCK_SALES, MOCK_USED_SALES])
+
+  // Brend bo'yicha sotuv
+  const brandCounts = useMemo(() => {
+    const counts = {}
+    MOCK_SALES.forEach(s => s.items?.forEach(i => {
+      const p = MOCK_PRODUCTS.find(pr => pr.id === i.productId)
+      const brand = p?.brand || 'Noma\'lum'
+      counts[brand] = (counts[brand] || 0) + (i.qty || 1)
+    }))
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  }, [MOCK_SALES, MOCK_PRODUCTS])
+
   const { loading, analysis, error, refresh } = useAgentAnalysis({
     agentId: 'pr-agent',
     enabled: MOCK_PRODUCTS.length > 0 || MOCK_SALES.length > 0,
-    buildPrompt: () => `Sen GoodTires marketing agentisan. Quyidagi ma'lumotlar asosida brend, mijozlar oqimi va tovar aylanmasini yaxshilash bo'yicha aniq takliflar ber.
+    buildPrompt: () => `Sen GoodTires shina va disk do'konining marketing menejeri/strategistisan. Quyidagi CRM ma'lumotlarini to'liq tahlil qilib, savdoni oshirish, yangi mijozlarni jalb qilish va mavjudlarini ushlab qolish bo'yicha aniq, amaliy reja tuz.
 
-📅 FASL: ${seasonLabel} (${currentMonth}-oy)
+━━━ DO'KON HOLATI ━━━
+Fasl: ${seasonLabel} (${currentMonth}-oy)
+Jami mijozlar: ${MOCK_CUSTOMERS.length} ta | Jami tovar turlari: ${MOCK_PRODUCTS.length} ta
 
-📦 TOVAR AYLANMASI:
-Bu oy sotilgan: ${thisMonthSales.length} ta | O'tgan oy: ${lastMonthSales.length} ta | O'sish: ${revGrowth}%
+━━━ SOTUV TRENDI (3 OY) ━━━
+${monthTrend.map(m => `${m.label}: ${m.count} ta sotuv`).join(' → ')}
+Bu oy o'sish: ${revGrowth}%
 
-ENG TEZ SOTILADIGAN (kuchaytirilsin):
-${topFast.map((p, i) => `${i+1}. ${p.name} (${p.brand}): bu oy ${p.thisMonth} ta, jami ${p.total} ta`).join('\n') || 'ma\'lumot yo\'q'}
+━━━ MIJOZLAR SEGMENTI ━━━
+VIP (oltin): ${vipCount} ta — ushlab qolish, maxsus taklif kerak
+Sodiq (kumush): ${loyalCount} ta — VIP ga ko'tarish imkoni bor
+Yangi / bir martalik: ${newCount} ta — qayta jalb qilish kerak
+Nasiyadorlar: ${debtors} ta — aktiv muloqot va eslatma zarur
+Qayta kelgan mijozlar: ${repeatCustomers} ta (${MOCK_CUSTOMERS.length ? Math.round(repeatCustomers / MOCK_CUSTOMERS.length * 100) : 0}% retention)
 
-ENG SEKIN SOTILADIGAN (kampaniya kerak!):
+━━━ MIJOZLAR MANBALARI ━━━
+${sourceCounts.slice(0, 5).map(([src, cnt]) => `${src}: ${cnt} ta (${Math.round(cnt / Math.max(MOCK_SALES.length, 1) * 100)}%)`).join('\n') || 'ma\'lumot yo\'q'}
+
+━━━ TOVAR AYLANMASI ━━━
+ENG TEZ SOTILADIGAN (kuchaytirish kerak):
+${topFast.map((p, i) => `${i+1}. ${p.name} (${p.brand}): bu oy ${p.thisMonth} ta, jami ${p.total} ta`).join('\n') || 'yo\'q'}
+
+ENG SEKIN SOTILADIGAN (kampaniya zarur):
 ${topSlow.map((p, i) => `${i+1}. ${p.name} (${p.brand}): ${p.total} ta`).join('\n') || 'yo\'q'}
 
-ZAXIRADA BOR, HECH SOTILMAGAN (tezkor harakatlar kerak):
+ZAXIRADA BOR, HECH SOTILMAGAN (tezkor harakat kerak):
 ${unsoldProducts.map(p => `- ${p.name} (${p.brand || '—'})`).join('\n') || 'yo\'q'}
 
-👥 MIJOZLAR OQIMI (${MOCK_CUSTOMERS.length} ta jami):
-- VIP: ${vipCount} ta — ushlab qolish strategiyasi kerak
-- Sodiq: ${loyalCount} ta — VIP ga ko'tarilishi mumkin
-- Yangi/bir martalik: ${newCount} ta — qayta jalb kerak
-- Nasiyadorlar: ${debtors} ta — muloqot va eslatma strategiyasi
+━━━ BREND TAHLILI ━━━
+${brandCounts.map(([brand, cnt]) => `${brand}: ${cnt} ta sotilgan`).join('\n') || 'yo\'q'}
 
-🎯 FAOL AKSIYALAR: ${activePromos.map(p => p.name).join(', ') || 'hozircha yo\'q'}
+━━━ FAOL AKSIYALAR ━━━
+${activePromos.length ? activePromos.map(p => `- ${p.name}`).join('\n') : 'Hozircha faol aksiya yo\'q'}
 
-TAHLIL VA TAKLIFLAR:
-1. Qotib qolgan tovarlarni tezroq sotish uchun kampaniya g'oyalari
-2. Yangi mijozlarni jalb qilish va mavjudlarini ushlab qolish yo'llari
-3. GoodTires brendini ko'tarish — sodiqlik, referral, takroriy xarid
-4. Sezoniy marketing — ${seasonLabel} faslida qaysi tovar, qaysi auditoriya
-5. 1 oy, 3 oy, 6 oylik marketing yo'l xaritasi`,
-    deps: [version, selectedShopId, MOCK_SALES.length, MOCK_CUSTOMERS.length, topFast.length, unsoldProducts.length],
+━━━ KERAKLI TAHLIL VA REJA ━━━
+1. SAVDONI OSHIRISH: Qaysi tovarlar, qaysi segment, qaysi kanal orqali — aniq raqamlar bilan
+2. YANGI MIJOZLAR: Qaysi manbadan ko'proq kelmoqda, qayerga e'tibor berish kerak
+3. RETENTION STRATEGIYA: VIP, sodiq, bir martalik — har biri uchun alohida yondashuv
+4. QOTIB QOLGAN TOVARLAR: Ularni tezda sotish uchun kampaniya g'oyalari
+5. SEZONIY MARKETING: ${seasonLabel} faslida eng dolzarb harakatlar
+6. INSTAGRAM: Ohvatni oshirish, qanday kontentlar qo'yish, qachon post qilish
+7. YO'L XARITASI: 1 oy — tezkor harakatlar; 3 oy — o'rta muddatli; 6 oy — strategik`,
+    deps: [version, selectedShopId, MOCK_SALES.length, MOCK_CUSTOMERS.length, topFast.length, unsoldProducts.length, repeatCustomers, sourceCounts.length],
   })
 
   useEffect(() => {
@@ -127,20 +182,30 @@ TAHLIL VA TAKLIFLAR:
     }
   }, [analysis])
 
-  const systemPrompt = useMemo(() => `Sen GoodTires do'konining MARKETING AGENTI — brend, mijozlar oqimi va tovar aylanmasiga ixtisoslashgansa.
+  const systemPrompt = useMemo(() => `Sen GoodTires shina va disk do'konining MARKETING MENEJERI VA STRATEGISTISAN.
 
-=== JORIY MARKETING MA'LUMOTI ===
-Fasl: ${seasonLabel} | Oy: ${currentMonth}
-Bu oy: ${thisMonthSales.length} ta sotuv | O'tgan oy: ${lastMonthSales.length} ta | O'sish: ${revGrowth}%
+=== JORIY HOLAT ===
+Fasl: ${seasonLabel} (${currentMonth}-oy)
+3 oylik trend: ${monthTrend.map(m => `${m.label}: ${m.count} ta`).join(' → ')} | Bu oy o'sish: ${revGrowth}%
+Mijozlar: ${MOCK_CUSTOMERS.length} ta jami (VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount} | Nasiyador: ${debtors})
+Retention: ${repeatCustomers} ta qayta kelgan (${MOCK_CUSTOMERS.length ? Math.round(repeatCustomers / MOCK_CUSTOMERS.length * 100) : 0}%)
+Eng yaxshi manbalar: ${sourceCounts.slice(0, 3).map(([s, c]) => `${s}(${c})`).join(', ') || 'yo\'q'}
 Eng tez sotiladigan: ${topFast.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
 Eng sekin sotiladigan: ${topSlow.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
 Sotilmagan (zaxirada): ${unsoldProducts.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
-Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${vipCount}, sodiq: ${loyalCount}, yangi: ${newCount}, nasiyador: ${debtors})
-Faol aksiyalar: ${activePromos.length} ta
+Faol aksiyalar: ${activePromos.length ? activePromos.map(p => p.name).join(', ') : 'yo\'q'}
 
-SENGA TEGISHLI: Brend ko'tarish, mijoz jalb qilish/ushlab qolish, qotib qolgan tovarlarni sotish, sezoniy kampaniyalar.
-SENGA TEGISHLI EMAS: Moliyaviy tahlil, foyda/marja/xarajat hisob-kitoblari — bu Savdo agentining ishi.
-JAVOB: O'zbek tilida, ijodiy va amaliy.`, [currentMonth, seasonLabel, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length])
+=== SENING VAZIFANG ===
+— Savdoni oshirish: to'g'ri tovar, to'g'ri vaqt, to'g'ri kanal
+— Yangi mijozlarni jalb qilish: qaysi manbani kuchaytirish, qanday kampaniya
+— Mavjud mijozlarni ushlab qolish: VIP dasturi, eslatmalar, maxsus takliflar
+— Qotib qolgan tovarlarni sotish: chegirma, paket, aksiya g'oyalari
+— Instagram strategiyasi: qanday kontentlar, hashtag, posting vaqti, engagement oshirish
+— Yo'l xaritasi tuzish: 1/3/6 oylik rejalashtirilgan harakatlar
+
+=== CHEGARA ===
+Foyda/zarar/marja/xarajat hisob-kitoblari SENING ISHINGMAS — bu Savdo agentining vazifasi.
+JAVOB: O'zbek tilida, aniq va amaliy.`, [currentMonth, seasonLabel, monthTrend, thisMonthSales.length, lastMonthSales.length, revGrowth, MOCK_CUSTOMERS.length, vipCount, loyalCount, newCount, debtors, activePromos.length, repeatCustomers, sourceCounts, topFast, topSlow, unsoldProducts])
 
   // Instagram integratsiya
   const igConfig = useMemo(() => {
