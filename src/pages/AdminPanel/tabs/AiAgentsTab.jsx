@@ -34,7 +34,11 @@ const TOOL_LABELS = {
   get_top_products:          'Eng ko\'p sotilgan tovarlar',
   get_barcodes_summary:      'Barkodlar holati',
   // Mijozlar agenti
-  get_customer_debts:          'Nasiyador mijozlar ro\'yxati',
+  get_top_customers:           'Eng yaxshi mijozlar (xarid soni, sarflagan pul)',
+  get_inactive_customers:      'Uzoqlashayotgan mijozlar (qayta jalb)',
+  get_customer_segments:       'Segmentatsiya (yangi/sodiq/xavf ostida/uyqudagi)',
+  get_customer_debts:          'Nasiyadorlar (qarz holati)',
+  get_recent_returns:          'Qaytarilgan sotuvlar',
   search_products:             'Tovar qidirish (savollarga javob)',
   create_reservation:          'Tovar bron qilish',
   // Instagram agenti
@@ -52,23 +56,15 @@ const AGENT_TOOLS = {
   'sales-agent':    ['get_sales_summary', 'get_customer_debts', 'get_profit_by_brand', 'get_recent_returns', 'get_supplier_debts', 'get_expenses_summary', 'get_capital_summary', 'get_discounts_summary'],
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_low_stock', 'get_discounts_summary', 'get_customer_debts', 'get_recent_returns', 'get_profit_by_brand', 'get_monthly_growth'],
-  'customer-agent':  ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
+  'customer-agent':  ['get_top_customers', 'get_inactive_customers', 'get_customer_segments', 'get_customer_debts', 'get_recent_returns', 'get_discounts_summary', 'get_sales_summary', 'search_products', 'create_reservation'],
   'staff-agent':     ['get_sales_summary', 'get_discounts_summary', 'get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
   'instagram-agent': ['get_customer_by_instagram', 'search_products', 'create_reservation'],
 }
 
 const INTEGRATION_CONFIG = {
   'customer-agent': [
-    { key: 'shop.name',            label: 'Do\'kon nomi',              type: 'text',     placeholder: 'GoodTires' },
-    { key: 'shop.address',         label: 'Do\'kon manzili',           type: 'text',     placeholder: 'Toshkent, Chilonzor, 14-kvartal' },
-    { key: 'shop.hours',           label: 'Ish vaqti',                 type: 'text',     placeholder: 'Dushanba–Shanba: 9:00–19:00' },
-    { key: 'shop.phone',           label: 'Telefon raqam',             type: 'text',     placeholder: '+998 90 123 45 67' },
-    { key: 'shop.locationUrl',     label: 'Telegram/Yandex lokatsiya', type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
-    { key: 'instagram.handle',     label: 'Instagram akkaunt',         type: 'text',     placeholder: '@goodtires_uz' },
-    { key: 'instagram.webhookUrl', label: 'make.com Webhook URL (DM bot)', type: 'text', placeholder: 'https://hook.make.com/...' },
-    { key: 'instagram.enabled',    label: 'Instagram DM bot yoqilgan', type: 'toggle' },
-    { key: 'telegram.botToken',    label: 'Telegram Bot Token',        type: 'password', placeholder: '123456:ABC...' },
-    { key: 'telegram.enabled',     label: 'Telegram bot yoqilgan',     type: 'toggle' },
+    { key: 'telegram.botToken', label: 'Telegram Bot Token (mijozlarga xabar uchun)', type: 'password', placeholder: '123456:ABC...' },
+    { key: 'telegram.enabled',  label: 'Telegram bot yoqilgan',                       type: 'toggle' },
   ],
   'pr-agent': [
     { key: 'instagram.handle',     label: 'Instagram akkaunt',       type: 'text',     placeholder: '@goodtires_uz' },
