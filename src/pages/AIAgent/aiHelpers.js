@@ -7,6 +7,7 @@ export const TAB_COLORS = {
   marketing: { bg: 'bg-[#f97316]/10',   text: 'text-[#f97316]',   border: 'border-[#f97316]/30',   dot: 'bg-[#f97316]' },
   customer:  { bg: 'bg-[#3b82f6]/10',   text: 'text-[#3b82f6]',   border: 'border-[#3b82f6]/30',   dot: 'bg-[#3b82f6]' },
   staff:     { bg: 'bg-[#a855f7]/10',   text: 'text-[#a855f7]',   border: 'border-[#a855f7]/30',   dot: 'bg-[#a855f7]' },
+  instagram: { bg: 'bg-pink-500/10',    text: 'text-pink-400',    border: 'border-pink-500/30',    dot: 'bg-pink-400' },
 }
 
 export const TYPE_COLORS = {
@@ -23,7 +24,7 @@ export const TYPE_LABEL_KEYS = {
 }
 
 export const AGENT_LABEL_KEYS = {
-  sales: 'ai_tab_sales', inventory: 'ai_tab_inventory', marketing: 'ai_tab_marketing', customer: 'ai_tab_customer', staff: 'ai_tab_staff',
+  sales: 'ai_tab_sales', inventory: 'ai_tab_inventory', marketing: 'ai_tab_marketing', customer: 'ai_tab_customer', staff: 'ai_tab_staff', instagram: 'ai_tab_instagram',
 }
 
 export const TAB_AGENT_KEYS = {
@@ -33,6 +34,7 @@ export const TAB_AGENT_KEYS = {
   marketing: 'ai_agent_marketing',
   customer: 'ai_agent_customer',
   staff: 'ai_agent_staff',
+  instagram: 'ai_agent_instagram',
 }
 
 export const TAB_DESC_KEYS = {
@@ -42,6 +44,7 @@ export const TAB_DESC_KEYS = {
   marketing: 'ai_marketing_desc',
   customer: 'ai_customer_desc',
   staff: 'ai_staff_desc',
+  instagram: 'ai_instagram_desc',
 }
 
 export function fmtNum(n, t) {

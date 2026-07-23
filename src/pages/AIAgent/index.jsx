@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck } from 'lucide-react'
+import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TAB_COLORS, TAB_AGENT_KEYS, TAB_DESC_KEYS } from './aiHelpers'
 import { getAiAgents } from '../../api/aiAgentsService'
@@ -19,6 +19,7 @@ import InventoryTab from './tabs/InventoryTab'
 import MarketingTab from './tabs/MarketingTab'
 import CustomerTab from './tabs/CustomerTab'
 import StaffTab from './tabs/StaffTab'
+import InstagramTab from './tabs/InstagramTab'
 
 export const AIAgent = () => {
   const { t } = useTranslation()
@@ -48,7 +49,8 @@ export const AIAgent = () => {
     { id: 'inventory', label: t('ai_tab_inventory'),  Icon: Package,    color: TAB_COLORS.inventory },
     { id: 'marketing', label: t('ai_tab_marketing'),Icon: Megaphone,  color: TAB_COLORS.marketing },
     { id: 'customer',  label: t('ai_tab_customer'), Icon: Users,      color: TAB_COLORS.customer },
-    { id: 'staff',     label: t('ai_tab_staff'),    Icon: UserCheck,  color: TAB_COLORS.staff },
+    { id: 'staff',     label: t('ai_tab_staff'),     Icon: UserCheck,  color: TAB_COLORS.staff },
+    { id: 'instagram', label: t('ai_tab_instagram'), Icon: Globe,       color: TAB_COLORS.instagram },
   ]
 
   const tab = TABS.find(tb => tb.id === activeTab)
@@ -103,6 +105,7 @@ export const AIAgent = () => {
             {activeTab === 'marketing' && <MarketingTab aiData={aiData} agentConfig={agentConfigs['pr-agent']} />}
             {activeTab === 'customer'  && <CustomerTab  aiData={aiData} agentConfig={agentConfigs['customer-agent']} />}
             {activeTab === 'staff'     && <StaffTab     aiData={aiData} agentConfig={agentConfigs['staff-agent']} />}
+            {activeTab === 'instagram' && <InstagramTab agentConfig={agentConfigs['instagram-agent']} />}
           </motion.div>
         </AnimatePresence>
       </div>

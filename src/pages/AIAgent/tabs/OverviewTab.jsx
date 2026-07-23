@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { TrendingUp, Megaphone, Users, Package, Activity, UserCheck, Zap, AlertCircle } from 'lucide-react'
+import { TrendingUp, Megaphone, Users, Package, Activity, UserCheck, Globe, Zap, AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
@@ -13,6 +13,7 @@ const AGENT_IDS = {
   marketing: 'pr-agent',
   customer:  'customer-agent',
   staff:     'staff-agent',
+  instagram: 'instagram-agent',
 }
 
 const CACHE_PREFIX = 'ai_analysis_v4_'
@@ -31,8 +32,9 @@ const AGENT_DEFS = [
   { id: 'sales',     label: 'Savdo agenti',       Icon: TrendingUp, emptyLabel: 'Savdo tahlili' },
   { id: 'inventory', label: 'Tovar bazasi agenti', Icon: Package,    emptyLabel: 'Inventar tahlili' },
   { id: 'marketing', label: 'PR/Marketing agenti', Icon: Megaphone,  emptyLabel: 'Marketing tahlili' },
-  { id: 'customer',  label: 'Mijoz muloqoti agenti',Icon: Users,     emptyLabel: 'Mijozlar tahlili' },
+  { id: 'customer',  label: 'Mijozlar agenti',         Icon: Users,     emptyLabel: 'Mijozlar tahlili' },
   { id: 'staff',     label: 'Xodimlar faoliyat agenti', Icon: UserCheck, emptyLabel: 'Xodimlar tahlili' },
+  { id: 'instagram', label: 'Instagram agenti',         Icon: Globe,     emptyLabel: 'Instagram bot' },
 ]
 
 function AgentCard({ def, onTabChange }) {
@@ -105,7 +107,7 @@ function OverviewTab({ onTabChange }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {AGENT_DEFS.map(def => (
           <AgentCard key={def.id} def={def} onTabChange={onTabChange} />
         ))}
