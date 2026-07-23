@@ -437,7 +437,7 @@ export default function AiAgentsTab() {
       )}
       {agents.map(agent => (
         <AgentCard
-          key={agent.id}
+          key={agent.slug}
           agent={agent}
           onSave={handleSave}
         />
