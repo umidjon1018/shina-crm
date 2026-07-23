@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
+import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Globe, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
@@ -8,8 +8,9 @@ const AGENT_ICONS = {
   'sales-agent':    { Icon: TrendingUp,   color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-border' },
   'product-agent':  { Icon: Package,      color: 'text-accent-red',    bg: 'bg-accent-red/10',    border: 'border-border' },
   'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-border' },
-  'customer-agent': { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-border' },
-  'staff-agent':    { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-border' },
+  'customer-agent':  { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-border' },
+  'staff-agent':     { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-border' },
+  'instagram-agent': { Icon: Globe,        color: 'text-pink-400',      bg: 'bg-pink-400/10',      border: 'border-border' },
 }
 
 const MODELS = [
@@ -33,9 +34,11 @@ const TOOL_LABELS = {
   get_top_products:          'Eng ko\'p sotilgan tovarlar',
   get_barcodes_summary:      'Barkodlar holati',
   // Mijozlar agenti
-  get_customer_debts:        'Nasiyador mijozlar ro\'yxati',
-  search_products:           'Tovar qidirish (savollarga javob)',
-  create_reservation:        'Tovar bron qilish',
+  get_customer_debts:          'Nasiyador mijozlar ro\'yxati',
+  search_products:             'Tovar qidirish (savollarga javob)',
+  create_reservation:          'Tovar bron qilish',
+  // Instagram agenti
+  get_customer_by_instagram:   'Instagram mijozni aniqlash',
   // Xodimlar agenti
   get_staff_performance:     'Xodim samaradorligi (sotuv, tushum, foyda)',
   get_staff_discount_report: 'Xodim chegirma hisoboti (kim, kimga, necha marta)',
@@ -49,8 +52,9 @@ const AGENT_TOOLS = {
   'sales-agent':    ['get_sales_summary', 'get_customer_debts', 'get_profit_by_brand', 'get_recent_returns', 'get_supplier_debts', 'get_expenses_summary', 'get_capital_summary', 'get_discounts_summary'],
   'product-agent':  ['get_low_stock', 'get_top_products', 'get_barcodes_summary'],
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_low_stock', 'get_discounts_summary', 'get_customer_debts', 'get_recent_returns', 'get_profit_by_brand', 'get_monthly_growth'],
-  'customer-agent': ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
-  'staff-agent':    ['get_sales_summary', 'get_discounts_summary', 'get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
+  'customer-agent':  ['get_customer_debts', 'get_sales_summary', 'get_discounts_summary', 'search_products', 'create_reservation'],
+  'staff-agent':     ['get_sales_summary', 'get_discounts_summary', 'get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
+  'instagram-agent': ['get_customer_by_instagram', 'search_products', 'create_reservation'],
 }
 
 const INTEGRATION_CONFIG = {
@@ -70,6 +74,16 @@ const INTEGRATION_CONFIG = {
     { key: 'instagram.handle',     label: 'Instagram akkaunt',       type: 'text',     placeholder: '@goodtires_uz' },
     { key: 'instagram.webhookUrl', label: 'make.com Webhook URL',    type: 'text',     placeholder: 'https://hook.make.com/...' },
     { key: 'instagram.enabled',    label: 'Instagram tahlil yoqilgan', type: 'toggle' },
+  ],
+  'instagram-agent': [
+    { key: 'shop.name',            label: 'Do\'kon nomi',                   type: 'text',     placeholder: 'GoodTires' },
+    { key: 'shop.address',         label: 'Do\'kon manzili',                type: 'text',     placeholder: 'Toshkent, Chilonzor, 14-kvartal' },
+    { key: 'shop.hours',           label: 'Ish vaqti',                      type: 'text',     placeholder: 'Dushanba–Shanba: 9:00–19:00' },
+    { key: 'shop.phone',           label: 'Telefon raqam',                  type: 'text',     placeholder: '+998 90 123 45 67' },
+    { key: 'shop.locationUrl',     label: 'Telegram/Yandex lokatsiya',      type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
+    { key: 'instagram.handle',     label: 'Instagram akkaunt',              type: 'text',     placeholder: '@goodtires_uz' },
+    { key: 'instagram.webhookUrl', label: 'make.com Webhook URL (komment bot)', type: 'text', placeholder: 'https://hook.make.com/...' },
+    { key: 'instagram.enabled',    label: 'Instagram komment bot yoqilgan', type: 'toggle' },
   ],
 }
 
@@ -132,6 +146,9 @@ function AgentCard({ agent, onSave }) {
       }
       if (agent.slug === 'customer-agent') {
         try { localStorage.setItem('goodtires-customer-integrations', JSON.stringify(form.integrations)) } catch {}
+      }
+      if (agent.slug === 'instagram-agent') {
+        try { localStorage.setItem('goodtires-instagram-integrations', JSON.stringify(form.integrations)) } catch {}
       }
       clearAnalysisCache(agent.slug)
       setSaved(true)
