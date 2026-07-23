@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TAB_COLORS, TAB_AGENT_KEYS, TAB_DESC_KEYS } from './aiHelpers'
+import { getAiAgents } from '../../api/aiAgentsService'
 import { getSales } from '../../api/salesService'
 import { getCustomers } from '../../api/customerService'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
 import { getIncomeBatches } from '../../api/incomeService'
-import { getUsedSales } from '../../api/usedService'
+import { getUsedSales, getUsedStock } from '../../api/usedService'
 import { getExpenses } from '../../api/expenseService'
 import { getCapital } from '../../api/capitalService'
 import { getPromotions } from '../../api/promotionService'
@@ -23,12 +24,22 @@ export const AIAgent = () => {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
 
-  const [aiData, setAiData] = useState({ sales: [], customers: [], products: [], items: [], batches: [], usedSales: [], expenses: [], capital: [], promotions: [] })
+  const [aiData, setAiData] = useState({ sales: [], customers: [], products: [], items: [], batches: [], usedSales: [], usedStock: [], expenses: [], capital: [], promotions: [] })
+  const [agentConfigs, setAgentConfigs] = useState({})
+
   useEffect(() => {
-    Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches(), getUsedSales(), getExpenses(), getCapital(), getPromotions()])
-      .then(([sales, customers, products, items, batches, usedSales, expenses, capital, promotions]) => {
-        setAiData({ sales, customers, products, items, batches, usedSales, expenses, capital, promotions })
+    Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches(), getUsedSales(), getUsedStock(), getExpenses(), getCapital(), getPromotions()])
+      .then(([sales, customers, products, items, batches, usedSales, usedStock, expenses, capital, promotions]) => {
+        setAiData({ sales, customers, products, items, batches, usedSales, usedStock, expenses, capital, promotions })
       }).catch((err) => console.error('[AIAgent] data load xatosi:', err))
+
+    getAiAgents()
+      .then(list => {
+        const map = {}
+        list.forEach(a => { map[a.slug] = a })
+        setAgentConfigs(map)
+      })
+      .catch(() => {})
   }, [])
 
   const TABS = [
@@ -87,11 +98,11 @@ export const AIAgent = () => {
             transition={{ duration: 0.15 }}
           >
             {activeTab === 'overview'  && <OverviewTab onTabChange={setActiveTab} aiData={aiData} />}
-            {activeTab === 'sales'     && <SalesTab aiData={aiData} />}
-            {activeTab === 'inventory' && <InventoryTab aiData={aiData} />}
-            {activeTab === 'marketing' && <MarketingTab aiData={aiData} />}
-            {activeTab === 'customer'  && <CustomerTab aiData={aiData} />}
-            {activeTab === 'staff'     && <StaffTab aiData={aiData} />}
+            {activeTab === 'sales'     && <SalesTab     aiData={aiData} agentConfig={agentConfigs['sales-agent']} />}
+            {activeTab === 'inventory' && <InventoryTab aiData={aiData} agentConfig={agentConfigs['product-agent']} />}
+            {activeTab === 'marketing' && <MarketingTab aiData={aiData} agentConfig={agentConfigs['pr-agent']} />}
+            {activeTab === 'customer'  && <CustomerTab  aiData={aiData} agentConfig={agentConfigs['customer-agent']} />}
+            {activeTab === 'staff'     && <StaffTab     aiData={aiData} agentConfig={agentConfigs['staff-agent']} />}
           </motion.div>
         </AnimatePresence>
       </div>
