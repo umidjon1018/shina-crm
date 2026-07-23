@@ -80,6 +80,8 @@ const INTEGRATION_CONFIG = {
     { key: 'instagram.handle',     label: 'Instagram akkaunt',              type: 'text',     placeholder: '@goodtires_uz' },
     { key: 'instagram.webhookUrl', label: 'make.com Webhook URL (komment bot)', type: 'text', placeholder: 'https://hook.make.com/...' },
     { key: 'instagram.enabled',    label: 'Instagram komment bot yoqilgan', type: 'toggle' },
+    { key: 'telegram.botToken',    label: 'Telegram Bot Token',             type: 'password', placeholder: '123456:ABC...' },
+    { key: 'telegram.enabled',     label: 'Telegram bot yoqilgan',          type: 'toggle' },
   ],
 }
 
