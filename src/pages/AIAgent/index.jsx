@@ -105,7 +105,7 @@ export const AIAgent = () => {
             {activeTab === 'marketing' && <MarketingTab aiData={aiData} agentConfig={agentConfigs['pr-agent']} />}
             {activeTab === 'customer'  && <CustomerTab  aiData={aiData} agentConfig={agentConfigs['customer-agent']} />}
             {activeTab === 'staff'     && <StaffTab     aiData={aiData} agentConfig={agentConfigs['staff-agent']} />}
-            {activeTab === 'instagram' && <InstagramTab agentConfig={agentConfigs['instagram-agent']} />}
+            {activeTab === 'instagram' && <InstagramTab aiData={aiData} agentConfig={agentConfigs['instagram-agent']} customerAgentConfig={agentConfigs['customer-agent']} />}
           </motion.div>
         </AnimatePresence>
       </div>
