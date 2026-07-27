@@ -1,28 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { streamChat } from '../../../api/aiService'
+import { getAgentInsights, triggerAgentRun, getAgentStatus } from '../../../api/agentRunService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useDataStore } from '../../../store/dataStore'
 
-// Max 8 KPI, 5 alert, 3 insight, 4 recommendation
-const JSON_INSTRUCTION = `
-
-Faqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 8 kpi, 5 alert, 3 insight, 4 recommendation:
-{"kpis":[{"label":"...","value":"...","sub":"...","status":"good|warning|danger|neutral"}],"alerts":[{"severity":"danger|warning|info","message":"..."}],"insights":[{"title":"...","description":"..."}],"recommendations":[{"priority":"high|medium|low","action":"...","reason":"..."}]}`
-
+// ─── LocalStorage cache (offline fallback) ────────────────────────────────
 const CACHE_PREFIX = 'ai_analysis_v4_'
 
-function getCache(agentId, autoRunHour = 23) {
+function getCache(agentId) {
   try {
     const raw = localStorage.getItem(CACHE_PREFIX + agentId)
     if (!raw) return null
-    const { analysis, date, cachedAt } = JSON.parse(raw)
-    const today = new Date().toISOString().slice(0, 10)
-    if (date !== today) return null
-    const currentHour = new Date().getHours()
-    if (cachedAt) {
-      const cacheHour = new Date(cachedAt).getHours()
-      if (currentHour >= autoRunHour && cacheHour < autoRunHour) return null
-    }
+    const { analysis, date } = JSON.parse(raw)
+    if (date !== new Date().toISOString().slice(0, 10)) return null
     return analysis
   } catch { return null }
 }
@@ -47,17 +37,13 @@ export function clearAllAnalysisCache() {
   } catch {}
 }
 
-// Tries to close a truncated JSON string by balancing braces/brackets
+// ─── JSON repair (stream fallback uchun) ──────────────────────────────────
 function repairJSON(text) {
   const start = text.indexOf('{')
   if (start === -1) return null
   let t = text.slice(start)
-  // Remove trailing incomplete key or value (cut at last complete comma or bracket)
-  // Find the deepest safely parseable prefix
   const stack = []
-  let inStr = false
-  let esc = false
-  let lastSafePos = 0
+  let inStr = false, esc = false, lastSafePos = 0
   for (let i = 0; i < t.length; i++) {
     const c = t[i]
     if (esc) { esc = false; continue }
@@ -72,16 +58,10 @@ function repairJSON(text) {
       }
     }
   }
-  // If JSON is truncated, close all open brackets
   if (stack.length > 0) {
-    // Trim to last comma-safe position to avoid partial key/value
     let trimmed = t
-    // Remove incomplete last token (find last , or { or [ before the cut)
     const lastComma = Math.max(t.lastIndexOf(','), t.lastIndexOf('['), t.lastIndexOf('{'))
-    if (lastComma > 0 && lastComma < t.length - 1) {
-      trimmed = t.slice(0, lastComma)
-    }
-    // Close any open string
+    if (lastComma > 0 && lastComma < t.length - 1) trimmed = t.slice(0, lastComma)
     const checkStack = []
     let cs = false, ce = false
     for (const ch of trimmed) {
@@ -94,82 +74,81 @@ function repairJSON(text) {
     }
     if (cs) trimmed += '"'
     trimmed += checkStack.reverse().join('')
-    try {
-      const r = JSON.parse(trimmed)
-      if (r && typeof r === 'object' && !Array.isArray(r)) return r
-    } catch {}
+    try { const r = JSON.parse(trimmed); if (r && typeof r === 'object' && !Array.isArray(r)) return r } catch {}
   }
-  // Otherwise use the last complete portion
   if (lastSafePos > 0) {
-    try {
-      const r = JSON.parse(t.slice(0, lastSafePos))
-      if (r && typeof r === 'object' && !Array.isArray(r)) return r
-    } catch {}
+    try { const r = JSON.parse(t.slice(0, lastSafePos)); if (r && typeof r === 'object' && !Array.isArray(r)) return r } catch {}
   }
   return null
 }
 
-// Tries multiple strategies to extract JSON from AI response text
 function parseAnalysis(text) {
   const strategies = [
-    // 1. Direct parse
     () => JSON.parse(text.trim()),
-    // 2. Extract from first { to last }
-    () => {
-      const s = text.indexOf('{'), e = text.lastIndexOf('}')
-      if (s === -1 || e <= s) throw new Error('no braces')
-      return JSON.parse(text.slice(s, e + 1))
-    },
-    // 3. Strip code fence then parse
-    () => {
-      const stripped = text.replace(/^```[\w]*\s*/m, '').replace(/\s*```\s*$/m, '').trim()
-      return JSON.parse(stripped)
-    },
-    // 4. Strip code fence then extract braces
-    () => {
-      const stripped = text.replace(/^```[\w]*\s*/m, '').replace(/\s*```\s*$/m, '')
-      const s = stripped.indexOf('{'), e = stripped.lastIndexOf('}')
-      if (s === -1 || e <= s) throw new Error('no braces')
-      return JSON.parse(stripped.slice(s, e + 1))
-    },
-    // 5. Repair truncated JSON (token limit hit)
-    () => {
-      const r = repairJSON(text)
-      if (!r) throw new Error('repair failed')
-      return r
-    },
+    () => { const s = text.indexOf('{'), e = text.lastIndexOf('}'); if (s === -1 || e <= s) throw 0; return JSON.parse(text.slice(s, e + 1)) },
+    () => { const stripped = text.replace(/^```[\w]*\s*/m, '').replace(/\s*```\s*$/m, '').trim(); return JSON.parse(stripped) },
+    () => { const r = repairJSON(text); if (!r) throw 0; return r },
   ]
   for (const fn of strategies) {
-    try {
-      const r = fn()
-      if (r && typeof r === 'object' && !Array.isArray(r)) return r
-    } catch {}
+    try { const r = fn(); if (r && typeof r === 'object' && !Array.isArray(r)) return r } catch {}
   }
   return null
 }
 
-export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled = true }) {
-  const autoRunHour = useSettingsStore(s => s.aiAutoAnalysisHour ?? 23)
-  const cached = enabled ? getCache(agentId, autoRunHour) : null
-  const [loading, setLoading] = useState(!cached && enabled)
-  const [analysis, setAnalysis] = useState(cached)
-  const [error, setError] = useState(null)
-  const runIdRef = useRef(0)
-  const didRunRef = useRef(!!cached)
+// ─── DB dan o'qish (asosiy manba) ─────────────────────────────────────────
+async function fetchFromDB(agentId) {
+  try {
+    const data = await getAgentInsights(agentId)
+    if (!data?.run) return null
+    // analysis: {kpis, alerts, insights, recommendations} — to'g'ridan AgentAnalysisPanel formatiga mos
+    if (data.analysis && (data.analysis.kpis?.length || data.analysis.alerts?.length || data.analysis.recommendations?.length)) {
+      return data.analysis
+    }
+    return null
+  } catch {
+    return null
+  }
+}
 
-  const run = (force = false) => {
+// ─── Asosiy hook ──────────────────────────────────────────────────────────
+// Ikki rejim:
+// 1. DB rejim: agentId bo'yicha /api/agents/:slug/insights dan o'qiydi
+// 2. Stream rejim (fallback): streamChat orqali — buildPrompt + systemPrompt kerak
+export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled = true }) {
+  const [loading, setLoading]   = useState(enabled)
+  const [analysis, setAnalysis] = useState(null)
+  const [error, setError]       = useState(null)
+  const [source, setSource]     = useState(null) // 'db' | 'stream' | 'cache'
+  const [runStatus, setRunStatus] = useState(null) // { status, started_at, finished_at }
+  const runIdRef = useRef(0)
+  const didLoadRef = useRef(false)
+
+  const loadFromDB = useCallback(async () => {
+    if (!enabled || !agentId) return false
+    try {
+      const dbAnalysis = await fetchFromDB(agentId)
+      if (dbAnalysis) {
+        setAnalysis(dbAnalysis)
+        setCache(agentId, dbAnalysis)
+        setSource('db')
+        setError(null)
+        return true
+      }
+    } catch {}
+    return false
+  }, [agentId, enabled])
+
+  const runStreamFallback = useCallback(() => {
     if (!enabled || !agentId || !buildPrompt) return
-    if (!force && didRunRef.current) return
     const dataPrompt = buildPrompt()
     if (!dataPrompt) return
-
-    if (force) clearAnalysisCache(agentId)
-    didRunRef.current = true
 
     const id = ++runIdRef.current
     setLoading(true)
     setError(null)
     let fullText = ''
+
+    const JSON_INSTRUCTION = `\n\nFaqat quyidagi JSON formatida javob ber, hech qanday boshqa matn yozma. MAX: 8 kpi, 5 alert, 3 insight, 4 recommendation:\n{"kpis":[{"label":"...","value":"...","sub":"...","status":"good|warning|danger|neutral"}],"alerts":[{"severity":"danger|warning|info","message":"..."}],"insights":[{"title":"...","description":"..."}],"recommendations":[{"priority":"high|medium|low","action":"...","reason":"..."}]}`
 
     streamChat({
       agentId,
@@ -182,25 +161,109 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
         if (parsed) {
           setCache(agentId, parsed)
           setAnalysis(parsed)
+          setSource('stream')
           setError(null)
           useDataStore.getState().bump()
         } else {
           setAnalysis({ raw: fullText || 'Javob bo\'sh qaytdi. Qayta urinib ko\'ring.' })
+          setSource('stream')
         }
         setLoading(false)
       },
       onError: (err) => {
         if (runIdRef.current !== id) return
+        // Stream ham xato bersа — cache ni ko'rsat
+        const cached = getCache(agentId)
+        if (cached) { setAnalysis(cached); setSource('cache') }
         setError(String(err))
         setLoading(false)
       },
     })
-  }
+  }, [agentId, systemPrompt, buildPrompt, enabled])
 
-  // Run once on mount if no cache
+  const load = useCallback(async (force = false) => {
+    if (!enabled || !agentId) return
+    if (!force && didLoadRef.current) return
+    didLoadRef.current = true
+    setLoading(true)
+
+    // 1. DB dan o'qishga urinish
+    const fromDB = await loadFromDB()
+    if (fromDB) {
+      setLoading(false)
+      return
+    }
+
+    // 2. LocalStorage cache
+    const cached = getCache(agentId)
+    if (cached && !force) {
+      setAnalysis(cached)
+      setSource('cache')
+      setLoading(false)
+      return
+    }
+
+    // 3. Stream fallback (buildPrompt mavjud bo'lsa)
+    if (buildPrompt && systemPrompt) {
+      runStreamFallback()
+    } else {
+      setLoading(false)
+    }
+  }, [agentId, enabled, loadFromDB, buildPrompt, systemPrompt, runStreamFallback])
+
+  const refresh = useCallback(async () => {
+    didLoadRef.current = false
+    clearAnalysisCache(agentId)
+    setAnalysis(null)
+    setError(null)
+    setSource(null)
+
+    // DB dan so'nggi natijani ol
+    setLoading(true)
+    const fromDB = await loadFromDB()
+    if (fromDB) { setLoading(false); return }
+
+    // Agentni trigger qilishga urinish
+    try {
+      await triggerAgentRun(agentId)
+      // 3 soniya kutib qayta yukla (agent fon da ishlaydi)
+      setTimeout(async () => {
+        const fromDB2 = await loadFromDB()
+        if (!fromDB2 && buildPrompt && systemPrompt) runStreamFallback()
+        setLoading(false)
+      }, 3000)
+    } catch {
+      if (buildPrompt && systemPrompt) runStreamFallback()
+      else setLoading(false)
+    }
+  }, [agentId, loadFromDB, buildPrompt, systemPrompt, runStreamFallback])
+
+  // Agent run holatini polling (agent ishlab turgan paytda)
   useEffect(() => {
-    if (enabled && !didRunRef.current) run()
+    if (!agentId || !enabled) return
+    let interval = null
+    const checkStatus = async () => {
+      try {
+        const st = await getAgentStatus(agentId)
+        setRunStatus(st)
+        if (st?.status === 'completed' && !analysis) {
+          await loadFromDB()
+          setLoading(false)
+        }
+        if (st?.status !== 'running') {
+          clearInterval(interval)
+          interval = null
+        }
+      } catch {}
+    }
+    checkStatus()
+    interval = setInterval(checkStatus, 5000)
+    return () => { if (interval) clearInterval(interval) }
+  }, [agentId, enabled])
+
+  useEffect(() => {
+    if (enabled) load()
   }, [enabled])
 
-  return { loading, analysis, error, refresh: () => run(true) }
+  return { loading, analysis, error, source, runStatus, refresh }
 }
