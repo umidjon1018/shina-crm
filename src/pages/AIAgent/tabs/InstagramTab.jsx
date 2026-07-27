@@ -1,6 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Globe, Users, ShoppingBag, AlertCircle, X, ChevronRight, Car, Star, Zap, MessageCircle, TrendingUp, BarChart2, Send, Loader2 } from 'lucide-react'
 import { streamChat } from '../../../api/aiService'
+import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
+import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 
 // ─────────── helpers ───────────
 function fmtMoney(n) {
@@ -284,8 +286,52 @@ export default function InstagramTab({ aiData, agentConfig, customerAgentConfig 
 
   const customerAgentId = customerAgentConfig?.id
 
+  const { loading: agLoading, analysis: agAnalysis, error: agError, refresh: agRefresh,
+          triggerRun, triggering, source, lastRun } = useAgentAnalysis({
+    agentId: 'instagram-agent',
+    enabled: socialCustomers.length > 0,
+    systemPrompt: agentConfig?.systemPrompt || "Sen GoodTires do'konining INSTAGRAM AGENTISAN.",
+    buildPrompt: () => {
+      const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)
+      const noSaleCustomers = socialCustomers.filter(c => c.count === 0)
+      return `Instagram orqali kelgan mijozlarni tahlil qil.
+
+INSTAGRAM MIJOZLAR HOLATI:
+- Jami: ${socialCustomers.length} ta (instagram handle bor mijozlar)
+- Jami xaridlar: ${fmtMoney(totalSpent)} so'm (${socialCustomers.reduce((s,c)=>s+c.count,0)} ta sotuv)
+- Bu oy sotuvlar: ${thisMonth} ta
+- Nasiya qarz: ${fmtMoney(totalDebt)} so'm
+
+TOP 5 INSTAGRAM MIJOZLAR:
+${topBySpend.map((c, i) => `${i+1}. @${c.instagram} — ${c.count} ta xarid, ${fmtMoney(c.spent)} so'm, qarz: ${fmtMoney(c.debt)} so'm`).join('\n') || 'yo\'q'}
+
+XARID QILMAGAN INSTAGRAM MIJOZLAR: ${noSaleCustomers.length} ta
+${noSaleCustomers.slice(0, 5).map(c => `- @${c.instagram} (${c.name})`).join('\n') || 'yo\'q'}
+
+VAZIFALAR:
+1. Instagram mijozlar segmentatsiyasi (aktiv/passiv/yangi) — KPI qilib saqlа
+2. Xarid qilmagan Instagram follower'lar uchun jalb strategiyasi — tavsiya saqlа
+3. Top Instagram mijozlar holati — KPI saqlа
+4. Agar instagram integratsiya ulangan bo'lsa — bot samaradorligi bo'yicha tahlil`
+    },
+    deps: [socialCustomers.length, totalSpent, thisMonth],
+  })
+
   return (
     <div className="space-y-5">
+      {/* Instagram agent tahlili */}
+      <AgentAnalysisPanel
+        loading={agLoading}
+        analysis={agAnalysis}
+        error={agError}
+        refresh={agRefresh}
+        accentColor="text-pink-400"
+        onTriggerRun={triggerRun}
+        triggering={triggering}
+        source={source}
+        lastRun={lastRun}
+      />
+
       {/* Bot holati banner */}
       {!igEnabled && (
         <div className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
