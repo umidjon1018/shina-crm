@@ -3,6 +3,7 @@ import { Globe, Users, ShoppingBag, AlertCircle, X, ChevronRight, Car, Star, Zap
 import { streamChat } from '../../../api/aiService'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
+import { useAgentActivityStore } from '../../../store/agentActivityStore'
 
 // ─────────── helpers ───────────
 function fmtMoney(n) {
@@ -285,6 +286,7 @@ export default function InstagramTab({ aiData, agentConfig, customerAgentConfig 
   }, [socialCustomers, search])
 
   const customerAgentId = customerAgentConfig?.id
+  const { addActivity } = useAgentActivityStore()
 
   const { loading: agLoading, analysis: agAnalysis, error: agError, refresh: agRefresh,
           triggerRun, triggering, source, lastRun } = useAgentAnalysis({
@@ -316,6 +318,14 @@ VAZIFALAR:
     },
     deps: [socialCustomers.length, totalSpent, thisMonth],
   })
+
+  useEffect(() => {
+    if (agAnalysis && !agAnalysis.raw) {
+      agAnalysis.alerts?.forEach(a => addActivity({ agentId: 'instagram', type: 'ALERT', message: a.message }))
+      agAnalysis.recommendations?.slice(0, 2).forEach(r => addActivity({ agentId: 'instagram', type: 'RECOMMENDATION', message: r.action }))
+      agAnalysis.insights?.slice(0, 1).forEach(i => addActivity({ agentId: 'instagram', type: 'INSIGHT', message: i.description || i.title }))
+    }
+  }, [agAnalysis])
 
   return (
     <div className="space-y-5">

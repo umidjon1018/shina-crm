@@ -15,6 +15,17 @@ const AGENT_DEFS = [
   { id: 'instagram', slug: 'instagram-agent', label: 'Instagram agenti',         Icon: Globe,      emptyLabel: 'Instagram bot' },
 ]
 
+// Stream tahlilidan localStorage keshini o'qish
+function getLocalCache(slug) {
+  try {
+    const raw = localStorage.getItem('ai_analysis_v4_' + slug)
+    if (!raw) return null
+    const { analysis, date } = JSON.parse(raw)
+    if (date !== new Date().toISOString().slice(0, 10)) return null
+    return analysis
+  } catch { return null }
+}
+
 function fmtAgo(iso) {
   if (!iso) return null
   const diff = Math.floor((Date.now() - new Date(iso)) / 60000)
@@ -35,6 +46,9 @@ function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
   const { id, slug, label, Icon, emptyLabel } = def
   const color = TAB_COLORS[id]
   const hasRun = !!runInfo
+  // Backend run yo'q bo'lsa stream keshidan top KPI ni olamiz
+  const localCache = !hasRun ? getLocalCache(slug) : null
+  const localTopKpi = localCache?.kpis?.[0] || null
 
   return (
     <div className={`flex flex-col text-left p-4 rounded-xl border ${color.border} ${color.bg}`}>
@@ -65,6 +79,13 @@ function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
               {runInfo.top_kpi_label || fmtAgo(runInfo.finished_at) || 'tugallandi'}
             </p>
           </>
+        ) : localTopKpi ? (
+          <>
+            <p className={`text-base font-bold font-syne ${color.text} leading-tight truncate`}>
+              {localTopKpi.value}
+            </p>
+            <p className="text-xs text-text-secondary mt-1 truncate">{localTopKpi.label}</p>
+          </>
         ) : (
           <>
             <p className={`text-lg font-bold font-syne ${color.text}`}>—</p>
@@ -75,7 +96,7 @@ function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
         <div className="flex items-center gap-1.5 mt-1">
           <StatusDot status={runInfo?.status} />
           <span className="text-xs text-text-secondary">
-            {isRunning ? 'Ishlamoqda...' : hasRun ? (runInfo.status === 'failed' ? 'Xato' : 'Tayyor') : 'Ishga tushirilmagan'}
+            {isRunning ? 'Ishlamoqda...' : hasRun ? (runInfo.status === 'failed' ? 'Xato' : 'Tayyor') : localTopKpi ? 'Stream tahlili' : 'Ishga tushirilmagan'}
           </span>
         </div>
       </button>
