@@ -1,4 +1,4 @@
-import { RefreshCw, AlertTriangle, AlertCircle, Info, Lightbulb, Zap, ChevronRight, Loader2 } from 'lucide-react'
+import { RefreshCw, AlertTriangle, AlertCircle, Info, Lightbulb, Zap, Loader2, Play } from 'lucide-react'
 
 const STATUS_STYLES = {
   good:    'text-[#22c55e]',
@@ -17,6 +17,15 @@ const PRIORITY_STYLES = {
   high:   { dot: 'bg-[#E63946]',  label: 'Yuqori' },
   medium: { dot: 'bg-amber-400',  label: "O'rta" },
   low:    { dot: 'bg-[#22c55e]',  label: 'Past' },
+}
+
+function fmtAgo(iso) {
+  if (!iso) return null
+  const diff = Math.floor((Date.now() - new Date(iso)) / 60000)
+  if (diff < 1) return 'hozirgina'
+  if (diff < 60) return diff + ' daqiqa oldin'
+  if (diff < 1440) return Math.floor(diff / 60) + ' soat oldin'
+  return Math.floor(diff / 1440) + ' kun oldin'
 }
 
 function KpiSkeleton() {
@@ -41,13 +50,22 @@ function RawFallback({ text }) {
   )
 }
 
-export default function AgentAnalysisPanel({ loading, analysis, error, refresh, accentColor = 'text-accent-blue' }) {
+export default function AgentAnalysisPanel({
+  loading, analysis, error, refresh,
+  accentColor = 'text-accent-blue',
+  onTriggerRun = null,
+  triggering = false,
+  source = null,
+  lastRun = null,
+}) {
   if (loading) {
     return (
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Loader2 size={16} className={`animate-spin ${accentColor}`} />
-          <span className="text-sm text-text-secondary">AI agent tahlil qilmoqda...</span>
+          <span className="text-sm text-text-secondary">
+            {triggering ? 'Backend agent ishlamoqda...' : 'AI agent tahlil qilmoqda...'}
+          </span>
         </div>
         <KpiSkeleton />
         <div className="space-y-2">
@@ -61,11 +79,23 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
 
   if (error) {
     return (
-      <div className="bg-[#E63946]/10 border border-[#E63946]/30 rounded-xl p-4 mb-6 flex items-center justify-between">
-        <span className="text-[#E63946] text-sm">{error}</span>
-        <button onClick={refresh} className="flex items-center gap-1.5 text-sm text-[#E63946] hover:underline">
-          <RefreshCw size={14} /> Qayta urinish
-        </button>
+      <div className="bg-[#E63946]/10 border border-[#E63946]/30 rounded-xl p-4 mb-6 flex items-center justify-between gap-3">
+        <span className="text-[#E63946] text-sm flex-1">{error}</span>
+        <div className="flex items-center gap-2 shrink-0">
+          {onTriggerRun && (
+            <button
+              onClick={onTriggerRun}
+              disabled={triggering}
+              className="flex items-center gap-1.5 text-sm text-[#E63946] hover:underline"
+            >
+              {triggering ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+              {triggering ? 'Ishlamoqda...' : 'Ishga tushir'}
+            </button>
+          )}
+          <button onClick={refresh} className="flex items-center gap-1.5 text-sm text-[#E63946] hover:underline">
+            <RefreshCw size={14} /> Qayta
+          </button>
+        </div>
       </div>
     )
   }
@@ -76,20 +106,45 @@ export default function AgentAnalysisPanel({ loading, analysis, error, refresh, 
 
   const { kpis = [], alerts = [], insights = [], recommendations = [] } = analysis
 
+  const sourceLabel = source === 'db'
+    ? '🟢 Backend agent natijasi'
+    : source === 'cache'
+    ? '🟡 Kesh'
+    : '🔵 Stream tahlili'
+
   return (
     <div className="mb-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="text-sm text-text-secondary flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />
-          AI tahlil tayyor
+          {sourceLabel}
+          {lastRun?.finished_at && (
+            <span className="text-text-muted"> — {fmtAgo(lastRun.finished_at)}</span>
+          )}
         </span>
-        <button
-          onClick={refresh}
-          className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
-        >
-          <RefreshCw size={13} /> Yangilash
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refresh}
+            className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <RefreshCw size={13} /> Yangilash
+          </button>
+          {onTriggerRun && (
+            <button
+              onClick={onTriggerRun}
+              disabled={triggering}
+              title="Backend agentni ishga tushirish (DB ga yozadi)"
+              className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border transition-colors ${
+                triggering
+                  ? 'text-text-muted border-border cursor-not-allowed'
+                  : 'text-accent-red border-accent-red/30 hover:bg-accent-red/10'
+              }`}
+            >
+              {triggering ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+              {triggering ? 'Ishlamoqda...' : 'Agentni ishga tushir'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* KPIs */}

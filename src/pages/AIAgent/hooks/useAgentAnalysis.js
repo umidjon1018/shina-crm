@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { streamChat } from '../../../api/aiService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useDataStore } from '../../../store/dataStore'
+import { getAgentInsights, getAgentStatus, triggerAgentRun } from '../../../api/agentRunService'
 
 // Max 8 KPI, 5 alert, 3 insight, 4 recommendation
 const JSON_INSTRUCTION = `
@@ -141,14 +142,42 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
   const [loading, setLoading] = useState(!cached && enabled)
   const [analysis, setAnalysis] = useState(cached)
   const [error, setError] = useState(null)
+  const [source, setSource] = useState(cached ? 'cache' : null)
+  const [lastRun, setLastRun] = useState(null)
+  const [triggering, setTriggering] = useState(false)
   const runIdRef = useRef(0)
   const didRunRef = useRef(!!cached)
+  const pollingRef = useRef(null)
+  // Refs so that closures always see the latest buildPrompt/systemPrompt
+  const buildPromptRef = useRef(buildPrompt)
+  const systemPromptRef = useRef(systemPrompt)
+  buildPromptRef.current = buildPrompt
+  systemPromptRef.current = systemPrompt
 
+  // DB dan so'nggi agent natijalarini olish
+  function checkDB() {
+    return getAgentInsights(agentId)
+      .then(data => {
+        if (!data?.analysis) return false
+        const { kpis = [], alerts = [], insights = [], recommendations = [] } = data.analysis
+        if (!kpis.length && !alerts.length && !insights.length && !recommendations.length) return false
+        setAnalysis(data.analysis)
+        setLastRun(data.run || null)
+        setSource('db')
+        setCache(agentId, data.analysis)
+        return true
+      })
+      .catch(() => false)
+  }
+
+  // Stream orqali tahlil (fallback)
   const run = (force = false) => {
-    if (!enabled || !agentId || !buildPrompt) return
+    const bp = buildPromptRef.current
+    const sp = systemPromptRef.current
+    if (!enabled || !agentId || !bp) { setLoading(false); return }
     if (!force && didRunRef.current) return
-    const dataPrompt = buildPrompt()
-    if (!dataPrompt) return
+    const dataPrompt = bp()
+    if (!dataPrompt) { setLoading(false); return }
 
     if (force) clearAnalysisCache(agentId)
     didRunRef.current = true
@@ -156,11 +185,12 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
     const id = ++runIdRef.current
     setLoading(true)
     setError(null)
+    setSource('stream')
     let fullText = ''
 
     streamChat({
       agentId,
-      systemPrompt,
+      systemPrompt: sp,
       messages: [{ role: 'user', content: dataPrompt + JSON_INSTRUCTION }],
       onToken: (token) => { if (runIdRef.current === id) fullText += token },
       onDone: () => {
@@ -184,11 +214,62 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
     })
   }
 
-  // Run once on mount if no cache
+  // Mount: DB tekshir → yo'q bo'lsa cache/stream
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (enabled && !didRunRef.current) run()
+    if (!enabled) return
+    checkDB().then(fromDB => {
+      if (fromDB) {
+        didRunRef.current = true
+        setLoading(false)
+        return
+      }
+      if (!didRunRef.current) run()
+    })
   }, [enabled, ...deps])
 
-  return { loading, analysis, error, refresh: () => run(true) }
+  // Backend agentni ishga tushirish va natijani kutish
+  function triggerRun() {
+    if (triggering) return
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    setTriggering(true)
+    setError(null)
+    triggerAgentRun(agentId)
+      .then(() => {
+        let n = 0
+        pollingRef.current = setInterval(async () => {
+          if (++n > 90) { clearInterval(pollingRef.current); setTriggering(false); return }
+          try {
+            const st = await getAgentStatus(agentId)
+            if (st?.status === 'completed') {
+              clearInterval(pollingRef.current)
+              checkDB().then(() => {
+                setTriggering(false)
+                useDataStore.getState().bump()
+              })
+            } else if (st?.status === 'failed') {
+              clearInterval(pollingRef.current)
+              setError('Agent xato: ' + (st.error ? st.error.slice(0, 100) : 'noma\'lum'))
+              setTriggering(false)
+            }
+          } catch {}
+        }, 2000)
+      })
+      .catch(err => {
+        setTriggering(false)
+        setError(err?.response?.data?.error || err.message || 'Agent ishga tushmadi')
+      })
+  }
+
+  async function refresh() {
+    didRunRef.current = false
+    clearAnalysisCache(agentId)
+    setSource(null)
+    setLoading(true)
+    const fromDB = await checkDB()
+    if (!fromDB) run(true)
+    else setLoading(false)
+  }
+
+  return { loading, analysis, error, source, lastRun, triggering, triggerRun, refresh }
 }

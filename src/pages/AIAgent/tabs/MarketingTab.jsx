@@ -127,7 +127,7 @@ function MarketingTab({ aiData = {}, agentConfig = null }) {
 
   const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
-  const { loading, analysis, error, refresh } = useAgentAnalysis({
+  const { loading, analysis, error, refresh, triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'pr-agent',
     enabled: MOCK_PRODUCTS.length > 0 || MOCK_SALES.length > 0,
     buildPrompt: () => {
@@ -303,7 +303,7 @@ JAVOB: O'zbek tilida, qisqa va amaliy.`
         {/* ── TAHLIL ── */}
         {activeSection === 'analysis' && (
           <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-            <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#f97316]" />
+            <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#f97316]" onTriggerRun={triggerRun} triggering={triggering} source={source} lastRun={lastRun} />
             <AiChat agentId="pr-agent" colorClass="accent-orange" systemPrompt={systemPrompt}
               placeholder="Marketing strategiyasi, savdoni oshirish, mijozlar haqida so'rang..." />
           </motion.div>

@@ -390,7 +390,7 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
 
   const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
-  const { loading, analysis, error, refresh } = useAgentAnalysis({
+  const { loading, analysis, error, refresh, triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'customer-agent',
     enabled: shopCustomers.length > 0,
     buildPrompt: () => {
@@ -489,7 +489,7 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
   return (
     <div className="space-y-5">
       {/* Auto tahlil */}
-      <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#3b82f6]" />
+      <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#3b82f6]" onTriggerRun={triggerRun} triggering={triggering} source={source} lastRun={lastRun} />
 
       {/* Statistika kartochkalari */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

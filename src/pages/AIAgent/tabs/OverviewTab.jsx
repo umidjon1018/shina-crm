@@ -58,11 +58,11 @@ function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
       <button onClick={() => onTabChange(id)} className="text-left flex-1">
         {hasRun ? (
           <>
-            <p className={`text-lg font-bold font-syne ${color.text} leading-tight`}>
-              {runInfo.insight_count != null ? `${runInfo.insight_count} ta` : '—'}
+            <p className={`text-base font-bold font-syne ${color.text} leading-tight truncate`}>
+              {runInfo.top_kpi_value || (runInfo.insight_count != null ? `${runInfo.insight_count} ta` : '—')}
             </p>
             <p className="text-xs text-text-secondary mt-1 truncate">
-              {fmtAgo(runInfo.finished_at) || 'tugallandi'}
+              {runInfo.top_kpi_label || fmtAgo(runInfo.finished_at) || 'tugallandi'}
             </p>
           </>
         ) : (

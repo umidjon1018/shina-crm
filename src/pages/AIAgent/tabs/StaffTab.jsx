@@ -307,7 +307,7 @@ Shubhali patternlar: ${suspiciousDiscounts.length > 0 ? suspiciousDiscounts.map(
   }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), staffStats, empList, totalRevenue, totalSales, totalProfit, totalSalary, topDiscounter, suspiciousDiscounts, version])
 
   // ─── Auto analysis ──────────────────────────────────────────────────────────
-  const { loading, analysis, error, refresh } = useAgentAnalysis({
+  const { loading, analysis, error, refresh, triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'staff-agent',
     enabled: staffStats.length > 0,
     buildPrompt,
@@ -329,6 +329,10 @@ Shubhali patternlar: ${suspiciousDiscounts.length > 0 ? suspiciousDiscounts.map(
         error={error}
         refresh={refresh}
         accentColor="text-[#a855f7]"
+        onTriggerRun={triggerRun}
+        triggering={triggering}
+        source={source}
+        lastRun={lastRun}
       />
       <AiChat
         agentId="staff-agent"

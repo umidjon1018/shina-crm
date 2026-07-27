@@ -135,7 +135,7 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
   const enabled = MOCK_SALES.length > 0 || MOCK_BATCHES.length > 0 || MOCK_EXPENSES.length > 0
   const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
-  const { loading, analysis, error, refresh } = useAgentAnalysis({
+  const { loading, analysis, error, refresh, triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'sales-agent',
     enabled,
     buildPrompt: () => {
@@ -183,6 +183,10 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
         error={error}
         refresh={refresh}
         accentColor="text-[#22c55e]"
+        onTriggerRun={triggerRun}
+        triggering={triggering}
+        source={source}
+        lastRun={lastRun}
       />
       <AiChat agentId="sales-agent" colorClass="accent-green" systemPrompt={salesSystemPrompt} placeholder="Savdo, foyda, xarajat haqida so'rang..." />
     </div>

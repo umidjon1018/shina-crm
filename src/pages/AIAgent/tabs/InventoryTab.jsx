@@ -113,7 +113,7 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
   const enabled = stockByProduct.length > 0 || MOCK_USED_STOCK.length > 0
   const hasTool = name => !agentConfig?.tools?.length || agentConfig.tools.includes(name)
 
-  const { loading, analysis, error, refresh } = useAgentAnalysis({
+  const { loading, analysis, error, refresh, triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'product-agent',
     enabled,
     buildPrompt: () => {
@@ -155,6 +155,10 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
         error={error}
         refresh={refresh}
         accentColor="text-[#E63946]"
+        onTriggerRun={triggerRun}
+        triggering={triggering}
+        source={source}
+        lastRun={lastRun}
       />
       <AiChat agentId="product-agent" colorClass="accent-red" systemPrompt={inventorySystemPrompt} placeholder="Ombor, tovar zaxirasi, barkodlar haqida so'rang..." />
     </div>
