@@ -19,6 +19,13 @@ Thumbs.db
 .vscode/settings.json
 *.log
 
+# Claude internal
+.claude/worktrees/
+
+# Test seed files
+products_seed.sql
+seed_full.sql
+
 # Temp files
 *.tmp
 *.bak
