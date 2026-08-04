@@ -295,7 +295,7 @@ export const useSettingsStore = create(
             const existing = current.find(x => x.id === e.id)
             return { ...e, password: existing?.password || '' }
           })
-          set({ employees: merged })
+          set({ employees: merged.length > 0 ? merged : [] })
         } catch {}
       },
       addEmployee: async (employee) => {
