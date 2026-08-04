@@ -18,8 +18,8 @@ export const useSettingsStore = create(
 
       // Chegirma darajalari (Mavjud - o'zgarmasin)
       discountSmallMax: 5,
-      discountMediumMax: 15,
-      // 15%+ avtomatik admin PIN
+      discountMediumMax: 10,
+      // 10%+ avtomatik admin PIN
 
       // 1. USD kursi
       usdRate: 12700,
