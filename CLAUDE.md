@@ -434,3 +434,34 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_person TEXT;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 ```
+
+---
+
+## Domen faollashtirish buyruqlari (crmsi.uz tayyor bo'lgach)
+
+Nginx config va tenant middleware tayyor — `/etc/nginx/sites-available/crmsi.uz` yozilgan. Domen DNS ga ulanib propagatsiya bo'lgach quyidagilarni bajarish kerak:
+
+```bash
+# 1. SSL sertifikat olish (faqat asosiy domen — wildcard alohida)
+certbot --nginx -d crmsi.uz -d www.crmsi.uz
+
+# 2. Nginx wildcard config yoqish
+ln -s /etc/nginx/sites-available/crmsi.uz /etc/nginx/sites-enabled/crmsi.uz
+nginx -t && systemctl reload nginx
+
+# 3. ALLOWED_ORIGINS ga domen qo'shish (.env ni tahrirlash)
+# /root/shina_crm_backend/.env da qo'shiladi:
+# ALLOWED_ORIGINS=...,https://crmsi.uz,https://www.crmsi.uz
+# Keyin:
+cd /root/shina_crm_backend && pm2 restart shina-backend --update-env
+```
+
+**Yangi mijoz (tenant) qo'shish:**
+```bash
+# Serverda:
+/root/create_tenant.sh <tenant_slug>
+# Misol: /root/create_tenant.sh goodtires2
+# Bu shina_crm_goodtires2 DB yaratadi va sxemani ko'chiradi
+```
+
+**Tenant middleware holati:** `src/middleware/tenant.js` — hozir barcha tenantlar bitta DB (`shina_crm`) ishlatadi. Ko'p mijoz bo'lganda middleware ichida `getPool(\`shina_crm_\${tenant}\`)` qo'shiladi.
