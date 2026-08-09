@@ -339,6 +339,7 @@ function DmConversationsPanel() {
                       </div>
                       <div>
                         <p className="text-text-primary font-medium text-xs">{c.username ? `@${c.username}` : c.senderId}</p>
+                        {c.username && <p className="text-[10px] text-text-muted/60 leading-none mb-0.5">{c.senderId}</p>}
                         <p className="text-xs text-text-muted">{c.userMsgs} savol</p>
                       </div>
                     </div>
