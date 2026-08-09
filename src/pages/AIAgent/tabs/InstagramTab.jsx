@@ -26,6 +26,24 @@ const LOYALTY_LABEL = {
   none: { label: 'Yangi', color: 'text-text-muted bg-bg-secondary' },
 }
 
+const PS = 20
+
+function Pagination({ page, total, onPage }) {
+  const pages = Math.ceil(total / PS)
+  if (pages <= 1) return null
+  return (
+    <div className="flex items-center justify-between px-4 py-2.5 border-t border-border text-xs text-text-muted">
+      <span>{Math.min((page - 1) * PS + 1, total)} – {Math.min(page * PS, total)} / {total} ta</span>
+      <div className="flex gap-1">
+        <button disabled={page === 1} onClick={() => onPage(page - 1)}
+          className="px-2 py-1 rounded-lg border border-border hover:bg-bg-secondary disabled:opacity-30 disabled:cursor-not-allowed">‹</button>
+        <button disabled={page === pages} onClick={() => onPage(page + 1)}
+          className="px-2 py-1 rounded-lg border border-border hover:bg-bg-secondary disabled:opacity-30 disabled:cursor-not-allowed">›</button>
+      </div>
+    </div>
+  )
+}
+
 // ─────────── Per-customer stats ───────────
 function buildCustomerStats(customers, sales) {
   const byId = {}
@@ -258,6 +276,7 @@ function DmConversationsPanel() {
   const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     getInstagramConversations({ limit: 50 })
@@ -280,6 +299,7 @@ function DmConversationsPanel() {
   if (loading) return <div className="py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
 
   const convs = data?.conversations || []
+  const paged = convs.slice((page - 1) * PS, page * PS)
 
   return (
     <div className="space-y-3">
@@ -306,7 +326,7 @@ function DmConversationsPanel() {
               </tr>
             </thead>
             <tbody>
-              {convs.map((c, i) => (
+              {paged.map((c, i) => (
                 <tr
                   key={c.senderId}
                   onClick={() => openDetail(c)}
@@ -337,6 +357,7 @@ function DmConversationsPanel() {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} total={convs.length} onPage={setPage} />
         </div>
       )}
 
@@ -496,6 +517,7 @@ function BotStatsPanel() {
 export default function InstagramTab({ aiData, agentConfig, customerAgentConfig }) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
+  const [custPage, setCustPage] = useState(1)
 
   const customers = aiData?.customers || []
   const sales = aiData?.sales || []
@@ -520,11 +542,14 @@ export default function InstagramTab({ aiData, agentConfig, customerAgentConfig 
   }, [sales, socialIds])
 
   const filtered = useMemo(() => {
+    setCustPage(1)
     const q = search.toLowerCase()
     return socialCustomers.filter(c =>
       !q || c.name.toLowerCase().includes(q) || c.instagram.toLowerCase().includes(q) || (c.carModel || '').toLowerCase().includes(q)
     )
   }, [socialCustomers, search])
+
+  const pagedCustomers = useMemo(() => filtered.slice((custPage - 1) * PS, custPage * PS), [filtered, custPage])
 
   const customerAgentId = customerAgentConfig?.id
   const { addActivity } = useAgentActivityStore()
@@ -648,7 +673,7 @@ VAZIFALAR:
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c, i) => {
+                {pagedCustomers.map((c, i) => {
                   const li = LOYALTY_LABEL[c.loyaltyLevel || 'none'] || LOYALTY_LABEL.none
                   return (
                     <tr
@@ -684,6 +709,7 @@ VAZIFALAR:
                 })}
               </tbody>
             </table>
+            <Pagination page={custPage} total={filtered.length} onPage={setCustPage} />
           </div>
         )}
       </div>
