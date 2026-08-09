@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { Globe, Users, ShoppingBag, AlertCircle, X, ChevronRight, Car, Star, Zap, MessageCircle, TrendingUp, BarChart2, Send, Loader2 } from 'lucide-react'
-import { streamChat } from '../../../api/aiService'
+import { Globe, Users, ShoppingBag, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, TrendingUp, BarChart2, Send, Loader2, Clock, Phone, Package, CheckCircle, XCircle } from 'lucide-react'
+import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
@@ -251,6 +251,247 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
   )
 }
 
+// ─────────── DM Suhbatlar ───────────
+function DmConversationsPanel() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [detail, setDetail] = useState(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+
+  useEffect(() => {
+    getInstagramConversations({ limit: 50 })
+      .then(setData)
+      .catch(() => setData({ conversations: [], total: 0 }))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const openDetail = async (conv) => {
+    setSelected(conv)
+    setDetailLoading(true)
+    setDetail(null)
+    try {
+      const d = await getInstagramConversationDetail(conv.senderId)
+      setDetail(d.messages || [])
+    } catch { setDetail([]) }
+    finally { setDetailLoading(false) }
+  }
+
+  if (loading) return <div className="py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
+
+  const convs = data?.conversations || []
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-text-primary flex items-center gap-2">
+          <MessageCircle size={14} className="text-pink-400" />
+          DM Suhbatlar
+          <span className="text-xs text-text-muted font-normal">({data?.total || 0} ta foydalanuvchi)</span>
+        </p>
+      </div>
+
+      {convs.length === 0 ? (
+        <div className="py-8 text-center text-text-muted text-sm">Hali DM suhbat yo'q</div>
+      ) : (
+        <div className="rounded-2xl border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-bg-secondary text-xs text-text-muted">
+                <th className="text-left px-4 py-2.5">Foydalanuvchi</th>
+                <th className="text-right px-4 py-2.5 hidden sm:table-cell">Xabarlar</th>
+                <th className="text-right px-4 py-2.5 hidden md:table-cell">So'nggi faollik</th>
+                <th className="text-left px-4 py-2.5 hidden lg:table-cell">Oxirgi xabar</th>
+                <th className="px-4 py-2.5 w-6" />
+              </tr>
+            </thead>
+            <tbody>
+              {convs.map((c, i) => (
+                <tr
+                  key={c.senderId}
+                  onClick={() => openDetail(c)}
+                  className={`border-b border-border/50 hover:bg-bg-secondary cursor-pointer transition-colors ${i % 2 === 0 ? '' : 'bg-bg-secondary/30'}`}
+                >
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        {(c.username || c.senderId)[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-text-primary font-medium text-xs">{c.username ? `@${c.username}` : c.senderId}</p>
+                        <p className="text-xs text-text-muted">{c.userMsgs} savol</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right text-xs text-text-secondary hidden sm:table-cell">{c.msgCount} ta</td>
+                  <td className="px-4 py-3 text-right text-xs text-text-muted hidden md:table-cell">
+                    {c.lastMsg ? new Date(c.lastMsg).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <p className="text-xs text-text-secondary truncate max-w-xs">
+                      {c.lastRole === 'assistant' ? '🤖 ' : '👤 '}{c.lastMessage}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3"><ChevronRight size={14} className="text-text-muted" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Suhbat detail modal */}
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)}>
+          <div className="bg-bg-primary border border-border rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <p className="font-semibold text-text-primary text-sm">
+                {selected.username ? `@${selected.username}` : selected.senderId} — suhbat tarixi
+              </p>
+              <button onClick={() => setSelected(null)} className="text-text-muted hover:text-text-primary"><X size={16} /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {detailLoading && <div className="text-center text-text-muted text-sm py-4"><Loader2 size={14} className="animate-spin inline mr-1" />Yuklanmoqda...</div>}
+              {detail?.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}>
+                  <div className={`max-w-[80%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-bg-secondary text-text-primary'
+                      : 'bg-pink-500/20 text-pink-100'
+                  }`}>
+                    <p>{msg.message}</p>
+                    <p className="text-text-muted text-[10px] mt-1">
+                      {new Date(msg.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────── Bronlar va statistika ───────────
+function BotStatsPanel() {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getInstagramStats()
+      .then(setStats)
+      .catch(() => setStats(null))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
+  if (!stats) return null
+
+  const cs = stats.commentSummary || {}
+  const dm = stats.dmSummary || {}
+  const reservations = stats.reservations || []
+
+  return (
+    <div className="space-y-4">
+      {/* Umumiy statistika */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'DM suhbatlar', value: dm.unique_senders || 0, sub: `${dm.total_messages || 0} ta xabar`, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+          { label: 'Kommentlar', value: cs.total || 0, sub: `${cs.unique_users || 0} ta foydalanuvchi`, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+          { label: 'Narx so\'rovlari', value: cs.price_inquiries || 0, sub: 'kommentdan', color: 'text-accent-green', bg: 'bg-accent-green/10', border: 'border-accent-green/20' },
+          { label: 'Bot bronlar', value: reservations.length, sub: 'jami', color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-accent-orange/20' },
+        ].map(({ label, value, sub, color, bg, border }) => (
+          <div key={label} className={`p-4 rounded-2xl border ${border} ${bg}`}>
+            <p className={`text-xl font-bold ${color}`}>{value}</p>
+            <p className="text-sm font-medium text-text-primary mt-0.5">{label}</p>
+            <p className="text-xs text-text-muted mt-0.5">{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Komment intent breakdown */}
+      {cs.total > 0 && (
+        <div className="p-4 rounded-2xl border border-border bg-bg-secondary">
+          <p className="text-sm font-medium text-text-primary mb-3 flex items-center gap-2">
+            <BarChart2 size={14} className="text-blue-400" />
+            Komment turlari
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            {[
+              { label: 'Narx so\'rovi', val: cs.price_inquiries, color: 'text-accent-green' },
+              { label: 'Ijobiy', val: cs.positive_feedback, color: 'text-yellow-400' },
+              { label: 'Emoji', val: cs.emoji_only, color: 'text-pink-400' },
+              { label: 'Noaniq', val: cs.unclear, color: 'text-text-muted' },
+            ].map(({ label, val, color }) => (
+              <div key={label} className="p-2 rounded-xl bg-bg-primary border border-border text-center">
+                <p className={`text-lg font-bold ${color}`}>{val || 0}</p>
+                <p className="text-text-muted">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bronlar jadvali */}
+      <div>
+        <p className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+          <Package size={14} className="text-accent-orange" />
+          Bot yaratgan bronlar
+          <span className="text-xs text-text-muted font-normal">({reservations.length} ta)</span>
+        </p>
+        {reservations.length === 0 ? (
+          <div className="py-6 text-center text-text-muted text-sm rounded-2xl border border-border">Hali bot orqali bron qilinmagan</div>
+        ) : (
+          <div className="rounded-2xl border border-border overflow-hidden">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-bg-secondary text-text-muted">
+                  <th className="text-left px-4 py-2.5">Mijoz</th>
+                  <th className="text-left px-4 py-2.5 hidden sm:table-cell">Tovar</th>
+                  <th className="text-right px-4 py-2.5 hidden md:table-cell">Narx</th>
+                  <th className="text-center px-4 py-2.5">Holat</th>
+                  <th className="text-right px-4 py-2.5 hidden lg:table-cell">Vaqt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reservations.map((r, i) => (
+                  <tr key={r.id} className={`border-b border-border/50 ${i % 2 === 0 ? '' : 'bg-bg-secondary/30'}`}>
+                    <td className="px-4 py-3">
+                      <p className="text-text-primary font-medium">{r.customerName || '—'}</p>
+                      {r.customerPhone && <p className="text-text-muted flex items-center gap-1"><Phone size={10} />{r.customerPhone}</p>}
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell text-text-secondary">
+                      {r.brand && <span className="text-pink-400 mr-1">{r.brand}</span>}
+                      {r.productName || '—'}
+                      {r.size && <span className="text-text-muted ml-1">({r.size})</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right hidden md:table-cell text-accent-green">
+                      {r.cashPrice ? r.cashPrice.toLocaleString('uz-UZ') + " so'm" : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {r.status === 'active' && new Date(r.reservedUntil) > new Date()
+                        ? <span className="flex items-center justify-center gap-1 text-accent-green"><CheckCircle size={12} />Aktiv</span>
+                        : r.status === 'completed'
+                          ? <span className="flex items-center justify-center gap-1 text-blue-400"><CheckCircle size={12} />Bajarildi</span>
+                          : <span className="flex items-center justify-center gap-1 text-text-muted"><XCircle size={12} />Muddati o'tdi</span>
+                      }
+                    </td>
+                    <td className="px-4 py-3 text-right text-text-muted hidden lg:table-cell">
+                      {new Date(r.createdAt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─────────── Asosiy tab ───────────
 export default function InstagramTab({ aiData, agentConfig, customerAgentConfig }) {
   const [search, setSearch] = useState('')
@@ -455,6 +696,16 @@ VAZIFALAR:
           onClose={() => setSelected(null)}
         />
       )}
+
+      {/* DM suhbatlar arxivi */}
+      <div className="pt-2 border-t border-border">
+        <DmConversationsPanel />
+      </div>
+
+      {/* Bot statistika va bronlar */}
+      <div className="pt-2 border-t border-border">
+        <BotStatsPanel />
+      </div>
     </div>
   )
 }

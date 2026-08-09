@@ -1,5 +1,28 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
+const authHeaders = () => {
+  const token = localStorage.getItem('shina_token')
+  return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+}
+
+export const getInstagramConversations = async ({ limit = 50, offset = 0 } = {}) => {
+  const r = await fetch(`${BASE_URL}/api/ai/instagram/conversations?limit=${limit}&offset=${offset}`, { headers: authHeaders() })
+  if (!r.ok) throw new Error('Instagram conversations yuklanmadi')
+  return r.json()
+}
+
+export const getInstagramConversationDetail = async (senderId) => {
+  const r = await fetch(`${BASE_URL}/api/ai/instagram/conversations/${encodeURIComponent(senderId)}`, { headers: authHeaders() })
+  if (!r.ok) throw new Error('Suhbat tarixi yuklanmadi')
+  return r.json()
+}
+
+export const getInstagramStats = async () => {
+  const r = await fetch(`${BASE_URL}/api/ai/instagram/stats`, { headers: authHeaders() })
+  if (!r.ok) throw new Error('Instagram statistika yuklanmadi')
+  return r.json()
+}
+
 export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onModel, onDone, onError }) => {
   const token = localStorage.getItem('shina_token')
 
