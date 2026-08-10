@@ -596,20 +596,14 @@ VAZIFALAR:
   }, [agAnalysis])
 
   const igSystemPrompt = useMemo(() => {
-    const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)
-    const noSale = socialCustomers.filter(c => c.count === 0)
-    return `Sen GoodTires do'konining Instagram CRM tahlilchisissan. Foydalanuvchi (admin) Instagram marketing, DM bot, mijozlar tahlili va statistika haqida savol beradi — aniq, qisqa va foydali javob ber.
+    return `Sen GoodTires Instagram agentlari tizimining yordamchisissan. Ikki agent ishlaydi:
+1. Komment-agent: Instagram kommentlarga avtomatik javob beradi (tovar qidirish, narx, bron)
+2. DM-agent: Direct Message orqali kelgan xabarlarga javob beradi
 
-=== JORIY INSTAGRAM HOLAT ===
-Instagram orqali kelgan mijozlar: ${socialCustomers.length} ta
-Ularning jami xaridlari: ${fmtMoney(totalSpent)} so'm
-Bu oy sotuvlar: ${thisMonth} ta
-Nasiya qarz: ${fmtMoney(totalDebt)} so'm
-Hech xarid qilmaganlar: ${noSale.length} ta
-TOP 5 mijoz: ${topBySpend.map((c, i) => `${i + 1}. @${c.instagram} (${fmtMoney(c.spent)} so'm)`).join(', ') || 'yo\'q'}
-Instagram handle: ${igHandle || 'ulanmagan'}
-DM bot: ${igEnabled ? 'faol' : 'o\'chiq'}`
-  }, [socialCustomers.length, totalSpent, thisMonth, totalDebt, igHandle, igEnabled])
+Instagram holati: handle=${igHandle || 'ulanmagan'}, DM bot=${igEnabled ? 'faol' : "o'chiq"}
+
+Admin savol bersa — agent ishlash tartibi, sozlamalar, statistika yoki natijalar haqida aniq va qisqa javob ber.`
+  }, [igHandle, igEnabled])
 
   return (
     <div className="space-y-5">
