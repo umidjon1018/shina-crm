@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bot, TrendingUp, Package, Megaphone, MessageSquare, UserCheck, Globe, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
+import { Bot, TrendingUp, Package, Megaphone, MessageSquare, MessageCircle, UserCheck, Globe, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
@@ -10,7 +10,8 @@ const AGENT_ICONS = {
   'pr-agent':       { Icon: Megaphone,    color: 'text-accent-orange', bg: 'bg-accent-orange/10', border: 'border-border' },
   'customer-agent':  { Icon: MessageSquare,color: 'text-accent-blue',   bg: 'bg-accent-blue/10',   border: 'border-border' },
   'staff-agent':     { Icon: UserCheck,    color: 'text-purple-400',    bg: 'bg-purple-400/10',    border: 'border-border' },
-  'instagram-agent': { Icon: Globe,        color: 'text-pink-400',      bg: 'bg-pink-400/10',      border: 'border-border' },
+  'instagram-agent':    { Icon: Globe,        color: 'text-pink-400',      bg: 'bg-pink-400/10',      border: 'border-border' },
+  'instagram-dm-agent': { Icon: MessageCircle, color: 'text-pink-400',      bg: 'bg-pink-400/10',      border: 'border-border' },
 }
 
 const MODELS = [
@@ -58,7 +59,8 @@ const AGENT_TOOLS = {
   'pr-agent':       ['get_sales_summary', 'get_top_products', 'get_low_stock', 'get_discounts_summary', 'get_customer_debts', 'get_recent_returns', 'get_profit_by_brand', 'get_monthly_growth'],
   'customer-agent':  ['get_top_customers', 'get_inactive_customers', 'get_customer_segments', 'get_customer_debts', 'get_recent_returns', 'get_discounts_summary', 'get_sales_summary', 'search_products', 'create_reservation'],
   'staff-agent':     ['get_sales_summary', 'get_discounts_summary', 'get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
-  'instagram-agent': ['get_customer_by_instagram', 'search_products', 'create_reservation'],
+  'instagram-agent':    ['get_customer_by_instagram', 'search_products', 'create_reservation'],
+  'instagram-dm-agent': ['get_customer_by_instagram', 'search_products', 'create_reservation'],
 }
 
 const INTEGRATION_CONFIG = {
@@ -72,16 +74,33 @@ const INTEGRATION_CONFIG = {
     { key: 'instagram.enabled',    label: 'Instagram tahlil yoqilgan', type: 'toggle' },
   ],
   'instagram-agent': [
-    { key: 'shop.name',            label: 'Do\'kon nomi',                   type: 'text',     placeholder: 'GoodTires' },
-    { key: 'shop.address',         label: 'Do\'kon manzili',                type: 'text',     placeholder: 'Toshkent, Chilonzor, 14-kvartal' },
-    { key: 'shop.hours',           label: 'Ish vaqti',                      type: 'text',     placeholder: 'Dushanba–Shanba: 9:00–19:00' },
-    { key: 'shop.phone',           label: 'Telefon raqam',                  type: 'text',     placeholder: '+998 90 123 45 67' },
-    { key: 'shop.locationUrl',     label: 'Telegram/Yandex lokatsiya',      type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
-    { key: 'instagram.handle',     label: 'Instagram akkaunt',              type: 'text',     placeholder: '@goodtires_uz' },
-    { key: 'instagram.webhookUrl', label: 'make.com Webhook URL (komment bot)', type: 'text', placeholder: 'https://hook.make.com/...' },
-    { key: 'instagram.enabled',    label: 'Instagram komment bot yoqilgan', type: 'toggle' },
-    { key: 'telegram.botToken',    label: 'Telegram Bot Token',             type: 'password', placeholder: '123456:ABC...' },
-    { key: 'telegram.enabled',     label: 'Telegram bot yoqilgan',          type: 'toggle' },
+    { key: 'shop.name',              label: 'Do\'kon nomi',                       type: 'text',     placeholder: 'GoodTires' },
+    { key: 'shop.address',           label: 'Do\'kon manzili',                    type: 'text',     placeholder: 'Toshkent, Chilonzor, 14-kvartal' },
+    { key: 'shop.hours',             label: 'Ish vaqti',                          type: 'text',     placeholder: 'Dushanba–Shanba: 9:00–19:00' },
+    { key: 'shop.phone',             label: 'Telefon raqam',                      type: 'text',     placeholder: '+998 90 123 45 67' },
+    { key: 'shop.locationUrl',       label: 'Telegram/Yandex lokatsiya',          type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
+    { key: 'instagram.handle',       label: 'Instagram akkaunt',                  type: 'text',     placeholder: '@goodtires_uz' },
+    { key: 'instagram.accessToken',  label: 'Instagram Access Token',             type: 'password', placeholder: 'EAAB...' },
+    { key: 'instagram.pageId',       label: 'Instagram Business Account ID',      type: 'text',     placeholder: '27509075055455614' },
+    { key: 'instagram.userId',       label: 'Instagram User ID (o\'z akkaunti)',  type: 'text',     placeholder: '17841437993304690' },
+    { key: 'instagram.webhookSecret',label: 'Webhook Secret (ixtiyoriy)',          type: 'password', placeholder: 'mysecret' },
+    { key: 'instagram.webhookUrl',   label: 'make.com Webhook URL (komment bot)', type: 'text',     placeholder: 'https://hook.make.com/...' },
+    { key: 'instagram.enabled',      label: 'Instagram komment bot yoqilgan',     type: 'toggle' },
+    { key: 'anthropic.apiKey',       label: 'Anthropic API kaliti (ixtiyoriy)',   type: 'password', placeholder: 'sk-ant-...' },
+    { key: 'telegram.botToken',      label: 'Telegram Bot Token',                 type: 'password', placeholder: '123456:ABC...' },
+    { key: 'telegram.enabled',       label: 'Telegram bot yoqilgan',              type: 'toggle' },
+  ],
+  'instagram-dm-agent': [
+    { key: 'shop.name',              label: 'Do\'kon nomi',                      type: 'text',     placeholder: 'GoodTires' },
+    { key: 'shop.address',           label: 'Do\'kon manzili',                   type: 'text',     placeholder: 'Yunusobod, 19-kvartal' },
+    { key: 'shop.hours',             label: 'Ish vaqti',                         type: 'text',     placeholder: 'Du–Sha: 9:00–19:00' },
+    { key: 'shop.phone',             label: 'Telefon raqam',                     type: 'text',     placeholder: '+998 90 123 45 67' },
+    { key: 'shop.locationUrl',       label: 'Lokatsiya URL',                     type: 'text',     placeholder: 'https://yandex.uz/maps/...' },
+    { key: 'instagram.accessToken',  label: 'Instagram Access Token',            type: 'password', placeholder: 'EAAB...' },
+    { key: 'instagram.pageId',       label: 'Instagram Business Account ID',     type: 'text',     placeholder: '27509075055455614' },
+    { key: 'instagram.webhookSecret',label: 'Webhook Secret (ixtiyoriy)',         type: 'password', placeholder: 'mysecret' },
+    { key: 'instagram.dmEnabled',    label: 'Instagram DM bot yoqilgan',         type: 'toggle' },
+    { key: 'anthropic.apiKey',       label: 'Anthropic API kaliti (ixtiyoriy)',  type: 'password', placeholder: 'sk-ant-...' },
   ],
 }
 

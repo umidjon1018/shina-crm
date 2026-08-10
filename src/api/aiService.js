@@ -1,3 +1,5 @@
+import { useSettingsStore } from '../store/settingsStore'
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
 const authHeaders = () => {
@@ -25,6 +27,7 @@ export const getInstagramStats = async () => {
 
 export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onModel, onDone, onError }) => {
   const token = localStorage.getItem('shina_token')
+  const { aiApiKey } = useSettingsStore.getState()
 
   let response
   try {
@@ -34,7 +37,7 @@ export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onM
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ messages, agentId, systemPrompt }),
+      body: JSON.stringify({ messages, agentId, systemPrompt, ...(aiApiKey ? { apiKey: aiApiKey } : {}) }),
     })
   } catch (err) {
     onError?.('Server bilan aloqa yo\'q')
