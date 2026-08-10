@@ -115,8 +115,29 @@ function AgentCard({ agent, onSave }) {
   const [expanded, setExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [editingField, setEditingField] = useState(null)
+  const [fieldDraft, setFieldDraft] = useState('')
+  const [confirmField, setConfirmField] = useState(null)
+  const [fieldSaving, setFieldSaving] = useState(false)
   const { Icon, color, bg, border } = AGENT_ICONS[agent.slug] || { Icon: Bot, color: 'text-text-muted', bg: 'bg-bg-secondary', border: 'border-border' }
   const integrations = INTEGRATION_CONFIG[agent.slug] || []
+
+  const startEditField = (key) => { setEditingField(key); setFieldDraft(''); setConfirmField(null) }
+  const cancelEditField = () => { setEditingField(null); setFieldDraft(''); setConfirmField(null) }
+
+  const handleFieldSave = async (key) => {
+    setFieldSaving(true)
+    try {
+      const newIntegrations = setNestedValue(form.integrations, key, fieldDraft)
+      await onSave(agent.id, { integrations: newIntegrations })
+      setForm(f => ({ ...f, integrations: newIntegrations }))
+      cancelEditField()
+    } catch {
+      // xato parent da ko'rsatiladi
+    } finally {
+      setFieldSaving(false)
+    }
+  }
 
   const toggleTool = (tool) => {
     setForm(f => ({
@@ -296,6 +317,7 @@ function AgentCard({ agent, onSave }) {
                 {integrations.map(cfg => (
                   <div key={cfg.key} className="flex items-center gap-3">
                     <span className="text-xs text-text-secondary w-44 flex-shrink-0">{cfg.label}</span>
+
                     {cfg.type === 'toggle' ? (
                       <button
                         onClick={() => setForm(f => ({
@@ -307,9 +329,70 @@ function AgentCard({ agent, onSave }) {
                           ? <ToggleRight size={20} className="text-accent-green" />
                           : <ToggleLeft size={20} className="text-text-muted" />}
                       </button>
+
+                    ) : cfg.type === 'password' ? (
+                      editingField === cfg.key ? (
+                        confirmField === cfg.key ? (
+                          <div className="flex-1 flex items-center gap-2">
+                            <span className="text-xs text-text-muted">Saqlaysizmi?</span>
+                            <button
+                              onClick={() => handleFieldSave(cfg.key)}
+                              disabled={fieldSaving}
+                              className="px-2 py-0.5 text-xs bg-accent-green text-white rounded"
+                            >
+                              {fieldSaving ? '...' : 'Ha'}
+                            </button>
+                            <button
+                              onClick={() => setConfirmField(null)}
+                              className="px-2 py-0.5 text-xs border border-border rounded text-text-muted"
+                            >
+                              Yo'q
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={fieldDraft}
+                              onChange={e => setFieldDraft(e.target.value)}
+                              placeholder={cfg.placeholder}
+                              autoFocus
+                              className="flex-1 bg-bg-primary border border-border rounded px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-accent-green/50"
+                            />
+                            {fieldDraft && (
+                              <button
+                                onClick={() => setConfirmField(cfg.key)}
+                                className="px-2 py-0.5 text-xs bg-accent-green text-white rounded whitespace-nowrap"
+                              >
+                                Saqlash
+                              </button>
+                            )}
+                            <button
+                              onClick={cancelEditField}
+                              className="px-2 py-0.5 text-xs border border-border rounded text-text-muted"
+                            >
+                              Bekor
+                            </button>
+                          </div>
+                        )
+                      ) : (
+                        <div className="flex-1 flex items-center justify-between">
+                          {getNestedValue(form.integrations, cfg.key)
+                            ? <span className="text-text-muted text-sm tracking-widest">●●●●●●●●</span>
+                            : <span className="text-xs text-text-muted italic">Kiritilmagan</span>
+                          }
+                          <button
+                            onClick={() => startEditField(cfg.key)}
+                            className="text-xs text-accent-blue hover:underline ml-2 whitespace-nowrap"
+                          >
+                            {getNestedValue(form.integrations, cfg.key) ? 'O\'zgartirish' : 'Kiritish'}
+                          </button>
+                        </div>
+                      )
+
                     ) : (
                       <input
-                        type={cfg.type === 'password' ? 'password' : 'text'}
+                        type="text"
                         value={getNestedValue(form.integrations, cfg.key) || ''}
                         onChange={e => setForm(f => ({
                           ...f,
