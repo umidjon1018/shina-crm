@@ -596,19 +596,20 @@ VAZIFALAR:
   }, [agAnalysis])
 
   const igSystemPrompt = useMemo(() => {
-    const base = agentConfig?.systemPrompt || "Sen GoodTires do'konining INSTAGRAM AGENTISAN."
     const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)
     const noSale = socialCustomers.filter(c => c.count === 0)
-    return `${base}
+    return `Sen GoodTires do'konining Instagram CRM tahlilchisissan. Foydalanuvchi (admin) Instagram marketing, DM bot, mijozlar tahlili va statistika haqida savol beradi — aniq, qisqa va foydali javob ber.
 
 === JORIY INSTAGRAM HOLAT ===
-Instagram mijozlar: ${socialCustomers.length} ta
-Jami xaridlar: ${fmtMoney(totalSpent)} so'm
-Bu oy: ${thisMonth} ta sotuv
+Instagram orqali kelgan mijozlar: ${socialCustomers.length} ta
+Ularning jami xaridlari: ${fmtMoney(totalSpent)} so'm
+Bu oy sotuvlar: ${thisMonth} ta
 Nasiya qarz: ${fmtMoney(totalDebt)} so'm
-Xarid qilmaganlar: ${noSale.length} ta
-TOP 5: ${topBySpend.map((c, i) => `${i+1}. @${c.instagram} (${fmtMoney(c.spent)} so'm)`).join(', ') || 'yo\'q'}`
-  }, [agentConfig?.systemPrompt, socialCustomers.length, totalSpent, thisMonth, totalDebt])
+Hech xarid qilmaganlar: ${noSale.length} ta
+TOP 5 mijoz: ${topBySpend.map((c, i) => `${i + 1}. @${c.instagram} (${fmtMoney(c.spent)} so'm)`).join(', ') || 'yo\'q'}
+Instagram handle: ${igHandle || 'ulanmagan'}
+DM bot: ${igEnabled ? 'faol' : 'o\'chiq'}`
+  }, [socialCustomers.length, totalSpent, thisMonth, totalDebt, igHandle, igEnabled])
 
   return (
     <div className="space-y-5">
