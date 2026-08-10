@@ -74,7 +74,9 @@ const INTEGRATION_CONFIG = {
     { key: 'instagram.webhookSecret', label: 'Webhook Secret (ixtiyoriy)',         type: 'password', placeholder: 'mysecret' },
     { key: 'anthropic.apiKey',        label: 'Anthropic API kaliti (ixtiyoriy)',  type: 'password', placeholder: 'sk-ant-...' },
     { key: 'instagram.enabled',       label: 'Instagram komment bot yoqilgan',    type: 'toggle' },
-    { key: 'instagram.dmEnabled',     label: 'Instagram DM bot yoqilgan',         type: 'toggle' },
+  ],
+  'instagram-dm-agent': [
+    { key: 'instagram.dmEnabled', label: 'Instagram DM bot yoqilgan', type: 'toggle' },
   ],
   'telegram-agent': [
     { key: 'telegram.botToken', label: 'Telegram Bot Token',    type: 'password', placeholder: '123456:ABC...' },
