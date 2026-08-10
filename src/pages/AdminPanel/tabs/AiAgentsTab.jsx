@@ -44,7 +44,8 @@ const TOOL_LABELS = {
   search_products:             'Tovar qidirish (savollarga javob)',
   create_reservation:          'Tovar bron qilish',
   // Instagram agenti
-  get_customer_by_instagram:   'Instagram mijozni aniqlash',
+  get_customer_by_instagram:        'Instagram mijozni aniqlash',
+  get_customer_purchase_history:    'Mijoz xarid tarixi',
   // Xodimlar agenti
   get_staff_performance:     'Xodim samaradorligi (sotuv, tushum, foyda)',
   get_staff_discount_report: 'Xodim chegirma hisoboti (kim, kimga, necha marta)',
@@ -60,8 +61,8 @@ const AGENT_TOOLS = {
   'pr-agent':           ['get_sales_summary', 'get_top_products', 'get_low_stock', 'get_discounts_summary', 'get_customer_debts', 'get_recent_returns', 'get_profit_by_brand', 'get_monthly_growth'],
   'customer-agent':     ['get_top_customers', 'get_inactive_customers', 'get_customer_segments', 'get_customer_debts', 'get_recent_returns', 'get_discounts_summary', 'get_sales_summary', 'search_products', 'create_reservation'],
   'staff-agent':        ['get_sales_summary', 'get_discounts_summary', 'get_staff_performance', 'get_staff_discount_report', 'get_staff_violations', 'get_salary_info', 'get_monthly_growth'],
-  'instagram-agent':    ['get_customer_by_instagram', 'search_products', 'create_reservation'],
-  'instagram-dm-agent': ['get_customer_by_instagram', 'search_products', 'create_reservation'],
+  'instagram-agent':    ['search_products', 'create_reservation'],
+  'instagram-dm-agent': ['get_customer_by_instagram', 'get_customer_purchase_history', 'search_products', 'create_reservation', 'get_discounts_summary'],
   'telegram-agent':     [],
 }
 
