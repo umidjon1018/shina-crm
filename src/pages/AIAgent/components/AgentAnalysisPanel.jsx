@@ -149,18 +149,14 @@ export default function AgentAnalysisPanel({
 
       {/* KPIs */}
       {kpis.length > 0 && (
-        <div className={`grid gap-3 ${
-          kpis.length <= 2 ? 'grid-cols-2' :
-          kpis.length <= 4 ? 'grid-cols-2 md:grid-cols-4' :
-          'grid-cols-2 md:grid-cols-4'
-        }`}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {kpis.map((kpi, i) => (
-            <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4">
-              <p className="text-text-secondary text-sm mb-2">{kpi.label}</p>
-              <p className={`font-syne font-bold text-2xl ${STATUS_STYLES[kpi.status] || 'text-text-primary'}`}>
+            <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col">
+              <p className="text-text-secondary text-xs mb-2 leading-tight line-clamp-2">{kpi.label}</p>
+              <p className={`font-syne font-bold ${kpi.value.length > 12 ? 'text-lg' : 'text-2xl'} ${STATUS_STYLES[kpi.status] || 'text-text-primary'} leading-tight`}>
                 {kpi.value}
               </p>
-              {kpi.sub && <p className="text-text-secondary text-sm mt-1.5">{kpi.sub}</p>}
+              {kpi.sub && <p className="text-text-secondary text-xs mt-1.5 line-clamp-2 leading-snug">{kpi.sub}</p>}
             </div>
           ))}
         </div>
