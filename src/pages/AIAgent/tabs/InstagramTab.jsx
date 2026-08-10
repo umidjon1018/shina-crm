@@ -3,6 +3,7 @@ import { Globe, Users, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, Ba
 import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
+import AiChat from '../components/AiChat'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 
 // ─────────── helpers ───────────
@@ -594,6 +595,21 @@ VAZIFALAR:
     }
   }, [agAnalysis])
 
+  const igSystemPrompt = useMemo(() => {
+    const base = agentConfig?.systemPrompt || "Sen GoodTires do'konining INSTAGRAM AGENTISAN."
+    const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)
+    const noSale = socialCustomers.filter(c => c.count === 0)
+    return `${base}
+
+=== JORIY INSTAGRAM HOLAT ===
+Instagram mijozlar: ${socialCustomers.length} ta
+Jami xaridlar: ${fmtMoney(totalSpent)} so'm
+Bu oy: ${thisMonth} ta sotuv
+Nasiya qarz: ${fmtMoney(totalDebt)} so'm
+Xarid qilmaganlar: ${noSale.length} ta
+TOP 5: ${topBySpend.map((c, i) => `${i+1}. @${c.instagram} (${fmtMoney(c.spent)} so'm)`).join(', ') || 'yo\'q'}`
+  }, [agentConfig?.systemPrompt, socialCustomers.length, totalSpent, thisMonth, totalDebt])
+
   return (
     <div className="space-y-5">
       {/* Instagram agent tahlili */}
@@ -715,6 +731,16 @@ VAZIFALAR:
       {/* Bot statistika va bronlar */}
       <div className="pt-2 border-t border-border">
         <BotStatsPanel />
+      </div>
+
+      {/* Agent bilan suhbat */}
+      <div className="pt-2 border-t border-border">
+        <AiChat
+          agentId="instagram-agent"
+          colorClass="text-pink-400"
+          systemPrompt={igSystemPrompt}
+          placeholder="Instagram mijozlar, DM, bot statistika haqida so'rang..."
+        />
       </div>
     </div>
   )
