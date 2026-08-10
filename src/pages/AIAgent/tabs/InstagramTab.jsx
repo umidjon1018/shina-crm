@@ -564,7 +564,7 @@ export default function InstagramTab({ aiData, agentConfig, customerAgentConfig 
   const { loading: agLoading, analysis: agAnalysis, error: agError, refresh: agRefresh,
           triggerRun, triggering, source, lastRun } = useAgentAnalysis({
     agentId: 'instagram-agent',
-    enabled: socialCustomers.length > 0,
+    enabled: true,
     systemPrompt: agentConfig?.systemPrompt || "Sen GoodTires do'konining INSTAGRAM AGENTISAN.",
     buildPrompt: () => {
       const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)

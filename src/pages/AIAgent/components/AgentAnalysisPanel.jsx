@@ -100,7 +100,26 @@ export default function AgentAnalysisPanel({
     )
   }
 
-  if (!analysis) return null
+  if (!analysis) {
+    if (!onTriggerRun) return null
+    return (
+      <div className="mb-6 flex items-center justify-between gap-3 bg-bg-secondary border border-border rounded-xl px-5 py-4">
+        <span className="text-sm text-text-secondary">Hali agent natijasi yo'q</span>
+        <button
+          onClick={onTriggerRun}
+          disabled={triggering}
+          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+            triggering
+              ? 'text-text-muted border-border cursor-not-allowed'
+              : 'text-accent-red border-accent-red/30 hover:bg-accent-red/10'
+          }`}
+        >
+          {triggering ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+          {triggering ? 'Ishlamoqda...' : 'Agentni ishga tushir'}
+        </button>
+      </div>
+    )
+  }
 
   if (analysis.raw) return <RawFallback text={analysis.raw} />
 
