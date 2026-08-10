@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { Globe, Users, ShoppingBag, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, TrendingUp, BarChart2, Send, Loader2, Clock, Phone, Package, CheckCircle, XCircle } from 'lucide-react'
+import { Globe, Users, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, BarChart2, Send, Loader2, Clock, Phone, Package, CheckCircle, XCircle } from 'lucide-react'
 import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
@@ -616,23 +616,6 @@ VAZIFALAR:
           <span>Instagram komment boti o'chirilgan. <strong>Admin Panel → AI Agentlar → Instagram agenti</strong> da yoqing.</span>
         </div>
       )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Instagram mijozlar', value: socialCustomers.length, sub: igHandle ? '@' + igHandle : 'Ulangan akkaunt yo\'q', Icon: Globe, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
-          { label: 'Jami xaridlar (so\'m)', value: fmtMoney(totalSpent), sub: socialCustomers.reduce((s,c)=>s+c.count,0) + ' ta sotuv', Icon: ShoppingBag, color: 'text-accent-green', bg: 'bg-accent-green/10', border: 'border-accent-green/20' },
-          { label: 'Bu oy xaridlar', value: thisMonth, sub: 'ta sotuv', Icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-          { label: 'Nasiya qarz', value: fmtMoney(totalDebt), sub: totalDebt > 0 ? 'so\'m' : 'Qarz yo\'q', Icon: AlertCircle, color: totalDebt > 0 ? 'text-accent-red' : 'text-text-muted', bg: totalDebt > 0 ? 'bg-accent-red/10' : 'bg-bg-secondary', border: totalDebt > 0 ? 'border-accent-red/20' : 'border-border' },
-        ].map(({ label, value, sub, Icon, color, bg, border }) => (
-          <div key={label} className={`p-4 rounded-2xl border ${border} ${bg}`}>
-            <Icon size={14} className={`${color} mb-2`} />
-            <p className={`text-xl font-bold ${color}`}>{value}</p>
-            <p className="text-sm font-medium text-text-primary mt-0.5">{label}</p>
-            <p className="text-xs text-text-muted mt-0.5">{sub}</p>
-          </div>
-        ))}
-      </div>
 
       {/* Oylik grafik */}
       <MonthlyChart sales={sales} socialIds={socialIds} />

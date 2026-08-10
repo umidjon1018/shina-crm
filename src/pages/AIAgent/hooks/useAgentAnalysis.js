@@ -229,35 +229,42 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
   }, [enabled, ...deps])
 
   // Backend agentni ishga tushirish va natijani kutish
+  function startPolling() {
+    let n = 0
+    pollingRef.current = setInterval(async () => {
+      if (++n > 90) { clearInterval(pollingRef.current); setTriggering(false); return }
+      try {
+        const st = await getAgentStatus(agentId)
+        if (st?.status === 'completed') {
+          clearInterval(pollingRef.current)
+          checkDB().then(() => {
+            setTriggering(false)
+            useDataStore.getState().bump()
+          })
+        } else if (st?.status === 'failed') {
+          clearInterval(pollingRef.current)
+          setError('Agent xato: ' + (st.error ? st.error.slice(0, 100) : 'noma\'lum'))
+          setTriggering(false)
+        }
+      } catch {}
+    }, 2000)
+  }
+
   function triggerRun() {
     if (triggering) return
     if (pollingRef.current) clearInterval(pollingRef.current)
     setTriggering(true)
     setError(null)
     triggerAgentRun(agentId)
-      .then(() => {
-        let n = 0
-        pollingRef.current = setInterval(async () => {
-          if (++n > 90) { clearInterval(pollingRef.current); setTriggering(false); return }
-          try {
-            const st = await getAgentStatus(agentId)
-            if (st?.status === 'completed') {
-              clearInterval(pollingRef.current)
-              checkDB().then(() => {
-                setTriggering(false)
-                useDataStore.getState().bump()
-              })
-            } else if (st?.status === 'failed') {
-              clearInterval(pollingRef.current)
-              setError('Agent xato: ' + (st.error ? st.error.slice(0, 100) : 'noma\'lum'))
-              setTriggering(false)
-            }
-          } catch {}
-        }, 2000)
-      })
+      .then(() => startPolling())
       .catch(err => {
-        setTriggering(false)
-        setError(err?.response?.data?.error || err.message || 'Agent ishga tushmadi')
+        if (err?.response?.status === 409) {
+          // Agent allaqachon ishlayapti — uning natijasini kuting
+          startPolling()
+        } else {
+          setTriggering(false)
+          setError(err?.response?.data?.error || err.message || 'Agent ishga tushmadi')
+        }
       })
   }
 

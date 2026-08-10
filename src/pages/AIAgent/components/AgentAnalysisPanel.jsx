@@ -181,48 +181,45 @@ export default function AgentAnalysisPanel({
         </div>
       )}
 
-      {/* Insights + Recommendations */}
-      {(insights.length > 0 || recommendations.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {insights.length > 0 && (
-            <div className="bg-bg-secondary border border-border rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Lightbulb size={16} className="text-amber-400" />
-                <span className="text-base font-semibold text-text-primary">Tahlil natijalari</span>
+      {/* Insights — fullwidth */}
+      {insights.length > 0 && (
+        <div className="bg-bg-secondary border border-border rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb size={16} className="text-amber-400" />
+            <span className="text-base font-semibold text-text-primary">Tahlil natijalari</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {insights.map((ins, i) => (
+              <div key={i}>
+                <p className="text-sm font-semibold text-text-primary">{ins.title}</p>
+                <p className="text-sm text-text-secondary mt-1 leading-relaxed">{ins.description}</p>
               </div>
-              <div className="space-y-4">
-                {insights.map((ins, i) => (
-                  <div key={i}>
-                    <p className="text-sm font-semibold text-text-primary">{ins.title}</p>
-                    <p className="text-sm text-text-secondary mt-1 leading-relaxed">{ins.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
+      )}
 
-          {recommendations.length > 0 && (
-            <div className="bg-bg-secondary border border-border rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap size={16} className={accentColor} />
-                <span className="text-base font-semibold text-text-primary">Tavsiyalar</span>
-              </div>
-              <div className="space-y-4">
-                {recommendations.map((rec, i) => {
-                  const p = PRIORITY_STYLES[rec.priority] || PRIORITY_STYLES.medium
-                  return (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <div className={`w-2 h-2 rounded-full ${p.dot} mt-2 flex-shrink-0`} />
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">{rec.action}</p>
-                        {rec.reason && <p className="text-sm text-text-secondary mt-0.5 leading-relaxed">{rec.reason}</p>}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+      {/* Recommendations — fullwidth */}
+      {recommendations.length > 0 && (
+        <div className="bg-bg-secondary border border-border rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap size={16} className={accentColor} />
+            <span className="text-base font-semibold text-text-primary">Tavsiyalar</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recommendations.map((rec, i) => {
+              const p = PRIORITY_STYLES[rec.priority] || PRIORITY_STYLES.medium
+              return (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className={`w-2 h-2 rounded-full ${p.dot} mt-2 flex-shrink-0`} />
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">{rec.action}</p>
+                    {rec.reason && <p className="text-sm text-text-secondary mt-0.5 leading-relaxed">{rec.reason}</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
