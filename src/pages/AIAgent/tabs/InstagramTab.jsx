@@ -520,6 +520,11 @@ export default function InstagramTab({ aiData, agentConfig, customerAgentConfig 
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [custPage, setCustPage] = useState(1)
+  const [botStats, setBotStats] = useState(null)
+
+  useEffect(() => {
+    getInstagramStats().then(setBotStats).catch(() => {})
+  }, [])
 
   const customers = aiData?.customers || []
   const sales = aiData?.sales || []
@@ -596,14 +601,24 @@ VAZIFALAR:
   }, [agAnalysis])
 
   const igSystemPrompt = useMemo(() => {
+    const cs = botStats?.commentSummary || {}
+    const dm = botStats?.dmSummary || {}
+    const reservations = botStats?.reservations || []
     return `Sen GoodTires Instagram agentlari tizimining yordamchisissan. Ikki agent ishlaydi:
 1. Komment-agent: Instagram kommentlarga avtomatik javob beradi (tovar qidirish, narx, bron)
 2. DM-agent: Direct Message orqali kelgan xabarlarga javob beradi
 
 Instagram holati: handle=${igHandle || 'ulanmagan'}, DM bot=${igEnabled ? 'faol' : "o'chiq"}
 
-Admin savol bersa — agent ishlash tartibi, sozlamalar, statistika yoki natijalar haqida aniq va qisqa javob ber.`
-  }, [igHandle, igEnabled])
+BOT STATISTIKASI:
+- DM suhbatlar: ${dm.unique_senders || 0} ta odamdan ${dm.total_messages || 0} ta xabar
+- Kommentlar: ${cs.total || 0} ta (${cs.unique_users || 0} ta foydalanuvchi)
+- Narx so'rovlari: ${cs.price_inquiries || 0} ta
+- Ijobiy kommentlar: ${cs.positive_feedback || 0} ta
+- Bot bronlar: ${reservations.length} ta
+
+Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida aniq va qisqa javob ber.`
+  }, [igHandle, igEnabled, botStats])
 
   return (
     <div className="space-y-5">
