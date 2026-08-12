@@ -206,7 +206,7 @@ const LoginPage = () => {
                 <SelfieCapture
                   onCapture={handleSelfie}
                   onCancel={() => { setSelfieError(''); setStep('credentials') }}
-                  allowUpload={user?.role === 'admin' || user?.role === 'manager'}
+                  allowUpload={user?.role === 'admin'}
                   disabled={isLoading}
                 />
               </div>
