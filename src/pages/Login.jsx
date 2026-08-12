@@ -88,7 +88,7 @@ const LoginPage = () => {
             <TireIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
           </motion.div>
           <h1 className="mt-8 text-4xl lg:text-6xl font-syne font-extrabold text-white tracking-tighter">
-            SHINA <span className="text-accent-red">CRM</span>
+            GOOD TIRES <span className="text-accent-red">CRM</span>
           </h1>
           <p className="mt-4 text-text-muted text-lg font-dm max-w-[280px]">
             {t('login_tagline')}
