@@ -163,10 +163,16 @@ export const useAuthStore = create(
         const isTrusted = isTrustedDevice(deviceId)
 
         if (isAdmin || isTrusted) {
-          saveTrustedDevice(deviceId, user?.id)
-          set({ isAuthenticated: true, deviceStatus: 'approved' })
-          logSession(user, 'Tizimga kirdi (online)')
-          return { status: 'approved' }
+          // Admin: har doim kirish
+          // Xodim/Manager: descriptor tekshirilgan va mos bo'lishi shart (null = yo'q = bloklash)
+          if (isAdmin || faceMatch === true) {
+            saveTrustedDevice(deviceId, user?.id)
+            set({ isAuthenticated: true, deviceStatus: 'approved' })
+            logSession(user, 'Tizimga kirdi (online)')
+            return { status: 'approved' }
+          }
+          // faceMatch === null: descriptor yuklab olinmadi — xavfsizlik uchun bloklash
+          return { status: 'face_mismatch' }
         }
 
         // Yangi qurilma: yuz mos bo'lsa ham admin/manager tasdiqlashi kerak
