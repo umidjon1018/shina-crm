@@ -120,7 +120,7 @@ function DevicesTab() {
     setTrusted(updated)
   }
 
-  const needsAttention = attempts.filter(a => !a.isTrusted && a.status === 'pending').length
+  const needsAttention = attempts.filter(a => !a.isTrusted && (a.status === 'pending' || a.status === 'face_review')).length
 
   const faceKeys = Object.keys(descriptors)
   const attPages  = Math.max(1, Math.ceil(attempts.length / PAGE_SIZE))
@@ -171,7 +171,8 @@ function DevicesTab() {
         ) : (
           <div className="divide-y divide-border">
             {attSlice.map(a => {
-              const isPending = !a.isTrusted && a.status !== 'approved' && a.status !== 'rejected'
+              const isPending = !a.isTrusted && (a.status === 'pending' || a.status === 'face_review')
+              const isFaceReview = a.status === 'face_review'
               const deviceInfo = parseUserAgent(a.userAgent)
               return (
                 <div key={a.id} className="px-5 py-4 flex items-center gap-4">
@@ -188,7 +189,8 @@ function DevicesTab() {
                     <p className="font-semibold text-text-primary text-sm">{a.fullName || a.username || t('adm_emp_unknown')}</p>
                     <p className="text-xs text-text-muted">{formatDateTime(a.timestamp)}{deviceInfo ? ` · ${deviceInfo}` : ''}</p>
                     <p className="text-xs text-text-muted font-mono truncate opacity-50">{a.deviceId}</p>
-                    {a.faceMatch === false && <Badge color="bg-accent-red/10 text-accent-red">{t('adm_dev_face_mismatch')}</Badge>}
+                    {a.faceMatch === false && !isFaceReview && <Badge color="bg-accent-red/10 text-accent-red">{t('adm_dev_face_mismatch')}</Badge>}
+                    {isFaceReview && <Badge color="bg-accent-orange/10 text-accent-orange">5× FaceID — vizual tasdiqlash kerak</Badge>}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {me?.role === 'admin' && a.role === 'manager' && !isPending && (
@@ -202,8 +204,13 @@ function DevicesTab() {
                     )}
                     {isPending ? (
                       <>
+                        {isFaceReview && a.selfie && (
+                          <button onClick={() => setSelfieModal(a)} className="flex items-center gap-1 px-2 py-1.5 bg-accent-blue/10 text-accent-blue text-xs font-bold rounded-xl hover:bg-accent-blue/20 border border-accent-blue/30">
+                            <ScanFace size={12} /> Ko'rish
+                          </button>
+                        )}
                         <button onClick={() => approve(a)} className="flex items-center gap-1 px-3 py-1.5 bg-accent-green/10 text-accent-green text-xs font-bold rounded-xl hover:bg-accent-green/20 border border-accent-green/30">
-                          <CheckSquare size={12} /> {t('confirm')}
+                          <CheckSquare size={12} /> {isFaceReview ? 'O\'zim' : t('confirm')}
                         </button>
                         <button onClick={() => reject(a)} className="flex items-center gap-1 px-3 py-1.5 bg-accent-red/10 text-accent-red text-xs font-bold rounded-xl hover:bg-accent-red/20 border border-accent-red/30">
                           <XSquare size={12} /> {t('adm_dev_reject')}

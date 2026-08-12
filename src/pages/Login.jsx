@@ -23,7 +23,7 @@ const TireIcon = ({ className }) => (
 const LoginPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { checkCredentials, submitSelfie, user } = useAuthStore()
+  const { checkCredentials, submitSelfie, submitFaceReview, user } = useAuthStore()
   const { lang, setLang } = useLangStore()
 
   const [step, setStep] = useState('credentials')
@@ -32,6 +32,8 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [selfieError, setSelfieError] = useState('')
+  const [faceAttempts, setFaceAttempts] = useState(0)
+  const MAX_FACE_ATTEMPTS = 5
 
   // Step 1: check login + password
   const handleCredentials = async (e) => {
@@ -64,7 +66,17 @@ const LoginPage = () => {
     } else if (result.status === 'pending') {
       navigate('/pending-approval')
     } else if (result.status === 'face_mismatch') {
-      setSelfieError(t('face_mismatch_error'))
+      const next = faceAttempts + 1
+      setFaceAttempts(next)
+      if (next >= MAX_FACE_ATTEMPTS) {
+        // 5 marta urinib bo'ldi — yuqori darajaga vizual tasdiqlash so'rovi yuborilsin
+        setIsLoading(true)
+        await submitFaceReview(selfieBase64)
+        setIsLoading(false)
+        navigate('/pending-approval')
+      } else {
+        setSelfieError(`${t('face_mismatch_error')} (${next}/${MAX_FACE_ATTEMPTS})`)
+      }
     } else if (result.status === 'multi_device_blocked') {
       setSelfieError(t('multi_device_blocked_error'))
     }

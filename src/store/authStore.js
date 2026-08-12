@@ -196,6 +196,37 @@ export const useAuthStore = create(
       },
 
 
+      // 5 marta FaceID muvaffaqiyatsiz — vizual tasdiqlash so'rovi
+      submitFaceReview: async (selfieBase64) => {
+        const { deviceId, user } = get()
+        try {
+          await api.post('/api/auth/attempts', {
+            deviceId,
+            selfie: selfieBase64,
+            faceMatch: null,
+            descriptor: null,
+            reviewRequest: true,
+          })
+        } catch {}
+        set({ deviceStatus: 'pending' })
+        const notifSettings = useSettingsStore.getState().notificationSettings
+        if (notifSettings?.DEVICE_LOGIN_ATTEMPT !== false) {
+          useNotificationStore.getState().addNotification({
+            type: 'DEVICE_LOGIN_ATTEMPT',
+            severity: 'warning',
+            title: 'Yuz tasdiqlash so\'rovi',
+            message: `"${user?.fullName || user?.username}" yuzini FaceID taniy olmadi — vizual tasdiqlash so'raldi`,
+            titleKey: 'notif_title_device_login',
+            messageKey: 'notif_msg_device_login',
+            messageParams: { name: user?.fullName || user?.username, deviceId },
+            deviceId,
+            userId: user?.id,
+            username: user?.username,
+          })
+        }
+        return { status: 'pending' }
+      },
+
       // Admin approves device
       approveDevice: async (deviceId) => {
         let attempt = null
