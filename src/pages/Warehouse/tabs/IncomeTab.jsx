@@ -16,7 +16,7 @@ import { Badge, Th, Td, isPrivileged } from '../whHelpers.jsx'
 const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, selectedShopId, shopBatchIds }) => {
   const { t } = useTranslation()
   const { user, hasPermission } = useAuthStore()
-  const { usdRate } = useSettingsStore()
+  const { usdRate, productAttributeDefs } = useSettingsStore()
   const canFinance = hasPermission('warehouse.income.financial')
   const [shopPickCallback, setShopPickCallback] = useState(null)
   const requireShop = (cb) => {
@@ -33,6 +33,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
     newProductName: '',
     quantity: '',
     notes: '',
+    attributes: {},
     // Moliyaviy (faqat admin/manager)
     supplierId: '',
     purchasePriceUSD: '',
@@ -66,7 +67,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
 
   const resetForm = () => {
     setForm({
-      newProductName: '', quantity: '', notes: '',
+      newProductName: '', quantity: '', notes: '', attributes: {},
       supplierId: '', purchasePriceUSD: '', entryUsdRate: String(usdRate || ''),
       paymentStatus: 'credit', paidUSD: '', dueDate: '',
     })
@@ -125,6 +126,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
         paymentStatus: canFinance ? form.paymentStatus : 'credit',
         paidUSD: canFinance ? paidUSD : 0,
         dueDate: canFinance ? (form.dueDate || null) : null,
+        attributes: form.attributes || {},
       })
 
       setSuccess(true)
@@ -435,6 +437,50 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
             className="w-full px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors resize-none"
           />
         </div>
+
+        {/* Xususiyatlar — faqat aniqlangan bo'lsa */}
+        {(productAttributeDefs || []).length > 0 && (
+          <div className="pt-1 border-t border-border space-y-3">
+            <p className="text-xs font-bold text-text-muted uppercase tracking-wider pt-1">Xususiyatlar</p>
+            {(productAttributeDefs || []).map(def => {
+              const checked = def.id in form.attributes
+              return (
+                <div key={def.id} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id={`wh-attr-${def.id}`}
+                    checked={checked}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: def.values[0] || '' } }))
+                      } else {
+                        setForm(f => {
+                          const a = { ...f.attributes }
+                          delete a[def.id]
+                          return { ...f, attributes: a }
+                        })
+                      }
+                    }}
+                    className="w-4 h-4 accent-accent-red cursor-pointer flex-shrink-0"
+                  />
+                  <label htmlFor={`wh-attr-${def.id}`} className="text-sm text-text-secondary font-medium cursor-pointer min-w-[70px]">
+                    {def.label}
+                  </label>
+                  {checked && (
+                    <select
+                      value={form.attributes[def.id] || ''}
+                      onChange={e => setForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: e.target.value } }))}
+                      className="flex-1 px-3 py-1.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
+                    >
+                      {def.values.length === 0 && <option value="">— Qiymat yo'q —</option>}
+                      {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {error && <p className="text-accent-red text-sm flex items-center gap-2"><XCircle size={14} /> {error}</p>}
         {success && <p className="text-accent-green text-sm flex items-center gap-2"><CheckCircle size={14} /> {t('wh_in_saved')}</p>}
