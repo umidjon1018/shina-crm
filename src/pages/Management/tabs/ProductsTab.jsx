@@ -771,6 +771,50 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
+                          {/* SECTION 1.5: Disk xususiyatlari */}
+                          <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
+                            Disk xususiyatlari
+                          </p>
+
+                          <div className="col-span-2">
+                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">Rang</label>
+                            <select
+                              id="p_color"
+                              defaultValue={editingProduct.color || ''}
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue cursor-pointer"
+                            >
+                              <option value="">— Tanlanmagan —</option>
+                              <option value="Qora">Qora</option>
+                              <option value="Kumush">Kumush</option>
+                              <option value="Bronza">Bronza</option>
+                              <option value="Chrome">Chrome</option>
+                              <option value="Gunmetal">Gunmetal</option>
+                              <option value="Kulrang">Kulrang</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">PCD (bolt naqshi)</label>
+                            <input
+                              type="text"
+                              id="p_pcd"
+                              defaultValue={editingProduct.pcd || ''}
+                              placeholder="masalan: 5×112"
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">ET (offset)</label>
+                            <input
+                              type="text"
+                              id="p_et"
+                              defaultValue={editingProduct.et || ''}
+                              placeholder="masalan: ET35"
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                            />
+                          </div>
+
                           {/* SECTION 2: Narxlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
                             {t('mgmt_section_prices')}
@@ -872,6 +916,9 @@ const ProductsTab = ({ ctx }) => {
                             const installmentMonths = [3, 6, 12].filter(m =>
                               document.getElementById('p_inst_' + m)?.checked
                             )
+                            const color = document.getElementById('p_color')?.value || null
+                            const pcd = document.getElementById('p_pcd')?.value || null
+                            const et = document.getElementById('p_et')?.value || null
 
                             const categoryId = document.getElementById('p_category')?.value || ''
                             if (editingProduct.isNew === true) {
@@ -881,7 +928,7 @@ const ProductsTab = ({ ctx }) => {
                                 warrantyDays, lowStockThreshold,
                                 category: categoryId,
                                 attribute, carCategory, notes,
-                                installmentMonths,
+                                installmentMonths, color, pcd, et,
                               })
                             } else {
                               await apiUpdateProduct(editingProduct.id, {
@@ -890,7 +937,7 @@ const ProductsTab = ({ ctx }) => {
                                 warrantyDays, lowStockThreshold,
                                 category: categoryId,
                                 attribute, carCategory, notes,
-                                installmentMonths,
+                                installmentMonths, color, pcd, et,
                               })
                             }
                             await refreshProducts()

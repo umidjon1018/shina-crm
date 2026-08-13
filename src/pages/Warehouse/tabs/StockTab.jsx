@@ -16,6 +16,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [category, setCategory] = useState('all')
   const [season, setSeason] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [colorFilter, setColorFilter] = useState('all')
   const [selectedProduct, setSelectedProduct] = useState(null)
 
   const [sortField, setSortField] = useState(null)
@@ -50,7 +51,8 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       (p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q)) &&
       (category === 'all' || p.category === category) &&
       (season === 'all' || p.season === season) &&
-      (statusFilter === 'all' || shopStockStatus(p) === statusFilter)
+      (statusFilter === 'all' || shopStockStatus(p) === statusFilter) &&
+      (colorFilter === 'all' || p.color === colorFilter)
     )
   })
 
@@ -96,6 +98,15 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
           <option value="ok">{t('stock_ok')}</option>
           <option value="low">{t('stock_low')}</option>
           <option value="empty">{t('stock_empty')}</option>
+        </select>
+        <select value={colorFilter} onChange={e => setColorFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+          <option value="all">Barcha ranglar</option>
+          <option value="Qora">Qora</option>
+          <option value="Kumush">Kumush</option>
+          <option value="Bronza">Bronza</option>
+          <option value="Chrome">Chrome</option>
+          <option value="Gunmetal">Gunmetal</option>
+          <option value="Kulrang">Kulrang</option>
         </select>
       </div>
 
@@ -165,6 +176,13 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                   <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
                     <td className="px-4 py-3.5">
                       <p className="font-medium text-text-primary text-sm">{p.name}</p>
+                      {(p.color || p.pcd || p.et) && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {p.color && <span className="px-1.5 py-0.5 bg-bg-tertiary text-text-muted text-[10px] rounded font-semibold">{p.color}</span>}
+                          {p.pcd && <span className="px-1.5 py-0.5 bg-bg-tertiary text-text-muted text-[10px] rounded font-semibold">{p.pcd}</span>}
+                          {p.et && <span className="px-1.5 py-0.5 bg-bg-tertiary text-text-muted text-[10px] rounded font-semibold">{p.et}</span>}
+                        </div>
+                      )}
                     </td>
                     {(() => {
                       const catColor = getCategoryColor(p.category, productCategories)
