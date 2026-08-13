@@ -24,6 +24,7 @@ const map = (p) => ({
   color: p.color || '',
   pcd: p.pcd || '',
   et: p.et || '',
+  customAttributes: p.custom_attributes || {},
   isActive: p.is_active,
   // Stock (backend dan)
   totalStock: Number(p.stock_count) || 0,
@@ -64,6 +65,7 @@ export const createProduct = async (productData) => {
       color: productData.color || null,
       pcd: productData.pcd || null,
       et: productData.et || null,
+      custom_attributes: productData.customAttributes || {},
     })
     return map(data)
   } catch (err) {
@@ -96,6 +98,7 @@ export const updateProduct = async (id, productData) => {
     color: productData.color || null,
     pcd: productData.pcd || null,
     et: productData.et || null,
+    custom_attributes: productData.customAttributes || {},
   })
   return map(data)
 }

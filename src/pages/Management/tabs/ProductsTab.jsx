@@ -14,8 +14,11 @@ const ProductsTab = ({ ctx }) => {
     markRead, markAllRead, removeNotification, removeAllNotifications, updateNotification, getUnreadCount,
     employees, addEmployee, updateEmployee, removeEmployee, requestEmployeeDeletion,
     employeeEditLocked, addEmployeeEditHistory,
+    productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, updateProductAttributeDef,
     productCategories, addProductCategory, updateProductCategory, toggleProductCategory,
     sources, addSource, updateSource, toggleSource,
+    customAttrsState, setCustomAttrsState,
+    newAttrLabel, setNewAttrLabel,
     installmentOrganizations, addInstallmentOrg, updateInstallmentOrg, toggleInstallmentOrg, removeInstallmentOrg,
     monthlyTargets, setMonthlyTarget, employeeTargets, setEmployeeTarget,
     notificationSettings: _ns, toggleNotification,
@@ -212,6 +215,71 @@ const ProductsTab = ({ ctx }) => {
                     })}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            {/* QISM 1.5 — Mahsulot xususiyatlari */}
+            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-syne font-bold text-text-primary">Mahsulot xususiyatlari</h3>
+                  <p className="text-xs text-text-muted">Tovarlar uchun maxsus maydonlar (rang, material, o'lchov va h.k.)</p>
+                </div>
+              </div>
+
+              {productAttributeDefs.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead className="bg-bg-tertiary">
+                      <tr>
+                        <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">Xususiyat nomi</th>
+                        <th className="px-4 py-3 text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {productAttributeDefs.map(def => (
+                        <tr key={def.id} className="hover:bg-bg-tertiary/20 transition-colors">
+                          <td className="px-4 py-3 font-semibold text-text-primary">{def.label}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => removeProductAttributeDef(def.id)}
+                              className="p-1 hover:bg-accent-red/10 rounded text-text-secondary hover:text-accent-red"
+                            >
+                              <X size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newAttrLabel}
+                  onChange={e => setNewAttrLabel(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && newAttrLabel.trim()) {
+                      addProductAttributeDef(newAttrLabel.trim())
+                      setNewAttrLabel('')
+                    }
+                  }}
+                  placeholder="Xususiyat nomi (masalan: Rang, Material)"
+                  className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red placeholder-text-muted"
+                />
+                <button
+                  onClick={() => {
+                    if (newAttrLabel.trim()) {
+                      addProductAttributeDef(newAttrLabel.trim())
+                      setNewAttrLabel('')
+                    }
+                  }}
+                  className="flex items-center gap-1 px-3 py-2 bg-accent-red text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-glow-red"
+                >
+                  <Plus size={14} /> Qo'shish
+                </button>
               </div>
             </div>
 
@@ -771,49 +839,25 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
-                          {/* SECTION 1.5: Disk xususiyatlari */}
-                          <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
-                            Disk xususiyatlari
-                          </p>
-
-                          <div className="col-span-2">
-                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">Rang</label>
-                            <select
-                              id="p_color"
-                              defaultValue={editingProduct.color || ''}
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue cursor-pointer"
-                            >
-                              <option value="">— Tanlanmagan —</option>
-                              <option value="Qora">Qora</option>
-                              <option value="Kumush">Kumush</option>
-                              <option value="Bronza">Bronza</option>
-                              <option value="Chrome">Chrome</option>
-                              <option value="Gunmetal">Gunmetal</option>
-                              <option value="Kulrang">Kulrang</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">PCD (bolt naqshi)</label>
-                            <input
-                              type="text"
-                              id="p_pcd"
-                              defaultValue={editingProduct.pcd || ''}
-                              placeholder="masalan: 5×112"
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">ET (offset)</label>
-                            <input
-                              type="text"
-                              id="p_et"
-                              defaultValue={editingProduct.et || ''}
-                              placeholder="masalan: ET35"
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                            />
-                          </div>
+                          {/* SECTION 1.5: Qo'shimcha xususiyatlar (dinamik) */}
+                          {productAttributeDefs.length > 0 && (
+                            <>
+                              <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
+                                Qo'shimcha xususiyatlar
+                              </p>
+                              {productAttributeDefs.map(def => (
+                                <div key={def.id} className="col-span-2">
+                                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{def.label}</label>
+                                  <input
+                                    type="text"
+                                    value={customAttrsState[def.id] || ''}
+                                    onChange={e => setCustomAttrsState(prev => ({ ...prev, [def.id]: e.target.value }))}
+                                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                                  />
+                                </div>
+                              ))}
+                            </>
+                          )}
 
                           {/* SECTION 2: Narxlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
@@ -916,11 +960,10 @@ const ProductsTab = ({ ctx }) => {
                             const installmentMonths = [3, 6, 12].filter(m =>
                               document.getElementById('p_inst_' + m)?.checked
                             )
-                            const color = document.getElementById('p_color')?.value || null
-                            const pcd = document.getElementById('p_pcd')?.value || null
-                            const et = document.getElementById('p_et')?.value || null
 
                             const categoryId = document.getElementById('p_category')?.value || ''
+                            const cleanAttrs = {}
+                            Object.entries(customAttrsState).forEach(([k, v]) => { if (v) cleanAttrs[k] = v })
                             if (editingProduct.isNew === true) {
                               await createProduct({
                                 name, brand, country, size, season,
@@ -928,7 +971,8 @@ const ProductsTab = ({ ctx }) => {
                                 warrantyDays, lowStockThreshold,
                                 category: categoryId,
                                 attribute, carCategory, notes,
-                                installmentMonths, color, pcd, et,
+                                installmentMonths,
+                                customAttributes: cleanAttrs,
                               })
                             } else {
                               await apiUpdateProduct(editingProduct.id, {
@@ -937,7 +981,8 @@ const ProductsTab = ({ ctx }) => {
                                 warrantyDays, lowStockThreshold,
                                 category: categoryId,
                                 attribute, carCategory, notes,
-                                installmentMonths, color, pcd, et,
+                                installmentMonths,
+                                customAttributes: cleanAttrs,
                               })
                             }
                             await refreshProducts()

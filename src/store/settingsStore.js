@@ -33,6 +33,15 @@ export const useSettingsStore = create(
         { id: 'referral',  label: "Do'stdan eshitgan",  isActive: true },
       ],
 
+      // Mahsulot xususiyat ta'riflari (dinamik, foydalanuvchi qo'shadi)
+      productAttributeDefs: [],
+      addProductAttributeDef: (label) =>
+        set(s => ({ productAttributeDefs: [...s.productAttributeDefs, { id: Date.now().toString(), label: label.trim() }] })),
+      removeProductAttributeDef: (id) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.filter(d => d.id !== id) })),
+      updateProductAttributeDef: (id, label) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.map(d => d.id === id ? { ...d, label } : d) })),
+
       // 3. Mahsulot kategoriyalari
       productCategories: [
         { id: 'tire',      label: 'Shina',     turnoverDays: 45, isActive: true },
