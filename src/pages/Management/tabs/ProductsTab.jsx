@@ -14,11 +14,8 @@ const ProductsTab = ({ ctx }) => {
     markRead, markAllRead, removeNotification, removeAllNotifications, updateNotification, getUnreadCount,
     employees, addEmployee, updateEmployee, removeEmployee, requestEmployeeDeletion,
     employeeEditLocked, addEmployeeEditHistory,
-    productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, updateProductAttributeDef,
     productCategories, addProductCategory, updateProductCategory, toggleProductCategory,
     sources, addSource, updateSource, toggleSource,
-    customAttrsState, setCustomAttrsState,
-    newAttrLabel, setNewAttrLabel,
     installmentOrganizations, addInstallmentOrg, updateInstallmentOrg, toggleInstallmentOrg, removeInstallmentOrg,
     monthlyTargets, setMonthlyTarget, employeeTargets, setEmployeeTarget,
     notificationSettings: _ns, toggleNotification,
@@ -774,65 +771,6 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
-                          {/* SECTION 1.5: Qo'shimcha xususiyatlar (dinamik) */}
-                          <div className="col-span-2 border-t border-border pt-4 mt-2">
-                            <div className="flex items-center justify-between mb-3">
-                              <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">
-                                Qo'shimcha xususiyatlar
-                              </p>
-                            </div>
-
-                            {productAttributeDefs.map(def => (
-                              <div key={def.id} className="mb-3">
-                                <div className="flex items-center justify-between mb-1">
-                                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{def.label}</label>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeProductAttributeDef(def.id)}
-                                    className="p-0.5 text-text-muted hover:text-accent-red transition-colors"
-                                    title="Xususiyatni o'chirish"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </div>
-                                <input
-                                  type="text"
-                                  value={customAttrsState[def.id] || ''}
-                                  onChange={e => setCustomAttrsState(prev => ({ ...prev, [def.id]: e.target.value }))}
-                                  className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                                />
-                              </div>
-                            ))}
-
-                            <div className="flex items-center gap-2 mt-2">
-                              <input
-                                type="text"
-                                value={newAttrLabel}
-                                onChange={e => setNewAttrLabel(e.target.value)}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter' && newAttrLabel.trim()) {
-                                    addProductAttributeDef(newAttrLabel.trim())
-                                    setNewAttrLabel('')
-                                  }
-                                }}
-                                placeholder="Yangi xususiyat (Rang, Material...)"
-                                className="flex-1 bg-bg-tertiary border border-dashed border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-red placeholder-text-muted"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (newAttrLabel.trim()) {
-                                    addProductAttributeDef(newAttrLabel.trim())
-                                    setNewAttrLabel('')
-                                  }
-                                }}
-                                className="flex items-center gap-1 px-3 py-2 bg-bg-tertiary border border-border text-text-secondary rounded-xl text-xs font-bold hover:text-text-primary hover:border-accent-red transition-colors"
-                              >
-                                <Plus size={13} /> Qo'shish
-                              </button>
-                            </div>
-                          </div>
-
                           {/* SECTION 2: Narxlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
                             {t('mgmt_section_prices')}
@@ -936,8 +874,6 @@ const ProductsTab = ({ ctx }) => {
                             )
 
                             const categoryId = document.getElementById('p_category')?.value || ''
-                            const cleanAttrs = {}
-                            Object.entries(customAttrsState).forEach(([k, v]) => { if (v) cleanAttrs[k] = v })
                             if (editingProduct.isNew === true) {
                               await createProduct({
                                 name, brand, country, size, season,
@@ -946,7 +882,6 @@ const ProductsTab = ({ ctx }) => {
                                 category: categoryId,
                                 attribute, carCategory, notes,
                                 installmentMonths,
-                                customAttributes: cleanAttrs,
                               })
                             } else {
                               await apiUpdateProduct(editingProduct.id, {
@@ -956,7 +891,6 @@ const ProductsTab = ({ ctx }) => {
                                 category: categoryId,
                                 attribute, carCategory, notes,
                                 installmentMonths,
-                                customAttributes: cleanAttrs,
                               })
                             }
                             await refreshProducts()

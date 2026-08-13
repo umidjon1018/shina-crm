@@ -21,10 +21,6 @@ const map = (p) => ({
   carCategory: p.car_category || '',
   notes: p.notes || '',
   installmentMonths: Array.isArray(p.installment_months) ? p.installment_months : [],
-  color: p.color || '',
-  pcd: p.pcd || '',
-  et: p.et || '',
-  customAttributes: p.custom_attributes || {},
   isActive: p.is_active,
   // Stock (backend dan)
   totalStock: Number(p.stock_count) || 0,
@@ -62,10 +58,6 @@ export const createProduct = async (productData) => {
       attribute: productData.attribute,
       car_category: productData.carCategory,
       notes: productData.notes,
-      color: productData.color || null,
-      pcd: productData.pcd || null,
-      et: productData.et || null,
-      custom_attributes: productData.customAttributes || {},
     })
     return map(data)
   } catch (err) {
@@ -95,10 +87,6 @@ export const updateProduct = async (id, productData) => {
     car_category: productData.carCategory,
     notes: productData.notes,
     installment_months: productData.installmentMonths || null,
-    color: productData.color || null,
-    pcd: productData.pcd || null,
-    et: productData.et || null,
-    custom_attributes: productData.customAttributes || {},
   })
   return map(data)
 }

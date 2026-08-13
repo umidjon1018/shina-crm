@@ -55,14 +55,7 @@ export const Management = () => {
   })
   const [filterType, setFilterType]   = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [_editingProduct, _setEditingProduct] = useState(null)
-  const [customAttrsState, setCustomAttrsState] = useState({})
-  const [newAttrLabel, setNewAttrLabel] = useState('')
-  const setEditingProduct = (product) => {
-    _setEditingProduct(product)
-    if (product?.isModal) setCustomAttrsState(product.customAttributes || {})
-  }
-  const editingProduct = _editingProduct
+  const [editingProduct, setEditingProduct] = useState(null)
   const [deleteProductConfirm, setDeleteProductConfirm] = useState(null)
   const [barcodeInfoModal, setBarcodeInfoModal] = useState(null) // { barcode, item, product }
 
@@ -119,7 +112,6 @@ export const Management = () => {
     discountSmallMax, discountMediumMax, updateSettings,
     usdRate, setUsdRate,
     sources, addSource, updateSource, toggleSource, removeSource,
-    productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, updateProductAttributeDef,
     productCategories, addProductCategory, updateProductCategory, toggleProductCategory, removeProductCategory,
     monthlyTargets, setMonthlyTarget,
     employeeTargets, setEmployeeTarget,
@@ -442,11 +434,8 @@ export const Management = () => {
     markRead, markAllRead, removeNotification, removeAllNotifications, updateNotification, getUnreadCount,
     employees, addEmployee, updateEmployee, removeEmployee, requestEmployeeDeletion,
     employeeEditLocked, addEmployeeEditHistory,
-    productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, updateProductAttributeDef,
     productCategories, addProductCategory, updateProductCategory, toggleProductCategory, removeProductCategory,
     sources, addSource, updateSource, toggleSource, removeSource,
-    customAttrsState, setCustomAttrsState,
-    newAttrLabel, setNewAttrLabel,
     installmentOrganizations, addInstallmentOrg, updateInstallmentOrg, toggleInstallmentOrg, removeInstallmentOrg,
     monthlyTargets, setMonthlyTarget, employeeTargets, setEmployeeTarget,
     toggleNotification,
