@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
+import { useSettingsStore } from '../../../store/settingsStore'
 import { Badge, StatCard, Th, Td, SortIcon, CATEGORIES, SEASONS, SEASON_COLORS, stockStatus, STATUS_CONFIG, isPrivileged } from '../whHelpers.jsx'
 import ProductModal from '../components/ProductModal'
 
@@ -12,7 +13,18 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const som = t('unit_som')
   const pcs = t('unit_pcs')
   const { hasPermission } = useAuthStore()
+  const { productAttributeDefs } = useSettingsStore()
   const [search, setSearch] = useState('')
+  const [expandedProducts, setExpandedProducts] = useState(new Set())
+
+  const toggleExpand = (productId) => {
+    setExpandedProducts(prev => {
+      const next = new Set(prev)
+      if (next.has(productId)) next.delete(productId)
+      else next.add(productId)
+      return next
+    })
+  }
   const [category, setCategory] = useState('all')
   const [season, setSeason] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -162,9 +174,18 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                 }, 0)
                 const lastBatch = productBatches[productBatches.length - 1]
                 return (
-                  <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
+                  <React.Fragment key={p.id}>
+                  <tr
+                    className="hover:bg-bg-tertiary/50 transition-colors cursor-pointer"
+                    onClick={() => toggleExpand(p.id)}
+                  >
                     <td className="px-4 py-3.5">
-                      <p className="font-medium text-text-primary text-sm">{p.name}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-text-muted flex-shrink-0">
+                          {expandedProducts.has(p.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                        </span>
+                        <p className="font-medium text-text-primary text-sm">{p.name}</p>
+                      </div>
                     </td>
                     {(() => {
                       const catColor = getCategoryColor(p.category, productCategories)
@@ -219,7 +240,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <button
-                        onClick={() => setSelectedProduct(p)}
+                        onClick={e => { e.stopPropagation(); setSelectedProduct(p) }}
                         className="p-2 rounded-lg hover:bg-bg-tertiary text-text-muted hover:text-accent-blue transition-colors"
                         title={t('wh_th_detail')}
                       >
@@ -227,6 +248,82 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       </button>
                     </td>
                   </tr>
+
+                  {expandedProducts.has(p.id) && (() => {
+                    const inStockItems = items.filter(i =>
+                      i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)
+                    )
+                    const colCount = canSeePurchasePrice ? 12 : 11
+                    return (
+                      <tr>
+                        <td colSpan={colCount} className="px-0 py-0 bg-bg-tertiary/30 border-b border-border">
+                          <div className="px-8 py-3">
+                            {inStockItems.length === 0 ? (
+                              <p className="text-xs text-text-muted py-2">Omborda birlik yo'q</p>
+                            ) : (
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="border-b border-border/50">
+                                    <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Barkod</th>
+                                    <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Partiya</th>
+                                    <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Xususiyatlar</th>
+                                    <th className="text-left py-2 text-text-muted font-bold uppercase tracking-wider">Holat</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/30">
+                                  {inStockItems.map(item => {
+                                    const batch = batches.find(b => b.id === item.batchId)
+                                    const attrs = batch?.attributes || {}
+                                    const attrEntries = Object.entries(attrs).filter(([, v]) => v)
+                                    const barcodeStatusCls = {
+                                      active: 'bg-accent-green/10 text-accent-green',
+                                      printed: 'bg-accent-blue/10 text-accent-blue',
+                                      downloaded: 'bg-accent-blue/10 text-accent-blue',
+                                    }[item.barcodeStatus] || 'bg-bg-tertiary text-text-muted'
+                                    const barcodeStatusLabel = { active: 'Faol', printed: 'Chop', downloaded: 'Yuklangan' }[item.barcodeStatus] || 'Tayinlanmagan'
+                                    return (
+                                      <tr key={item.id} className="hover:bg-bg-tertiary/20">
+                                        <td className="py-2 pr-6">
+                                          {item.barcode
+                                            ? <span className="font-mono font-medium text-text-primary">{item.barcode}</span>
+                                            : <span className="text-text-muted italic">— barkod yo'q —</span>}
+                                        </td>
+                                        <td className="py-2 pr-6 text-text-secondary">
+                                          {batch?.batchNumber || '—'}
+                                        </td>
+                                        <td className="py-2 pr-6">
+                                          {attrEntries.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1">
+                                              {attrEntries.map(([defId, val]) => {
+                                                const def = (productAttributeDefs || []).find(d => d.id === defId)
+                                                return (
+                                                  <span key={defId} className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md">
+                                                    <Tag size={9} />
+                                                    {def ? `${def.label}: ` : ''}{val}
+                                                  </span>
+                                                )
+                                              })}
+                                            </div>
+                                          ) : <span className="text-text-muted">—</span>}
+                                        </td>
+                                        <td className="py-2">
+                                          <span className={`px-2 py-0.5 rounded-md font-medium ${barcodeStatusCls}`}>
+                                            {barcodeStatusLabel}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
+                            )}
+                            <p className="text-[10px] text-text-muted mt-2">{inStockItems.length} ta birlik • omborda</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })()}
+                  </React.Fragment>
                 )
               })}
             </tbody>
