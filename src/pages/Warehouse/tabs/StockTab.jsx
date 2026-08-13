@@ -28,7 +28,15 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [category, setCategory] = useState('all')
   const [season, setSeason] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [attrFilters, setAttrFilters] = useState({}) // { defId: selectedValue | 'all' }
   const [selectedProduct, setSelectedProduct] = useState(null)
+
+  const setAttrFilter = (defId, value) => {
+    setAttrFilters(prev => {
+      if (value === 'all') { const next = { ...prev }; delete next[defId]; return next }
+      return { ...prev, [defId]: value }
+    })
+  }
 
   const [sortField, setSortField] = useState(null)
   const [sortDir, setSortDir] = useState('asc')
@@ -56,14 +64,26 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     }
   }
 
+  const activeAttrFilters = Object.entries(attrFilters)
+
   const filtered = shopProducts.filter(p => {
     const q = search.toLowerCase()
-    return (
-      (p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q)) &&
-      (category === 'all' || p.category === category) &&
-      (season === 'all' || p.season === season) &&
-      (statusFilter === 'all' || shopStockStatus(p) === statusFilter)
-    )
+    if (!(p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q))) return false
+    if (category !== 'all' && p.category !== category) return false
+    if (season !== 'all' && p.season !== season) return false
+    if (statusFilter !== 'all' && shopStockStatus(p) !== statusFilter) return false
+    // Xususiyat filtrlari: shu product ning ombordagi batchlarida mos qiymat bormi?
+    if (activeAttrFilters.length > 0) {
+      const productBatchIds = items
+        .filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
+        .map(i => i.batchId)
+      const productBatches = batches.filter(b => productBatchIds.includes(b.id))
+      for (const [defId, val] of activeAttrFilters) {
+        const hasMatch = productBatches.some(b => b.attributes?.[defId] === val)
+        if (!hasMatch) return false
+      }
+    }
+    return true
   })
 
   const sorted = useMemo(() => {
@@ -109,6 +129,17 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
           <option value="low">{t('stock_low')}</option>
           <option value="empty">{t('stock_empty')}</option>
         </select>
+        {(productAttributeDefs || []).map(def => (
+          <select
+            key={def.id}
+            value={attrFilters[def.id] || 'all'}
+            onChange={e => setAttrFilter(def.id, e.target.value)}
+            className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+          >
+            <option value="all">{def.label}: Barchasi</option>
+            {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        ))}
       </div>
 
       {/* Table */}
