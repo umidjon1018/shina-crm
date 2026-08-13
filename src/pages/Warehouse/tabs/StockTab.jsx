@@ -266,7 +266,11 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                   <tr className="border-b border-border/50">
                                     <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Barkod</th>
                                     <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Partiya</th>
-                                    <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Xususiyatlar</th>
+                                    {(productAttributeDefs || []).map(def => (
+                                      <th key={def.id} className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">
+                                        {def.label}
+                                      </th>
+                                    ))}
                                     <th className="text-left py-2 text-text-muted font-bold uppercase tracking-wider">Holat</th>
                                   </tr>
                                 </thead>
@@ -274,7 +278,6 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                   {inStockItems.map(item => {
                                     const batch = batches.find(b => b.id === item.batchId)
                                     const attrs = batch?.attributes || {}
-                                    const attrEntries = Object.entries(attrs).filter(([, v]) => v)
                                     const barcodeStatusCls = {
                                       active: 'bg-accent-green/10 text-accent-green',
                                       printed: 'bg-accent-blue/10 text-accent-blue',
@@ -291,21 +294,16 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                         <td className="py-2 pr-6 text-text-secondary">
                                           {batch?.batchNumber || '—'}
                                         </td>
-                                        <td className="py-2 pr-6">
-                                          {attrEntries.length > 0 ? (
-                                            <div className="flex flex-wrap gap-1">
-                                              {attrEntries.map(([defId, val]) => {
-                                                const def = (productAttributeDefs || []).find(d => d.id === defId)
-                                                return (
-                                                  <span key={defId} className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md">
-                                                    <Tag size={9} />
-                                                    {def ? `${def.label}: ` : ''}{val}
-                                                  </span>
-                                                )
-                                              })}
-                                            </div>
-                                          ) : <span className="text-text-muted">—</span>}
-                                        </td>
+                                        {(productAttributeDefs || []).map(def => {
+                                          const val = attrs[def.id]
+                                          return (
+                                            <td key={def.id} className="py-2 pr-6">
+                                              {val
+                                                ? <span className="px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md font-medium">{val}</span>
+                                                : <span className="text-text-muted">—</span>}
+                                            </td>
+                                          )
+                                        })}
                                         <td className="py-2">
                                           <span className={`px-2 py-0.5 rounded-md font-medium ${barcodeStatusCls}`}>
                                             {barcodeStatusLabel}
