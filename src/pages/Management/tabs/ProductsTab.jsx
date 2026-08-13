@@ -218,71 +218,6 @@ const ProductsTab = ({ ctx }) => {
               </div>
             </div>
 
-            {/* QISM 1.5 — Mahsulot xususiyatlari */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-syne font-bold text-text-primary">Mahsulot xususiyatlari</h3>
-                  <p className="text-xs text-text-muted">Tovarlar uchun maxsus maydonlar (rang, material, o'lchov va h.k.)</p>
-                </div>
-              </div>
-
-              {productAttributeDefs.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm border-collapse">
-                    <thead className="bg-bg-tertiary">
-                      <tr>
-                        <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">Xususiyat nomi</th>
-                        <th className="px-4 py-3 text-right"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {productAttributeDefs.map(def => (
-                        <tr key={def.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                          <td className="px-4 py-3 font-semibold text-text-primary">{def.label}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => removeProductAttributeDef(def.id)}
-                              className="p-1 hover:bg-accent-red/10 rounded text-text-secondary hover:text-accent-red"
-                            >
-                              <X size={14} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newAttrLabel}
-                  onChange={e => setNewAttrLabel(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && newAttrLabel.trim()) {
-                      addProductAttributeDef(newAttrLabel.trim())
-                      setNewAttrLabel('')
-                    }
-                  }}
-                  placeholder="Xususiyat nomi (masalan: Rang, Material)"
-                  className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red placeholder-text-muted"
-                />
-                <button
-                  onClick={() => {
-                    if (newAttrLabel.trim()) {
-                      addProductAttributeDef(newAttrLabel.trim())
-                      setNewAttrLabel('')
-                    }
-                  }}
-                  className="flex items-center gap-1 px-3 py-2 bg-accent-red text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-glow-red"
-                >
-                  <Plus size={14} /> Qo'shish
-                </button>
-              </div>
-            </div>
-
             {/* QISM 2 — Barkodlar bloki */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-6 flex flex-col" style={{minHeight: '520px'}}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -840,24 +775,63 @@ const ProductsTab = ({ ctx }) => {
                           </div>
 
                           {/* SECTION 1.5: Qo'shimcha xususiyatlar (dinamik) */}
-                          {productAttributeDefs.length > 0 && (
-                            <>
-                              <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
+                          <div className="col-span-2 border-t border-border pt-4 mt-2">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">
                                 Qo'shimcha xususiyatlar
                               </p>
-                              {productAttributeDefs.map(def => (
-                                <div key={def.id} className="col-span-2">
-                                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{def.label}</label>
-                                  <input
-                                    type="text"
-                                    value={customAttrsState[def.id] || ''}
-                                    onChange={e => setCustomAttrsState(prev => ({ ...prev, [def.id]: e.target.value }))}
-                                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                                  />
+                            </div>
+
+                            {productAttributeDefs.map(def => (
+                              <div key={def.id} className="mb-3">
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{def.label}</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeProductAttributeDef(def.id)}
+                                    className="p-0.5 text-text-muted hover:text-accent-red transition-colors"
+                                    title="Xususiyatni o'chirish"
+                                  >
+                                    <X size={12} />
+                                  </button>
                                 </div>
-                              ))}
-                            </>
-                          )}
+                                <input
+                                  type="text"
+                                  value={customAttrsState[def.id] || ''}
+                                  onChange={e => setCustomAttrsState(prev => ({ ...prev, [def.id]: e.target.value }))}
+                                  className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                                />
+                              </div>
+                            ))}
+
+                            <div className="flex items-center gap-2 mt-2">
+                              <input
+                                type="text"
+                                value={newAttrLabel}
+                                onChange={e => setNewAttrLabel(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && newAttrLabel.trim()) {
+                                    addProductAttributeDef(newAttrLabel.trim())
+                                    setNewAttrLabel('')
+                                  }
+                                }}
+                                placeholder="Yangi xususiyat (Rang, Material...)"
+                                className="flex-1 bg-bg-tertiary border border-dashed border-border rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-red placeholder-text-muted"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (newAttrLabel.trim()) {
+                                    addProductAttributeDef(newAttrLabel.trim())
+                                    setNewAttrLabel('')
+                                  }
+                                }}
+                                className="flex items-center gap-1 px-3 py-2 bg-bg-tertiary border border-border text-text-secondary rounded-xl text-xs font-bold hover:text-text-primary hover:border-accent-red transition-colors"
+                              >
+                                <Plus size={13} /> Qo'shish
+                              </button>
+                            </div>
+                          </div>
 
                           {/* SECTION 2: Narxlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
