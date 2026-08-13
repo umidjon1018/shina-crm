@@ -28,6 +28,7 @@ const mapBatch = (b) => ({
   promoDiscount: b.promo_discount ? Number(b.promo_discount) : null,
   promoNote: b.promo_note || null,
   promoPassToCustomer: b.promo_pass_to_customer ?? false,
+  attributes: b.attributes || {},
   receivedAt: b.received_at || b.created_at || '',
   receivedByName: b.received_by_name || '',
   payments: (b.payments || []).map(p => ({
@@ -63,6 +64,7 @@ export const addBatch = async (batchData) => {
     notes: batchData.notes,
     promo_discount: batchData.promoDiscount,
     promo_note: batchData.promoNote,
+    attributes: batchData.attributes || {},
   })
   return mapBatch(data)
 }

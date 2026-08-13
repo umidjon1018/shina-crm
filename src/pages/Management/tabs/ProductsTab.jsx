@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react'
@@ -85,7 +85,11 @@ const ProductsTab = ({ ctx }) => {
     updateSettings,
     productSearch, setProductSearch,
     productCatFilter, setProductCatFilter,
+    productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, addAttributeValue, removeAttributeValue,
   } = ctx
+
+  const [newAttrLabel, setNewAttrLabel] = useState('')
+  const [attrValueInputs, setAttrValueInputs] = useState({})
 
   return (
           <motion.div key="products" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
@@ -213,6 +217,111 @@ const ProductsTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* QISM 1.5 — Xususiyatlar shabloni bloki */}
+            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-syne font-bold text-text-primary">Xususiyatlar</h3>
+                  <p className="text-xs text-text-muted">Kirim qilishda batchga beriladigan xususiyat shablonlari (masalan: Rang, Material)</p>
+                </div>
+              </div>
+
+              {/* Yangi xususiyat qo'shish */}
+              <div className="flex items-center gap-2">
+                <input
+                  value={newAttrLabel}
+                  onChange={e => setNewAttrLabel(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && newAttrLabel.trim()) {
+                      addProductAttributeDef(newAttrLabel.trim())
+                      setNewAttrLabel('')
+                    }
+                  }}
+                  placeholder="Yangi xususiyat nomi (masalan: Rang)"
+                  className="flex-1 px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue"
+                />
+                <button
+                  onClick={() => {
+                    if (!newAttrLabel.trim()) return
+                    addProductAttributeDef(newAttrLabel.trim())
+                    setNewAttrLabel('')
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-accent-red text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-glow-red"
+                >
+                  <Plus size={14} /> Qo'shish
+                </button>
+              </div>
+
+              {/* Xususiyatlar ro'yxati */}
+              {(productAttributeDefs || []).length === 0 ? (
+                <p className="text-sm text-text-muted text-center py-4">Hali xususiyat qo'shilmagan</p>
+              ) : (
+                <div className="space-y-3">
+                  {(productAttributeDefs || []).map(def => (
+                    <div key={def.id} className="border border-border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-text-primary text-sm">{def.label}</span>
+                        <button
+                          onClick={() => removeProductAttributeDef(def.id)}
+                          className="p-1 hover:bg-accent-red/10 rounded text-text-muted hover:text-accent-red transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+
+                      {/* Qiymatlar */}
+                      <div className="flex flex-wrap gap-2">
+                        {def.values.map(val => (
+                          <span
+                            key={val}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary"
+                          >
+                            {val}
+                            <button
+                              onClick={() => removeAttributeValue(def.id, val)}
+                              className="text-text-muted hover:text-accent-red transition-colors ml-0.5"
+                            >
+                              <X size={11} />
+                            </button>
+                          </span>
+                        ))}
+                        {/* Yangi qiymat input */}
+                        <div className="inline-flex items-center gap-1">
+                          <input
+                            value={attrValueInputs[def.id] || ''}
+                            onChange={e => setAttrValueInputs(prev => ({ ...prev, [def.id]: e.target.value }))}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                const val = (attrValueInputs[def.id] || '').trim()
+                                if (val && !def.values.includes(val)) {
+                                  addAttributeValue(def.id, val)
+                                  setAttrValueInputs(prev => ({ ...prev, [def.id]: '' }))
+                                }
+                              }
+                            }}
+                            placeholder="+ qiymat"
+                            className="w-24 px-2 py-1 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue"
+                          />
+                          <button
+                            onClick={() => {
+                              const val = (attrValueInputs[def.id] || '').trim()
+                              if (val && !def.values.includes(val)) {
+                                addAttributeValue(def.id, val)
+                                setAttrValueInputs(prev => ({ ...prev, [def.id]: '' }))
+                              }
+                            }}
+                            className="p-1 hover:bg-accent-green/10 rounded text-text-muted hover:text-accent-green transition-colors"
+                          >
+                            <CheckCircle size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* QISM 2 — Barkodlar bloki */}

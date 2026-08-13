@@ -122,6 +122,18 @@ export const useSettingsStore = create(
       removeCustomRole: (id) =>
         set(s => ({ customRoles: s.customRoles.filter(r => r.id !== id) })),
 
+      // Tovar xususiyat shablonlari (batch darajasida qo'llaniladi)
+      // [{ id: string, label: string, values: string[] }]
+      productAttributeDefs: [],
+      addProductAttributeDef: (label) =>
+        set(s => ({ productAttributeDefs: [...s.productAttributeDefs, { id: Date.now().toString(), label, values: [] }] })),
+      removeProductAttributeDef: (id) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.filter(d => d.id !== id) })),
+      addAttributeValue: (defId, value) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.map(d => d.id === defId ? { ...d, values: [...d.values, value] } : d) })),
+      removeAttributeValue: (defId, value) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.map(d => d.id === defId ? { ...d, values: d.values.filter(v => v !== value) } : d) })),
+
       // 6. Xodimlar ro'yxati — backend dan yuklanadi
       employees: [],
       // Har bir xodim:

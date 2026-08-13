@@ -28,7 +28,7 @@ const Income = () => {
   const { t } = useTranslation()
   const som = t('unit_som')
   const { user } = useAuthStore()
-  const { productCategories, usdRate } = useSettingsStore()
+  const { productCategories, usdRate, productAttributeDefs } = useSettingsStore()
   const { bump } = useDataStore()
   const { selectedShopId } = useShopStore()
   const isPrivileged = user?.role === 'admin' || user?.role === 'manager'
@@ -60,7 +60,7 @@ const Income = () => {
     productId: '', isNewProduct: false, newProductName: '',
     supplierId: '', quantity: 1, purchasePriceUSD: '',
     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
-    dueDate: '', promoDiscount: '', promoNote: '', notes: ''
+    dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
   })
   const [editingBatch, setEditingBatch] = useState(null)
   const [ebPaidDate, setEbPaidDate] = useState('')
@@ -873,6 +873,52 @@ const Income = () => {
                 </div>
               </div>
 
+              {/* Xususiyatlar */}
+              {(productAttributeDefs || []).length > 0 && (
+                <div className="mt-4 p-4 bg-bg-tertiary border border-border rounded-2xl space-y-3">
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">Xususiyatlar</p>
+                  <div className="space-y-2">
+                    {(productAttributeDefs || []).map(def => {
+                      const checked = def.id in newBatchForm.attributes
+                      return (
+                        <div key={def.id} className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            id={`attr-${def.id}`}
+                            checked={checked}
+                            onChange={e => {
+                              if (e.target.checked) {
+                                setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: def.values[0] || '' } }))
+                              } else {
+                                setNewBatchForm(f => {
+                                  const a = { ...f.attributes }
+                                  delete a[def.id]
+                                  return { ...f, attributes: a }
+                                })
+                              }
+                            }}
+                            className="w-4 h-4 accent-accent-red cursor-pointer"
+                          />
+                          <label htmlFor={`attr-${def.id}`} className="text-sm text-text-secondary font-medium cursor-pointer min-w-[80px]">
+                            {def.label}
+                          </label>
+                          {checked && (
+                            <select
+                              value={newBatchForm.attributes[def.id] || ''}
+                              onChange={e => setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: e.target.value } }))}
+                              className="flex-1 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                            >
+                              {def.values.length === 0 && <option value="">— Qiymat yo'q —</option>}
+                              {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                            </select>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Preview */}
               {newBatchForm.purchasePriceUSD && newBatchForm.entryUsdRate && newBatchForm.quantity && (
                 <div className="bg-bg-tertiary border border-border rounded-2xl p-4 mb-6 grid grid-cols-3 gap-4 text-center">
@@ -934,6 +980,7 @@ const Income = () => {
                     notes: notes || null,
                     promoDiscount: promoDiscount || null,
                     promoNote: promoNote || null,
+                    attributes: newBatchForm.attributes || {},
                   })
                   setBatches(prev => [newBatch, ...prev])
                   bump()
@@ -942,7 +989,7 @@ const Income = () => {
                     productId: '', isNewProduct: false, newProductName: '',
                     supplierId: '', quantity: 1, purchasePriceUSD: '',
                     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
-                    dueDate: '', promoDiscount: '', promoNote: '', notes: ''
+                    dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
                   })
                 }}
                 disabled={(!newBatchForm.productId && !newBatchForm.newProductName) || !newBatchForm.purchasePriceUSD || !newBatchForm.entryUsdRate}
