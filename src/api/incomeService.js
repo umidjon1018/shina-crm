@@ -157,6 +157,11 @@ export const deleteSupplier = async (id) => {
   return data
 }
 
+export const updateBatchAttributes = async (batchId, attributes) => {
+  const { data } = await api.patch(`/api/batches/${batchId}/attributes`, { attributes })
+  return data
+}
+
 export const togglePromoPassToCustomer = async (batchId) => {
   const { data } = await api.patch(`/api/batches/${batchId}/promo-pass`)
   return data

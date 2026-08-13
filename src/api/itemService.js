@@ -19,6 +19,7 @@ const mapItem = (i) => ({
   batchNumber: i.batch_number || '',
   purchasePrice: Number(i.purchase_price) || 0,
   purchasePriceUSD: Number(i.purchase_price_usd) || 0,
+  attributes: i.attributes || {},
 })
 
 export const getItems = async (params = {}) => {
@@ -47,6 +48,11 @@ export const updateBarcodeStatus = async (itemIds, statusOrObj) => {
     if (statusOrObj.status !== undefined) payload.status = statusOrObj.status
   }
   await api.patch('/api/items/barcode-status', payload)
+}
+
+export const updateItemAttributes = async (itemId, attributes) => {
+  const { data } = await api.patch(`/api/items/${itemId}/attributes`, { attributes })
+  return data
 }
 
 export const findItemByBarcode = async (barcode) => {

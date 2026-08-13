@@ -7,6 +7,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { Badge, StatCard, Th, Td, SortIcon, CATEGORIES, SEASONS, SEASON_COLORS, stockStatus, STATUS_CONFIG, isPrivileged } from '../whHelpers.jsx'
 import ProductModal from '../components/ProductModal'
+import { updateItemAttributes } from '../../../api/itemService'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -16,6 +17,12 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const { productAttributeDefs } = useSettingsStore()
   const [search, setSearch] = useState('')
   const [expandedProducts, setExpandedProducts] = useState(new Set())
+  const [pendingAttrs, setPendingAttrs] = useState({})     // { itemId: { defId: value|'__none__' } }
+  const [localItemAttrs, setLocalItemAttrs] = useState({}) // { itemId: attributes } — saved locally
+  const [savingItemId, setSavingItemId] = useState(null)
+  const [attrDismissed, setAttrDismissed] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('attr_warn_dismissed') || '{}') } catch { return {} }
+  })
 
   const toggleExpand = (productId) => {
     setExpandedProducts(prev => {
@@ -45,6 +52,68 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const shopBatchIds = useMemo(() => new Set(batches.map(b => b.id)), [batches])
   // Only products that have at least 1 batch in this shop
   const shopProducts = useMemo(() => products.filter(p => batches.some(b => b.productId === p.id)), [products, batches])
+
+  const TWENTY_FOUR_H = 24 * 60 * 60 * 1000
+
+  const dismissAttrWarning = (productId) => {
+    const pid = String(productId)
+    const updated = { ...attrDismissed, [pid]: Date.now() }
+    setAttrDismissed(updated)
+    localStorage.setItem('attr_warn_dismissed', JSON.stringify(updated))
+  }
+
+  // Item attrs: localItemAttrs overrides prop data (after local save)
+  const getItemAttrs = (item) => localItemAttrs[item?.id] ?? item?.attributes ?? {}
+
+  // Barcha in-stock itemlar barcha def kalitlariga ega (value yoki null) — to'liq hal qilingan
+  const productFullyResolved = (productId) => {
+    if (!productAttributeDefs?.length) return true
+    const inStock = items.filter(i => i.productId === productId && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
+    if (!inStock.length) return true
+    return inStock.every(i => productAttributeDefs.every(def => def.id in getItemAttrs(i)))
+  }
+
+  const productNeedsAttrs = (productId) => {
+    if (!productAttributeDefs?.length) return false
+    const inStock = items.filter(i => i.productId === productId && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
+    if (!inStock.length) return false
+
+    // To'liq hal qilingan — sariq butunlay yo'q
+    if (productFullyResolved(productId)) return false
+
+    // Hech biri belgilanmagan — har doim sariq
+    const anyResolved = inStock.some(i => Object.keys(getItemAttrs(i)).length > 0)
+    if (!anyResolved) return true
+
+    // Qisman belgilangan — dismiss vaqtini tekshir
+    const dismissedAt = attrDismissed[String(productId)]
+    if (!dismissedAt) return true // hech qachon dismiss qilinmagan
+    return Date.now() - dismissedAt >= TWENTY_FOUR_H // 24 soat o'tgan bo'lsa qaytsin
+  }
+
+  const handleSaveAttrs = async (item) => {
+    const itemId = item.id
+    const pending = pendingAttrs[itemId]
+    if (!pending || Object.keys(pending).length === 0) return
+    setSavingItemId(itemId)
+    try {
+      const existingAttrs = getItemAttrs(item)
+      const newAttrs = { ...existingAttrs }
+      for (const [defId, val] of Object.entries(pending)) {
+        if (val === '') continue
+        newAttrs[defId] = val === '__none__' ? null : val
+      }
+      await updateItemAttributes(itemId, newAttrs)
+      setLocalItemAttrs(prev => ({ ...prev, [itemId]: newAttrs }))
+      setPendingAttrs(prev => { const n = { ...prev }; delete n[itemId]; return n })
+      // Dismiss: agar to'liq hal qilinmagan bo'lsa, 24s ogohlantirish boshlanadi
+      dismissAttrWarning(item.productId)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setSavingItemId(null)
+    }
+  }
   const shopItemCount = (productId, status) =>
     items.filter(i => i.productId === productId && i.status === status && shopBatchIds.has(i.batchId)).length
   const shopStock = (productId) => shopItemCount(productId, 'in_stock')
@@ -112,33 +181,52 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       </div>
 
       {/* Filters */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-48">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_search_ph')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-wrap gap-4 items-end">
+        {/* Qidiruv */}
+        <div className="flex flex-col gap-1 flex-1 min-w-48">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('wh_search_ph') || 'Tovar izlash'}</span>
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_search_ph')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
+          </div>
         </div>
-        <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
-          {CATEGORIES.map(c => <option key={c} value={c}>{t('cat_' + c)}</option>)}
-        </select>
-        <select value={season} onChange={e => setSeason(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
-          {SEASONS.map(s => <option key={s} value={s}>{t('season_' + s)}</option>)}
-        </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
-          <option value="all">{t('wh_all_status')}</option>
-          <option value="ok">{t('stock_ok')}</option>
-          <option value="low">{t('stock_low')}</option>
-          <option value="empty">{t('stock_empty')}</option>
-        </select>
-        {(productAttributeDefs || []).map(def => (
-          <select
-            key={def.id}
-            value={attrFilters[def.id] || 'all'}
-            onChange={e => setAttrFilter(def.id, e.target.value)}
-            className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-          >
-            <option value="all">{def.label}: Barchasi</option>
-            {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+        {/* Tovar turi */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_category')}</span>
+          <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+            {CATEGORIES.map(c => <option key={c} value={c}>{t('cat_' + c)}</option>)}
           </select>
+        </div>
+        {/* Mavsum */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('wh_th_season')}</span>
+          <select value={season} onChange={e => setSeason(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+            {SEASONS.map(s => <option key={s} value={s}>{t('season_' + s)}</option>)}
+          </select>
+        </div>
+        {/* Holat */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_status')}</span>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+            <option value="all">{t('wh_all_status')}</option>
+            <option value="ok">{t('stock_ok')}</option>
+            <option value="low">{t('stock_low')}</option>
+            <option value="empty">{t('stock_empty')}</option>
+          </select>
+        </div>
+        {/* Xususiyat filtrlari — dinamik */}
+        {(productAttributeDefs || []).map(def => (
+          <div key={def.id} className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
+            <select
+              value={attrFilters[def.id] || 'all'}
+              onChange={e => setAttrFilter(def.id, e.target.value)}
+              className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+            >
+              <option value="all">Barchasi</option>
+              {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
         ))}
       </div>
 
@@ -204,10 +292,11 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                   return (b?.purchasePrice || 0) > max ? (b?.purchasePrice || 0) : max
                 }, 0)
                 const lastBatch = productBatches[productBatches.length - 1]
+                const needsAttrs = productNeedsAttrs(p.id)
                 return (
                   <React.Fragment key={p.id}>
                   <tr
-                    className="hover:bg-bg-tertiary/50 transition-colors cursor-pointer"
+                    className={`transition-colors cursor-pointer ${needsAttrs ? 'bg-amber-400/20 hover:bg-amber-400/30' : 'hover:bg-bg-tertiary/50'}`}
                     onClick={() => toggleExpand(p.id)}
                   >
                     <td className="px-4 py-3.5">
@@ -215,6 +304,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         <span className="text-text-muted flex-shrink-0">
                           {expandedProducts.has(p.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         </span>
+                        {needsAttrs && <span title="Xususiyat belgilanmagan" className="text-amber-500 flex-shrink-0"><AlertTriangle size={13} /></span>}
                         <p className="font-medium text-text-primary text-sm">{p.name}</p>
                       </div>
                     </td>
@@ -285,9 +375,10 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)
                     )
                     const colCount = canSeePurchasePrice ? 12 : 11
+                    const hasDefs = productAttributeDefs?.length > 0
                     return (
                       <tr>
-                        <td colSpan={colCount} className="px-0 py-0 bg-bg-tertiary/30 border-b border-border">
+                        <td colSpan={colCount} className={`px-0 py-0 border-b border-border ${needsAttrs ? 'bg-amber-400/10' : 'bg-bg-tertiary/30'}`}>
                           <div className="px-8 py-3">
                             {inStockItems.length === 0 ? (
                               <p className="text-xs text-text-muted py-2">Omborda birlik yo'q</p>
@@ -298,17 +389,21 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                     <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Barkod</th>
                                     <th className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">Partiya</th>
                                     {(productAttributeDefs || []).map(def => (
-                                      <th key={def.id} className="text-left py-2 pr-6 text-text-muted font-bold uppercase tracking-wider">
+                                      <th key={def.id} className="text-left py-2 pr-4 text-text-muted font-bold uppercase tracking-wider">
                                         {def.label}
                                       </th>
                                     ))}
                                     <th className="text-left py-2 text-text-muted font-bold uppercase tracking-wider">Holat</th>
+                                    {hasDefs && <th className="py-2 w-20"></th>}
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/30">
                                   {inStockItems.map(item => {
                                     const batch = batches.find(b => b.id === item.batchId)
-                                    const attrs = batch?.attributes || {}
+                                    const itemId = item.id
+                                    const attrs = getItemAttrs(item)
+                                    const hasPending = pendingAttrs[itemId] &&
+                                      Object.values(pendingAttrs[itemId]).some(v => v !== '')
                                     const barcodeStatusCls = {
                                       active: 'bg-accent-green/10 text-accent-green',
                                       printed: 'bg-accent-blue/10 text-accent-blue',
@@ -326,12 +421,34 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                           {batch?.batchNumber || '—'}
                                         </td>
                                         {(productAttributeDefs || []).map(def => {
+                                          const isKeySet = def.id in attrs
                                           const val = attrs[def.id]
+                                          const hasPendingDef = pendingAttrs[itemId] && def.id in pendingAttrs[itemId]
+                                          if (isKeySet && !hasPendingDef) {
+                                            return (
+                                              <td key={def.id} className="py-2 pr-4">
+                                                {val
+                                                  ? <span className="px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md font-medium">{val}</span>
+                                                  : <span className="text-text-muted">—</span>}
+                                              </td>
+                                            )
+                                          }
+                                          const selectVal = hasPendingDef ? (pendingAttrs[itemId][def.id] ?? '__none__') : ''
                                           return (
-                                            <td key={def.id} className="py-2 pr-6">
-                                              {val
-                                                ? <span className="px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md font-medium">{val}</span>
-                                                : <span className="text-text-muted">—</span>}
+                                            <td key={def.id} className="py-2 pr-4">
+                                              <select
+                                                value={selectVal}
+                                                onClick={e => e.stopPropagation()}
+                                                onChange={e => setPendingAttrs(prev => ({
+                                                  ...prev,
+                                                  [itemId]: { ...(prev[itemId] || {}), [def.id]: e.target.value }
+                                                }))}
+                                                className="text-xs px-2 py-1 bg-bg-tertiary border border-amber-400 rounded-lg text-text-primary focus:outline-none focus:border-accent-blue"
+                                              >
+                                                <option value="">— tanlang —</option>
+                                                {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                                                <option value="__none__">Xususiyatsiz</option>
+                                              </select>
                                             </td>
                                           )
                                         })}
@@ -340,6 +457,19 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                             {barcodeStatusLabel}
                                           </span>
                                         </td>
+                                        {hasDefs && (
+                                          <td className="py-2 pl-2">
+                                            {hasPending && (
+                                              <button
+                                                onClick={e => { e.stopPropagation(); handleSaveAttrs(item) }}
+                                                disabled={savingItemId === itemId}
+                                                className="px-3 py-1 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-accent-blue/80 transition-colors disabled:opacity-50"
+                                              >
+                                                {savingItemId === itemId ? '...' : 'Saqlash'}
+                                              </button>
+                                            )}
+                                          </td>
+                                        )}
                                       </tr>
                                     )
                                   })}
