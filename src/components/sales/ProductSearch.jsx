@@ -216,7 +216,7 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
               <tbody className="divide-y divide-border">
                 {results.map(p => {
                   const available = MOCK_ITEMS.filter(i =>
-                    i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null
+                    i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i)
                   )
                   const inCartCount = allowSold ? 0 : (cartItems || []).filter(c => c.item.productId === p.id).length
                   const canAdd = allowSold ? available.length > 0 : available.length > inCartCount
