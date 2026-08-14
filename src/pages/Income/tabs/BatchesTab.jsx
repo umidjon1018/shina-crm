@@ -49,7 +49,7 @@ const BatchesTab = ({ ctx }) => {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-syne font-extrabold text-text-primary">{t('inc_table1_title')}</h2>
                 <button
-                  onClick={() => setShowNewBatchModal(true)}
+                  onClick={() => { setNewBatchForm(f => ({ ...f, unit: '' })); setShowNewBatchModal(true) }}
                   className="flex items-center gap-2 px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90"
                 >
                   <Plus size={16} /> {t('inc_new_batch_btn')}

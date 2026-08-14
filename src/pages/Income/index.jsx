@@ -707,7 +707,7 @@ const Income = () => {
         {showNewBatchModal && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-            onClick={e => { if (e.target === e.currentTarget) setShowNewBatchModal(false) }}
+            onClick={e => { if (e.target === e.currentTarget) { setShowNewBatchModal(false); setNewBatchForm(f => ({ ...f, unit: '' })) } }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -717,7 +717,7 @@ const Income = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-syne font-extrabold text-text-primary">{t('inc_new_batch_modal_title')}</h3>
-                <button onClick={() => setShowNewBatchModal(false)} className="p-2 text-text-muted hover:text-text-primary">
+                <button onClick={() => { setShowNewBatchModal(false); setNewBatchForm(f => ({ ...f, unit: '' })) }} className="p-2 text-text-muted hover:text-text-primary">
                   <X size={24} />
                 </button>
               </div>
