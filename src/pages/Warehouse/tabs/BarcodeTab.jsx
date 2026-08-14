@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, ChevronRight } from 'lucide-react'
+import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download } from 'lucide-react'
 import { generateBarcodes, updateBarcodeStatus, findExistingGroupBarcode } from '../../../api/itemService'
 import { getItemStatus } from '../../../utils/itemStatus'
 import JsBarcode from 'jsbarcode'
@@ -223,6 +223,26 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     onRefresh?.()
   }
 
+  const handleDownloadBarcode = (barcodeValue) => {
+    try {
+      const canvas = document.createElement('canvas')
+      JsBarcode(canvas, barcodeValue, {
+        format: 'CODE128', width: 2, height: 60,
+        displayValue: true, fontSize: 12, margin: 10,
+        background: '#ffffff', lineColor: '#000000',
+      })
+      canvas.toBlob(blob => {
+        if (!blob) return
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `barcode-${barcodeValue}.png`
+        a.click()
+        URL.revokeObjectURL(url)
+      })
+    } catch {}
+  }
+
   const handlePrintPerItem = async (batch) => {
     const { withBarcode } = getBatchBarcodeState(batch.id)
     const barcodes = withBarcode.map(i => i.barcode)
@@ -390,7 +410,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 z-60 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
               onClick={() => setDetailModal(null)}
             >
               <motion.div
@@ -482,6 +502,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                               <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Chop</th>
                               <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Yuklab</th>
                               <th className="px-3 py-2.5 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Holat</th>
+                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider"></th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-border">
@@ -504,6 +525,15 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                                   </td>
                                   <td className="px-3 py-2">
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cls}`}>{label}</span>
+                                  </td>
+                                  <td className="px-3 py-2 text-center">
+                                    <button
+                                      onClick={() => handleDownloadBarcode(item.barcode)}
+                                      className="p-1 rounded text-text-muted hover:text-accent-blue transition-colors"
+                                      title="Yuklab olish"
+                                    >
+                                      <Download size={12} />
+                                    </button>
                                   </td>
                                 </tr>
                               )
@@ -532,12 +562,20 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   </p>
                   <div className="flex gap-2">
                     {hasGroupBc && (
-                      <button
-                        onClick={() => { setDetailModal(null); handlePrintGroup(detailModal) }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-medium hover:bg-accent-green/20 transition-colors"
-                      >
-                        <Printer size={14} /> Chop etish
-                      </button>
+                      <>
+                        <button
+                          onClick={() => { setDetailModal(null); handlePrintGroup(detailModal) }}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-medium hover:bg-accent-green/20 transition-colors"
+                        >
+                          <Printer size={14} /> Chop etish
+                        </button>
+                        <button
+                          onClick={() => handleDownloadBarcode(uniqueBarcodes[0])}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm font-medium hover:bg-accent-blue/20 transition-colors"
+                        >
+                          <Download size={14} /> Yuklab olish
+                        </button>
+                      </>
                     )}
                     {isPerItem && (
                       <button
