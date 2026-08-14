@@ -887,7 +887,7 @@ const Income = () => {
                   <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">Xususiyatlar</p>
                   <div className="space-y-2">
                     {(productAttributeDefs || []).map(def => {
-                      const checked = def.id in newBatchForm.attributes
+                      const checked = def.label in newBatchForm.attributes
                       return (
                         <div key={def.id} className="flex items-center gap-3">
                           <input
@@ -896,11 +896,11 @@ const Income = () => {
                             checked={checked}
                             onChange={e => {
                               if (e.target.checked) {
-                                setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: def.values[0] || '' } }))
+                                setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: def.values[0] || '' } }))
                               } else {
                                 setNewBatchForm(f => {
                                   const a = { ...f.attributes }
-                                  delete a[def.id]
+                                  delete a[def.label]
                                   return { ...f, attributes: a }
                                 })
                               }
@@ -912,8 +912,8 @@ const Income = () => {
                           </label>
                           {checked && (
                             <select
-                              value={newBatchForm.attributes[def.id] || ''}
-                              onChange={e => setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: e.target.value } }))}
+                              value={newBatchForm.attributes[def.label] || ''}
+                              onChange={e => setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: e.target.value } }))}
                               className="flex-1 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue"
                             >
                               {def.values.length === 0 && <option value="">— Qiymat yo'q —</option>}

@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download, Plus } from 'lucide-react'
+import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download, Plus, Pencil } from 'lucide-react'
 import { generateBarcodes, updateBarcodeStatus, findExistingGroupBarcode } from '../../../api/itemService'
+import { updateBatchAttributes } from '../../../api/incomeService'
+import { useSettingsStore } from '../../../store/settingsStore'
 import { getItemStatus } from '../../../utils/itemStatus'
 import JsBarcode from 'jsbarcode'
 import { Badge } from '../whHelpers.jsx'
@@ -74,12 +76,14 @@ const downloadPng = (barcodeValue) => {
 const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName, downloadEnabled, notificationSettings, addNotification, onRefresh }) => {
   const { t } = useTranslation()
   const barcodeSelectClass = userRole === 'admin' ? '' : 'select-none'
+  const { productAttributeDefs } = useSettingsStore()
 
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [productSearch, setProductSearch] = useState('')
   const [generatingBatch, setGeneratingBatch] = useState(null)
   const [mergeDialog, setMergeDialog] = useState(null)
   const [detailModal, setDetailModal] = useState(null)
+  const [attrEditModal, setAttrEditModal] = useState(null)
   const pendingGenerate = useRef(null)
 
   const [allBarcodesSearch, setAllBarcodesSearch] = useState('')
@@ -279,6 +283,16 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     }
   }
 
+  // Batch xususiyatini yangilash
+  const handleSaveAttrs = async () => {
+    if (!attrEditModal) return
+    for (const bid of attrEditModal.batchIds) {
+      await updateBatchAttributes(bid, attrEditModal.attrs)
+    }
+    setAttrEditModal(null)
+    onRefresh?.()
+  }
+
   // === Print handlers ===
 
   const handlePrintGroupBarcodeByValue = async (barcodeValue, allItems) => {
@@ -474,6 +488,83 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 </button>
                 <button onClick={() => { setMergeDialog(null); pendingGenerate.current = null }} className="px-4 py-2.5 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-sm hover:text-text-primary transition-colors">
                   <X size={14} />
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Attr Edit Modal */}
+      <AnimatePresence>
+        {attrEditModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            onClick={() => setAttrEditModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-syne font-bold text-text-primary">Xususiyatlarni o'zgartirish</h3>
+                <button onClick={() => setAttrEditModal(null)} className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-tertiary transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+              {(productAttributeDefs || []).length === 0 ? (
+                <p className="text-sm text-text-muted">Xususiyat shablonlari sozlanmagan. Admin panelida qo'shing.</p>
+              ) : (
+                <div className="space-y-3">
+                  {productAttributeDefs.map(def => {
+                    const checked = def.label in attrEditModal.attrs
+                    return (
+                      <div key={def.id} className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setAttrEditModal(m => ({ ...m, attrs: { ...m.attrs, [def.label]: def.values[0] || '' } }))
+                            } else {
+                              setAttrEditModal(m => {
+                                const a = { ...m.attrs }
+                                delete a[def.label]
+                                return { ...m, attrs: a }
+                              })
+                            }
+                          }}
+                          className="w-4 h-4 accent-accent-red cursor-pointer"
+                        />
+                        <label className="text-sm text-text-secondary font-medium cursor-pointer min-w-[70px]">{def.label}</label>
+                        {checked && (
+                          <select
+                            value={attrEditModal.attrs[def.label] || ''}
+                            onChange={e => setAttrEditModal(m => ({ ...m, attrs: { ...m.attrs, [def.label]: e.target.value } }))}
+                            className="flex-1 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                          >
+                            {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                          </select>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              <div className="flex gap-2 mt-5">
+                <button
+                  onClick={handleSaveAttrs}
+                  className="flex-1 py-2.5 rounded-xl bg-accent-red text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  Saqlash
+                </button>
+                <button
+                  onClick={() => setAttrEditModal(null)}
+                  className="px-4 py-2.5 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-sm hover:text-text-primary transition-colors"
+                >
+                  Bekor
                 </button>
               </div>
             </motion.div>
@@ -883,6 +974,13 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                                 }
                                 Alohida barkodga o'tkazish
                               </button>
+                              <button
+                                onClick={() => setAttrEditModal({ batchIds: group.batches.map(b => b.id), attrs: { ...group.attributes } })}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-tertiary border border-border text-text-muted text-xs hover:text-text-primary hover:border-accent-blue transition-all"
+                                title="Xususiyatlarni o'zgartirish"
+                              >
+                                <Pencil size={11} />
+                              </button>
                             </div>
                           </div>
                         )
@@ -942,6 +1040,13 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                                   <Eye size={11} /> Batafsil
                                 </button>
                                 <button
+                                  onClick={() => setAttrEditModal({ batchIds: [batch.id], attrs: { ...(batch.attributes || {}) } })}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-tertiary border border-border text-text-muted text-xs hover:text-text-primary hover:border-accent-blue transition-all"
+                                  title="Xususiyatlarni o'zgartirish"
+                                >
+                                  <Pencil size={11} />
+                                </button>
+                                <button
                                   onClick={() => handlePrintPerItem(batch)}
                                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors"
                                 >
@@ -992,7 +1097,16 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                               </div>
                             </div>
                             <div className="px-4 pb-3 space-y-2">
-                              <p className="text-[11px] font-semibold text-accent-orange">Barkod yaratish rejimini tanlang:</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[11px] font-semibold text-accent-orange">Barkod yaratish rejimini tanlang:</p>
+                                <button
+                                  onClick={() => setAttrEditModal({ batchIds: [batch.id], attrs: { ...(batch.attributes || {}) } })}
+                                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-bg-tertiary border border-border text-text-muted text-[10px] hover:text-text-primary hover:border-accent-blue transition-all"
+                                  title="Xususiyatlarni o'zgartirish"
+                                >
+                                  <Pencil size={9} /> Xususiyat
+                                </button>
+                              </div>
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => handleGenerateGroup(batch)}
