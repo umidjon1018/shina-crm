@@ -320,12 +320,12 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
               value={form.quantity}
               onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
               placeholder="0"
-              className="flex-1 px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
+              className="w-28 px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
             />
             <UnitInput
               value={form.unit}
               onChange={v => setForm(f => ({ ...f, unit: v }))}
-              className="w-24 px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors font-medium"
+              className="flex-1"
             />
           </div>
         </div>

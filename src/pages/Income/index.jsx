@@ -776,12 +776,12 @@ const Income = () => {
                       type="number" min="1"
                       value={newBatchForm.quantity}
                       onChange={e => setNewBatchForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
-                      className="flex-1 bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
+                      className="w-28 bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
                     />
                     <UnitInput
-                      value={newBatchForm.unit || 'dona'}
+                      value={newBatchForm.unit || ''}
                       onChange={v => setNewBatchForm(f => ({ ...f, unit: v }))}
-                      className="w-24 bg-bg-tertiary border border-border rounded-xl px-3 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue font-medium"
+                      className="flex-1"
                     />
                   </div>
                 </div>
