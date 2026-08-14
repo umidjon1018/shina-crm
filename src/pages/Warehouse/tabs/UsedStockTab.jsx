@@ -171,13 +171,13 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                 {hasDefs && (productAttributeDefs || []).map(def => (
                   <Th key={def.id} nowrap>{def.label}</Th>
                 ))}
+                {hasDefs && <Th nowrap></Th>}
                 <Th nowrap>{t('wh_bu_seller')}</Th>
                 <Th nowrap>{t('col_status')}</Th>
                 <Th nowrap>{t('col_sold_date')}</Th>
                 <Th nowrap>{t('wh_bu_buyer')}</Th>
                 <Th nowrap>{t('wh_bu_seller')}</Th>
                 <Th nowrap right>{t('wh_bu_sold_price')}</Th>
-                {hasDefs && <Th nowrap></Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -258,6 +258,19 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                         </td>
                       )
                     })}
+                    {hasDefs && (
+                      <td className="px-2 py-3.5 whitespace-nowrap">
+                        {hasPending && (
+                          <button
+                            onClick={() => handleSaveAttrs(u)}
+                            disabled={savingItemId === u.id}
+                            className="px-3 py-1 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-accent-blue/80 transition-colors disabled:opacity-50"
+                          >
+                            {savingItemId === u.id ? '...' : 'Saqlash'}
+                          </button>
+                        )}
+                      </td>
+                    )}
                     <Td nowrap muted>{u.employeeName || '—'}</Td>
                     <td className="px-2 py-3.5 whitespace-nowrap">
                       <Badge cls={statusCfg.cls}>{t(statusCfg.key)}</Badge>
@@ -277,19 +290,6 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                         ? <><span className="font-medium text-text-primary text-sm">{u.totalSellPrice.toLocaleString('uz')}</span><span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span></>
                         : <span className="text-text-muted text-xs">—</span>}
                     </td>
-                    {hasDefs && (
-                      <td className="px-2 py-3.5 whitespace-nowrap">
-                        {hasPending && (
-                          <button
-                            onClick={() => handleSaveAttrs(u)}
-                            disabled={savingItemId === u.id}
-                            className="px-3 py-1 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-accent-blue/80 transition-colors disabled:opacity-50"
-                          >
-                            {savingItemId === u.id ? '...' : 'Saqlash'}
-                          </button>
-                        )}
-                      </td>
-                    )}
                   </tr>
                 )
               })}
