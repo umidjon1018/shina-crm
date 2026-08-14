@@ -58,7 +58,7 @@ const Income = () => {
   const [showNewBatchModal, setShowNewBatchModal] = useState(false)
   const [newBatchForm, setNewBatchForm] = useState({
     productId: '', isNewProduct: false, newProductName: '',
-    supplierId: '', quantity: 1, purchasePriceUSD: '',
+    supplierId: '', quantity: 1, unit: 'dona', purchasePriceUSD: '',
     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
     dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
   })
@@ -767,15 +767,28 @@ const Income = () => {
                   </select>
                 </div>
 
-                {/* Soni */}
+                {/* Soni + Birlik */}
                 <div>
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('inc_qty_label')}</label>
-                  <input
-                    type="number" min="1"
-                    value={newBatchForm.quantity}
-                    onChange={e => setNewBatchForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
-                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number" min="1"
+                      value={newBatchForm.quantity}
+                      onChange={e => setNewBatchForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
+                      className="flex-1 bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
+                    />
+                    <datalist id="inc-unit-list">
+                      {['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta'].map(u => <option key={u} value={u} />)}
+                    </datalist>
+                    <input
+                      type="text"
+                      list="inc-unit-list"
+                      value={newBatchForm.unit || 'dona'}
+                      onChange={e => setNewBatchForm(f => ({ ...f, unit: e.target.value }))}
+                      placeholder="dona"
+                      className="w-24 bg-bg-tertiary border border-border rounded-xl px-3 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue font-medium"
+                    />
+                  </div>
                 </div>
 
                 {/* Dona narxi USD */}
@@ -971,6 +984,7 @@ const Income = () => {
                     supplierId,
                     shopId: selectedShopId !== 'all' ? selectedShopId : (shops[0]?.id || '1'),
                     quantity,
+                    unit: newBatchForm.unit || 'dona',
                     purchasePrice: purchasePriceUSD * entryUsdRate,
                     purchasePriceUSD,
                     entryUsdRate,
@@ -987,7 +1001,7 @@ const Income = () => {
                   setShowNewBatchModal(false)
                   setNewBatchForm({
                     productId: '', isNewProduct: false, newProductName: '',
-                    supplierId: '', quantity: 1, purchasePriceUSD: '',
+                    supplierId: '', quantity: 1, unit: 'dona', purchasePriceUSD: '',
                     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
                     dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
                   })

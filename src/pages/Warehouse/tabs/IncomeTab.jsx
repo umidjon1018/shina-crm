@@ -320,13 +320,19 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
               placeholder="0"
               className="flex-1 px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
             />
-            <select
-              value={form.unit}
-              onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
-              className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors font-medium"
-            >
-              {UNIT_OPTIONS.map(u => <option key={u} value={u}>{u}</option>)}
-            </select>
+            <>
+              <datalist id="wh-unit-list">
+                {UNIT_OPTIONS.map(u => <option key={u} value={u} />)}
+              </datalist>
+              <input
+                type="text"
+                list="wh-unit-list"
+                value={form.unit}
+                onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
+                placeholder="dona"
+                className="w-24 px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors font-medium"
+              />
+            </>
           </div>
         </div>
 
