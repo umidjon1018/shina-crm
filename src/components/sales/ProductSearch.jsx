@@ -237,7 +237,7 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
                           !allowSold && available.length <= (p.lowStockThreshold || 3) ? 'bg-accent-orange/10 text-accent-orange' :
                           'bg-accent-green/10 text-accent-green'
                         }`}>
-                          {allowSold ? available.length : available.length - inCartCount}
+                          {allowSold ? available.length : available.length - inCartCount} {available[0]?.unit || 'dona'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">

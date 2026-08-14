@@ -157,7 +157,7 @@ const BatchesTab = ({ ctx }) => {
                                 </button>
                               )}
                             </td>
-                            <td className="px-4 py-4 font-bold text-sm text-text-primary">{batch.quantity} {t('unit_pcs')}</td>
+                            <td className="px-4 py-4 font-bold text-sm text-text-primary">{batch.quantity} {batch.unit || 'dona'}</td>
                             <td className="px-4 py-4">
                               <p className="text-sm font-bold text-text-primary">${batch.purchasePriceUSD}</p>
                               <p className="text-xs text-text-muted">

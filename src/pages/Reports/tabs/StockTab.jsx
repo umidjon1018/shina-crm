@@ -267,7 +267,7 @@ const StockTab = ({ ctx }) => {
                           <td className="px-6 py-4">
                             {renderCatBadge(s.category)}
                           </td>
-                          <td className="px-6 py-4 text-center font-bold text-text-primary">{s.inStock}</td>
+                          <td className="px-6 py-4 text-center font-bold text-text-primary">{s.inStock} <span className="text-xs text-text-muted font-normal">{s.unit || 'dona'}</span></td>
                           <td className="px-6 py-4 text-center">
                             {s.inStock === 0 ? (
                               <span className="text-accent-red text-xs font-bold">{t('stock_empty')}</span>
@@ -676,7 +676,7 @@ const StockTab = ({ ctx }) => {
                         </span>
                       )},
                       { key:'inStock', label:t('rep_col_remaining'), align:'center', render: r => (
-                        <span className="font-bold text-text-primary">{r.inStock} {t('unit_pcs')}</span>
+                        <span className="font-bold text-text-primary">{r.inStock} <span className="text-xs font-normal text-text-muted">{r.unit || 'dona'}</span></span>
                       )},
                       { key:'purchasePrice', label:t('rep_col_purchase_price'), align:'right', render: r => fmtUZS(r.purchasePrice) },
                       { key:'capital', label:t('rep_col_capital'), align:'right', render: r => (
@@ -800,7 +800,7 @@ const StockTab = ({ ctx }) => {
                             <span className="text-text-primary text-sm font-medium">{x.productName}</span>
                             <div className="flex items-center gap-4 text-sm">
                               <span className="text-text-muted text-xs">
-                                {x.inStock} {t('unit_pcs')} {t('rep_col_remaining').toLowerCase()}
+                                {x.inStock} {x.unit || 'dona'} {t('rep_col_remaining').toLowerCase()}
                                 {x.daysLeft !== null
                                   ? <> · ~{x.daysLeft} {t('rep_days_ends_suffix')}</>
                                   : <> · {t('rep_no_sales')}</>}
@@ -820,7 +820,7 @@ const StockTab = ({ ctx }) => {
                     pageSize={8}
                     columns={[
                       { key:'productName', label:t('col_product'), render: r => <span className="font-medium text-text-primary">{r.productName}</span> },
-                      { key:'inStock', label:t('rep_col_remaining'), align:'center', render: r => `${r.inStock} ${t('unit_pcs')}` },
+                      { key:'inStock', label:t('rep_col_remaining'), align:'center', render: r => `${r.inStock} ${r.unit || 'dona'}` },
                       { key:'purchasePrice', label:t('wh_th_purchase_price'), align:'right', render: r => fmtUZS(r.purchasePrice) },
                       { key:'capital', label:t('rep_col_capital'), align:'right', render: r => (
                         <span className="font-bold text-accent-blue">{fmtUZS(r.inStock * r.purchasePrice)}</span>
@@ -897,8 +897,8 @@ const StockTab = ({ ctx }) => {
                               <div>
                                 <p className="font-medium text-text-primary text-sm">{x.productName}</p>
                                 <p className="text-text-muted text-xs mt-0.5">
-                                  {t('rep_col_remaining')}: <span className="font-bold text-accent-orange">{x.inStock} {t('unit_pcs')}</span>
-                                  {' '}/ {t('rep_threshold_prefix')}{x.lowStockThreshold} {t('unit_pcs')}
+                                  {t('rep_col_remaining')}: <span className="font-bold text-accent-orange">{x.inStock} {x.unit || 'dona'}</span>
+                                  {' '}/ {t('rep_threshold_prefix')}{x.lowStockThreshold} {x.unit || 'dona'}
                                   {x.daysLeft !== null && ` • ~${x.daysLeft} ${t('rep_days_suffix')}`}
                                 </p>
                               </div>

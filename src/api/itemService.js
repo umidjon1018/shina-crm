@@ -20,6 +20,7 @@ const mapItem = (i) => ({
   purchasePrice: Number(i.purchase_price) || 0,
   purchasePriceUSD: Number(i.purchase_price_usd) || 0,
   attributes: i.attributes || {},
+  unit: i.unit || 'dona',
 })
 
 export const getItems = async (params = {}) => {

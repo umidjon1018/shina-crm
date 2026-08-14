@@ -1021,7 +1021,7 @@ export const Management = () => {
                                     <p className="text-xs text-text-muted">{formatDate(b.receivedAt)}</p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="text-sm font-bold text-text-primary">{t('mgmt_pcs_unit', { n: b.quantityIn })}</p>
+                                    <p className="text-sm font-bold text-text-primary">{b.quantityIn} {b.unit || 'dona'}</p>
                                     <p className="text-xs text-text-muted">{t('emp_batch_received')}</p>
                                   </div>
                                 </div>

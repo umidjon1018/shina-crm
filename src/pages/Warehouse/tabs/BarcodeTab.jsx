@@ -343,7 +343,7 @@ const BarcodeTab = ({ products, items, userRole, userId, userName, downloadEnabl
                   <p className="font-medium text-text-primary text-sm">{p.name}</p>
                   {noBarcodeCount > 0 && <Badge cls="text-accent-orange bg-accent-orange/10">{noBarcodeCount} {t('wh_new_product')}</Badge>}
                 </div>
-                <p className="text-xs text-text-muted mt-0.5">{t('cat_' + p.category, { defaultValue: p.categoryLabel })} · {p.size} · {t('wh_bc_in_stock', { n: pItems.length })}</p>
+                <p className="text-xs text-text-muted mt-0.5">{t('cat_' + p.category, { defaultValue: p.categoryLabel })} · {p.size} · {pItems.length} {pItems[0]?.unit || 'dona'}</p>
               </button>
             )
           })}
@@ -363,7 +363,7 @@ const BarcodeTab = ({ products, items, userRole, userId, userName, downloadEnabl
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h3 className="font-syne font-bold text-text-primary text-sm">{selectedProduct.name}</h3>
-                <p className="text-xs text-text-muted">{t('wh_bc_in_stock', { n: productItems.length })}</p>
+                <p className="text-xs text-text-muted">{productItems.length} {productItems[0]?.unit || 'dona'}</p>
               </div>
               <div className="flex items-center gap-2">
                 {productItems.some(i => i.barcode && !isItemLocked(i)) && (

@@ -570,6 +570,9 @@ const ProductsTab = ({ ctx }) => {
                       const barcoded   = p.barcodeReadyStock || 0
                       const noBarcode  = p.noBarcodeCount || 0
                       const isEditing  = editingProduct?.id === p.id && !editingProduct?.isModal
+                      const pUnit = (items || []).find(i => i.productId === p.id && i.status === 'in_stock')?.unit
+                        || (items || []).find(i => i.productId === p.id)?.unit
+                        || 'dona'
 
                       const catObj = productCategories.find(c => c.id === p.category)
                       const isCatInactive = catObj && !catObj.isActive
@@ -674,12 +677,12 @@ const ProductsTab = ({ ctx }) => {
                               stock === 0 ? 'bg-accent-red/10 text-accent-red' :
                               stock <= threshold ? 'bg-accent-orange/10 text-accent-orange' :
                               'bg-accent-green/10 text-accent-green'
-                            }`}>{t('mgmt_pcs_unit', { n: stock })}</span>
+                            }`}>{stock} {pUnit}</span>
                           </td>
                           <td className="px-4 py-3 text-right">
                             <div>
-                              <p className="text-xs font-bold text-accent-green">✓ {t('mgmt_pcs_unit', { n: barcoded })}</p>
-                              <p className="text-xs font-bold text-accent-orange">✗ {t('mgmt_pcs_unit', { n: noBarcode })}</p>
+                              <p className="text-xs font-bold text-accent-green">✓ {barcoded} {pUnit}</p>
+                              <p className="text-xs font-bold text-accent-orange">✗ {noBarcode} {pUnit}</p>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right">

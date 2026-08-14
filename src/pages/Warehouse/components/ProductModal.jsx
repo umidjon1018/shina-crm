@@ -14,6 +14,10 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
   const inStockItems = items.filter(i => i.status === 'in_stock')
   const shopStock = (productId) => items.filter(i => i.productId === productId && i.status === 'in_stock').length
   const shopItemCount = (productId, status) => items.filter(i => i.productId === productId && i.status === status).length
+  const getProductUnit = (productId) =>
+    items.find(i => i.productId === productId && i.status === 'in_stock')?.unit
+    || items.find(i => i.productId === productId)?.unit
+    || 'dona'
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -48,8 +52,8 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
               { label: t('wh_th_season'), value: t('season_' + product.season) || product.seasonLabel || '—' },
               { label: t('wh_modal_attribute'), value: product.attribute || '—' },
               { label: t('wh_modal_car_type'), value: product.carCategory || '—' },
-              { label: t('wh_modal_remaining'), value: shopStock(product.id) + ' ta' },
-              { label: t('sold'), value: shopItemCount(product.id, 'sold') + ' ta' },
+              { label: t('wh_modal_remaining'), value: shopStock(product.id) + ' ' + getProductUnit(product.id) },
+              { label: t('sold'), value: shopItemCount(product.id, 'sold') + ' ' + getProductUnit(product.id) },
             ].map(({ label, value }) => (
               <div key={label} className="bg-bg-tertiary rounded-xl px-3 py-2.5">
                 <p className="text-xs text-text-muted mb-0.5">{label}</p>

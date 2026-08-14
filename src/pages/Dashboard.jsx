@@ -112,7 +112,9 @@ export const Dashboard = () => {
       return p.lowStockThreshold != null && stock <= p.lowStockThreshold
     }).map(p => ({
       ...p,
-      currentStock: MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length
+      currentStock: MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length,
+      unit: MOCK_ITEMS.find(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))?.unit
+        || MOCK_ITEMS.find(i => i.productId === p.id)?.unit || 'dona'
     }))
 
     return { todayTotal, todaySalesCount, inStock, debtUSD, customers, chart, recent, lowStock }
@@ -249,7 +251,7 @@ export const Dashboard = () => {
                   </div>
                 </div>
                 <span className="text-sm font-semibold text-amber-500">
-                  {p.currentStock} / {p.lowStockThreshold} {t('unit_pcs')}
+                  {p.currentStock} / {p.lowStockThreshold} {p.unit || 'dona'}
                 </span>
               </div>
             ))}

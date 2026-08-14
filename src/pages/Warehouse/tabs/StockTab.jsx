@@ -13,6 +13,10 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const { t } = useTranslation()
   const som = t('unit_som')
   const pcs = t('unit_pcs')
+  const getProductUnit = (productId) =>
+    items.find(i => i.productId === productId && i.status === 'in_stock')?.unit
+    || items.find(i => i.productId === productId)?.unit
+    || 'dona'
   const { hasPermission } = useAuthStore()
   const { productAttributeDefs } = useSettingsStore()
   const [search, setSearch] = useState('')
@@ -319,18 +323,20 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     })()}
                     <Td><Badge cls={SEASON_COLORS[p.season] || 'text-text-muted bg-bg-tertiary'}>{t('season_' + p.season) || '—'}</Badge></Td>
                     <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>
+                    {(() => { const unit = getProductUnit(p.id); return (<>
                     <td className="px-4 py-3.5 text-right">
                       <span className="text-text-secondary">{batches.filter(b => b.productId === p.id).reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
-                      <span className="text-text-muted text-xs ml-1">{pcs}</span>
+                      <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <span className="font-bold text-text-primary">{shopStock(p.id)}</span>
-                      <span className="text-text-muted text-xs ml-1">{pcs}</span>
+                      <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       <span className="text-text-secondary">{shopItemCount(p.id, 'sold')}</span>
-                      <span className="text-text-muted text-xs ml-1">{pcs}</span>
+                      <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
+                    </>) })()}
                     <td className="px-4 py-3.5 text-right">
                       <span className="font-medium text-text-primary text-sm">{p.cashPrice.toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{som}</span>
@@ -489,7 +495,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                 </tbody>
                               </table>
                             )}
-                            <p className="text-[10px] text-text-muted mt-2">{inStockItems.length} ta birlik • omborda</p>
+                            <p className="text-[10px] text-text-muted mt-2">{inStockItems.length} {getProductUnit(p.id)} • omborda</p>
                           </div>
                         </td>
                       </tr>

@@ -29,9 +29,12 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
   const [isNewProduct, setIsNewProduct] = useState(false)
   const [newCategory, setNewCategory] = useState('')
   const [suppliers, setSuppliers] = useState([])
+  const UNIT_OPTIONS = ['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta']
+
   const [form, setForm] = useState({
     newProductName: '',
     quantity: '',
+    unit: 'dona',
     notes: '',
     attributes: {},
     // Moliyaviy (faqat admin/manager)
@@ -67,7 +70,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
 
   const resetForm = () => {
     setForm({
-      newProductName: '', quantity: '', notes: '', attributes: {},
+      newProductName: '', quantity: '', unit: 'dona', notes: '', attributes: {},
       supplierId: '', purchasePriceUSD: '', entryUsdRate: String(usdRate || ''),
       paymentStatus: 'credit', paidUSD: '', dueDate: '',
     })
@@ -127,6 +130,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
         paidUSD: canFinance ? paidUSD : 0,
         dueDate: canFinance ? (form.dueDate || null) : null,
         attributes: form.attributes || {},
+        unit: form.unit || 'dona',
       })
 
       setSuccess(true)
@@ -197,6 +201,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                 const catObj = productCategories?.find(c => c.id === p.category)
                 const catColor = getCategoryColor(p.category, productCategories)
                 const stock = p.totalStock || 0
+                const pUnit = batches.find(b => b.productId === p.id)?.unit || 'dona'
                 return (
                   <button
                     key={p.id}
@@ -214,7 +219,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                         stock <= (p.lowStockThreshold || 3) ? 'bg-accent-orange/10 text-accent-orange' :
                         'bg-accent-green/10 text-accent-green'
                       }`}>
-                        {stock} ta
+                        {stock} {pUnit}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -304,16 +309,25 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
           </div>
         )}
 
-        {/* Miqdor */}
+        {/* Miqdor + Birlik */}
         <div>
           <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5 block">{t('wh_in_qty')}</label>
-          <input
-            type="number" min="1"
-            value={form.quantity}
-            onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
-            placeholder="0"
-            className="w-full px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
-          />
+          <div className="flex gap-2">
+            <input
+              type="number" min="1"
+              value={form.quantity}
+              onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
+              placeholder="0"
+              className="flex-1 px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
+            />
+            <select
+              value={form.unit}
+              onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
+              className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors font-medium"
+            >
+              {UNIT_OPTIONS.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* ─── MOLIYAVIY MAYDONLAR (faqat admin/manager) ─── */}

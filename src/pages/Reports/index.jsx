@@ -576,6 +576,9 @@ export const Reports = () => {
       // Kunlik sotuv tezligi — oxirgi 30 kun real sotuvdan
       const dailySalesRate = Math.round((soldLast30[p.id] || 0) / 30 * 100) / 100
 
+      const unit = shopItems.find(i => i.productId === p.id && i.status === 'in_stock')?.unit
+        || shopItems.find(i => i.productId === p.id)?.unit
+        || 'dona'
       return {
         productId: p.id,
         productName: p.name,
@@ -587,6 +590,7 @@ export const Reports = () => {
         lastReceivedAt,
         dailySalesRate,
         lastSoldAt,
+        unit,
       }
     })
 
