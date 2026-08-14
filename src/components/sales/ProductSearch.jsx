@@ -150,8 +150,8 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
         />
       </div>
 
-      {/* Xususiyat filtrlari — faqat natijalar bor va defs mavjud bo'lganda */}
-      {results.length > 0 && (productAttributeDefs || []).length > 0 && (
+      {/* Xususiyat filtrlari — qidiruv boshlanganda ko'rinadi (natija bo'lmasa ham) */}
+      {query.length >= 2 && (productAttributeDefs || []).length > 0 && (
         <div className="flex flex-wrap gap-2">
           {(productAttributeDefs || []).map(def => (
             <div key={def.id} className="flex flex-col gap-0.5">
