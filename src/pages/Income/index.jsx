@@ -23,6 +23,7 @@ import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPay
 import BatchesTab   from './tabs/BatchesTab'
 import SuppliersTab from './tabs/SuppliersTab'
 import DebtsTab     from './tabs/DebtsTab'
+import UnitInput from '../../components/UnitInput'
 
 const Income = () => {
   const { t } = useTranslation()
@@ -777,15 +778,9 @@ const Income = () => {
                       onChange={e => setNewBatchForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
                       className="flex-1 bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
                     />
-                    <datalist id="inc-unit-list">
-                      {['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta'].map(u => <option key={u} value={u} />)}
-                    </datalist>
-                    <input
-                      type="text"
-                      list="inc-unit-list"
+                    <UnitInput
                       value={newBatchForm.unit || 'dona'}
-                      onChange={e => setNewBatchForm(f => ({ ...f, unit: e.target.value }))}
-                      placeholder="dona"
+                      onChange={v => setNewBatchForm(f => ({ ...f, unit: v }))}
                       className="w-24 bg-bg-tertiary border border-border rounded-xl px-3 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue font-medium"
                     />
                   </div>
