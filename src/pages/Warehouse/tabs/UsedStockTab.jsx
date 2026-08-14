@@ -115,6 +115,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
   const groupNeedsAttrs = (group) => {
     if (!hasDefs) return false
     return group._items.some(item => {
+      if (item.status !== 'in_stock') return false
       const a = getItemAttrs(item)
       return productAttributeDefs.some(def => !(def.id in a))
     })
@@ -281,7 +282,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                               {u._items.map(item => {
                                 const attrs = getItemAttrs(item)
                                 const hasPending = pendingAttrs[item.id] && Object.values(pendingAttrs[item.id]).some(v => v !== '')
-                                const itemUnset = productAttributeDefs.some(def => !(def.id in attrs))
+                                const itemUnset = item.status === 'in_stock' && productAttributeDefs.some(def => !(def.id in attrs))
                                 return (
                                   <tr key={item.id} className={itemUnset ? 'bg-amber-400/15 hover:bg-amber-400/25' : 'hover:bg-bg-tertiary/20'}>
                                     <td className="py-2 pr-6 text-text-muted font-mono">{item.id}</td>
