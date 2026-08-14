@@ -25,6 +25,7 @@ const mapStock = (r) => ({
   scrapNote: r.scrap_note ?? r.scrapNote ?? null,
   scrapAt: r.scrap_at ?? r.scrapAt ?? null,
   createdAt: r.created_at ?? r.createdAt ?? '',
+  attributes: r.attributes ?? {},
 })
 
 const mapSale = (s) => ({
@@ -70,6 +71,11 @@ export const addUsedStockFromTradeIn = async (tradeIns, context = {}) => {
     }
   }
   return results
+}
+
+export const updateUsedStockAttributes = async (id, attributes) => {
+  const { data } = await api.patch(`/api/used/stock/${id}/attributes`, { attributes })
+  return data
 }
 
 export const scrapUsedStock = async (id, data) => {

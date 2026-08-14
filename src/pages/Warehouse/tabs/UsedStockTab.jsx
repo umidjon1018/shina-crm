@@ -1,31 +1,56 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDownToLine, BarChart2, CheckCircle, Package, Search } from 'lucide-react'
+import { AlertTriangle, ArrowDownToLine, BarChart2, CheckCircle, Package, Search } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
+import { useSettingsStore } from '../../../store/settingsStore'
 import { Badge, StatCard, Th, Td, CATEGORIES, USED_STOCK_STATUS_CONFIG } from '../whHelpers.jsx'
+import { updateUsedStockAttributes } from '../../../api/usedService'
 
 const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
   const MOCK_USED_SALES = usedSales
   const { t } = useTranslation()
+  const { productAttributeDefs } = useSettingsStore()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [attrFilters, setAttrFilters] = useState({})
+  const [pendingAttrs, setPendingAttrs] = useState({})
+  const [localItemAttrs, setLocalItemAttrs] = useState({})
+  const [savingItemId, setSavingItemId] = useState(null)
+
+  const setAttrFilter = (defId, value) => {
+    setAttrFilters(prev => {
+      if (value === 'all') { const next = { ...prev }; delete next[defId]; return next }
+      return { ...prev, [defId]: value }
+    })
+  }
+
+  const getItemAttrs = (item) => localItemAttrs[item?.id] ?? item?.attributes ?? {}
+
+  const activeAttrFilters = Object.entries(attrFilters)
 
   const filtered = usedStock.filter(u => {
     const q = search.toLowerCase()
-    const nameMatch = u.name?.toLowerCase().includes(q)
-    const catMatch = category === 'all' || u.category === category
+    if (!u.name?.toLowerCase().includes(q)) return false
+    if (category !== 'all' && u.category !== category) return false
     let statusMatch
     if (statusFilter === 'all') {
       statusMatch = true
     } else if (statusFilter === 'scrapped') {
-      // Utilizatsiya: scrap qilingan YOKI "Utilizatsiya" mijoziga sotilgan
       const soldSale = (u.status === 'sold' && u.soldSaleId) ? usedSales.find(s => s.id === u.soldSaleId) : null
       statusMatch = u.status === 'scrapped' || soldSale?.customerName === 'Utilizatsiya'
     } else {
       statusMatch = u.status === statusFilter
     }
-    return nameMatch && catMatch && statusMatch
+    if (!statusMatch) return false
+    if (activeAttrFilters.length > 0) {
+      const a = getItemAttrs(u)
+      for (const [defId, val] of activeAttrFilters) {
+        if (val === '__unset__') { if (defId in a && a[defId] !== null) return false }
+        else { if (a[defId] !== val) return false }
+      }
+    }
+    return true
   })
 
   const sorted = useMemo(() => {
@@ -35,8 +60,8 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
   const grouped = useMemo(() => {
     const map = new Map()
     sorted.forEach(u => {
-      // replacedItemBarcode mavjud bo'lsa — alohida qator (har bir item o'z barkodi bilan)
-      const key = [u.acquiredSaleId, u.name, u.category, u.acquiredPrice, u.status, u.replacedItemBarcode || '', u.soldSaleId || ''].join('|')
+      const attrsKey = JSON.stringify(getItemAttrs(u))
+      const key = [u.acquiredSaleId, u.name, u.category, u.acquiredPrice, u.status, u.replacedItemBarcode || '', u.soldSaleId || '', attrsKey].join('|')
       if (!map.has(key)) {
         const soldSale = u.status === 'sold' ? MOCK_USED_SALES.find(s => s.id === u.soldSaleId) : null
         const buyerName = soldSale?.customerName || '—'
@@ -51,10 +76,34 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
     return [...map.values()]
   }, [sorted])
 
+  const handleSaveAttrs = async (item) => {
+    const itemId = item.id
+    const pending = pendingAttrs[itemId]
+    if (!pending || Object.keys(pending).length === 0) return
+    setSavingItemId(itemId)
+    try {
+      const existingAttrs = getItemAttrs(item)
+      const newAttrs = { ...existingAttrs }
+      for (const [defId, val] of Object.entries(pending)) {
+        if (val === '') continue
+        newAttrs[defId] = val === '__none__' ? null : val
+      }
+      await updateUsedStockAttributes(itemId, newAttrs)
+      setLocalItemAttrs(prev => ({ ...prev, [itemId]: newAttrs }))
+      setPendingAttrs(prev => { const n = { ...prev }; delete n[itemId]; return n })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setSavingItemId(null)
+    }
+  }
+
   const inStockItems = usedStock.filter(u => u.status === 'in_stock')
   const soldItems = usedStock.filter(u => u.status === 'sold')
   const stockValue = inStockItems.reduce((sum, u) => sum + (u.acquiredPrice || 0), 0)
   const soldValue = soldItems.reduce((sum, u) => sum + (u.sellPrice || 0), 0)
+
+  const hasDefs = productAttributeDefs?.length > 0
 
   return (
     <div className="space-y-5">
@@ -66,25 +115,48 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
       </div>
 
       {/* Filters */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-48">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_bu_not_found')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-wrap gap-4 items-end">
+        <div className="flex flex-col gap-1 flex-1 min-w-48">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('wh_search_ph') || 'Qidiruv'}</span>
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_bu_not_found')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
+          </div>
         </div>
-        <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
-          {CATEGORIES.map(c => <option key={c} value={c}>{t('cat_' + c)}</option>)}
-        </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
-          <option value="all">{t('wh_all_status')}</option>
-          <option value="in_stock">{t('col_in_stock')}</option>
-          <option value="sold">{t('sold')}</option>
-          <option value="scrapped">{t('wh_bu_scrapped')}</option>
-        </select>
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_category')}</span>
+          <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+            {CATEGORIES.map(c => <option key={c} value={c}>{t('cat_' + c)}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_status')}</span>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+            <option value="all">{t('wh_all_status')}</option>
+            <option value="in_stock">{t('col_in_stock')}</option>
+            <option value="sold">{t('sold')}</option>
+            <option value="scrapped">{t('wh_bu_scrapped')}</option>
+          </select>
+        </div>
+        {(productAttributeDefs || []).map(def => (
+          <div key={def.id} className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
+            <select
+              value={attrFilters[def.id] || 'all'}
+              onChange={e => setAttrFilter(def.id, e.target.value)}
+              className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+            >
+              <option value="all">Barchasi</option>
+              {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+              <option value="__unset__">Xususiyatsiz</option>
+            </select>
+          </div>
+        ))}
       </div>
 
       {/* Table */}
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-        <div className="overflow-x-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-bg-tertiary">
@@ -96,24 +168,31 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                 <Th nowrap right>{t('wh_th_in_qty')}</Th>
                 <Th nowrap right>{t('wh_bu_unit_price')}</Th>
                 <Th nowrap right>{t('wh_bu_total_price')}</Th>
+                {hasDefs && (productAttributeDefs || []).map(def => (
+                  <Th key={def.id} nowrap>{def.label}</Th>
+                ))}
                 <Th nowrap>{t('wh_bu_seller')}</Th>
                 <Th nowrap>{t('col_status')}</Th>
                 <Th nowrap>{t('col_sold_date')}</Th>
                 <Th nowrap>{t('wh_bu_buyer')}</Th>
                 <Th nowrap>{t('wh_bu_seller')}</Th>
                 <Th nowrap right>{t('wh_bu_sold_price')}</Th>
+                {hasDefs && <Th nowrap></Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {grouped.length === 0 ? (
-                <tr><td colSpan={14} className="text-center py-12 text-text-muted">{t('wh_bu_not_found')}</td></tr>
+                <tr><td colSpan={hasDefs ? 15 + (productAttributeDefs?.length || 0) : 14} className="text-center py-12 text-text-muted">{t('wh_bu_not_found')}</td></tr>
               ) : grouped.map(u => {
                 const catColor = getCategoryColor(u.category, productCategories)
                 const catObj = productCategories?.find(c => c.id === u.category)
                 const catLabel = catObj ? t('cat_' + catObj.id, { defaultValue: catObj.label }) : (u.categoryLabel || '—')
                 const statusCfg = USED_STOCK_STATUS_CONFIG[u.status] || USED_STOCK_STATUS_CONFIG.in_stock
+                const attrs = getItemAttrs(u)
+                const itemUnset = hasDefs && productAttributeDefs.some(def => !(def.id in attrs))
+                const hasPending = pendingAttrs[u.id] && Object.values(pendingAttrs[u.id]).some(v => v !== '')
                 return (
-                  <tr key={u.id} className="hover:bg-bg-tertiary/50 transition-colors">
+                  <tr key={u.id} className={`transition-colors ${itemUnset ? 'bg-amber-400/10 hover:bg-amber-400/20' : 'hover:bg-bg-tertiary/50'}`}>
                     <td className="px-2 py-3.5 whitespace-nowrap text-sm text-text-muted">
                       {u.acquiredAt ? (
                         <>
@@ -122,7 +201,12 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                         </>
                       ) : '—'}
                     </td>
-                    <Td nowrap><span className="font-medium text-text-primary">{u.name}</span></Td>
+                    <td className="px-2 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        {itemUnset && <AlertTriangle size={13} className="text-amber-500 flex-shrink-0" title="Xususiyat belgilanmagan" />}
+                        <span className="font-medium text-text-primary text-sm">{u.name}</span>
+                      </div>
+                    </td>
                     <Td nowrap><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></Td>
                     <td className="px-2 py-3.5 whitespace-nowrap text-sm text-text-muted">
                       <div>{u.replacedProductName || '—'}</div>
@@ -142,6 +226,38 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                       <span className="font-medium text-text-primary text-sm">{((u.acquiredPrice || 0) * u.qty).toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span>
                     </td>
+                    {hasDefs && (productAttributeDefs || []).map(def => {
+                      const isKeySet = def.id in attrs
+                      const val = attrs[def.id]
+                      const hasPendingDef = pendingAttrs[u.id] && def.id in pendingAttrs[u.id]
+                      if (isKeySet && !hasPendingDef) {
+                        return (
+                          <td key={def.id} className="px-2 py-3.5 whitespace-nowrap">
+                            {val
+                              ? <span className="px-2 py-0.5 bg-accent-blue/10 text-accent-blue rounded-md text-xs font-medium">{val}</span>
+                              : <span className="text-text-muted text-xs">—</span>}
+                          </td>
+                        )
+                      }
+                      const selectVal = hasPendingDef ? (pendingAttrs[u.id][def.id] ?? '__none__') : ''
+                      return (
+                        <td key={def.id} className="px-2 py-3.5 whitespace-nowrap">
+                          <select
+                            value={selectVal}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => setPendingAttrs(prev => ({
+                              ...prev,
+                              [u.id]: { ...(prev[u.id] || {}), [def.id]: e.target.value }
+                            }))}
+                            className="text-xs px-2 py-1 bg-bg-tertiary border border-amber-400 rounded-lg text-text-primary focus:outline-none focus:border-accent-blue"
+                          >
+                            <option value="">— tanlang —</option>
+                            {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                            <option value="__none__">Xususiyatsiz</option>
+                          </select>
+                        </td>
+                      )
+                    })}
                     <Td nowrap muted>{u.employeeName || '—'}</Td>
                     <td className="px-2 py-3.5 whitespace-nowrap">
                       <Badge cls={statusCfg.cls}>{t(statusCfg.key)}</Badge>
@@ -150,7 +266,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                       {u.soldAt ? (
                         <>
                           <div>{new Date(u.soldAt).toLocaleDateString('uz-UZ')}</div>
-                          <div className="text-[10px] text-text-muted/60">{new Date(u.soldAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}</div>
+                          <div className="text-[10px] text-text-muted/60">{new Date(u.soldAt).toLocaleTimeString('uz-UZ', { hoor: '2-digit', minute: '2-digit' })}</div>
                         </>
                       ) : '—'}
                     </td>
@@ -161,6 +277,19 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                         ? <><span className="font-medium text-text-primary text-sm">{u.totalSellPrice.toLocaleString('uz')}</span><span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span></>
                         : <span className="text-text-muted text-xs">—</span>}
                     </td>
+                    {hasDefs && (
+                      <td className="px-2 py-3.5 whitespace-nowrap">
+                        {hasPending && (
+                          <button
+                            onClick={() => handleSaveAttrs(u)}
+                            disabled={savingItemId === u.id}
+                            className="px-3 py-1 rounded-lg bg-accent-blue text-white text-xs font-medium hover:bg-accent-blue/80 transition-colors disabled:opacity-50"
+                          >
+                            {savingItemId === u.id ? '...' : 'Saqlash'}
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 )
               })}
