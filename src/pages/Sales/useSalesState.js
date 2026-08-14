@@ -42,7 +42,7 @@ export const useSalesState = () => {
   const { bump } = useDataStore()
 
   const getItemBarcode = useCallback(() => '—', [])
-  const { sources, productCategories, installmentOrganizations, loyaltyMinAmount, loyaltyVisitsRequired, silverVisits, notificationSettings, discountSmallMax, discountMediumMax, loyaltyDiscountPercent, companyName } = useSettingsStore()
+  const { sources, productCategories, installmentOrganizations, loyaltyMinAmount, loyaltyVisitsRequired, silverVisits, notificationSettings, discountSmallMax, discountMediumMax, loyaltyDiscountPercent, companyName, productAttributeDefs } = useSettingsStore()
   const { selectedShopId } = useShopStore()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(
@@ -153,6 +153,7 @@ export const useSalesState = () => {
   const [buCart, setBuCart] = useState([]) // [{ usedStockId, name, category, acquiredPrice, sellPrice }]
   const [buGroupQty, setBuGroupQty] = useState({})
   const [buSearch, setBuSearch] = useState('')
+  const [buAttrFilters, setBuAttrFilters] = useState({})
   const [buScrapMode, setBuScrapMode] = useState(false)
   const [buScrapSelected, setBuScrapSelected] = useState([])
   const [buScrapCategory, setBuScrapCategory] = useState('all')
@@ -906,12 +907,18 @@ export const useSalesState = () => {
   )
 
   // B/U Sotuv — qoldiqdan qidirish (faqat in_stock), bir xil partiyadagilarni guruhlash
+  const activeBuAttrFilters = Object.entries(buAttrFilters).filter(([, v]) => v && v !== 'all')
   const buAvailableGroups = (() => {
-    const filteredStock = usedStockList.filter(u =>
-      u.status === 'in_stock' &&
-      !buCart.find(c => c.usedStockId === u.id) &&
-      (u.name.toLowerCase().includes(buSearch.toLowerCase()) || !buSearch)
-    )
+    const filteredStock = usedStockList.filter(u => {
+      if (u.status !== 'in_stock') return false
+      if (buCart.find(c => c.usedStockId === u.id)) return false
+      if (buSearch && !u.name.toLowerCase().includes(buSearch.toLowerCase())) return false
+      if (activeBuAttrFilters.length > 0) {
+        const attrs = u.attributes || {}
+        if (!activeBuAttrFilters.every(([defId, val]) => attrs[defId] === val)) return false
+      }
+      return true
+    })
     const map = new Map()
     filteredStock.forEach(u => {
       const key = [u.acquiredSaleId, u.name, u.category, u.acquiredPrice].join('|')
@@ -1595,7 +1602,8 @@ export const useSalesState = () => {
     usedStockList, setUsedStockList,
     usedSalesList: selectedShopId === 'all' ? usedSalesList : usedSalesList.filter(s => !s.shopId || s.shopId === selectedShopId),
     setUsedSalesList,
-    buCart, setBuCart, buGroupQty, setBuGroupQty, buSearch, setBuSearch,
+    buCart, setBuCart, buGroupQty, setBuGroupQty, buSearch, setBuSearch, buAttrFilters, setBuAttrFilters,
+    productAttributeDefs,
     buScrapMode, setBuScrapMode, buScrapSelected, setBuScrapSelected,
     buScrapCategory, setBuScrapCategory, buSelectedCustomer, setBuSelectedCustomer,
     buCustomerSearch, setBuCustomerSearch, buShowNewCustomerModal, setBuShowNewCustomerModal,

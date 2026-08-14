@@ -12,7 +12,8 @@ const UsedSaleTab = ({ ctx }) => {
     buScrapCategory, setBuScrapCategory, buScrapCategories, buScrapGroups,
     buAddScrapToCart, buSelectedCustomer, setBuSelectedCustomer,
     buCustomerSearch, setBuCustomerSearch, buFilteredCustomers,
-    setBuShowNewCustomerModal, buSearch, setBuSearch,
+    setBuShowNewCustomerModal, buSearch, setBuSearch, buAttrFilters, setBuAttrFilters,
+    productAttributeDefs,
     buAvailableGroups, buGroupQty, setBuGroupQty, buAddToCart,
     buCart, setBuCart, buCartGroups, buRemoveGroupFromCart,
     buSetGroupTotalPrice, buSuccessSale, setBuSuccessSale,
@@ -84,11 +85,28 @@ const UsedSaleTab = ({ ctx }) => {
               <h4 className="text-text-primary font-syne font-bold mb-4 flex items-center gap-2">
                 <Recycle className="text-accent-red" size={20} /> {t('sl_us_select_title')}
               </h4>
-              <div className="relative mb-4">
+              <div className="relative mb-3">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input value={buSearch} onChange={(e) => setBuSearch(e.target.value)} placeholder={t('sl_us_search_ph')}
                   className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-xs text-text-primary focus:outline-none focus:border-accent-blue" />
               </div>
+              {(productAttributeDefs || []).length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {(productAttributeDefs || []).map(def => (
+                    <div key={def.id} className="flex flex-col gap-0.5">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
+                      <select
+                        value={buAttrFilters[def.id] || 'all'}
+                        onChange={e => setBuAttrFilters(prev => ({ ...prev, [def.id]: e.target.value }))}
+                        className="px-2 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary focus:outline-none focus:border-accent-blue"
+                      >
+                        <option value="all">Barchasi</option>
+                        {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
               {buAvailableGroups.length === 0 ? (
                 <p className="text-xs text-text-muted text-center py-6">{t('sl_us_not_found')}</p>
               ) : (
