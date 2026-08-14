@@ -74,7 +74,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     if (!productAttributeDefs?.length) return true
     const inStock = items.filter(i => i.productId === productId && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
     if (!inStock.length) return true
-    return inStock.every(i => productAttributeDefs.every(def => def.id in getItemAttrs(i)))
+    return inStock.every(i => productAttributeDefs.every(def => def.label in getItemAttrs(i)))
   }
 
   const productNeedsAttrs = (productId) => {
@@ -225,8 +225,8 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
           <div key={def.id} className="flex flex-col gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
             <select
-              value={attrFilters[def.id] || 'all'}
-              onChange={e => setAttrFilter(def.id, e.target.value)}
+              value={attrFilters[def.label] || 'all'}
+              onChange={e => setAttrFilter(def.label, e.target.value)}
               className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
             >
               <option value="all">Barchasi</option>
@@ -428,7 +428,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                     }[item.barcodeStatus] || 'bg-bg-tertiary text-text-muted'
                                     const barcodeStatusLabel = { active: 'Faol', printed: 'Chop', downloaded: 'Yuklangan' }[item.barcodeStatus] || 'Tayinlanmagan'
                                     const itemUnset = productAttributeDefs?.length > 0 &&
-                                      productAttributeDefs.some(def => !(def.id in attrs))
+                                      productAttributeDefs.some(def => !(def.label in attrs))
                                     return (
                                       <tr key={item.id} className={itemUnset ? 'bg-amber-400/15 hover:bg-amber-400/25' : 'hover:bg-bg-tertiary/20'}>
                                         <td className="py-2 pr-6">
@@ -440,9 +440,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                           {batch?.batchNumber || '—'}
                                         </td>
                                         {(productAttributeDefs || []).map(def => {
-                                          const isKeySet = def.id in attrs
-                                          const val = attrs[def.id]
-                                          const hasPendingDef = pendingAttrs[itemId] && def.id in pendingAttrs[itemId]
+                                          const isKeySet = def.label in attrs
+                                          const val = attrs[def.label]
+                                          const hasPendingDef = pendingAttrs[itemId] && def.label in pendingAttrs[itemId]
                                           if (isKeySet && !hasPendingDef) {
                                             return (
                                               <td key={def.id} className="py-2 pr-4">
@@ -452,7 +452,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                               </td>
                                             )
                                           }
-                                          const selectVal = hasPendingDef ? (pendingAttrs[itemId][def.id] ?? '__none__') : ''
+                                          const selectVal = hasPendingDef ? (pendingAttrs[itemId][def.label] ?? '__none__') : ''
                                           return (
                                             <td key={def.id} className="py-2 pr-4">
                                               <select
@@ -460,7 +460,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                                 onClick={e => e.stopPropagation()}
                                                 onChange={e => setPendingAttrs(prev => ({
                                                   ...prev,
-                                                  [itemId]: { ...(prev[itemId] || {}), [def.id]: e.target.value }
+                                                  [itemId]: { ...(prev[itemId] || {}), [def.label]: e.target.value }
                                                 }))}
                                                 className="text-xs px-2 py-1 bg-bg-tertiary border border-amber-400 rounded-lg text-text-primary focus:outline-none focus:border-accent-blue"
                                               >
