@@ -131,7 +131,11 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
         paymentStatus: canFinance ? form.paymentStatus : 'credit',
         paidUSD: canFinance ? paidUSD : 0,
         dueDate: canFinance ? (form.dueDate || null) : null,
-        attributes: form.attributes || {},
+        attributes: Object.fromEntries(
+          Object.entries(form.attributes || {}).filter(([k]) =>
+            (productAttributeDefs || []).some(d => d.label === k)
+          )
+        ),
         unit: form.unit || 'dona',
       })
 

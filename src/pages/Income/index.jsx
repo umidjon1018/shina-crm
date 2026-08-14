@@ -993,7 +993,11 @@ const Income = () => {
                     notes: notes || null,
                     promoDiscount: promoDiscount || null,
                     promoNote: promoNote || null,
-                    attributes: newBatchForm.attributes || {},
+                    attributes: Object.fromEntries(
+                      Object.entries(newBatchForm.attributes || {}).filter(([k]) =>
+                        (productAttributeDefs || []).some(d => d.label === k)
+                      )
+                    ),
                   })
                   setBatches(prev => [newBatch, ...prev])
                   bump()
