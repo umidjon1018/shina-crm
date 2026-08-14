@@ -141,15 +141,17 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     if (category !== 'all' && p.category !== category) return false
     if (season !== 'all' && p.season !== season) return false
     if (statusFilter !== 'all' && shopStockStatus(p) !== statusFilter) return false
-    // Xususiyat filtrlari: shu product ning ombordagi batchlarida mos qiymat bormi?
+    // Xususiyat filtrlari: shu product ning ombordagi itemlarida mos qiymat bormi?
     if (activeAttrFilters.length > 0) {
-      const productBatchIds = items
-        .filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
-        .map(i => i.batchId)
-      const productBatches = batches.filter(b => productBatchIds.includes(b.id))
+      const productItems = items.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
       for (const [defId, val] of activeAttrFilters) {
-        const hasMatch = productBatches.some(b => b.attributes?.[defId] === val)
-        if (!hasMatch) return false
+        if (val === '__unset__') {
+          const hasUnset = productItems.some(i => { const a = getItemAttrs(i); return !(defId in a) || a[defId] === null })
+          if (!hasUnset) return false
+        } else {
+          const hasMatch = productItems.some(i => getItemAttrs(i)?.[defId] === val)
+          if (!hasMatch) return false
+        }
       }
     }
     return true
@@ -225,6 +227,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             >
               <option value="all">Barchasi</option>
               {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+              <option value="__unset__">Xususiyatsiz</option>
             </select>
           </div>
         ))}
@@ -410,8 +413,10 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                       downloaded: 'bg-accent-blue/10 text-accent-blue',
                                     }[item.barcodeStatus] || 'bg-bg-tertiary text-text-muted'
                                     const barcodeStatusLabel = { active: 'Faol', printed: 'Chop', downloaded: 'Yuklangan' }[item.barcodeStatus] || 'Tayinlanmagan'
+                                    const itemUnset = productAttributeDefs?.length > 0 &&
+                                      productAttributeDefs.some(def => !(def.id in attrs))
                                     return (
-                                      <tr key={item.id} className="hover:bg-bg-tertiary/20">
+                                      <tr key={item.id} className={itemUnset ? 'bg-amber-400/15 hover:bg-amber-400/25' : 'hover:bg-bg-tertiary/20'}>
                                         <td className="py-2 pr-6">
                                           {item.barcode
                                             ? <span className="font-mono font-medium text-text-primary">{item.barcode}</span>
