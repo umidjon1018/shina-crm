@@ -374,9 +374,17 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                   </tr>
 
                   {expandedProducts.has(p.id) && (() => {
-                    const inStockItems = items.filter(i =>
-                      i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)
-                    )
+                    const inStockItems = items.filter(i => {
+                      if (!(i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))) return false
+                      if (activeAttrFilters.length > 0) {
+                        const a = getItemAttrs(i)
+                        for (const [defId, val] of activeAttrFilters) {
+                          if (val === '__unset__') { if (defId in a && a[defId] !== null) return false }
+                          else { if (a[defId] !== val) return false }
+                        }
+                      }
+                      return true
+                    })
                     const colCount = canSeePurchasePrice ? 12 : 11
                     const hasDefs = productAttributeDefs?.length > 0
                     return (
