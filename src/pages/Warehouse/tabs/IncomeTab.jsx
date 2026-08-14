@@ -35,7 +35,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
   const [form, setForm] = useState({
     newProductName: '',
     quantity: '',
-    unit: 'dona',
+    unit: '',
     notes: '',
     attributes: {},
     // Moliyaviy (faqat admin/manager)
@@ -71,7 +71,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
 
   const resetForm = () => {
     setForm({
-      newProductName: '', quantity: '', unit: 'dona', notes: '', attributes: {},
+      newProductName: '', quantity: '', unit: '', notes: '', attributes: {},
       supplierId: '', purchasePriceUSD: '', entryUsdRate: String(usdRate || ''),
       paymentStatus: 'credit', paidUSD: '', dueDate: '',
     })

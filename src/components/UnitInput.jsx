@@ -18,7 +18,7 @@ const UnitInput = ({ value, onChange, className = '' }) => {
         />
         <button
           type="button"
-          onClick={() => { setCustom(false); onChange('dona') }}
+          onClick={() => { setCustom(false); onChange('') }}
           title="Ro'yxatga qaytish"
           className="text-text-muted hover:text-text-primary text-lg leading-none px-0.5 flex-shrink-0"
         >‹</button>
@@ -28,7 +28,7 @@ const UnitInput = ({ value, onChange, className = '' }) => {
 
   return (
     <select
-      value={PRESET_UNITS.includes(value) ? value : 'dona'}
+      value={value}
       onChange={e => {
         if (e.target.value === '__other__') {
           setCustom(true)
@@ -39,6 +39,7 @@ const UnitInput = ({ value, onChange, className = '' }) => {
       }}
       className={className}
     >
+      <option value="" disabled>— tanlang —</option>
       {PRESET_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
       <option disabled value="">──────</option>
       <option value="__other__">Boshqa...</option>

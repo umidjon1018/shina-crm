@@ -59,7 +59,7 @@ const Income = () => {
   const [showNewBatchModal, setShowNewBatchModal] = useState(false)
   const [newBatchForm, setNewBatchForm] = useState({
     productId: '', isNewProduct: false, newProductName: '',
-    supplierId: '', quantity: 1, unit: 'dona', purchasePriceUSD: '',
+    supplierId: '', quantity: 1, unit: '', purchasePriceUSD: '',
     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
     dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
   })
@@ -997,7 +997,7 @@ const Income = () => {
                   setShowNewBatchModal(false)
                   setNewBatchForm({
                     productId: '', isNewProduct: false, newProductName: '',
-                    supplierId: '', quantity: 1, unit: 'dona', purchasePriceUSD: '',
+                    supplierId: '', quantity: 1, unit: '', purchasePriceUSD: '',
                     entryUsdRate: usdRate || '', paymentStatus: 'unpaid', paidUSD: 0,
                     dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
                   })
