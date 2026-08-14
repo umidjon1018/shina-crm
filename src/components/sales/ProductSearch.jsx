@@ -7,6 +7,7 @@ import { getItems } from '../../api/itemService'
 import { checkReservation } from '../../api/reservationService'
 import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import i18n from '../../i18n'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
@@ -15,11 +16,21 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
   const { t } = useTranslation()
   const { selectedShopId } = useShopStore()
   const { version } = useDataStore()
+  const { productAttributeDefs } = useSettingsStore()
   const [MOCK_PRODUCTS, setMockProducts] = useState([])
   const [MOCK_ITEMS, setMockItems] = useState([])
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [warning, setWarning] = useState(null)
+  const [attrFilters, setAttrFilters] = useState({}) // { defId: value }
+
+  const activeAttrFilters = Object.entries(attrFilters).filter(([, v]) => v && v !== 'all')
+
+  const itemMatchesAttrs = (item) => {
+    if (activeAttrFilters.length === 0) return true
+    const attrs = item.attributes || {}
+    return activeAttrFilters.every(([defId, val]) => attrs[defId] === val)
+  }
 
   useEffect(() => {
     const params = selectedShopId && selectedShopId !== 'all' ? { shopId: selectedShopId } : {}
@@ -38,7 +49,7 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
     const q = query.toLowerCase()
     const found = MOCK_PRODUCTS.filter(p => {
       const stock = MOCK_ITEMS.filter(i =>
-        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null
+        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i)
       ).length
       return stock > 0 && (
         p.name?.toLowerCase().includes(q) ||
@@ -65,14 +76,14 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
     }
 
     setResults(found)
-  }, [query, allowSold, salesItems, MOCK_PRODUCTS, MOCK_ITEMS])
+  }, [query, allowSold, salesItems, MOCK_PRODUCTS, MOCK_ITEMS, attrFilters])
 
   const handleAdd = async (product) => {
     setWarning(null)
 
     const allItems = MOCK_ITEMS.filter(i => i.productId === product.id)
     const withBarcode = allItems.filter(i => i.barcode !== null)
-    const available = withBarcode.filter(i => i.status === (allowSold ? 'sold' : 'in_stock'))
+    const available = withBarcode.filter(i => i.status === (allowSold ? 'sold' : 'in_stock') && itemMatchesAttrs(i))
 
     if (allItems.length > 0 && withBarcode.length === 0) {
       setWarning({ type: 'no_barcode', message: t('sl_ps_msg_no_barcode', { name: product.name }) })
@@ -138,6 +149,25 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
           className="w-full pl-10 pr-4 py-3 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
         />
       </div>
+
+      {/* Xususiyat filtrlari — faqat natijalar bor va defs mavjud bo'lganda */}
+      {results.length > 0 && (productAttributeDefs || []).length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {(productAttributeDefs || []).map(def => (
+            <div key={def.id} className="flex flex-col gap-0.5">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
+              <select
+                value={attrFilters[def.id] || 'all'}
+                onChange={e => setAttrFilters(prev => ({ ...prev, [def.id]: e.target.value }))}
+                className="px-2 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary focus:outline-none focus:border-accent-blue"
+              >
+                <option value="all">Barchasi</option>
+                {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {warning && (
