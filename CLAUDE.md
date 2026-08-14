@@ -444,6 +444,8 @@ Tab fayllarida bir nechta root element bo'lsa (masalan `<motion.div>` + modal `<
 | Supplier maydon majburiy | IncomeTab da supplier bo'lmasa ham kirim qilish kerak | Required validation olib tashlandi |
 
 ### DB migration log (barcha qo'shilgan ustunlar)
+
+Quyidagilar **lokal DB da** bajarilgan (2026-06-30):
 ```sql
 ALTER TABLE products ADD COLUMN IF NOT EXISTS attribute TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS car_category TEXT;
@@ -454,6 +456,46 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_person TEXT;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 ```
+
+---
+
+## ⚠️ SERVER DEPLOY QUEUE — HETZNER GA KO'CHIRILMAGAN
+
+**Oxirgi deploy: 2026-08-09. Quyidagilar lokal ishlaydi, lekin serverda YO'Q.**
+To'liq deploy ko'rsatmasi: memory `project_server_deploy_queue.md` da.
+
+### Pending DB migrations (server PostgreSQL da bajarish kerak)
+```sql
+-- items.attributes (batch attribute tizimi, 2026-08-13)
+ALTER TABLE items ADD COLUMN IF NOT EXISTS attributes JSONB DEFAULT '{}';
+
+-- batches.unit (o'lchov birligi, 2026-08-14)
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS unit VARCHAR(20) DEFAULT 'dona';
+```
+
+### Pending backend kod o'zgarishlari
+- `batchesController.js` — unit INSERT, items attributes endpoint
+- `itemsController.js` — COALESCE(b.unit) SELECT, PATCH attributes route
+- Batch attribute tizimi — routes/controllers
+
+### Pending frontend
+- Barcha 2026-08-09 dan keyingi o'zgarishlar (attribute tizimi, unit, ProductSearch, B/U tab, ...)
+
+### Deploy tartibi
+```bash
+# 1. Backend — lokal → server
+git push origin main  # shina_crm_backend papkasida
+ssh -i ~/.ssh/crm_bot root@167.233.169.118 "cd /root/shina_crm_backend && git pull && pm2 restart shina-backend"
+
+# 2. DB migrations — server psql da yuqoridagi SQL lar
+
+# 3. Frontend — lokal build → SCP
+npm run build  # shina_crm papkasida
+scp -i ~/.ssh/crm_bot -r dist/* root@167.233.169.118:/var/www/shina-crm/
+ssh -i ~/.ssh/crm_bot root@167.233.169.118 "chmod -R 755 /var/www/shina-crm/"
+```
+
+> **ESLATMA:** Har sessiyada yangi o'zgarish qo'shilsa — shu bo'limni yangilash kerak!
 
 ---
 
