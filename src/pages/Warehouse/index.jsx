@@ -100,7 +100,7 @@ const Warehouse = () => {
             {activeTab === 'stock' && <StockTab products={products} batches={shopBatches} items={items} userRole={user?.role} productCategories={productCategories} />}
             {activeTab === 'used_stock' && <UsedStockTab usedStock={selectedShopId === 'all' ? usedStock : usedStock.filter(u => !u.shopId || u.shopId === selectedShopId)} usedSales={usedSales} productCategories={productCategories} />}
             {activeTab === 'income' && <IncomeTab products={shopProductsList} batches={shopBatches} userRole={user?.role} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} shopBatchIds={shopBatchIds} />}
-            {activeTab === 'barcode' && <BarcodeTab products={shopProductsList} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} />}
+            {activeTab === 'barcode' && <BarcodeTab products={shopProductsList} batches={shopBatches} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} />}
           </motion.div>
         </AnimatePresence>
       )}

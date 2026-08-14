@@ -32,12 +32,28 @@ export const getItems = async (params = {}) => {
   return data.map(mapItem)
 }
 
-export const generateBarcodes = async (itemIds, userId) => {
+export const generateBarcodes = async (itemIds, userId, options = {}) => {
   const { data } = await api.post('/api/items/generate-barcodes', {
     item_ids: itemIds.map(Number),
     user_id: userId,
+    mode: options.mode || 'per_item',
+    base_barcode: options.baseBarcode || null,
   })
   return data.map(mapItem)
+}
+
+export const findExistingGroupBarcode = async (productId, attributes = {}) => {
+  try {
+    const { data } = await api.get('/api/items/existing-group-barcode', {
+      params: {
+        product_id: productId,
+        attributes: JSON.stringify(attributes),
+      }
+    })
+    return data.barcodes || []
+  } catch {
+    return []
+  }
 }
 
 export const updateBarcodeStatus = async (itemIds, statusOrObj) => {
