@@ -1,26 +1,24 @@
-import { useRef } from 'react'
+import { useState } from 'react'
 
 const PRESET_UNITS = ['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta']
 
 const UnitInput = ({ value, onChange, className = '' }) => {
-  const inputRef = useRef(null)
-  const isCustom = value && !PRESET_UNITS.includes(value)
+  const [custom, setCustom] = useState(!PRESET_UNITS.includes(value) && !!value)
 
-  if (isCustom) {
+  if (custom) {
     return (
       <div className="flex gap-1 items-center">
         <input
-          ref={inputRef}
           type="text"
-          value={value}
+          value={PRESET_UNITS.includes(value) ? '' : value}
           onChange={e => onChange(e.target.value)}
-          placeholder="birlik"
+          placeholder="birlik yozing..."
           autoFocus
           className={className}
         />
         <button
           type="button"
-          onClick={() => onChange('dona')}
+          onClick={() => { setCustom(false); onChange('dona') }}
           title="Ro'yxatga qaytish"
           className="text-text-muted hover:text-text-primary text-lg leading-none px-0.5 flex-shrink-0"
         >‹</button>
@@ -30,16 +28,20 @@ const UnitInput = ({ value, onChange, className = '' }) => {
 
   return (
     <select
-      value={value || 'dona'}
+      value={PRESET_UNITS.includes(value) ? value : 'dona'}
       onChange={e => {
-        if (e.target.value === '__other__') onChange('')
-        else onChange(e.target.value)
+        if (e.target.value === '__other__') {
+          setCustom(true)
+          onChange('')
+        } else {
+          onChange(e.target.value)
+        }
       }}
       className={className}
     >
       {PRESET_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
       <option disabled value="">──────</option>
-      <option value="__other__">O'zgacha...</option>
+      <option value="__other__">Boshqa...</option>
     </select>
   )
 }
