@@ -310,7 +310,8 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     printWindow.document.close()
     printWindow.print()
     printWindow.close()
-    await updateBarcodeStatus(allItems.map(i => i.id), { status: 'printed', reprintAllowed: false })
+    // Umumiy barkod: faqat count++ — reprint cheklanmaydi (bir barkod ko'p item uchun)
+    await updateBarcodeStatus(allItems.map(i => i.id), { status: 'printed' })
     onRefresh?.()
   }
 
@@ -352,7 +353,8 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
 
   const handleDownloadGroupBarcodeByValue = async (barcodeValue, allItems) => {
     await downloadPng(barcodeValue)
-    await updateBarcodeStatus(allItems.map(i => i.id), { status: 'downloaded', reprintAllowed: false })
+    // Umumiy barkod: faqat count++ — reprint cheklanmaydi
+    await updateBarcodeStatus(allItems.map(i => i.id), { status: 'downloaded' })
     onRefresh?.()
   }
 
@@ -591,8 +593,9 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             >
               {detailModal.type === 'group' ? (() => {
                 const allGroupItems = items.filter(i => i.barcode === detailModal.barcode && i.status === 'in_stock')
-                const totalPrint = allGroupItems.reduce((s, i) => s + (i.printCount || 0), 0)
-                const totalDownload = allGroupItems.reduce((s, i) => s + (i.downloadCount || 0), 0)
+                // Umumiy barkodda barcha item count bir xil — birinchisi vakil
+                const totalPrint = allGroupItems[0]?.printCount || 0
+                const totalDownload = allGroupItems[0]?.downloadCount || 0
                 return (
                   <>
                     <div className="flex items-start justify-between p-5 border-b border-border">
@@ -635,8 +638,9 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                         <div className="mt-2 space-y-2">
                           {detailModal.batches.map((b, idx) => {
                             const bItems = items.filter(i => i.batchId === b.id && i.barcode === detailModal.barcode)
-                            const bPrint = bItems.reduce((s, i) => s + (i.printCount || 0), 0)
-                            const bDownload = bItems.reduce((s, i) => s + (i.downloadCount || 0), 0)
+                            // Bir xil barkodli itemlar count bir xil — birinchisi vakil
+                            const bPrint = bItems[0]?.printCount || 0
+                            const bDownload = bItems[0]?.downloadCount || 0
                             const bDate = b.receivedAt ? new Date(b.receivedAt).toLocaleDateString('uz-UZ') : '—'
                             return (
                               <div key={b.id} className="bg-bg-tertiary rounded-xl p-3 flex items-center justify-between">
