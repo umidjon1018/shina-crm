@@ -210,6 +210,19 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     await doGenerate(pg.batchId, pg.itemIds, 'group', baseBarcode)
   }
 
+  const handleConvertToGroup = async (batch) => {
+    const { bItems } = getBatchBarcodeState(batch.id)
+    const allItemIds = bItems.map(i => i.id)
+    if (!allItemIds.length) return
+    setGeneratingBatch(batch.id)
+    try {
+      await generateBarcodes(allItemIds, userId, { mode: 'group', force: true })
+      onRefresh?.()
+    } finally {
+      setGeneratingBatch(null)
+    }
+  }
+
   const handleMergeNew = async () => {
     const pg = pendingGenerate.current
     if (!pg) return
@@ -730,11 +743,19 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                                   <Badge cls="text-accent-blue bg-accent-blue/10">{withBarcode.length} ta</Badge>
                                 </div>
                               )}
-                              {/* Per-item badge */}
+                              {/* Per-item badge + convert to group */}
                               {isPerItem && (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <Badge cls="text-text-secondary bg-bg-tertiary">Alohida barkodlar</Badge>
                                   <span className="text-[10px] text-text-muted">{withBarcode.length} ta</span>
+                                  <button
+                                    onClick={() => handleConvertToGroup(batch)}
+                                    disabled={isGenerating}
+                                    className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-accent-orange/10 border border-accent-orange/20 text-accent-orange text-[10px] font-medium hover:bg-accent-orange/20 transition-colors disabled:opacity-50"
+                                    title="Barcha alohida barkodlarni o'chirib, bitta umumiy barkod yaratish"
+                                  >
+                                    <Layers size={9} /> Umumiy barkodga o'tkazish
+                                  </button>
                                 </div>
                               )}
 

@@ -38,6 +38,7 @@ export const generateBarcodes = async (itemIds, userId, options = {}) => {
     user_id: userId,
     mode: options.mode || 'per_item',
     base_barcode: options.baseBarcode || null,
+    force: options.force || false,
   })
   return data.map(mapItem)
 }
