@@ -912,12 +912,15 @@ const Income = () => {
                           </label>
                           {checked && (
                             <select
-                              value={newBatchForm.attributes[def.label] || ''}
-                              onChange={e => setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: e.target.value } }))}
+                              value={newBatchForm.attributes[def.label] === null ? '__none__' : (newBatchForm.attributes[def.label] || '')}
+                              onChange={e => {
+                                const val = e.target.value === '__none__' ? null : e.target.value
+                                setNewBatchForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: val } }))
+                              }}
                               className="flex-1 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue"
                             >
-                              {def.values.length === 0 && <option value="">— Qiymat yo'q —</option>}
                               {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                              <option value="__none__">Xususiyatsiz</option>
                             </select>
                           )}
                         </div>

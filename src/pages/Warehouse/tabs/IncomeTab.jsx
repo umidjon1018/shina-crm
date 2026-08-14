@@ -457,7 +457,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
           <div className="pt-1 border-t border-border space-y-3">
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider pt-1">Xususiyatlar</p>
             {(productAttributeDefs || []).map(def => {
-              const checked = def.id in form.attributes
+              const checked = def.label in form.attributes
               return (
                 <div key={def.id} className="flex items-center gap-3">
                   <input
@@ -466,11 +466,11 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                     checked={checked}
                     onChange={e => {
                       if (e.target.checked) {
-                        setForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: def.values[0] || '' } }))
+                        setForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: def.values[0] || null } }))
                       } else {
                         setForm(f => {
                           const a = { ...f.attributes }
-                          delete a[def.id]
+                          delete a[def.label]
                           return { ...f, attributes: a }
                         })
                       }
@@ -482,12 +482,15 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                   </label>
                   {checked && (
                     <select
-                      value={form.attributes[def.id] || ''}
-                      onChange={e => setForm(f => ({ ...f, attributes: { ...f.attributes, [def.id]: e.target.value } }))}
+                      value={form.attributes[def.label] === null ? '__none__' : (form.attributes[def.label] || '')}
+                      onChange={e => {
+                        const val = e.target.value === '__none__' ? null : e.target.value
+                        setForm(f => ({ ...f, attributes: { ...f.attributes, [def.label]: val } }))
+                      }}
                       className="flex-1 px-3 py-1.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
                     >
-                      {def.values.length === 0 && <option value="">— Qiymat yo'q —</option>}
                       {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                      <option value="__none__">Xususiyatsiz</option>
                     </select>
                   )}
                 </div>

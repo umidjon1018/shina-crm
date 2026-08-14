@@ -15,7 +15,7 @@ const AttrBadges = ({ attributes }) => {
     <div className="flex flex-wrap gap-1">
       {Object.entries(attributes).map(([k, v]) => (
         <span key={k} className="px-1.5 py-0.5 rounded-md bg-bg-tertiary border border-border text-[10px] text-text-secondary">
-          {k}: <span className="text-text-primary font-medium">{v}</span>
+          {k}: <span className={v ? 'text-text-primary font-medium' : 'text-text-muted italic'}>{v || 'xususiyatsiz'}</span>
         </span>
       ))}
     </div>
@@ -541,11 +541,15 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                         <label className="text-sm text-text-secondary font-medium cursor-pointer min-w-[70px]">{def.label}</label>
                         {checked && (
                           <select
-                            value={attrEditModal.attrs[def.label] || ''}
-                            onChange={e => setAttrEditModal(m => ({ ...m, attrs: { ...m.attrs, [def.label]: e.target.value } }))}
+                            value={attrEditModal.attrs[def.label] === null ? '__none__' : (attrEditModal.attrs[def.label] || '')}
+                            onChange={e => {
+                              const val = e.target.value === '__none__' ? null : e.target.value
+                              setAttrEditModal(m => ({ ...m, attrs: { ...m.attrs, [def.label]: val } }))
+                            }}
                             className="flex-1 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue"
                           >
                             {def.values.map(v => <option key={v} value={v}>{v}</option>)}
+                            <option value="__none__">Xususiyatsiz</option>
                           </select>
                         )}
                       </div>
