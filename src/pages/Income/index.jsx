@@ -955,6 +955,7 @@ const Income = () => {
                 onClick={async () => {
                   const { productId, isNewProduct, newProductName, supplierId, quantity, purchasePriceUSD, entryUsdRate, paymentStatus, paidUSD, dueDate, promoDiscount, promoNote, notes } = newBatchForm
                   if ((!productId && !newProductName) || !purchasePriceUSD || !entryUsdRate) return
+                  if (!newBatchForm.unit?.trim()) { alert("O'lchov birligi majburiy"); return }
                   const product = MOCK_PRODUCTS.find(p => p.id === productId)
                   const totalUSD = purchasePriceUSD * quantity
                   const debtUSD = Math.max(0, totalUSD - paidUSD)

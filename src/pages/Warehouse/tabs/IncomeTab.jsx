@@ -86,6 +86,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
     if (!isNewProduct && !selectedProduct) { setError(t('wh_in_err_select')); return }
     if (isNewProduct && !form.newProductName.trim()) { setError(t('wh_in_err_name')); return }
     if (!form.quantity || +form.quantity <= 0) { setError(t('wh_in_err_qty')); return }
+    if (!form.unit?.trim()) { setError("O'lchov birligi majburiy"); return }
     if (canFinance) {
       if (!form.purchasePriceUSD || +form.purchasePriceUSD <= 0) { setError(t('wh_in_err_price')); return }
       if (!form.entryUsdRate || +form.entryUsdRate <= 0) { setError(t('wh_in_err_rate')); return }
@@ -312,7 +313,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
 
         {/* Miqdor + Birlik */}
         <div>
-          <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5 block">{t('wh_in_qty')}</label>
+          <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5 block">{t('wh_in_qty')} <span className="text-accent-red">*</span></label>
           <div className="flex gap-2">
             <input
               type="number" min="1"
