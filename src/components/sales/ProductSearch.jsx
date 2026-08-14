@@ -133,9 +133,6 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
     } else {
       onAdd({ item, product, warning: null })
     }
-
-    setQuery('')
-    setResults([])
   }
 
   return (
