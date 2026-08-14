@@ -335,8 +335,28 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 - `src/components/sales/` — 5 ta komponent (BarcodeScanner, DiscountRequestModal, ProductSearch, SaleItemSearch, SuccessModal)
 - `src/i18n/uz.js` va `src/i18n/ru.js` — yangi tarjima kalitlari
 
-### Keyingi session
-Barcha refactoringlar tugallandi. Yangi funksionallik yoki boshqa vazifalar.
+### Keyingi session (2026-08-14 dan keyin)
+**Barkod tizimini tuzatish** — birinchi ish (foydalanuvchi aytdi).
+Undan keyin Warehouse kengaytma ishlari tartibi bo'yicha (memory: project_warehouse_tasks).
+
+### O'lchov birligi tizimi (2026-08-14 da qo'shildi)
+
+- `src/components/UnitInput.jsx` — select + "Boshqa..." combo, X tugma bilan tozalash
+- `UNIT_OPTIONS = ['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta']` — predefined, + erkin matn
+- **Batch darajasida** (product emas) — har do'kon o'zinikini tanlaydi kirim vaqtida
+- DB: `batches.unit VARCHAR(20) DEFAULT 'dona'` — lokal DB da qo'shildi (Hetzner da HALI yo'q!)
+- **Hetzner migration KERAK**: `ALTER TABLE batches ADD COLUMN IF NOT EXISTS unit VARCHAR(20) DEFAULT 'dona';`
+- Ko'rinish joylari: BatchesTab, StockTab, ProductModal, BarcodeTab, ProductSearch, Management, Reports, Dashboard
+- **UX qoidasi**: forma ochilganda bo'sh (`— tanlang —`), majburiy, modal yopilsa/ochilsa reset
+
+### ProductSearch — Search natijasi qolishi (2026-08-14)
+- `handleAdd` dan `setQuery('')` va `setResults([])` olib tashlandi
+- Savat `+/-` tugmalari attribute filtrsiz ishlaydi (Option 1 — foydalanuvchi tasdiqladi)
+
+### B/U Sotuv tab — Attribute filtrlar (2026-08-14)
+- `buAttrFilters` state, `activeBuAttrFilters` computed — `useSalesState.js` da
+- Filter UI `UsedSaleTab.jsx` ga qo'shildi
+- `buAvailableGroups` filterlash logikasi yangilandi
 
 ### DateMaskInput — Barcha sana maydonlari (2026-06-30 da qo'shildi)
 - `src/components/DateMaskInput.jsx` — `kk.oo.yyyy` mask, ISO `yyyy-mm-dd` qaytaradi
