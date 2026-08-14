@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download, Plus, Pencil } from 'lucide-react'
+import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download, Plus, Pencil, Trash2 } from 'lucide-react'
 import { generateBarcodes, updateBarcodeStatus, findExistingGroupBarcode } from '../../../api/itemService'
 import { updateBatchAttributes } from '../../../api/incomeService'
 import { useSettingsStore } from '../../../store/settingsStore'
@@ -84,6 +84,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
   const [mergeDialog, setMergeDialog] = useState(null)
   const [detailModal, setDetailModal] = useState(null)
   const [attrEditModal, setAttrEditModal] = useState(null)
+  const [deleteGroupModal, setDeleteGroupModal] = useState(null)
   const pendingGenerate = useRef(null)
 
   const [allBarcodesSearch, setAllBarcodesSearch] = useState('')
@@ -283,6 +284,30 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     }
   }
 
+  // Umumiy barkoddan itemlarni boshqa guruhga ko'chirish, so'ng original card yo'qoladi
+  const handleMoveGroupItemsTo = async (targetBarcode) => {
+    if (!deleteGroupModal) return
+    const { group } = deleteGroupModal
+    const inStockItems = items.filter(i => i.barcode === group.barcode && i.status === 'in_stock')
+    if (!inStockItems.length) { setDeleteGroupModal(null); return }
+    setGeneratingBatch(group.barcode)
+    try {
+      await generateBarcodes(inStockItems.map(i => i.id), userId, { mode: 'group', baseBarcode: targetBarcode, force: true })
+      setDeleteGroupModal(null)
+      onRefresh?.()
+    } finally {
+      setGeneratingBatch(null)
+    }
+  }
+
+  // Umumiy barkoddan itemlarni alohida barkodga o'tkazish, card yo'qoladi
+  const handleConvertGroupAndDelete = async () => {
+    if (!deleteGroupModal) return
+    const { group } = deleteGroupModal
+    setDeleteGroupModal(null)
+    await handleConvertGroupToPerItem(group)
+  }
+
   // Batch xususiyatini yangilash
   const handleSaveAttrs = async () => {
     if (!attrEditModal) return
@@ -449,6 +474,97 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
 
   return (
     <>
+      {/* Delete Group Modal */}
+      <AnimatePresence>
+        {deleteGroupModal && (() => {
+          const { group } = deleteGroupModal
+          const inStockItems = items.filter(i => i.barcode === group.barcode && i.status === 'in_stock')
+          const otherGroups = groupCards.filter(g => g.barcode !== group.barcode)
+          const isGenerating = generatingBatch === group.barcode
+          return (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+              onClick={() => !isGenerating && setDeleteGroupModal(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              >
+                <div className="flex items-start gap-3 mb-4">
+                  <Trash2 size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-syne font-bold text-text-primary">Umumiy barkodni o'chirish</h3>
+                    <p className="font-mono text-sm text-accent-green mt-0.5">{group.barcode}</p>
+                  </div>
+                </div>
+
+                {inStockItems.length > 0 ? (
+                  <>
+                    <div className="p-3 rounded-xl bg-accent-orange/5 border border-accent-orange/20 mb-4">
+                      <p className="text-sm text-text-secondary">
+                        Bu barkodda hali <span className="font-bold text-accent-orange">{inStockItems.length} ta</span> tovar bor. O'chirish uchun ularni boshqa barkodga o'tkazing:
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleConvertGroupAndDelete}
+                        disabled={isGenerating}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-bg-tertiary border border-border text-left hover:border-accent-blue hover:bg-accent-blue/5 transition-all disabled:opacity-50"
+                      >
+                        <Hash size={14} className="text-text-muted flex-shrink-0" />
+                        <div>
+                          <p className="font-medium text-sm text-text-primary">Har biriga alohida barkod yaratish</p>
+                          <p className="text-xs text-text-muted">{inStockItems.length} ta tovar yangi barkod oladi</p>
+                        </div>
+                      </button>
+
+                      {otherGroups.length > 0 && (
+                        <div>
+                          <p className="text-[11px] text-text-muted mb-1.5 px-1">Boshqa guruhga biriktirish:</p>
+                          <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                            {otherGroups.map(og => (
+                              <button
+                                key={og.barcode}
+                                onClick={() => handleMoveGroupItemsTo(og.barcode)}
+                                disabled={isGenerating}
+                                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-accent-green/5 border border-accent-green/20 hover:bg-accent-green/10 transition-all disabled:opacity-50"
+                              >
+                                <span className="font-mono text-xs font-bold text-accent-green">{og.barcode}</span>
+                                {Object.keys(og.attributes).length > 0 && <AttrBadges attributes={og.attributes} />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-text-secondary mb-4">Bu barkod bo'sh — barcha tovarlar sotilgan. Barkod tarixi saqlanib qoladi.</p>
+                )}
+
+                <div className="flex gap-2 mt-4">
+                  {isGenerating && (
+                    <div className="flex items-center gap-2 text-text-muted text-xs">
+                      <div className="w-4 h-4 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
+                      Jarayonda...
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setDeleteGroupModal(null)}
+                    disabled={isGenerating}
+                    className="ml-auto px-4 py-2 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-sm hover:text-text-primary transition-colors disabled:opacity-50"
+                  >
+                    Bekor
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+
       {/* Merge Dialog */}
       <AnimatePresence>
         {mergeDialog && (
@@ -988,6 +1104,13 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                                 title="Xususiyatlarni o'zgartirish"
                               >
                                 <Pencil size={11} />
+                              </button>
+                              <button
+                                onClick={() => setDeleteGroupModal({ group })}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors"
+                                title="Umumiy barkodni o'chirish"
+                              >
+                                <Trash2 size={11} />
                               </button>
                             </div>
                           </div>
