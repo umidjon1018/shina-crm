@@ -20,18 +20,6 @@ const AttrBadges = ({ attributes }) => {
   )
 }
 
-const renderBarcodeSvg = (elementId, barcodeValue) => {
-  setTimeout(() => {
-    try {
-      JsBarcode(`#${elementId}`, barcodeValue, {
-        format: 'CODE128', width: 1.5, height: 40,
-        displayValue: true, fontSize: 10, margin: 6,
-        background: 'transparent', lineColor: 'currentColor',
-      })
-    } catch {}
-  }, 80)
-}
-
 const createBarcodeSvgHtml = (barcodeValue) => {
   return new Promise(resolve => {
     const div = document.createElement('div')
@@ -60,6 +48,29 @@ const createBarcodeSvgHtml = (barcodeValue) => {
   })
 }
 
+const downloadPng = (barcodeValue) => {
+  return new Promise(resolve => {
+    try {
+      const canvas = document.createElement('canvas')
+      JsBarcode(canvas, barcodeValue, {
+        format: 'CODE128', width: 2, height: 60,
+        displayValue: true, fontSize: 12, margin: 10,
+        background: '#ffffff', lineColor: '#000000',
+      })
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(); return }
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${barcodeValue}.png`
+        a.click()
+        URL.revokeObjectURL(url)
+        resolve()
+      })
+    } catch { resolve() }
+  })
+}
+
 const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName, downloadEnabled, notificationSettings, addNotification, onRefresh }) => {
   const { t } = useTranslation()
   const barcodeSelectClass = userRole === 'admin' ? '' : 'select-none'
@@ -68,7 +79,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
   const [productSearch, setProductSearch] = useState('')
   const [generatingBatch, setGeneratingBatch] = useState(null)
   const [mergeDialog, setMergeDialog] = useState(null)
-  const [detailModal, setDetailModal] = useState(null) // batch object
+  const [detailModal, setDetailModal] = useState(null)
   const pendingGenerate = useRef(null)
 
   const [allBarcodesSearch, setAllBarcodesSearch] = useState('')
@@ -96,8 +107,8 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
   }
 
   const SortIcon = ({ field, sortField, sortDir }) => {
-    if (sortField !== field) return <span className="text-text-muted ml-1 text-[10px] inline-block">⇅</span>
-    return <span className="text-accent-blue ml-1 text-[10px] inline-block">{sortDir === 'asc' ? '▲' : '▼'}</span>
+    if (sortField !== field) return <span className="text-text-muted ml-1 text-[10px]">⇅</span>
+    return <span className="text-accent-blue ml-1 text-[10px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
   }
 
   const filteredProducts = products.filter(p =>
@@ -129,7 +140,15 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     productBatches.forEach(batch => {
       const { uniqueBarcodes, isGroup, isSingle } = getBatchBarcodeState(batch.id)
       if ((isGroup || isSingle) && uniqueBarcodes[0]) {
-        renderBarcodeSvg(`bc-grp-${batch.id}`, uniqueBarcodes[0])
+        setTimeout(() => {
+          try {
+            JsBarcode(`#bc-grp-${batch.id}`, uniqueBarcodes[0], {
+              format: 'CODE128', width: 1.5, height: 40,
+              displayValue: true, fontSize: 10, margin: 6,
+              background: 'transparent', lineColor: 'currentColor',
+            })
+          } catch {}
+        }, 80)
       }
     })
   }, [productBatches, items])
@@ -223,24 +242,20 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     onRefresh?.()
   }
 
-  const handleDownloadBarcode = (barcodeValue) => {
-    try {
-      const canvas = document.createElement('canvas')
-      JsBarcode(canvas, barcodeValue, {
-        format: 'CODE128', width: 2, height: 60,
-        displayValue: true, fontSize: 12, margin: 10,
-        background: '#ffffff', lineColor: '#000000',
-      })
-      canvas.toBlob(blob => {
-        if (!blob) return
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `barcode-${barcodeValue}.png`
-        a.click()
-        URL.revokeObjectURL(url)
-      })
-    } catch {}
+  const handlePrintSingleItem = async (item) => {
+    const svgHtml = await createBarcodeSvgHtml(item.barcode)
+    if (!svgHtml) return
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <html><body style="margin:16px;background:#0F1520;">
+        <div style="background:#0F1520;display:inline-block;padding:4px;">${svgHtml}</div>
+      </body></html>
+    `)
+    printWindow.document.close()
+    printWindow.print()
+    printWindow.close()
+    await updateBarcodeStatus([item.id], { status: 'printed', reprintAllowed: false })
+    onRefresh?.()
   }
 
   const handlePrintPerItem = async (batch) => {
@@ -258,6 +273,34 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     printWindow.print()
     printWindow.close()
     await updateBarcodeStatus(withBarcode.map(i => i.id), { status: 'printed', reprintAllowed: false })
+    onRefresh?.()
+  }
+
+  // === Download handlers ===
+
+  const handleDownloadSingleItem = async (item) => {
+    await downloadPng(item.barcode)
+    await updateBarcodeStatus([item.id], { status: 'downloaded', reprintAllowed: false })
+    onRefresh?.()
+  }
+
+  const handleDownloadGroup = async (batch) => {
+    const { uniqueBarcodes, withBarcode } = getBatchBarcodeState(batch.id)
+    const bc = uniqueBarcodes[0]
+    if (!bc) return
+    await downloadPng(bc)
+    await updateBarcodeStatus(withBarcode.map(i => i.id), { status: 'downloaded', reprintAllowed: false })
+    onRefresh?.()
+  }
+
+  const handleDownloadAllPerItem = async (batch) => {
+    const { withBarcode } = getBatchBarcodeState(batch.id)
+    if (!withBarcode.length) return
+    for (const item of withBarcode) {
+      await downloadPng(item.barcode)
+      await new Promise(r => setTimeout(r, 200))
+    }
+    await updateBarcodeStatus(withBarcode.map(i => i.id), { status: 'downloaded', reprintAllowed: false })
     onRefresh?.()
   }
 
@@ -339,16 +382,12 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
       <AnimatePresence>
         {mergeDialog && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
             onClick={() => { setMergeDialog(null); pendingGenerate.current = null }}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
               className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
             >
@@ -356,9 +395,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 <AlertCircle size={20} className="text-accent-orange flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-syne font-bold text-text-primary">Barkod allaqachon mavjud</h3>
-                  <p className="text-sm text-text-secondary mt-1">
-                    Bu mahsulot va xususiyatlar uchun umumiy barkod oldindan yaratilgan.
-                  </p>
+                  <p className="text-sm text-text-secondary mt-1">Bu mahsulot va xususiyatlar uchun umumiy barkod oldindan yaratilgan.</p>
                 </div>
               </div>
               {mergeDialog.existingBarcodes.length > 0 && (
@@ -377,16 +414,10 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 </div>
               )}
               <div className="flex gap-2">
-                <button
-                  onClick={handleMergeNew}
-                  className="flex-1 py-2.5 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm font-medium hover:bg-accent-blue/20 transition-colors"
-                >
+                <button onClick={handleMergeNew} className="flex-1 py-2.5 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm font-medium hover:bg-accent-blue/20 transition-colors">
                   Yangi barkod yaratish
                 </button>
-                <button
-                  onClick={() => { setMergeDialog(null); pendingGenerate.current = null }}
-                  className="px-4 py-2.5 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-sm hover:text-text-primary transition-colors"
-                >
+                <button onClick={() => { setMergeDialog(null); pendingGenerate.current = null }} className="px-4 py-2.5 rounded-xl bg-bg-tertiary border border-border text-text-secondary text-sm hover:text-text-primary transition-colors">
                   <X size={14} />
                 </button>
               </div>
@@ -395,62 +426,45 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         )}
       </AnimatePresence>
 
-      {/* Barkod detail modal */}
+      {/* Detail Modal */}
       <AnimatePresence>
         {detailModal && (() => {
           const { bItems, withBarcode, withoutBarcode, uniqueBarcodes, isGroup, isPerItem, isSingle } = getBatchBarcodeState(detailModal.id)
           const hasGroupBc = isGroup || isSingle
-          const batchDate = detailModal.receivedAt
-            ? new Date(detailModal.receivedAt).toLocaleDateString('uz-UZ') : '—'
-          // Group barkodda birinchi itemning statistikasi umumiy (barchasi bir xil)
+          const batchDate = detailModal.receivedAt ? new Date(detailModal.receivedAt).toLocaleDateString('uz-UZ') : '—'
           const groupItem = withBarcode[0]
 
           return (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
               onClick={() => setDetailModal(null)}
             >
               <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
+                initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                 onClick={e => e.stopPropagation()}
                 className="bg-bg-secondary border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
               >
-                {/* Modal header */}
+                {/* Header */}
                 <div className="flex items-start justify-between p-5 border-b border-border">
                   <div>
                     <h3 className="font-syne font-bold text-text-primary">{selectedProduct?.name}</h3>
-                    <p className="text-xs text-text-muted mt-0.5">
-                      Kirim: {batchDate}
-                      {detailModal.supplierName && ` · ${detailModal.supplierName}`}
-                    </p>
+                    <p className="text-xs text-text-muted mt-0.5">Kirim: {batchDate}{detailModal.supplierName && ` · ${detailModal.supplierName}`}</p>
                     {detailModal.attributes && Object.keys(detailModal.attributes).length > 0 && (
-                      <div className="mt-1.5">
-                        <AttrBadges attributes={detailModal.attributes} />
-                      </div>
+                      <div className="mt-1.5"><AttrBadges attributes={detailModal.attributes} /></div>
                     )}
                   </div>
-                  <button
-                    onClick={() => setDetailModal(null)}
-                    className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-tertiary transition-colors"
-                  >
+                  <button onClick={() => setDetailModal(null)} className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-tertiary transition-colors">
                     <X size={16} />
                   </button>
                 </div>
 
-                {/* Modal body */}
+                {/* Body */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
-
-                  {/* Barkod yo'q */}
                   {withBarcode.length === 0 && (
                     <div className="text-center py-8">
                       <Tag size={32} className="text-text-muted mx-auto mb-2" />
                       <p className="text-sm text-text-muted">Bu kirim uchun hali barkod yaratilmagan</p>
-                      <p className="text-xs text-text-muted mt-1">{withoutBarcode.length} ta tovar barkod kutmoqda</p>
                     </div>
                   )}
 
@@ -461,33 +475,30 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                         <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Umumiy barkod</span>
                         <Badge cls="text-accent-blue bg-accent-blue/10">{withBarcode.length} ta uchun</Badge>
                       </div>
-
-                      {/* SVG */}
+                      {/* Barkod qiymati badge */}
+                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accent-green/10 border border-accent-green/30 ${barcodeSelectClass}`}>
+                        <span className="font-mono text-sm font-bold text-accent-green">{uniqueBarcodes[0]}</span>
+                      </div>
                       <div className="bg-bg-tertiary rounded-xl p-4 flex items-center gap-6">
                         <svg id="modal-group-bc" className="text-text-primary flex-shrink-0" style={{width: 200}} />
                         <div className="space-y-2">
-                          <p className={`font-mono text-base font-bold text-accent-green ${barcodeSelectClass}`}>
-                            {uniqueBarcodes[0]}
-                          </p>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="bg-bg-secondary rounded-lg p-2.5 text-center">
                               <p className="text-lg font-bold text-text-primary">{groupItem.printCount || 0}</p>
-                              <p className="text-[10px] text-text-muted">marta chop etildi</p>
+                              <p className="text-[10px] text-text-muted">marta chop</p>
                             </div>
                             <div className="bg-bg-secondary rounded-lg p-2.5 text-center">
                               <p className="text-lg font-bold text-text-primary">{groupItem.downloadCount || 0}</p>
-                              <p className="text-[10px] text-text-muted">marta yuklab olindi</p>
+                              <p className="text-[10px] text-text-muted">marta yuklab</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            {(() => { const { label, cls } = getItemStatus(groupItem, t); return <Badge cls={cls}>{label}</Badge> })()}
-                          </div>
+                          {(() => { const { label, cls } = getItemStatus(groupItem, t); return <Badge cls={cls}>{label}</Badge> })()}
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Per-item barkodlar jadvali */}
+                  {/* Per-item barkodlar */}
                   {isPerItem && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -499,10 +510,10 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                           <thead className="bg-bg-tertiary">
                             <tr>
                               <th className="px-3 py-2.5 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Barkod</th>
-                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Chop</th>
-                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Yuklab</th>
+                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider">Chop</th>
+                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider">Yuklab</th>
                               <th className="px-3 py-2.5 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Holat</th>
-                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider"></th>
+                              <th className="px-3 py-2.5 text-center text-[11px] font-bold text-text-muted uppercase tracking-wider w-16">Amal</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-border">
@@ -510,30 +521,25 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                               const { label, cls } = getItemStatus(item, t)
                               return (
                                 <tr key={item.id} className="hover:bg-bg-tertiary/30 transition-colors">
-                                  <td className={`px-3 py-2 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>
-                                    {item.barcode}
+                                  <td className={`px-3 py-2 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>{item.barcode}</td>
+                                  <td className="px-3 py-2 text-center">
+                                    <span className={`text-sm font-bold ${item.printCount > 0 ? 'text-accent-green' : 'text-text-muted'}`}>{item.printCount || 0}×</span>
                                   </td>
                                   <td className="px-3 py-2 text-center">
-                                    <span className={`text-sm font-bold ${item.printCount > 0 ? 'text-accent-green' : 'text-text-muted'}`}>
-                                      {item.printCount || 0}×
-                                    </span>
-                                  </td>
-                                  <td className="px-3 py-2 text-center">
-                                    <span className={`text-sm font-bold ${item.downloadCount > 0 ? 'text-accent-blue' : 'text-text-muted'}`}>
-                                      {item.downloadCount || 0}×
-                                    </span>
+                                    <span className={`text-sm font-bold ${item.downloadCount > 0 ? 'text-accent-blue' : 'text-text-muted'}`}>{item.downloadCount || 0}×</span>
                                   </td>
                                   <td className="px-3 py-2">
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cls}`}>{label}</span>
                                   </td>
-                                  <td className="px-3 py-2 text-center">
-                                    <button
-                                      onClick={() => handleDownloadBarcode(item.barcode)}
-                                      className="p-1 rounded text-text-muted hover:text-accent-blue transition-colors"
-                                      title="Yuklab olish"
-                                    >
-                                      <Download size={12} />
-                                    </button>
+                                  <td className="px-3 py-2">
+                                    <div className="flex items-center justify-center gap-1">
+                                      <button onClick={() => handlePrintSingleItem(item)} className="p-1 rounded text-text-muted hover:text-accent-green transition-colors" title="Chop etish">
+                                        <Printer size={12} />
+                                      </button>
+                                      <button onClick={() => handleDownloadSingleItem(item)} className="p-1 rounded text-text-muted hover:text-accent-blue transition-colors" title="Yuklab olish">
+                                        <Download size={12} />
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               )
@@ -544,46 +550,37 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                     </div>
                   )}
 
-                  {/* Barkod yaratilmagan tovarlar haqida xabar */}
                   {withoutBarcode.length > 0 && (
                     <div className="flex items-center gap-2 p-3 rounded-xl bg-accent-orange/5 border border-accent-orange/20">
                       <AlertCircle size={14} className="text-accent-orange flex-shrink-0" />
-                      <p className="text-xs text-accent-orange">
-                        {withoutBarcode.length} ta tovar hali barkod olishini kutmoqda
-                      </p>
+                      <p className="text-xs text-accent-orange">{withoutBarcode.length} ta tovar hali barkod olishini kutmoqda</p>
                     </div>
                   )}
                 </div>
 
-                {/* Modal footer */}
-                <div className="p-4 border-t border-border flex items-center justify-between gap-3">
-                  <p className="text-xs text-text-muted">
-                    Jami: {bItems.length} ta · Barkodli: {withBarcode.length} ta
-                  </p>
-                  <div className="flex gap-2">
+                {/* Footer */}
+                <div className="p-4 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-xs text-text-muted">Jami: {bItems.length} ta · Barkodli: {withBarcode.length} ta</p>
+                  <div className="flex gap-2 flex-wrap">
                     {hasGroupBc && (
                       <>
-                        <button
-                          onClick={() => { setDetailModal(null); handlePrintGroup(detailModal) }}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-medium hover:bg-accent-green/20 transition-colors"
-                        >
-                          <Printer size={14} /> Chop etish
+                        <button onClick={() => { setDetailModal(null); handlePrintGroup(detailModal) }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors">
+                          <Printer size={13} /> Chop etish
                         </button>
-                        <button
-                          onClick={() => handleDownloadBarcode(uniqueBarcodes[0])}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm font-medium hover:bg-accent-blue/20 transition-colors"
-                        >
-                          <Download size={14} /> Yuklab olish
+                        <button onClick={() => handleDownloadGroup(detailModal)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-medium hover:bg-accent-blue/20 transition-colors">
+                          <Download size={13} /> Yuklab olish
                         </button>
                       </>
                     )}
                     {isPerItem && (
-                      <button
-                        onClick={() => { setDetailModal(null); handlePrintPerItem(detailModal) }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-medium hover:bg-accent-green/20 transition-colors"
-                      >
-                        <Printer size={14} /> Barcha barkodlarni chop etish ({withBarcode.length})
-                      </button>
+                      <>
+                        <button onClick={() => { setDetailModal(null); handlePrintPerItem(detailModal) }} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors">
+                          <Printer size={13} /> Barcha chop etish ({withBarcode.length})
+                        </button>
+                        <button onClick={() => handleDownloadAllPerItem(detailModal)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-medium hover:bg-accent-blue/20 transition-colors">
+                          <Download size={13} /> Barcha yuklab olish ({withBarcode.length})
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -617,8 +614,12 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${selectedProduct?.id === p.id ? 'border-accent-red bg-accent-red/5' : 'border-border hover:border-accent-blue hover:bg-bg-tertiary'}`}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-text-primary text-sm">{p.name}</p>
-                    {noBarcodeCount > 0 && <Badge cls="text-accent-orange bg-accent-orange/10">{noBarcodeCount} {t('wh_new_product')}</Badge>}
+                    <p className="font-medium text-text-primary text-sm truncate pr-2">{p.name}</p>
+                    {noBarcodeCount > 0 && (
+                      <span className="flex-shrink-0 px-1.5 py-0.5 rounded-full bg-accent-orange/10 border border-accent-orange/20 text-accent-orange text-[10px] font-bold whitespace-nowrap">
+                        {noBarcodeCount} ta barkod yo'q
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-text-muted mt-0.5">{t('cat_' + p.category, { defaultValue: p.categoryLabel })} · {p.size} · {pItems.length} {pItems[0]?.unit || 'dona'}</p>
                 </button>
@@ -632,7 +633,8 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
           {!selectedProduct ? (
             <div className="flex flex-col items-center justify-center flex-1 py-16 gap-3">
               <Tag size={40} className="text-text-muted" />
-              <p className="text-text-secondary text-sm">{t('wh_bc_select_hint')}</p>
+              <p className="text-text-secondary text-sm text-center">{t('wh_bc_select_hint')}</p>
+              <p className="text-text-muted text-xs text-center">Chap panelda mahsulot tanlang<br />keyin shu yerda barkod yarating</p>
             </div>
           ) : (
             <>
@@ -647,35 +649,31 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   <p className="text-xs text-text-muted">Bu mahsulot uchun kirim topilmadi</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
                   {productBatches.map(batch => {
                     const { bItems, withBarcode, withoutBarcode, uniqueBarcodes, isGroup, isPerItem, isSingle } = getBatchBarcodeState(batch.id)
                     const isGenerating = generatingBatch === batch.id
                     const hasAttrs = batch.attributes && Object.keys(batch.attributes).length > 0
-                    const batchDate = batch.receivedAt
-                      ? new Date(batch.receivedAt).toLocaleDateString('uz-UZ') : '—'
+                    const batchDate = batch.receivedAt ? new Date(batch.receivedAt).toLocaleDateString('uz-UZ') : '—'
                     const hasBarcodes = withBarcode.length > 0
+                    const hasGroupBc = isGroup || isSingle
+                    const needBarcode = withoutBarcode.length > 0
 
                     return (
-                      <div key={batch.id} className="border border-border rounded-xl overflow-hidden">
-                        {/* Batch header — bosilganda modal ochiladi */}
-                        <button
-                          onClick={() => hasBarcodes && setDetailModal(batch)}
-                          className={`w-full text-left px-4 pt-4 pb-3 ${hasBarcodes ? 'hover:bg-bg-tertiary/40 cursor-pointer' : 'cursor-default'} transition-colors`}
-                        >
+                      <div key={batch.id} className={`border rounded-xl overflow-hidden ${needBarcode && !hasBarcodes ? 'border-accent-orange/30 bg-accent-orange/5' : 'border-border'}`}>
+                        {/* Batch header */}
+                        <div className="px-4 pt-4 pb-2">
                           <div className="flex items-start justify-between gap-2">
                             <div className="space-y-1 flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-xs font-semibold text-text-primary">Kirim: {batchDate}</p>
-                                {hasBarcodes && (
-                                  <span className="flex items-center gap-0.5 text-[10px] text-text-muted">
-                                    <Eye size={10} /> Batafsil
+                                {needBarcode && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange text-[10px] font-bold">
+                                    {withoutBarcode.length} ta barkod yo'q
                                   </span>
                                 )}
                               </div>
-                              {batch.supplierName && (
-                                <p className="text-[11px] text-text-muted">{batch.supplierName}</p>
-                              )}
+                              {batch.supplierName && <p className="text-[11px] text-text-muted">{batch.supplierName}</p>}
                               {hasAttrs && <AttrBadges attributes={batch.attributes} />}
                             </div>
                             <div className="text-right flex-shrink-0">
@@ -683,38 +681,15 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                               <p className="text-[10px] text-text-muted">{batch.unit || 'dona'}</p>
                             </div>
                           </div>
-                        </button>
+                        </div>
 
                         <div className="px-4 pb-4 space-y-3">
-                          {/* Group barkod ko'rsatish */}
-                          {(isGroup || isSingle) && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`font-mono text-xs text-accent-green ${barcodeSelectClass}`}>
-                                {uniqueBarcodes[0]}
-                              </span>
-                              <Badge cls="text-accent-blue bg-accent-blue/10">
-                                {isGroup ? 'Umumiy' : 'Yagona'} barkod
-                              </Badge>
-                              <span className="text-[10px] text-text-muted">{withBarcode.length} ta</span>
-                            </div>
-                          )}
-
-                          {/* Per-item barkod ko'rsatish */}
-                          {isPerItem && (
-                            <div className="flex items-center gap-2">
-                              <Badge cls="text-text-secondary bg-bg-tertiary">Alohida barkodlar</Badge>
-                              <span className="text-[10px] text-text-muted">{withBarcode.length} ta</span>
-                            </div>
-                          )}
-
-                          {/* Barkod yaratish tugmalari */}
-                          {withoutBarcode.length > 0 && (
+                          {/* --- Barkod yaratish bo'limi (eng yuqorida, ko'zga tashlanadi) --- */}
+                          {needBarcode && (
                             <div className="space-y-2">
-                              {hasBarcodes && (
-                                <p className="text-[11px] text-text-muted">
-                                  {withoutBarcode.length} ta tovarga hali barkod berilmagan
-                                </p>
-                              )}
+                              <p className="text-[11px] font-semibold text-accent-orange">
+                                Barkod yaratish rejimini tanlang:
+                              </p>
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => handleGenerateGroup(batch)}
@@ -742,15 +717,56 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                             </div>
                           )}
 
-                          {/* Chop etish tugmasi */}
+                          {/* --- Barkod ma'lumotlari --- */}
                           {hasBarcodes && (
-                            <button
-                              onClick={() => isGroup || isSingle ? handlePrintGroup(batch) : handlePrintPerItem(batch)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors w-full justify-center"
-                            >
-                              <Printer size={12} />
-                              Barcha barkodlarni chop etish ({withBarcode.length} ta)
-                            </button>
+                            <div className="space-y-2">
+                              {/* Group barkod badge */}
+                              {hasGroupBc && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider">Umumiy barkod:</span>
+                                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent-green/10 border border-accent-green/25 ${barcodeSelectClass}`}>
+                                    <span className="font-mono text-xs font-bold text-accent-green">{uniqueBarcodes[0]}</span>
+                                  </div>
+                                  <Badge cls="text-accent-blue bg-accent-blue/10">{withBarcode.length} ta</Badge>
+                                </div>
+                              )}
+                              {/* Per-item badge */}
+                              {isPerItem && (
+                                <div className="flex items-center gap-2">
+                                  <Badge cls="text-text-secondary bg-bg-tertiary">Alohida barkodlar</Badge>
+                                  <span className="text-[10px] text-text-muted">{withBarcode.length} ta</span>
+                                </div>
+                              )}
+
+                              {/* Batafsil + amallar */}
+                              <div className="flex items-center gap-2 flex-wrap pt-1">
+                                {/* Batafsil ko'rish */}
+                                <button
+                                  onClick={() => setDetailModal(batch)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-tertiary border border-border text-text-muted text-xs hover:text-text-primary hover:border-accent-blue transition-all"
+                                >
+                                  <Eye size={11} /> Batafsil
+                                </button>
+
+                                {/* Chop etish */}
+                                <button
+                                  onClick={() => hasGroupBc ? handlePrintGroup(batch) : handlePrintPerItem(batch)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent-green/10 border border-accent-green/20 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors"
+                                >
+                                  <Printer size={11} />
+                                  Barcha chop etish ({withBarcode.length})
+                                </button>
+
+                                {/* Yuklab olish */}
+                                <button
+                                  onClick={() => hasGroupBc ? handleDownloadGroup(batch) : handleDownloadAllPerItem(batch)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-medium hover:bg-accent-blue/20 transition-colors"
+                                >
+                                  <Download size={11} />
+                                  Barcha yuklab olish ({withBarcode.length})
+                                </button>
+                              </div>
+                            </div>
                           )}
 
                           {bItems.length === 0 && (
@@ -788,26 +804,26 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <table className="w-full text-left text-sm border-collapse" style={{tableLayout: 'auto'}}>
               <thead className="bg-bg-tertiary">
                 <tr>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '110px'}} onClick={() => handleSort1('batchDate')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('batchDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_income_date')} <SortIcon field="batchDate" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
                   <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('productName')}>
                     <span className="inline-flex items-center gap-1">{t('col_product')} <SortIcon field="productName" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '110px'}} onClick={() => handleSort1('barcodeDate')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('barcodeDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_bc_date')} <SortIcon field="barcodeDate" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider" style={{minWidth: '200px'}}>{t('wh_modal_barcode')}</th>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
                   <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Rejim</th>
                   <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Chop/Yuk</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '110px'}} onClick={() => handleSort1('status')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('status')}>
                     <span className="inline-flex items-center gap-1">{t('col_status')} <SortIcon field="status" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {allBarcodesPagedItems.map(item => {
-                  const { label, cls, trCls } = getItemStatus(item, t)
+                  const { label, cls } = getItemStatus(item, t)
                   const batchDate = item.batchDate ? new Date(item.batchDate).toLocaleDateString('uz-UZ') : '—'
                   const barcodeDate = item.barcodeCreatedAt ? new Date(item.barcodeCreatedAt).toLocaleDateString('uz-UZ') : '—'
                   const countLabel = [
@@ -816,7 +832,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   ].filter(Boolean).join(', ') || '—'
                   const isGroupBc = item.barcode && item.barcode.includes('-G')
                   return (
-                    <tr key={item.id} className={`hover:bg-bg-tertiary/20 transition-colors ${trCls}`}>
+                    <tr key={item.id} className="hover:bg-bg-tertiary/20 transition-colors">
                       <td className="px-4 py-3 text-xs text-text-muted">{batchDate}</td>
                       <td className="px-4 py-3 font-semibold text-text-primary truncate">{item.productName}</td>
                       <td className="px-4 py-3 text-xs text-text-muted">{barcodeDate}</td>
@@ -836,18 +852,14 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   )
                 })}
                 {allBarcodesPagedItems.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_not_found')}</td>
-                  </tr>
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_not_found')}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
 
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-            <p className="text-xs text-text-muted">
-              {Math.min(allBarcodesPage * ALL_BARCODES_PER_PAGE, allBarcodeItems.length)} / {allBarcodeItems.length} ta
-            </p>
+            <p className="text-xs text-text-muted">{Math.min(allBarcodesPage * ALL_BARCODES_PER_PAGE, allBarcodeItems.length)} / {allBarcodeItems.length} ta</p>
             <div className="flex items-center gap-1">
               <button onClick={() => setAllBarcodesPage(p => Math.max(1, p - 1))} disabled={allBarcodesPage === 1} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-bg-tertiary text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors">←</button>
               {Array.from({ length: Math.min(allBarcodesTotalPages, 5) }, (_, i) => i + 1).map(n => (
@@ -880,18 +892,18 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <table className="w-full text-left text-sm border-collapse" style={{tableLayout: 'auto'}}>
               <thead className="bg-bg-tertiary">
                 <tr>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '110px'}} onClick={() => handleSort2('batchDate')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('batchDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_income_date')} <SortIcon field="batchDate" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
                   <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('productName')}>
                     <span className="inline-flex items-center gap-1">{t('col_product')} <SortIcon field="productName" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '110px'}} onClick={() => handleSort2('barcodeDate')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('barcodeDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_bc_date')} <SortIcon field="barcodeDate" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider" style={{minWidth: '200px'}}>{t('wh_modal_barcode')}</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider" style={{minWidth: '110px'}}>{t('wh_bc_sold_date')}</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" style={{minWidth: '100px'}} onClick={() => handleSort2('status')}>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_bc_sold_date')}</th>
+                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('status')}>
                     <span className="inline-flex items-center gap-1">{t('col_status')} <SortIcon field="status" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
                 </tr>
@@ -900,9 +912,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 {soldPagedItems.map(item => {
                   const batchDate = item.batchDate ? new Date(item.batchDate).toLocaleDateString('uz-UZ') : '—'
                   const barcodeDate = item.barcodeCreatedAt ? new Date(item.barcodeCreatedAt).toLocaleDateString('uz-UZ') : '—'
-                  const soldDate = item.soldAt
-                    ? new Date(item.soldAt).toLocaleDateString('uz-UZ')
-                    : (item.barcodeCreatedAt ? new Date(item.barcodeCreatedAt).toLocaleDateString('uz-UZ') : '—')
+                  const soldDate = item.soldAt ? new Date(item.soldAt).toLocaleDateString('uz-UZ') : (item.barcodeCreatedAt ? new Date(item.barcodeCreatedAt).toLocaleDateString('uz-UZ') : '—')
                   return (
                     <tr key={item.id} className="hover:bg-bg-tertiary/20 transition-colors">
                       <td className="px-4 py-3 text-xs text-text-muted">{batchDate}</td>
@@ -917,18 +927,14 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   )
                 })}
                 {soldPagedItems.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_sold_not_found')}</td>
-                  </tr>
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_sold_not_found')}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
 
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-            <p className="text-xs text-text-muted">
-              {Math.min(soldBarcodesPage * SOLD_PER_PAGE, soldBarcodeItems.length)} / {soldBarcodeItems.length} ta
-            </p>
+            <p className="text-xs text-text-muted">{Math.min(soldBarcodesPage * SOLD_PER_PAGE, soldBarcodeItems.length)} / {soldBarcodeItems.length} ta</p>
             <div className="flex items-center gap-1">
               <button onClick={() => setSoldBarcodesPage(p => Math.max(1, p - 1))} disabled={soldBarcodesPage === 1} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-bg-tertiary text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors">←</button>
               {Array.from({ length: Math.min(soldTotalPages, 5) }, (_, i) => i + 1).map(n => (
