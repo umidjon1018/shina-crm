@@ -1343,6 +1343,7 @@ export const useSalesState = () => {
         category: isBundle ? 'Komplekt' : catLabel,
         isBundle,
         bundleDiscountAmount: effectiveBundleDiscount,
+        bundleDiscountPercent: matchedBundle?.discount || 0,
         qty,
         paymentTypeLabel: s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank'),
         statusLabel: s.status === 'completed' && s._isExchange ? t('sl_hist_status_exchanged')

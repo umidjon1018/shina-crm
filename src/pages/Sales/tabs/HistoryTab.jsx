@@ -147,10 +147,11 @@ const HistoryTab = ({ ctx }) => {
                       {s.discount > 0
                         ? <span className="text-accent-orange font-semibold whitespace-nowrap">
                             -{s.discount}% ({formatPrice(Math.round((s.subtotal || s.total) * s.discount / 100), som)})
-                            {s.bundleDiscountAmount > 0 && <span className="block text-[9px] text-accent-green">+Komplekt -{formatPrice(s.bundleDiscountAmount, som)}</span>}
                           </span>
                         : s.bundleDiscountAmount > 0
-                          ? <span className="text-accent-green font-semibold whitespace-nowrap">Komplekt -{formatPrice(s.bundleDiscountAmount, som)}</span>
+                          ? <span className="text-accent-orange font-semibold whitespace-nowrap">
+                              {s.bundleDiscountPercent > 0 ? `-${s.bundleDiscountPercent}% ` : ''}({formatPrice(s.bundleDiscountAmount, som)})
+                            </span>
                           : <span className="text-text-muted">—</span>}
                     </td>
                     <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
