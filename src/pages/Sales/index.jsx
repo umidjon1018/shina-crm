@@ -56,6 +56,7 @@ const Sales = () => {
     tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     subtotal, total, priceWarnings, setPriceWarnings, isSubmitting,
     handleSubmitSale, addNextItemOfProduct, updateGroupSalePrice,
+    addBundleToCart, removeBundleFromCart,
     buScrapMode, setBuScrapMode, buScrapSelected, setBuScrapSelected,
     buScrapCategory, setBuScrapCategory, buScrapCategories, buScrapGroups,
     buAddScrapToCart, buSelectedCustomer,
@@ -172,6 +173,7 @@ const Sales = () => {
           tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
           subtotal, total, priceWarnings, setPriceWarnings,
           handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice,
+          addBundleToCart, removeBundleFromCart,
           // used_sale
           buScrapMode, setBuScrapMode, buScrapSelected, setBuScrapSelected,
           buScrapCategory, setBuScrapCategory, buScrapCategories, buScrapGroups,

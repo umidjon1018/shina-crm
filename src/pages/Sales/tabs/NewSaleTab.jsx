@@ -126,7 +126,12 @@ const NewSaleTab = ({ ctx }) => {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-text-primary truncate">{product.name}</p>
-                            <p className="text-[10px] text-accent-red font-bold">{formatPrice(groupPrice, som)}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-[10px] text-accent-red font-bold">{formatPrice(groupPrice, som)}</p>
+                              {items.some(c => c.salePrice != null && c.salePrice < c.product.cashPrice) && (
+                                <p className="text-[9px] text-text-muted line-through">{formatPrice(product.cashPrice * count, som)}</p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       )

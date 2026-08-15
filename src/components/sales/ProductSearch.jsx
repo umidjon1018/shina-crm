@@ -292,14 +292,13 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                   {b.discount > 0 && <span className="ml-1.5 text-accent-green font-bold">−{b.discount}%</span>}
                 </p>
               </div>
-              {onBundleAdd && (
-                <button
-                  onClick={() => onBundleAdd(b)}
-                  className="ml-3 p-1.5 rounded-lg bg-accent-red text-white hover:opacity-90 transition-opacity flex-shrink-0"
+              <button
+                  onClick={() => onBundleAdd?.(b)}
+                  disabled={!onBundleAdd}
+                  className="ml-3 p-1.5 rounded-lg bg-accent-red text-white hover:opacity-90 transition-opacity flex-shrink-0 disabled:opacity-40"
                 >
                   <Plus size={15} />
                 </button>
-              )}
             </div>
           ))
         }

@@ -435,6 +435,13 @@ export const useSalesState = () => {
     const commissionPercent = selectedOrg?.commissionPercent || 0
     const commissionAmount = paymentType === 'installment' ? Math.round(total * (commissionPercent / 100)) : 0
 
+    const bundleDiscountAmount = cartItems.reduce((acc, c) => {
+      if (c.bundleId != null && c.salePrice != null) {
+        return acc + Math.max(0, Math.round(c.product.cashPrice - c.salePrice))
+      }
+      return acc
+    }, 0)
+
     const salePayload = {
       id: `SALE-${Date.now()}`,
       items: cartItems.map(c => ({
@@ -473,6 +480,7 @@ export const useSalesState = () => {
       })(),
       discount: effectiveDiscount,
       loyaltyDiscountApplied,
+      bundleDiscountAmount,
       subtotal,
       total,
       soldAt: new Date().toISOString(),
