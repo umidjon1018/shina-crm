@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -50,6 +50,41 @@ const SalesTab = ({ ctx }) => {
     storeCompanyName, storeProductCategories,
     MOCK_SALES, MOCK_PRODUCTS,
   } = ctx
+
+  const activeBundles = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+    catch { return [] }
+  }, [])
+
+  const productIdToName = useMemo(() => {
+    const map = {}
+    MOCK_SALES.forEach(sale => {
+      (sale.items || []).forEach(it => {
+        if (it.productId && (it.productName || it.name)) {
+          map[String(it.productId)] = (it.productName || it.name).trim()
+        }
+      })
+    })
+    return map
+  }, [MOCK_SALES])
+
+  const enrichSale = (s) => {
+    const existing = Number(s.bundleDiscountAmount) || 0
+    const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+    const matchedBundle = activeBundles.find(b =>
+      b.products?.length > 0 &&
+      b.products.every(bp => {
+        const bpName = productIdToName[String(bp.productId)]
+        return bpName ? saleNames.has(bpName) : false
+      })
+    )
+    if (!matchedBundle && existing === 0 && !s.isBundle) return s
+    const saleItemsTotal = (s.items || []).reduce((acc, it) => acc + (it.price || 0), 0)
+    const discAmt = existing > 0
+      ? existing
+      : (matchedBundle?.discount > 0 ? Math.round(saleItemsTotal * matchedBundle.discount / (100 - matchedBundle.discount)) : 0)
+    return { ...s, isBundle: true, bundleDiscountAmount: discAmt, bundleDiscountPercent: matchedBundle?.discount || 0 }
+  }
 
   return (
           <>
@@ -398,7 +433,12 @@ const SalesTab = ({ ctx }) => {
                           <td className="px-6 py-4 font-medium text-text-primary text-sm">{fmtItems(s.items)}</td>
                           <td className="px-6 py-4 text-right font-bold text-text-primary">{fmtNum(s.total)}</td>
                           <td className="px-6 py-4 text-center text-text-muted">
-                            {s.discount > 0 ? <span className="text-accent-orange font-bold">{s.discount}%</span> : '—'}
+                            {(() => {
+                              const es = enrichSale(s)
+                              if (s.discount > 0) return <span className="text-accent-orange font-semibold whitespace-nowrap">-{s.discount}% ({fmtNum(Math.round((s.subtotal || s.total) * s.discount / 100))} so'm)</span>
+                              if (es.bundleDiscountAmount > 0) return <span className="text-accent-orange font-semibold whitespace-nowrap">{es.bundleDiscountPercent > 0 ? `-${es.bundleDiscountPercent}% ` : ''}({fmtNum(es.bundleDiscountAmount)} so'm)</span>
+                              return <span className="text-text-muted">—</span>
+                            })()}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="inline-flex px-2 py-0.5 rounded-lg bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
@@ -483,10 +523,12 @@ const SalesTab = ({ ctx }) => {
                 )},
                 { key:'soldByName',   label:t('col_employee'),      render: r => <span className="text-xs text-text-secondary">{r.soldByName || '—'}</span> },
                 { key:'qty',          label:t('rep_col_qty'), align:'center', render: r => <span className="font-bold">{r.items?.reduce((s,i)=>s+(i.qty||1),0) || 1}</span> },
-                { key:'discount',     label:t('col_discount'), align:'center', render: r => r.discount > 0
-                  ? <span className="text-accent-orange font-bold text-xs">-{r.discount}%</span>
-                  : <span className="text-text-muted">—</span>
-                },
+                { key:'discount', label:t('col_discount'), align:'center', render: r => {
+                  const er = enrichSale(r)
+                  if (r.discount > 0) return <span className="text-accent-orange font-bold text-xs">-{r.discount}%</span>
+                  if (er.bundleDiscountAmount > 0) return <span className="text-accent-orange font-bold text-xs whitespace-nowrap">{er.bundleDiscountPercent > 0 ? `-${er.bundleDiscountPercent}% ` : ''}({fmtNum(er.bundleDiscountAmount)} so'm)</span>
+                  return <span className="text-text-muted">—</span>
+                }},
                 { key:'total',        label:t('col_amount'), align:'right', render: r => <span className="font-bold text-text-primary">{fmtUZS(r.total)}</span> },
               ]}
             />
