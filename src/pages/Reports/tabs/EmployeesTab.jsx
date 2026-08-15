@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line,
@@ -49,6 +49,41 @@ const EmployeesTab = ({ ctx }) => {
     storeCompanyName,
     MOCK_SALES, MOCK_CUSTOMERS, MOCK_RETURNS,
   } = ctx
+
+  const activeBundles = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+    catch { return [] }
+  }, [])
+
+  const productIdToName = useMemo(() => {
+    const map = {}
+    MOCK_SALES.forEach(sale => {
+      (sale.items || []).forEach(it => {
+        if (it.productId && (it.productName || it.name)) {
+          map[String(it.productId)] = (it.productName || it.name).trim()
+        }
+      })
+    })
+    return map
+  }, [MOCK_SALES])
+
+  const enrichSale = (s) => {
+    const existing = Number(s.bundleDiscountAmount) || 0
+    const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+    const matchedBundle = activeBundles.find(b =>
+      b.products?.length > 0 &&
+      b.products.every(bp => {
+        const bpName = productIdToName[String(bp.productId)]
+        return bpName ? saleNames.has(bpName) : false
+      })
+    )
+    if (!matchedBundle && existing === 0 && !s.isBundle) return s
+    const saleItemsTotal = (s.items || []).reduce((acc, it) => acc + (it.price || 0), 0)
+    const discAmt = existing > 0
+      ? existing
+      : (matchedBundle?.discount > 0 ? Math.round(saleItemsTotal * matchedBundle.discount / (100 - matchedBundle.discount)) : 0)
+    return { ...s, isBundle: true, bundleDiscountAmount: discAmt, bundleDiscountPercent: matchedBundle?.discount || 0 }
+  }
 
   return (
           <>
@@ -797,15 +832,19 @@ const EmployeesTab = ({ ctx }) => {
 
             {/* === MODAL: Chegirma nazorati batafsil === */}
             {modal === 'discountDetailModal' && (() => {
-              const discountSales = modalFilter === 'all'
-                ? MOCK_SALES.filter(s => s.status!=='cancelled' && s.discount > 0)
-                : MOCK_SALES.filter(s => s.status!=='cancelled' && s.discount > 0 && s.soldAt && s.soldAt.startsWith(modalFilter))
+              const baseSales = modalFilter === 'all'
+                ? MOCK_SALES.filter(s => s.status !== 'cancelled')
+                : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+              const discountSales = baseSales
+                .map(s => enrichSale(s))
+                .filter(s => s.discount > 0 || (s.isBundle && s.bundleDiscountAmount > 0))
+              const getLost = r => r.discount > 0 ? (r.subtotal - r.total) : (r.bundleDiscountAmount || 0)
               return (
                 <Modal open title={t('rep_emp_modal_discount_title')} subtitle={t('rep_emp_modal_discount_sub')} size="2xl" onClose={closeModal}>
                   <div className="flex items-center justify-between mb-5">
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                     <span className="text-text-muted text-xs">
-                      {t('rep_emp_modal_discount_lost')}<span className="font-bold text-accent-red">{fmtUZS(discountSales.reduce((s,x)=>s+(x.subtotal-x.total),0))}</span>
+                      {t('rep_emp_modal_discount_lost')}<span className="font-bold text-accent-red">{fmtUZS(discountSales.reduce((s,x) => s + getLost(x), 0))}</span>
                     </span>
                   </div>
                   <div className="bg-accent-orange/5 border border-accent-orange/20 rounded-xl p-3 mb-5">
@@ -816,7 +855,7 @@ const EmployeesTab = ({ ctx }) => {
                     <p className="text-text-muted text-xs mt-1">
                       {t('rep_emp_modal_discount_limit_stats')
                         .replace('{count}', discountSales.filter(s => s.discount > 5).length)
-                        .replace('{amount}', fmtUZS(discountSales.filter(s=>s.discount>5).reduce((s,x)=>s+(x.subtotal-x.total),0)))}
+                        .replace('{amount}', fmtUZS(discountSales.filter(s => s.discount > 5).reduce((s,x) => s + getLost(x), 0)))}
                     </p>
                   </div>
                   <ModalTable
@@ -832,12 +871,13 @@ const EmployeesTab = ({ ctx }) => {
                       { key:'customerName', label:t('col_customer') },
                       { key:'items',        label:t('col_product'),    render: r => <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span> },
                       { key:'subtotal',     label:t('rep_emp_modal_discount_col_orig_price'), align:'right', render: r => fmtUZS(r.subtotal) },
-                      { key:'discount',     label:t('rep_emp_col_discount_pct'), align:'center', render: r => (
-                        <span className="font-bold text-accent-orange">{r.discount}%</span>
-                      )},
+                      { key:'discount',     label:t('rep_emp_col_discount_pct'), align:'center', render: r => r.discount > 0
+                        ? <span className="font-bold text-accent-orange">{r.discount}%</span>
+                        : <span className="font-bold text-accent-orange whitespace-nowrap">{r.bundleDiscountPercent > 0 ? `${r.bundleDiscountPercent}%` : ''} Komplekt</span>
+                      },
                       { key:'total',        label:t('rep_emp_modal_discount_col_sale'),    align:'right', render: r => <span className="font-bold text-text-primary">{fmtUZS(r.total)}</span> },
                       { key:'lost',         label:t('rep_emp_discount_lost'), align:'right', render: r => (
-                        <span className="font-bold text-accent-red">{fmtUZS(r.subtotal - r.total)}</span>
+                        <span className="font-bold text-accent-red">{fmtUZS(getLost(r))}</span>
                       )},
                     ]}
                   />
