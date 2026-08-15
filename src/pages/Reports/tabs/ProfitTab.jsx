@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -51,6 +51,25 @@ const ProfitTab = ({ ctx }) => {
     MOCK_SALES, MOCK_PRODUCTS, MOCK_INCOME_BATCHES, MOCK_EXPENSES, MOCK_CAPITAL,
     MOCK_USED_SALES,
   } = ctx
+
+  const activeBundles = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+    catch { return [] }
+  }, [])
+  const productIdToName = useMemo(() => {
+    const map = {}
+    MOCK_SALES.forEach(sale => { (sale.items || []).forEach(it => { if (it.productId && (it.productName || it.name)) map[String(it.productId)] = (it.productName || it.name).trim() }) })
+    return map
+  }, [MOCK_SALES])
+  const enrichSale = (s) => {
+    const existing = Number(s.bundleDiscountAmount) || 0
+    const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+    const matched = activeBundles.find(b => b.products?.length > 0 && b.products.every(bp => { const n = productIdToName[String(bp.productId)]; return n ? saleNames.has(n) : false }))
+    if (!matched && existing === 0 && !s.isBundle) return s
+    const saleItemsTotal = (s.items || []).reduce((a, i) => a + (i.price || 0), 0)
+    const discAmt = existing > 0 ? existing : (matched?.discount > 0 ? Math.round(saleItemsTotal * matched.discount / (100 - matched.discount)) : 0)
+    return { ...s, isBundle: true, bundleDiscountAmount: discAmt, bundleDiscountPercent: matched?.discount || 0 }
+  }
 
   // Oylik yangi+B/U birlashgan chart ma'lumoti
   const combinedMonthlyChart = React.useMemo(() => {
@@ -272,7 +291,12 @@ const ProfitTab = ({ ctx }) => {
                         { key:'customerName', label:t('col_customer'), render: r => <span className="font-medium text-text-primary text-xs">{r.customerName}</span> },
                         { key:'soldByName',   label:t('col_employee'), render: r => <span className="text-xs text-text-secondary">{r.soldByName||'—'}</span> },
                         { key:'qty',          label:t('rep_col_qty'), align:'center', render: r => <span className="font-bold">{r.isUsedSale ? (r.qty||1) : (r.items?.reduce((s,i)=>s+(i.qty||1),0)||1)}</span> },
-                        { key:'discount',     label:t('col_discount'), align:'center', render: r => r.discount>0 ? <span className="text-accent-orange font-bold text-xs">-{r.discount}%</span> : <span className="text-text-muted">—</span> },
+                        { key:'discount', label:t('col_discount'), align:'center', render: r => {
+                          const er = enrichSale(r)
+                          if (r.discount > 0) return <span className="text-accent-orange font-bold text-xs">-{r.discount}%</span>
+                          if (er.bundleDiscountAmount > 0) return <span className="text-accent-orange font-bold text-xs whitespace-nowrap">{er.bundleDiscountPercent > 0 ? `-${er.bundleDiscountPercent}% ` : ''}({fmtNum(er.bundleDiscountAmount)} so'm)</span>
+                          return <span className="text-text-muted">—</span>
+                        }},
                         { key:'total',        label:t('wh_in_total'), align:'right', render: r => <span className="font-bold text-text-primary">{fmtUZS(r.total)}</span> },
                       ]}
                     />
@@ -351,7 +375,9 @@ const ProfitTab = ({ ctx }) => {
                       columns={[
                         { key:'soldAt',       label:t('col_date'),           render: r => <span className="whitespace-nowrap text-xs">{fmtSoldAt(r.soldAt)}</span> },
                         { key:'items',        label:t('col_product'),           render: r => <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span> },
-                        { key:'category',     label:t('col_category'),      render: r => {
+                        { key:'category', label:t('col_category'), render: r => {
+                          const er = enrichSale(r)
+                          if (er.isBundle) return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase" style={{ backgroundColor:'#E6394622', color:'#E63946' }}>Komplekt</span>
                           const cat = r.items?.[0]?.productId ? (MOCK_PRODUCTS.find(p=>p.id===r.items[0].productId)?.category||'—') : '—'
                           return renderCatBadge(cat)
                         }},

@@ -865,6 +865,19 @@ export const Reports = () => {
 
   // --- TAB 4: CUSTOMERS ---
   const customerStats = useMemo(() => {
+    const _ab = (() => { try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) } catch { return [] } })()
+    const _pn = {}
+    MOCK_SALES.forEach(sale => { (sale.items || []).forEach(it => { if (it.productId && (it.productName || it.name)) _pn[String(it.productId)] = (it.productName || it.name).trim() }) })
+    const _getBInfo = (s) => {
+      const ex = Number(s.bundleDiscountAmount) || 0
+      const names = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+      const m = _ab.find(b => b.products?.length > 0 && b.products.every(bp => { const n = _pn[String(bp.productId)]; return n ? names.has(n) : false }))
+      if (!m && ex === 0 && !s.isBundle) return null
+      if (ex > 0) return ex
+      if (!m?.discount) return null
+      const tot = (s.items || []).reduce((a, i) => a + (i.price || 0), 0)
+      return Math.round(tot * m.discount / (100 - m.discount))
+    }
     const completed   = filterByPeriod(MOCK_SALES, 'soldAt').filter(s => s.status !== 'cancelled')
     const newCount    = completed.filter(s => s.isNewCustomer).length
     const returnCount = completed.filter(s => !s.isNewCustomer).length
@@ -904,7 +917,7 @@ export const Reports = () => {
         ...MOCK_SALES.filter(s => s.customerId === c.id && s.status === 'cancelled'),
         ...MOCK_USED_SALES.filter(s => s.customerId === c.id && s.status === 'cancelled'),
       ]
-      const discountSales  = customerSales.filter(s => s.discount > 0)
+      const discountSales  = customerSales.filter(s => s.discount > 0 || !!_getBInfo(s))
       const avgCheck = customerSales.length > 0
         ? Math.round(totalSpent / customerSales.length) : 0
 

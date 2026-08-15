@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -52,6 +52,26 @@ const CustomersTab = ({ ctx }) => {
     storeCompanyName,
     MOCK_SALES, MOCK_CUSTOMERS, MOCK_PRODUCTS,
   } = ctx
+
+  const activeBundles = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+    catch { return [] }
+  }, [])
+  const productIdToName = useMemo(() => {
+    const map = {}
+    MOCK_SALES.forEach(sale => { (sale.items || []).forEach(it => { if (it.productId && (it.productName || it.name)) map[String(it.productId)] = (it.productName || it.name).trim() }) })
+    return map
+  }, [MOCK_SALES])
+  const enrichSale = (s) => {
+    const existing = Number(s.bundleDiscountAmount) || 0
+    const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+    const matched = activeBundles.find(b => b.products?.length > 0 && b.products.every(bp => { const n = productIdToName[String(bp.productId)]; return n ? saleNames.has(n) : false }))
+    if (!matched && existing === 0 && !s.isBundle) return s
+    const saleItemsTotal = (s.items || []).reduce((a, i) => a + (i.price || 0), 0)
+    const discAmt = existing > 0 ? existing : (matched?.discount > 0 ? Math.round(saleItemsTotal * matched.discount / (100 - matched.discount)) : 0)
+    return { ...s, isBundle: true, bundleDiscountAmount: discAmt, bundleDiscountPercent: matched?.discount || 0 }
+  }
+  const getSaleLost = (s) => s.discount > 0 ? ((s.subtotal || s.total) - s.total) : (Number(s.bundleDiscountAmount) || 0)
 
   return (
           <>
@@ -442,7 +462,12 @@ const CustomersTab = ({ ctx }) => {
                           { key:'soldAt',      label:t('col_date'),     render: r => fmtSoldAt(r.soldAt) },
                           { key:'items',       label:t('col_product'),    render: r => <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span> },
                           { key:'total',       label:t('col_amount'),    align:'right', render: r => <span className="font-bold text-text-primary">{fmtUZS(r.total)}</span> },
-                          { key:'discount',    label:t('col_discount'), align:'center', render: r => r.discount > 0 ? <span className="text-accent-orange font-bold">{r.discount}%</span> : '—' },
+                          { key:'discount', label:t('col_discount'), align:'center', render: r => {
+                            const er = enrichSale(r)
+                            if (r.discount > 0) return <span className="text-accent-orange font-bold text-xs">{r.discount}%</span>
+                            if (er.bundleDiscountAmount > 0) return <span className="text-accent-orange font-bold text-xs whitespace-nowrap">{er.bundleDiscountPercent > 0 ? `${er.bundleDiscountPercent}% ` : ''}Komplekt</span>
+                            return <span className="text-text-muted">—</span>
+                          }},
                           { key:'paymentType', label:t('rep_col_payment'),   align:'center', render: r => (
                             <span className="px-2 py-0.5 rounded bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
                               {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment') }[r.paymentType]}
@@ -455,7 +480,7 @@ const CustomersTab = ({ ctx }) => {
                     <div className="mt-4 bg-accent-orange/5 border border-accent-orange/20 rounded-xl px-4 py-3">
                       <p className="text-accent-orange text-xs font-bold">
                         {t('rep_cust_promo_used_prefix')}{c.discountSales.length}{t('rep_times_dot_suffix')}
-                        {t('rep_cust_saved_amount_prefix')}{fmtUZS(c.discountSales.reduce((s,x) => s+((x.subtotal||x.total||0)-(x.total||0)), 0))}
+                        {t('rep_cust_saved_amount_prefix')}{fmtUZS(c.discountSales.reduce((s,x) => s + getSaleLost(enrichSale(x)), 0))}
                       </p>
                     </div>
                   )}
