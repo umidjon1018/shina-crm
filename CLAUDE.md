@@ -335,9 +335,22 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 - `src/components/sales/` — 5 ta komponent (BarcodeScanner, DiscountRequestModal, ProductSearch, SaleItemSearch, SuccessModal)
 - `src/i18n/uz.js` va `src/i18n/ru.js` — yangi tarjima kalitlari
 
-### Keyingi session (2026-08-14 dan keyin)
-**Barkod tizimini tuzatish** — birinchi ish (foydalanuvchi aytdi).
-Undan keyin Warehouse kengaytma ishlari tartibi bo'yicha (memory: project_warehouse_tasks).
+### Sessiya 2026-08-15/16 — Komplekt/Bundle sotuv ko'rinishi (BAJARILDI)
+
+| Fayl | Nima tuzatildi |
+|------|----------------|
+| `Reports/tabs/SalesTab.jsx` | Bundle chegirma foiz/summa, bekor qilingan sotuvlarda haqiqiy refund summa (MOCK_RETURNS) |
+| `Reports/tabs/EmployeesTab.jsx` | Chegirma nazorati: komplekt sotuvlar ham hisobga olinadi |
+| `Reports/tabs/ProfitTab.jsx` | Kategoriya "Komplekt" badge, bundle chegirma |
+| `Reports/tabs/CustomersTab.jsx` | Mijoz profilida bundle chegirma va tejab qolgan summa |
+| `Reports/tabs/FinanceTab.jsx` | Nasiya sotuvlarda "Komplekt" kategoriya |
+| `Reports/index.jsx` | employeeStats + customerStats useMemo da komplekt |
+| `Sales/tabs/ReturnsTab.jsx` | Bekor qilish kartasida komplekt chegirma |
+
+**Texnik eslatma:** `cancelModal` da backend barcha return larni `cancelled` qilib qo'yadi → MOCK_RETURNS.refundAmount ni original sale bilan join qilib haqiqiy summa ko'rsatiladi.
+
+### Keyingi session
+Warehouse kengaytma ishlari — #4 Komplektlar (memory: project_warehouse_tasks).
 
 ### O'lchov birligi tizimi (2026-08-14 da qo'shildi)
 
