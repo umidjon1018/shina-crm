@@ -1,10 +1,11 @@
 ﻿import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, AlertCircle, X, Plus } from 'lucide-react'
+import { Search, AlertCircle, X, Plus, ShoppingBag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
 import { checkReservation } from '../../api/reservationService'
+import { getBundles } from '../../api/bundleService'
 import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -12,7 +13,7 @@ import i18n from '../../i18n'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
-const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSettings, allowSold = false, salesItems }) => {
+const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, notificationSettings, allowSold = false, salesItems }) => {
   const { t } = useTranslation()
   const { selectedShopId } = useShopStore()
   const { version } = useDataStore()
@@ -23,6 +24,7 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
   const [results, setResults] = useState([])
   const [warning, setWarning] = useState(null)
   const [attrFilters, setAttrFilters] = useState({}) // { defId: value }
+  const [activeBundles, setActiveBundles] = useState([])
 
   const activeAttrFilters = Object.entries(attrFilters).filter(([, v]) => v && v !== 'all')
 
@@ -39,6 +41,18 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
       setMockItems(items)
     })
   }, [version, selectedShopId])
+
+  useEffect(() => {
+    if (!onBundleAdd || allowSold) return
+    getBundles().then(list => {
+      const visible = list.filter(b => {
+        if (!b.isActive) return false
+        if (b.shopId !== 'all' && selectedShopId !== 'all' && b.shopId !== String(selectedShopId)) return false
+        return true
+      })
+      setActiveBundles(visible)
+    })
+  }, [version, selectedShopId, onBundleAdd, allowSold])
 
   const shopBatchIds = useMemo(() => {
     return new Set(MOCK_ITEMS.map(i => i.batchId))
@@ -261,6 +275,32 @@ const ProductSearch = ({ onAdd, cartItems, user, addNotification, notificationSe
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Komplektlar */}
+      {onBundleAdd && activeBundles.length > 0 && (
+        <div className="border border-border rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary border-b border-border">
+            <ShoppingBag size={13} className="text-accent-red" />
+            <span className="text-xs font-bold text-text-primary">Komplektlar</span>
+          </div>
+          {activeBundles.map(b => (
+            <div key={b.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-bg-secondary/50 transition-colors border-b border-border/50 last:border-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-text-primary truncate">{b.name}</p>
+                <p className="text-xs text-text-muted">
+                  {(b.products || []).length} ta tovar
+                  {b.discount > 0 && <span className="ml-1.5 text-accent-green font-bold">−{b.discount}%</span>}
+                </p>
+              </div>
+              <button
+                onClick={() => onBundleAdd(b)}
+                className="ml-3 p-1.5 rounded-lg bg-accent-red text-white hover:opacity-90 transition-opacity flex-shrink-0"
+              >
+                <Plus size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

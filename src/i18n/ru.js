@@ -871,6 +871,7 @@ export default {
   mgmt_tab_discounts: 'Скидки',
   mgmt_tab_promotions: 'Акции',
   mgmt_tab_shops: 'Магазины',
+  mgmt_tab_bundles: 'Комплекты',
   mgmt_tab_settings: 'Настройки',
   mgmt_stat_unread: 'Непрочитанные',
   mgmt_stat_total_notif: 'Всего сообщений',

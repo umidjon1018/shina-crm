@@ -877,6 +877,7 @@ export default {
   mgmt_tab_discounts: 'Chegirmalar',
   mgmt_tab_promotions: 'Aksiyalar',
   mgmt_tab_shops: "Do'konlar",
+  mgmt_tab_bundles: 'Komplektlar',
   mgmt_tab_settings: 'Sozlamalar',
   mgmt_stat_unread: "O'qilmagan",
   mgmt_stat_total_notif: 'Jami xabarlar',

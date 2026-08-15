@@ -22,6 +22,7 @@ import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
 import { getIncomeBatches } from '../../api/incomeService'
+import { getProducts } from '../../api/productService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -348,6 +349,47 @@ export const useSalesState = () => {
       updateSalePrice(c.item.id, base + (i < extra ? 1 : 0))
     })
   }
+
+  const addBundleToCart = useCallback(async (bundle) => {
+    const params = selectedShopId && selectedShopId !== 'all' ? { shopId: selectedShopId } : {}
+    const [allItems, allProducts] = await Promise.all([getItems(params), getProducts()])
+    const currentCartIds = new Set(cartItems.map(c => c.item.id))
+    let addedCount = 0
+
+    for (const { productId, quantity } of (bundle.products || [])) {
+      const product = allProducts.find(p => String(p.id) === String(productId))
+      if (!product) continue
+      const available = allItems.filter(i =>
+        String(i.productId) === String(productId) &&
+        i.status === 'in_stock' &&
+        i.barcode !== null &&
+        !currentCartIds.has(i.id)
+      ).slice(0, quantity)
+
+      for (const it of available) {
+        const added = addToCart({ item: it, product, bundleId: bundle.id, bundleName: bundle.name })
+        if (added) {
+          if (bundle.discount > 0) {
+            updateSalePrice(it.id, Math.round(product.cashPrice * (1 - bundle.discount / 100)))
+          }
+          currentCartIds.add(it.id)
+          addedCount++
+        }
+      }
+    }
+
+    if (addedCount === 0) {
+      addNotification({
+        type: 'OUT_OF_STOCK', severity: 'warning',
+        title: 'Tovar yetarli emas',
+        message: `"${bundle.name}" komplekti uchun barcoded tovar topilmadi`,
+      })
+    }
+  }, [selectedShopId, cartItems, addToCart, updateSalePrice, addNotification])
+
+  const removeBundleFromCart = useCallback((bundleId) => {
+    cartItems.filter(c => c.bundleId === bundleId).forEach(c => removeFromCart(c.item.id))
+  }, [cartItems, removeFromCart])
 
   // Eski tovar qabul qilish (trade-in) helpers
   const addTradeInRow = () => {
@@ -1636,6 +1678,7 @@ export const useSalesState = () => {
     maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     addNextItemOfProduct, updateGroupSalePrice,
+    addBundleToCart, removeBundleFromCart,
     handleSubmitSale, handleDiscountChange, handleSendDiscountRequest,
     handleCancelSale, executeCancelSale,
     handleLeftItemFound, handleSelectSaleItem, handleRightScanOrSearch,

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Minus, Plus, Search, ShoppingCart, Star, Trash2, UserPlus, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Minus, Plus, Search, ShoppingBag, ShoppingCart, Star, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 import ProductSearch from '../../../components/sales/ProductSearch'
@@ -27,19 +27,37 @@ const NewSaleTab = ({ ctx }) => {
     productCategories, subtotal, total, priceWarnings, setPriceWarnings,
     handleSubmitSale, isSubmitting,
     salesList, addNextItemOfProduct, updateGroupSalePrice,
+    addBundleToCart, removeBundleFromCart,
   } = ctx
 
-  // Savatdagi mahsulotlarni product.id bo'yicha guruhlash
-  const cartGroups = useMemo(() => {
-    const map = new Map()
+  // Savatni bundle va oddiy guruhlarga ajratish
+  const { bundleGroups, singleGroups } = useMemo(() => {
+    const bundleMap = new Map()
+    const singleMap = new Map()
     cartItems.forEach(c => {
-      if (!map.has(c.product.id)) {
-        map.set(c.product.id, { product: c.product, items: [] })
+      if (c.bundleId) {
+        if (!bundleMap.has(c.bundleId)) {
+          bundleMap.set(c.bundleId, { bundleId: c.bundleId, bundleName: c.bundleName, productGroups: new Map() })
+        }
+        const bg = bundleMap.get(c.bundleId)
+        if (!bg.productGroups.has(c.product.id)) {
+          bg.productGroups.set(c.product.id, { product: c.product, items: [] })
+        }
+        bg.productGroups.get(c.product.id).items.push(c)
+      } else {
+        if (!singleMap.has(c.product.id)) {
+          singleMap.set(c.product.id, { product: c.product, items: [] })
+        }
+        singleMap.get(c.product.id).items.push(c)
       }
-      map.get(c.product.id).items.push(c)
     })
-    return [...map.values()]
+    return {
+      bundleGroups: [...bundleMap.values()].map(b => ({ ...b, products: [...b.productGroups.values()] })),
+      singleGroups: [...singleMap.values()],
+    }
   }, [cartItems])
+
+  const cartGroups = singleGroups // eski nomi bilan ham ishlaydi (pastda ishlatilgan)
 
   // Guruh uchun umumiy narxni hisoblash
   const getGroupPrice = (group) => group.items.reduce((sum, c) =>
@@ -66,12 +84,12 @@ const NewSaleTab = ({ ctx }) => {
             <h4 className="text-text-primary font-syne font-bold mb-4 flex items-center gap-2">
               <Search className="text-accent-blue" size={20} /> {t('sl_ns_search_title')}
             </h4>
-            <ProductSearch onAdd={addToCart} cartItems={cartItems} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
+            <ProductSearch onAdd={addToCart} onBundleAdd={addBundleToCart} cartItems={cartItems} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
           </div>
         </div>
 
-        {/* SAVAT — guruhlangan */}
-        {cartGroups.length > 0 && (
+        {/* SAVAT — bundle + oddiy */}
+        {(bundleGroups.length > 0 || cartGroups.length > 0) && (
           <div className="bg-bg-primary border border-border rounded-3xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
@@ -83,6 +101,40 @@ const NewSaleTab = ({ ctx }) => {
               </button>
             </div>
             <div className="space-y-3 max-h-80 overflow-y-auto no-scrollbar">
+              {/* Bundle bloklari */}
+              {bundleGroups.map(bundle => (
+                <div key={bundle.bundleId} className="border border-accent-red/20 rounded-2xl overflow-hidden bg-accent-red/5">
+                  <div className="flex items-center justify-between px-4 py-2 bg-accent-red/10 border-b border-accent-red/20">
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag size={13} className="text-accent-red" />
+                      <span className="text-xs font-bold text-accent-red">{bundle.bundleName}</span>
+                      <span className="text-[10px] text-text-muted">({bundle.products.reduce((s, g) => s + g.items.length, 0)} ta tovar)</span>
+                    </div>
+                    <button onClick={() => removeBundleFromCart(bundle.bundleId)} className="p-1 hover:text-accent-red text-text-muted transition-colors">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {bundle.products.map(group => {
+                      const { product, items } = group
+                      const count = items.length
+                      const groupPrice = getGroupPrice(group)
+                      return (
+                        <div key={product.id} className="flex items-center gap-3 px-4 py-2">
+                          <div className="w-7 h-7 bg-bg-secondary rounded-lg flex items-center justify-center text-xs font-bold text-text-secondary shrink-0">
+                            {count}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-text-primary truncate">{product.name}</p>
+                            <p className="text-[10px] text-accent-red font-bold">{formatPrice(groupPrice, som)}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+              {/* Oddiy itemlar */}
               {cartGroups.map((group) => {
                 const { product, items } = group
                 const count = items.length

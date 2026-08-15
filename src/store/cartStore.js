@@ -7,7 +7,7 @@ export const useCartStore = create(
     (set, get) => ({
       cartItems: [],
 
-      addToCart: ({ item, product, warning = null }) => {
+      addToCart: ({ item, product, warning = null, bundleId = null, bundleName = null }) => {
         const exists = get().cartItems.some(c => c.item.id === item.id)
         if (exists) return false
         set(state => ({
@@ -15,7 +15,9 @@ export const useCartStore = create(
             item,
             product,
             warning,
-            salePrice: null, // sotuvchi kiritadi, null = cashPrice ishlatiladi
+            salePrice: null,
+            bundleId,
+            bundleName,
           }]
         }))
         return true
