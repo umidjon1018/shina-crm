@@ -483,6 +483,7 @@ export const useSalesState = () => {
       discount: effectiveDiscount,
       loyaltyDiscountApplied,
       bundleDiscountAmount,
+      isBundle: cartItems.some(c => c.bundleId != null),
       subtotal,
       total,
       soldAt: new Date().toISOString(),
@@ -1297,7 +1298,7 @@ export const useSalesState = () => {
         return acc
       }, 0) || 0
       const bundleDiscountAmount = s.bundleDiscountAmount || bundleItemsDiscount
-      const isBundle = bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null))
+      const isBundle = s.isBundle || bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null))
 
       return {
         ...s,
