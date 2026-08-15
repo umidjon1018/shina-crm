@@ -350,7 +350,7 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 **Texnik eslatma:** `cancelModal` da backend barcha return larni `cancelled` qilib qo'yadi → MOCK_RETURNS.refundAmount ni original sale bilan join qilib haqiqiy summa ko'rsatiladi.
 
 ### Keyingi session
-Warehouse kengaytma ishlari — #4 Komplektlar (memory: project_warehouse_tasks).
+Warehouse kengaytma ishlari — #5 Excel orqali tovar import (memory: project_warehouse_tasks).
 
 ### O'lchov birligi tizimi (2026-08-14 da qo'shildi)
 
