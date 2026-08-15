@@ -452,7 +452,9 @@ export const useSalesState = () => {
         salePrice: c.salePrice ?? c.product.cashPrice,
         cashPrice: c.product.cashPrice,
         purchasePrice: c.product.purchasePrice ?? 0,
-        qty: 1
+        qty: 1,
+        bundleId: c.bundleId ?? null,
+        bundleName: c.bundleName ?? null,
       })),
       customerId: selectedCustomer?.id || null,
       customerName: selectedCustomer?.name || 'Noma\'lum',
@@ -1288,11 +1290,22 @@ export const useSalesState = () => {
       const itemsNames = s.items?.map(i => i.name || 'Tovar').join(', ') || '—';
       const qty = s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0;
 
+      const isBundle = !!(s.items?.some(it => it.bundleId != null))
+      const bundleItemsDiscount = s.items?.reduce((acc, it) => {
+        if (it.bundleId != null && it.salePrice < it.cashPrice) {
+          return acc + Math.max(0, Math.round((it.cashPrice - it.salePrice) * (it.qty || 1)))
+        }
+        return acc
+      }, 0) || 0
+      const bundleDiscountAmount = s.bundleDiscountAmount || bundleItemsDiscount
+
       return {
         ...s,
         itemsNames,
         barcode: firstBarcode,
-        category: catLabel,
+        category: isBundle ? 'Komplekt' : catLabel,
+        isBundle,
+        bundleDiscountAmount,
         qty,
         paymentTypeLabel: s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank'),
         statusLabel: s.status === 'completed' && s._isExchange ? t('sl_hist_status_exchanged')

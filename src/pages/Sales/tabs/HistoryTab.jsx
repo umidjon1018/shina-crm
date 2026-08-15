@@ -118,6 +118,9 @@ const HistoryTab = ({ ctx }) => {
                       )
                     })()}
                     {(() => {
+                      if (s.isBundle) {
+                        return <td className="px-4 py-3.5 truncate"><span className="font-semibold text-sm text-accent-blue">Komplekt</span></td>
+                      }
                       const catObj = productCategories.find(c => c.id === catId)
                       const catColor = getCategoryColor(catObj?.id, productCategories)
                       return <td className="px-4 py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
