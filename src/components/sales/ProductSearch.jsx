@@ -5,11 +5,16 @@ import { useTranslation } from 'react-i18next'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
 import { checkReservation } from '../../api/reservationService'
-import { getBundles } from '../../api/bundleService'
 import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import i18n from '../../i18n'
+
+const BUNDLES_KEY = 'shina_crm_bundles'
+const readBundles = () => {
+  try { return JSON.parse(localStorage.getItem(BUNDLES_KEY) || '[]') }
+  catch { return [] }
+}
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
@@ -24,7 +29,6 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
   const [results, setResults] = useState([])
   const [warning, setWarning] = useState(null)
   const [attrFilters, setAttrFilters] = useState({}) // { defId: value }
-  const [activeBundles, setActiveBundles] = useState([])
 
   const activeAttrFilters = Object.entries(attrFilters).filter(([, v]) => v && v !== 'all')
 
@@ -42,9 +46,10 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
     })
   }, [version, selectedShopId])
 
-  useEffect(() => {
-    if (!onBundleAdd || allowSold) return
-    getBundles().then(list => setActiveBundles(list.filter(b => b.isActive)))
+  // Sinxron o'qish — render paytida tayyor bo'ladi
+  const activeBundles = useMemo(() => {
+    if (!onBundleAdd || allowSold) return []
+    return readBundles().filter(b => b.isActive)
   }, [version, onBundleAdd, allowSold])
 
   const shopBatchIds = useMemo(() => {
