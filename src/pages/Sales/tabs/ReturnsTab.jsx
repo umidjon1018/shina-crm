@@ -127,8 +127,32 @@ const ReturnsTab = ({ ctx }) => {
                 <div><span className="text-text-muted">{t('sl_ret_sale_total')}</span><p className="font-medium text-accent-green">{formatPrice(returnSale.total, som)}</p></div>
                 <div><span className="text-text-muted">{t('sl_ret_sale_discount')}</span>
                   <p className="font-medium text-accent-red">
-                    {returnSale.discount || 0}%
-                    {returnSale.discount > 0 && <span className="text-xs ml-1 text-text-muted font-normal">(-{formatPrice(Math.round((returnSale.subtotal || returnSale.total) * (returnSale.discount || 0) / 100), som)})</span>}
+                    {(() => {
+                      if (returnSale.discount > 0) {
+                        const amt = Math.round((returnSale.subtotal || returnSale.total) * returnSale.discount / 100)
+                        return <>{returnSale.discount}%<span className="text-xs ml-1 text-text-muted font-normal">(-{formatPrice(amt, som)})</span></>
+                      }
+                      const existing = Number(returnSale.bundleDiscountAmount) || 0
+                      if (existing > 0 || returnSale.isBundle) {
+                        return <>{returnSale.bundleDiscountPercent > 0 ? `${returnSale.bundleDiscountPercent}%` : 'Komplekt'}<span className="text-xs ml-1 text-text-muted font-normal">(-{formatPrice(existing, som)})</span></>
+                      }
+                      // Auto-detect bundle from localStorage
+                      try {
+                        const ab = JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive)
+                        const saleNames = new Set((returnSale.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+                        const matched = ab.find(b => b.products?.length > 0 && b.products.every(bp => {
+                          const it = (returnSale.items || []).find(i => String(i.productId) === String(bp.productId))
+                          const n = it ? (it.productName || it.name || '').trim() : null
+                          return n ? saleNames.has(n) : false
+                        }))
+                        if (matched?.discount > 0) {
+                          const tot = (returnSale.items || []).reduce((a, i) => a + (i.price || 0), 0)
+                          const amt = Math.round(tot * matched.discount / (100 - matched.discount))
+                          return <>{matched.discount}% Komplekt<span className="text-xs ml-1 text-text-muted font-normal">(-{formatPrice(amt, som)})</span></>
+                        }
+                      } catch {}
+                      return <>0%</>
+                    })()}
                   </p>
                 </div>
                 <div><span className="text-text-muted">{t('sl_ret_sale_customer')}</span><p className="font-medium text-text-primary">{returnSale.customerName || "Noma'lum"}</p></div>
