@@ -23,6 +23,7 @@ import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
+import { getBundles } from '../../api/bundleService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -1287,9 +1288,20 @@ export const useSalesState = () => {
   )
 
   const enrichedSalesForHistory = useMemo(() => {
-
-
-    // Shuning uchun bu yerda qayta qo'shish shart emas (ikki marta ko'rinishni oldini olish).
+    // Aktiv komplektlarni localStorage dan o'qiymiz (sinxron)
+    const activeBundles = (() => {
+      try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+      catch { return [] }
+    })()
+    // Barcha sotuvlardagi productId → name xaritasini quramiz (duplicate tovarlar uchun)
+    const productIdToName = {}
+    filteredSalesForHistory.forEach(sale => {
+      (sale.items || []).forEach(it => {
+        if (it.productId && (it.productName || it.name)) {
+          productIdToName[String(it.productId)] = (it.productName || it.name).trim()
+        }
+      })
+    })
 
     return [...filteredSalesForHistory].map(s => {
       const firstItem = s.items?.[0];
@@ -1305,7 +1317,17 @@ export const useSalesState = () => {
         return acc
       }, 0) || 0
       const bundleDiscountAmount = s.bundleDiscountAmount || bundleItemsDiscount
-      const isBundle = s.isBundle || bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null))
+      // Sale mahsulotlari nomi (Set)
+      const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+      // Biron aktiv bundle ga mos kelishini nom bo'yicha tekshir
+      const matchesBundle = activeBundles.some(bundle =>
+        bundle.products?.length > 0 &&
+        bundle.products.every(bp => {
+          const bpName = productIdToName[String(bp.productId)]
+          return bpName ? saleNames.has(bpName) : false
+        })
+      )
+      const isBundle = s.isBundle || bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null)) || matchesBundle
 
       return {
         ...s,
