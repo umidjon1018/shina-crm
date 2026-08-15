@@ -52,6 +52,7 @@ const map = (s) => ({
   installmentDebt: s.installment_debt != null ? Number(s.installment_debt) : null,
   installmentPaidAmount: Number(s.installment_paid_amount) || 0,
   installmentPayments: Array.isArray(s.installment_payments) ? s.installment_payments : [],
+  bundleDiscountAmount: Number(s.bundle_discount_amount) || 0,
   soldAt: s.created_at || '',
   createdAt: s.created_at || '',
   items: (s.items || []).map(mapItem),
@@ -94,6 +95,7 @@ export const createSale = async (saleData) => {
     installment_commission_amount: saleData.installmentCommissionAmount || 0,
     installment_due_date: saleData.installmentDueDate || null,
     contract_number: saleData.contractNumber || null,
+    bundle_discount_amount: saleData.bundleDiscountAmount || 0,
   })
   return map(data)
 }
