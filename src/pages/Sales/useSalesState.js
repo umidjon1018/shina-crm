@@ -1333,7 +1333,7 @@ export const useSalesState = () => {
       const effectiveBundleDiscount = bundleDiscountAmount > 0
         ? bundleDiscountAmount
         : (matchedBundle?.discount > 0
-            ? Math.round(saleItemsTotal * matchedBundle.discount / 100)
+            ? Math.round(saleItemsTotal * matchedBundle.discount / (100 - matchedBundle.discount))
             : 0)
 
       return {
