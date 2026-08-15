@@ -1085,6 +1085,31 @@ export const Reports = () => {
       return { empStats:[], activeCount:0, topSeller:null, monthlyActivity:[], cancelByEmp:[], totalCancelled:0 }
     }
 
+    // Bundle detection helpers (localStorage orqali, hook kerak emas)
+    const _activeBundles = (() => {
+      try { return JSON.parse(localStorage.getItem('shina_crm_bundles') || '[]').filter(b => b.isActive) }
+      catch { return [] }
+    })()
+    const _pidToName = {}
+    MOCK_SALES.forEach(sale => {
+      ;(sale.items || []).forEach(it => {
+        if (it.productId && (it.productName || it.name)) _pidToName[String(it.productId)] = (it.productName || it.name).trim()
+      })
+    })
+    const _getBundleInfo = (s) => {
+      const existing = Number(s.bundleDiscountAmount) || 0
+      const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
+      const matched = _activeBundles.find(b =>
+        b.products?.length > 0 &&
+        b.products.every(bp => { const n = _pidToName[String(bp.productId)]; return n ? saleNames.has(n) : false })
+      )
+      if (!matched && existing === 0 && !s.isBundle) return null
+      if (existing > 0) return { amt: existing, pct: matched?.discount || 0 }
+      if (!matched || !matched.discount) return null
+      const total = (s.items || []).reduce((a, i) => a + (i.price || 0), 0)
+      return { amt: Math.round(total * matched.discount / (100 - matched.discount)), pct: matched.discount }
+    }
+
     const completed  = filterByPeriod(MOCK_SALES, 'soldAt').filter(s => s.status !== 'cancelled')
     const cancelled  = filterByPeriod(MOCK_SALES, 'soldAt').filter(s => s.status === 'cancelled')
     const allSales   = filterByPeriod(MOCK_SALES, 'soldAt')
@@ -1125,11 +1150,20 @@ export const Reports = () => {
       const cancelPct    = empAll.length > 0 ? Math.round(cancelCount / empAll.length * 100) : 0
       const avgCheck     = salesCount > 0 ? Math.round(totalSales/salesCount) : 0
       const newCustomers = empCompleted.filter(s => s.isNewCustomer).length
-      const discountSales = empCompleted.filter(s => s.discount > 0)
+      const discountSales = empCompleted.filter(s => {
+        if (s.discount > 0) return true
+        const info = _getBundleInfo(s)
+        return !!(info && info.amt > 0)
+      })
+      const _getDiscPct = (s) => s.discount > 0 ? s.discount : (_getBundleInfo(s)?.pct || 0)
       const avgDiscount  = discountSales.length > 0
-        ? Math.round(discountSales.reduce((s,x) => s+x.discount,0)/discountSales.length) : 0
-      const maxDiscount  = discountSales.length > 0 ? Math.max(...discountSales.map(s=>s.discount)) : 0
-      const lostRevenue  = empCompleted.reduce((s,x) => s+(x.subtotal-x.total), 0)
+        ? Math.round(discountSales.reduce((s,x) => s + _getDiscPct(x), 0) / discountSales.length) : 0
+      const maxDiscount  = discountSales.length > 0 ? Math.max(...discountSales.map(s => _getDiscPct(s))) : 0
+      const lostRevenue  = empCompleted.reduce((s,x) => {
+        const reg = x.subtotal - x.total
+        const bInfo = x.discount === 0 ? _getBundleInfo(x) : null
+        return s + reg + (bInfo ? bInfo.amt : 0)
+      }, 0)
 
       // Oxirgi sotuv sanasi
       const lastSale = empCompleted.length > 0
