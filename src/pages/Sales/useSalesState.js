@@ -1290,7 +1290,6 @@ export const useSalesState = () => {
       const itemsNames = s.items?.map(i => i.name || 'Tovar').join(', ') || '—';
       const qty = s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0;
 
-      const isBundle = !!(s.items?.some(it => it.bundleId != null))
       const bundleItemsDiscount = s.items?.reduce((acc, it) => {
         if (it.bundleId != null && it.salePrice < it.cashPrice) {
           return acc + Math.max(0, Math.round((it.cashPrice - it.salePrice) * (it.qty || 1)))
@@ -1298,6 +1297,7 @@ export const useSalesState = () => {
         return acc
       }, 0) || 0
       const bundleDiscountAmount = s.bundleDiscountAmount || bundleItemsDiscount
+      const isBundle = bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null))
 
       return {
         ...s,
