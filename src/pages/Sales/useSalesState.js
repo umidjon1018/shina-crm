@@ -58,7 +58,7 @@ export const useSalesState = () => {
   const thisMonth = new Date().toISOString().substring(0, 7)
   
   // Cart Store (Zustand)
-  const { cartItems, addToCart, removeFromCart, clearCart, updateSalePrice } = useCartStore()
+  const { cartItems, addToCart, removeFromCart, clearCart, updateSalePrice, isBundleSale: cartIsBundleSale, setIsBundleSale: setCartIsBundleSale } = useCartStore()
 
   // Sale Form Store — navigatsiyadan keyin ham saqlanadi (localStorage)
   const {
@@ -118,7 +118,6 @@ export const useSalesState = () => {
 
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isBundleSale, setIsBundleSale] = useState(false)
   const [successSale, setSuccessSale] = useState(null)
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomerModal, setShowNewCustomerModal] = useState(false)
@@ -391,9 +390,9 @@ export const useSalesState = () => {
         message: `"${bundle.name}" komplekti uchun barcoded tovar topilmadi`,
       })
     } else {
-      setIsBundleSale(true)
+      setCartIsBundleSale(true)
     }
-  }, [selectedShopId, cartItems, addToCart, updateSalePrice, addNotification])
+  }, [selectedShopId, cartItems, addToCart, updateSalePrice, addNotification, setCartIsBundleSale])
 
   const removeBundleFromCart = useCallback((bundleId) => {
     cartItems.filter(c => c.bundleId === bundleId).forEach(c => removeFromCart(c.item.id))
@@ -491,7 +490,7 @@ export const useSalesState = () => {
       discount: effectiveDiscount,
       loyaltyDiscountApplied,
       bundleDiscountAmount,
-      isBundle: isBundleSale,
+      isBundle: cartIsBundleSale,
       subtotal,
       total,
       soldAt: new Date().toISOString(),
@@ -519,7 +518,6 @@ export const useSalesState = () => {
         const capturedCustomer = selectedCustomer
         const capturedCartItems = [...cartItems]
         setSuccessSale(res)
-        setIsBundleSale(false)
         clearCart()
         resetForm()
         setContractFile(null)

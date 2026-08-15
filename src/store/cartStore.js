@@ -6,6 +6,7 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       cartItems: [],
+      isBundleSale: false,
 
       addToCart: ({ item, product, warning = null, bundleId = null, bundleName = null }) => {
         const exists = get().cartItems.some(c => c.item.id === item.id)
@@ -35,7 +36,8 @@ export const useCartStore = create(
         set(state => ({ cartItems: state.cartItems.filter(c => c.item.id !== itemId) }))
       },
 
-      clearCart: () => set({ cartItems: [] }),
+      setIsBundleSale: (v) => set({ isBundleSale: v }),
+      clearCart: () => set({ cartItems: [], isBundleSale: false }),
     }),
     {
       name: 'goodtires-cart', // localStorage key
