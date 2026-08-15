@@ -47,10 +47,10 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
   }, [version, selectedShopId])
 
   // Sinxron o'qish — render paytida tayyor bo'ladi
-  const activeBundles = useMemo(() => {
-    if (!onBundleAdd || allowSold) return []
-    return readBundles().filter(b => b.isActive)
-  }, [version, onBundleAdd, allowSold])
+  const activeBundles = useMemo(
+    () => allowSold ? [] : readBundles().filter(b => b.isActive),
+    [version, allowSold]
+  )
 
   const shopBatchIds = useMemo(() => {
     return new Set(MOCK_ITEMS.map(i => i.batchId))
@@ -273,19 +273,17 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Komplektlar — har doim ko'rinadi; qidiruv matni bo'lsa nom bo'yicha filtr */}
-      {onBundleAdd && activeBundles.length > 0 && (() => {
-        const visibleBundles = query.length >= 2
-          ? activeBundles.filter(b => b.name.toLowerCase().includes(query.toLowerCase()))
+      {/* Komplektlar */}
+      <div className="border border-border rounded-2xl overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary border-b border-border">
+          <ShoppingBag size={13} className="text-accent-red" />
+          <span className="text-xs font-bold text-text-primary">Komplektlar ({activeBundles.length})</span>
+        </div>
+        {activeBundles.length === 0
+          ? <p className="px-4 py-2 text-xs text-text-muted">Komplekt topilmadi</p>
           : activeBundles
-        if (!visibleBundles.length) return null
-        return (
-        <div className="border border-border rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary border-b border-border">
-            <ShoppingBag size={13} className="text-accent-red" />
-            <span className="text-xs font-bold text-text-primary">Komplektlar</span>
-          </div>
-          {visibleBundles.map(b => (
+              .filter(b => query.length < 2 || b.name.toLowerCase().includes(query.toLowerCase()))
+              .map(b => (
             <div key={b.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-bg-secondary/50 transition-colors border-b border-border/50 last:border-0">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text-primary truncate">{b.name}</p>
@@ -294,17 +292,18 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                   {b.discount > 0 && <span className="ml-1.5 text-accent-green font-bold">−{b.discount}%</span>}
                 </p>
               </div>
-              <button
-                onClick={() => onBundleAdd(b)}
-                className="ml-3 p-1.5 rounded-lg bg-accent-red text-white hover:opacity-90 transition-opacity flex-shrink-0"
-              >
-                <Plus size={15} />
-              </button>
+              {onBundleAdd && (
+                <button
+                  onClick={() => onBundleAdd(b)}
+                  className="ml-3 p-1.5 rounded-lg bg-accent-red text-white hover:opacity-90 transition-opacity flex-shrink-0"
+                >
+                  <Plus size={15} />
+                </button>
+              )}
             </div>
-          ))}
-        </div>
-        )
-      })()}
+          ))
+        }
+      </div>
     </div>
   )
 }
