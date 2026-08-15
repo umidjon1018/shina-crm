@@ -618,7 +618,9 @@ const SalesTab = ({ ctx }) => {
               columns={[
                 { key:'soldAt',       label:t('col_date'),           render: r => <span className="whitespace-nowrap text-xs">{fmtSoldAt(r.soldAt)}</span> },
                 { key:'items',        label:t('col_product'),        render: r => <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span> },
-                { key:'category',     label:t('col_category'),       render: r => {
+                { key:'category', label:t('col_category'), render: r => {
+                  const er = enrichSale(r)
+                  if (er.isBundle) return <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase" style={{ backgroundColor: '#E6394622', color: '#E63946' }}>Komplekt</span>
                   const cat = r.items?.[0]?.productId ? (MOCK_PRODUCTS.find(p => p.id === r.items[0].productId)?.category || '—') : '—'
                   return renderCatBadge(cat)
                 }},
