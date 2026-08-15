@@ -118,6 +118,7 @@ export const useSalesState = () => {
 
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isBundleSale, setIsBundleSale] = useState(false)
   const [successSale, setSuccessSale] = useState(null)
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomerModal, setShowNewCustomerModal] = useState(false)
@@ -384,6 +385,8 @@ export const useSalesState = () => {
         title: 'Tovar yetarli emas',
         message: `"${bundle.name}" komplekti uchun barcoded tovar topilmadi`,
       })
+    } else {
+      setIsBundleSale(true)
     }
   }, [selectedShopId, cartItems, addToCart, updateSalePrice, addNotification])
 
@@ -483,7 +486,7 @@ export const useSalesState = () => {
       discount: effectiveDiscount,
       loyaltyDiscountApplied,
       bundleDiscountAmount,
-      isBundle: cartItems.some(c => c.bundleId != null),
+      isBundle: isBundleSale,
       subtotal,
       total,
       soldAt: new Date().toISOString(),
@@ -511,6 +514,7 @@ export const useSalesState = () => {
         const capturedCustomer = selectedCustomer
         const capturedCartItems = [...cartItems]
         setSuccessSale(res)
+        setIsBundleSale(false)
         clearCart()
         resetForm()
         setContractFile(null)
