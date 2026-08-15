@@ -1320,14 +1320,21 @@ export const useSalesState = () => {
       // Sale mahsulotlari nomi (Set)
       const saleNames = new Set((s.items || []).map(it => (it.productName || it.name || '').trim()).filter(Boolean))
       // Biron aktiv bundle ga mos kelishini nom bo'yicha tekshir
-      const matchesBundle = activeBundles.some(bundle =>
+      const matchedBundle = activeBundles.find(bundle =>
         bundle.products?.length > 0 &&
         bundle.products.every(bp => {
           const bpName = productIdToName[String(bp.productId)]
           return bpName ? saleNames.has(bpName) : false
         })
       )
-      const isBundle = s.isBundle || bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null)) || matchesBundle
+      const isBundle = s.isBundle || bundleDiscountAmount > 0 || !!(s.items?.some(it => it.bundleId != null)) || !!matchedBundle
+      // Bundle discount summasi: DB dan kelgan yoki bundle foizi bo'yicha hisoblangan
+      const saleItemsTotal = (s.items || []).reduce((acc, it) => acc + (it.price || 0), 0)
+      const effectiveBundleDiscount = bundleDiscountAmount > 0
+        ? bundleDiscountAmount
+        : (matchedBundle?.discount > 0
+            ? Math.round(saleItemsTotal * matchedBundle.discount / 100)
+            : 0)
 
       return {
         ...s,
@@ -1335,7 +1342,7 @@ export const useSalesState = () => {
         barcode: firstBarcode,
         category: isBundle ? 'Komplekt' : catLabel,
         isBundle,
-        bundleDiscountAmount,
+        bundleDiscountAmount: effectiveBundleDiscount,
         qty,
         paymentTypeLabel: s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank'),
         statusLabel: s.status === 'completed' && s._isExchange ? t('sl_hist_status_exchanged')
