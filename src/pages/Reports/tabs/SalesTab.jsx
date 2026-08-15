@@ -48,7 +48,7 @@ const SalesTab = ({ ctx }) => {
     USD_RATE,
     storeInstallmentOrgs, storeMonthlyTargets, storeEmployeeTargets,
     storeCompanyName, storeProductCategories,
-    MOCK_SALES, MOCK_PRODUCTS,
+    MOCK_SALES, MOCK_PRODUCTS, MOCK_RETURNS,
   } = ctx
 
   const activeBundles = useMemo(() => {
@@ -1706,6 +1706,16 @@ const SalesTab = ({ ctx }) => {
         const cancelled = modalFilter === 'all'
           ? MOCK_SALES.filter(s => s.status === 'cancelled')
           : MOCK_SALES.filter(s => s.status === 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+        // Har bir bekor sotuv uchun MOCK_RETURNS dan haqiqiy qaytarilgan summani olamiz
+        const returnByOrigSale = {}
+        ;(MOCK_RETURNS || []).forEach(r => {
+          if (r.originalSaleId) returnByOrigSale[String(r.originalSaleId)] = r
+        })
+        const getCancelAmount = (sale) => {
+          const ret = returnByOrigSale[String(sale.id)]
+          if (ret && (ret.refundAmount || ret.refundAmount === 0)) return ret.refundAmount
+          return sale.subtotal || sale.total || 0
+        }
 
         return (
           <Modal open title={t('rep_modal_cancelled_title')} subtitle={t('rep_modal_cancelled_sub')} size="xl" onClose={closeModal}>
@@ -1730,7 +1740,19 @@ const SalesTab = ({ ctx }) => {
                     { key:'items', label:t('col_product'), render: r => (
                       <span className="text-xs text-text-secondary">{fmtItems(r.items)}</span>
                     )},
-                    { key:'subtotal', label:t('col_amount'), align:'right', render: r => fmtUZS(r.subtotal) },
+                    { key:'subtotal', label:t('col_amount'), align:'right', render: r => {
+                      const refunded = getCancelAmount(r)
+                      const original = r.subtotal || r.total || 0
+                      if (refunded !== original) {
+                        return (
+                          <div className="text-right">
+                            <div className="font-semibold text-accent-red">{fmtUZS(refunded)}</div>
+                            <div className="text-xs text-text-muted line-through">{fmtUZS(original)}</div>
+                          </div>
+                        )
+                      }
+                      return fmtUZS(original)
+                    }},
                     { key:'cancelReason', label:t('col_reason'), render: r => {
                       const label = getCancelLabel(r.cancelReason);
                       const isExchange = r.cancelReason === 'almashtirish' || r.cancelReason === 'exchange';
