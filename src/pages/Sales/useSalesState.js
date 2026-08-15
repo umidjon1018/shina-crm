@@ -360,18 +360,23 @@ export const useSalesState = () => {
     for (const { productId, quantity } of (bundle.products || [])) {
       const product = allProducts.find(p => String(p.id) === String(productId))
       if (!product) continue
+      // ID bo'yicha topilmasa, bir xil nomli barcha productlar itemlarini ham qo'shish
+      const sameNameIds = new Set(
+        allProducts.filter(p => p.name === product.name).map(p => String(p.id))
+      )
       const available = allItems.filter(i =>
-        String(i.productId) === String(productId) &&
+        sameNameIds.has(String(i.productId)) &&
         i.status === 'in_stock' &&
         i.barcode !== null &&
         !currentCartIds.has(i.id)
       ).slice(0, quantity)
 
       for (const it of available) {
-        const added = addToCart({ item: it, product, bundleId: bundle.id, bundleName: bundle.name })
+        const itProduct = allProducts.find(p => String(p.id) === String(it.productId)) || product
+        const added = addToCart({ item: it, product: itProduct, bundleId: bundle.id, bundleName: bundle.name })
         if (added) {
           if (bundle.discount > 0) {
-            updateSalePrice(it.id, Math.round(product.cashPrice * (1 - bundle.discount / 100)))
+            updateSalePrice(it.id, Math.round(itProduct.cashPrice * (1 - bundle.discount / 100)))
           }
           currentCartIds.add(it.id)
           addedCount++
