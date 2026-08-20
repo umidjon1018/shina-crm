@@ -202,6 +202,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       } catch (e) { console.error(e) }
     }
     setSavingChain(null)
+    // Saqlangach zanjirni o'chir
+    setLinkedProducts(prev => { const next = new Set(prev); next.delete(pid); return next })
+    setUnlinkedItems(prev => { const n = { ...prev }; delete n[pid]; return n })
   }
 
   const shopItemCount = (productId, status) =>
