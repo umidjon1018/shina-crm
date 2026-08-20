@@ -231,9 +231,6 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                   <AlertCircle size={16} /> {parseError}
                 </div>
               )}
-              <div className="flex justify-between">
-                <button onClick={() => setStep(1)} className="text-sm text-text-muted hover:text-text-primary">← Orqaga</button>
-              </div>
             </div>
           )}
 
