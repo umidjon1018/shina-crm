@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
@@ -25,6 +25,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [pendingAttrs, setPendingAttrs] = useState({})     // { itemId: { defId: value|'__none__' } }
   const [localItemAttrs, setLocalItemAttrs] = useState({}) // { itemId: attributes } — saved locally
   const [savingItemId, setSavingItemId] = useState(null)
+  const [linkedProducts, setLinkedProducts] = useState(new Set())   // zanjirlangan product IDlar
+  const [unlinkedItems, setUnlinkedItems] = useState({})             // { productId: Set<itemId> } — zanjirdan ajratilganlar
+  const [savingChain, setSavingChain] = useState(null)              // chain save jarayonidagi productId
   const [attrDismissed, setAttrDismissed] = useState(() => {
     try { return JSON.parse(localStorage.getItem('attr_warn_dismissed') || '{}') } catch { return {} }
   })
@@ -119,6 +122,72 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       setSavingItemId(null)
     }
   }
+  // ---- Zanjir (chain link) yordamchi funksiyalar ----
+  const isLinked = (productId) => linkedProducts.has(String(productId))
+  const isItemUnlinked = (productId, itemId) =>
+    unlinkedItems[String(productId)]?.has(String(itemId)) ?? false
+  const isItemInChain = (productId, itemId) =>
+    isLinked(productId) && !isItemUnlinked(productId, itemId)
+
+  const toggleProductLink = (productId) => {
+    const pid = String(productId)
+    setLinkedProducts(prev => {
+      const next = new Set(prev)
+      if (next.has(pid)) next.delete(pid); else next.add(pid)
+      return next
+    })
+    setUnlinkedItems(prev => { const n = { ...prev }; delete n[pid]; return n })
+  }
+
+  const toggleItemLink = (productId, itemId) => {
+    const pid = String(productId); const iid = String(itemId)
+    setUnlinkedItems(prev => {
+      const set = new Set(prev[pid] || [])
+      if (set.has(iid)) set.delete(iid); else set.add(iid)
+      return { ...prev, [pid]: set }
+    })
+  }
+
+  const handleChainAttrChange = (productId, candidates, itemId, defLabel, value) => {
+    const pid = String(productId)
+    if (isItemInChain(pid, itemId)) {
+      const chainIds = candidates.filter(i => !isItemUnlinked(pid, i.id)).map(i => i.id)
+      setPendingAttrs(prev => {
+        const next = { ...prev }
+        chainIds.forEach(cid => { next[cid] = { ...(next[cid] || {}), [defLabel]: value } })
+        return next
+      })
+    } else {
+      setPendingAttrs(prev => ({ ...prev, [itemId]: { ...(prev[itemId] || {}), [defLabel]: value } }))
+    }
+  }
+
+  const handleSaveChain = async (productId, inStockItems) => {
+    const pid = String(productId)
+    setSavingChain(pid)
+    const chainItems = inStockItems.filter(i =>
+      !isItemUnlinked(pid, i.id) &&
+      pendingAttrs[i.id] && Object.values(pendingAttrs[i.id]).some(v => v !== '')
+    )
+    for (const item of chainItems) {
+      const pending = pendingAttrs[item.id]
+      if (!pending) continue
+      try {
+        const existingAttrs = getItemAttrs(item)
+        const newAttrs = { ...existingAttrs }
+        for (const [label, val] of Object.entries(pending)) {
+          if (val === '') continue
+          newAttrs[label] = val === '__none__' ? null : val
+        }
+        await updateItemAttributes(item.id, newAttrs)
+        setLocalItemAttrs(prev => ({ ...prev, [item.id]: newAttrs }))
+        setPendingAttrs(prev => { const n = { ...prev }; delete n[item.id]; return n })
+        dismissAttrWarning(item.productId)
+      } catch (e) { console.error(e) }
+    }
+    setSavingChain(null)
+  }
+
   const shopItemCount = (productId, status) =>
     items.filter(i => i.productId === productId && i.status === status && shopBatchIds.has(i.batchId)).length
   const shopStock = (productId) => shopItemCount(productId, 'in_stock')
@@ -416,6 +485,42 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                             {inStockItems.length === 0 ? (
                               <p className="text-xs text-text-muted py-2">Omborda birlik yo'q</p>
                             ) : (
+                              <>
+                              {/* Zanjir boshqaruvi */}
+                              {hasDefs && inStockItems.length > 1 && (() => {
+                                const pid = String(p.id)
+                                const linked = isLinked(p.id)
+                                const chainItems = inStockItems.filter(i => !isItemUnlinked(pid, i.id))
+                                const hasPendingChain = chainItems.some(i =>
+                                  pendingAttrs[i.id] && Object.values(pendingAttrs[i.id]).some(v => v !== '')
+                                )
+                                return (
+                                  <div className="flex items-center gap-2 mb-3" onClick={e => e.stopPropagation()}>
+                                    <button
+                                      onClick={() => toggleProductLink(p.id)}
+                                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                                        linked
+                                          ? 'bg-accent-blue/15 text-accent-blue border-accent-blue/40'
+                                          : 'bg-bg-tertiary text-text-muted border-border hover:border-accent-blue/50 hover:text-accent-blue'
+                                      }`}
+                                    >
+                                      <Link2 size={12} />
+                                      {linked
+                                        ? `Zanjirlangan — ${chainItems.length} ta`
+                                        : 'Barchasini bog\'lash'}
+                                    </button>
+                                    {linked && hasPendingChain && (
+                                      <button
+                                        onClick={() => handleSaveChain(p.id, inStockItems)}
+                                        disabled={savingChain === pid}
+                                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent-blue text-white text-xs font-bold hover:opacity-90 disabled:opacity-50"
+                                      >
+                                        {savingChain === pid ? '...' : `${chainItems.length} tasini saqlash`}
+                                      </button>
+                                    )}
+                                  </div>
+                                )
+                              })()}
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="border-b border-border/50">
@@ -448,9 +553,26 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                     return (
                                       <tr key={item.id} className={itemUnset ? 'bg-amber-400/15 hover:bg-amber-400/25' : 'hover:bg-bg-tertiary/20'}>
                                         <td className="py-2 pr-6">
-                                          {item.barcode
-                                            ? <span className="font-mono font-medium text-text-primary">{item.barcode}</span>
-                                            : <span className="text-text-muted italic">— barkod yo'q —</span>}
+                                          <div className="flex items-center gap-1.5">
+                                            {isLinked(p.id) && (
+                                              <button
+                                                onClick={e => { e.stopPropagation(); toggleItemLink(p.id, item.id) }}
+                                                className={`flex-shrink-0 p-0.5 rounded transition-colors ${
+                                                  isItemUnlinked(String(p.id), item.id)
+                                                    ? 'text-text-muted hover:text-accent-blue'
+                                                    : 'text-accent-blue hover:text-accent-orange'
+                                                }`}
+                                                title={isItemUnlinked(String(p.id), item.id) ? 'Zanjirga ulash' : 'Zanjirdan ajratish'}
+                                              >
+                                                {isItemUnlinked(String(p.id), item.id)
+                                                  ? <Unlink size={12} />
+                                                  : <Link2 size={12} />}
+                                              </button>
+                                            )}
+                                            {item.barcode
+                                              ? <span className="font-mono font-medium text-text-primary">{item.barcode}</span>
+                                              : <span className="text-text-muted italic">— barkod yo'q —</span>}
+                                          </div>
                                         </td>
                                         <td className="py-2 pr-6 text-text-secondary">
                                           {batch?.batchNumber || '—'}
@@ -474,11 +596,13 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                               <select
                                                 value={selectVal}
                                                 onClick={e => e.stopPropagation()}
-                                                onChange={e => setPendingAttrs(prev => ({
-                                                  ...prev,
-                                                  [itemId]: { ...(prev[itemId] || {}), [def.label]: e.target.value }
-                                                }))}
-                                                className="text-xs px-2 py-1 bg-bg-tertiary border border-amber-400 rounded-lg text-text-primary focus:outline-none focus:border-accent-blue"
+                                                onChange={e => {
+                                                  e.stopPropagation()
+                                                  handleChainAttrChange(p.id, inStockItems, itemId, def.label, e.target.value)
+                                                }}
+                                                className={`text-xs px-2 py-1 bg-bg-tertiary rounded-lg text-text-primary focus:outline-none focus:border-accent-blue border ${
+                                                  isItemInChain(String(p.id), itemId) ? 'border-accent-blue/60' : 'border-amber-400'
+                                                }`}
                                               >
                                                 <option value="">— tanlang —</option>
                                                 {def.values.map(v => <option key={v} value={v}>{v}</option>)}
@@ -494,7 +618,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                         </td>
                                         {hasDefs && (
                                           <td className="py-2 pl-2">
-                                            {hasPending && (
+                                            {hasPending && !isItemInChain(String(p.id), itemId) && (
                                               <button
                                                 onClick={e => { e.stopPropagation(); handleSaveAttrs(item) }}
                                                 disabled={savingItemId === itemId}
@@ -510,6 +634,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                   })}
                                 </tbody>
                               </table>
+                              </>
                             )}
                             <p className="text-[10px] text-text-muted mt-2">{inStockItems.length} {getProductUnit(p.id)} • omborda</p>
                           </div>
