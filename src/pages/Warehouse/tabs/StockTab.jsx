@@ -139,6 +139,22 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     setUnlinkedItems(prev => { const n = { ...prev }; delete n[pid]; return n })
   }
 
+  // Faqat xususiyatsiz itemlarni zanjirlash — belgilanganlari avtomatik ajratiladi
+  const linkUnattributed = (productId, inStockItems) => {
+    const pid = String(productId)
+    const attributedIds = new Set(
+      inStockItems
+        .filter(item => {
+          const attrs = getItemAttrs(item)
+          return productAttributeDefs?.length > 0 &&
+            productAttributeDefs.every(def => def.label in attrs && attrs[def.label] !== null)
+        })
+        .map(i => String(i.id))
+    )
+    setLinkedProducts(prev => { const next = new Set(prev); next.add(pid); return next })
+    setUnlinkedItems(prev => ({ ...prev, [pid]: attributedIds }))
+  }
+
   const toggleItemLink = (productId, itemId) => {
     const pid = String(productId); const iid = String(itemId)
     setUnlinkedItems(prev => {
@@ -495,7 +511,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                   pendingAttrs[i.id] && Object.values(pendingAttrs[i.id]).some(v => v !== '')
                                 )
                                 return (
-                                  <div className="flex items-center gap-2 mb-3" onClick={e => e.stopPropagation()}>
+                                  <div className="flex items-center gap-2 mb-3 flex-wrap" onClick={e => e.stopPropagation()}>
                                     <button
                                       onClick={() => toggleProductLink(p.id)}
                                       className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
@@ -509,6 +525,28 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                                         ? `Zanjirlangan — ${chainItems.length} ta`
                                         : 'Barchasini bog\'lash'}
                                     </button>
+                                    {/* Xususiyatsizlarni bog'lash — faqat linked emas va ba'zilari belgilangan bo'lsa */}
+                                    {!linked && (() => {
+                                      const hasAttributed = inStockItems.some(item => {
+                                        const attrs = getItemAttrs(item)
+                                        return productAttributeDefs?.length > 0 &&
+                                          productAttributeDefs.every(def => def.label in attrs && attrs[def.label] !== null)
+                                      })
+                                      const unattributedCount = inStockItems.filter(item => {
+                                        const attrs = getItemAttrs(item)
+                                        return productAttributeDefs?.length > 0 &&
+                                          productAttributeDefs.some(def => !(def.label in attrs) || attrs[def.label] === null)
+                                      }).length
+                                      return hasAttributed && unattributedCount > 0 ? (
+                                        <button
+                                          onClick={() => linkUnattributed(p.id, inStockItems)}
+                                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border border-amber-400/50 text-amber-500 bg-amber-400/10 hover:bg-amber-400/20 transition-colors"
+                                        >
+                                          <Link2 size={12} />
+                                          Xususiyatsizlarni bog'lash ({unattributedCount} ta)
+                                        </button>
+                                      ) : null
+                                    })()}
                                     {linked && hasPendingChain && (
                                       <button
                                         onClick={() => handleSaveChain(p.id, inStockItems)}
