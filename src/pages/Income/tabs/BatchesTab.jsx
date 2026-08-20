@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle, Users } from 'lucide-react'
+import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle, Users, FileSpreadsheet } from 'lucide-react'
 import { togglePromoPassToCustomer } from '../../../api/incomeService'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPaymentRateDiff } from '../components/incHelpers'
+import IncomeImportModal from '../../../components/IncomeImportModal'
 
 const BatchesTab = ({ ctx }) => {
   const { t } = useTranslation()
@@ -33,14 +34,17 @@ const BatchesTab = ({ ctx }) => {
     search2, setSearch2, filter2Supplier, setFilter2Supplier,
     filter2Status, setFilter2Status, page2, setPage2,
     PAGE_SIZE, deletePaymentConfirm, setDeletePaymentConfirm,
-    usdRate, productCategories, bump,
+    usdRate, productCategories, bump, selectedShopId,
     paged1, totalPages1, total1, paged2, totalPages2, total2,
     getSupplierName,
     inventoryCheck, allMatch,
     MOCK_PRODUCTS,
   } = ctx
 
+  const [showImport, setShowImport] = useState(false)
+
   return (
+    <>
           <div className="space-y-10">
 
             {/* ===== JADVAL 1: KIRIMLAR ===== */}
@@ -48,12 +52,20 @@ const BatchesTab = ({ ctx }) => {
               {/* Sarlavha + Yangi kirim tugmasi */}
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-syne font-extrabold text-text-primary">{t('inc_table1_title')}</h2>
-                <button
-                  onClick={() => { setNewBatchForm(f => ({ ...f, unit: '' })); setShowNewBatchModal(true) }}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90"
-                >
-                  <Plus size={16} /> {t('inc_new_batch_btn')}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowImport(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors"
+                  >
+                    <FileSpreadsheet size={16} /> Excel import
+                  </button>
+                  <button
+                    onClick={() => { setNewBatchForm(f => ({ ...f, unit: '' })); setShowNewBatchModal(true) }}
+                    className="flex items-center gap-2 px-4 py-2 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90"
+                  >
+                    <Plus size={16} /> {t('inc_new_batch_btn')}
+                  </button>
+                </div>
               </div>
 
               {/* Filter 1 */}
@@ -117,7 +129,7 @@ const BatchesTab = ({ ctx }) => {
                       {paged1.map(batch => {
                         const status = statusConfig[batch.paymentStatus]
                         return (
-                          <tr key={batch.id} className={`hover:bg-bg-tertiary/50 transition-colors ${batch.isFromWarehouse && !batch.purchasePriceUSD ? 'border-l-2 border-accent-blue' : ''}`}>
+                          <tr key={batch.id} className={`hover:bg-bg-tertiary/50 transition-colors ${batch.hasMissingPrice ? 'border-l-4 border-accent-red' : batch.isFromWarehouse && !batch.purchasePriceUSD ? 'border-l-2 border-accent-blue' : ''}`}>
                             <td className="px-4 py-4">
                               <p className="text-sm text-text-secondary">
                                 {new Date(batch.receivedAt).toLocaleDateString('uz-UZ')}
@@ -647,6 +659,17 @@ const BatchesTab = ({ ctx }) => {
 
           </div>
 
+      {showImport && (
+        <IncomeImportModal
+          onClose={() => setShowImport(false)}
+          onSuccess={() => { bump(); setShowImport(false) }}
+          suppliers={suppliers}
+          shopId={selectedShopId !== 'all' ? selectedShopId : null}
+          usdRate={usdRate}
+          productCategories={productCategories}
+        />
+      )}
+    </>
   )
 }
 

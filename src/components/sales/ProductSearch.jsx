@@ -61,7 +61,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
     const q = query.toLowerCase()
     const found = MOCK_PRODUCTS.filter(p => {
       const stock = MOCK_ITEMS.filter(i =>
-        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i)
+        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i) && !i.hasMissingPrice
       ).length
       return stock > 0 && (
         p.name?.toLowerCase().includes(q) ||
@@ -95,7 +95,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
 
     const allItems = MOCK_ITEMS.filter(i => i.productId === product.id)
     const withBarcode = allItems.filter(i => i.barcode !== null)
-    const available = withBarcode.filter(i => i.status === (allowSold ? 'sold' : 'in_stock') && itemMatchesAttrs(i))
+    const available = withBarcode.filter(i => i.status === (allowSold ? 'sold' : 'in_stock') && itemMatchesAttrs(i) && !i.hasMissingPrice)
 
     if (allItems.length > 0 && withBarcode.length === 0) {
       setWarning({ type: 'no_barcode', message: t('sl_ps_msg_no_barcode', { name: product.name }) })

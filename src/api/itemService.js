@@ -21,6 +21,7 @@ const mapItem = (i) => ({
   purchasePriceUSD: Number(i.purchase_price_usd) || 0,
   attributes: i.attributes || {},
   unit: i.unit || 'dona',
+  hasMissingPrice: i.batch_has_missing_price || false,
 })
 
 export const getItems = async (params = {}) => {
