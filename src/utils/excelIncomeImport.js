@@ -166,6 +166,46 @@ export function mapCategory(val) {
   return CAT_MAP[String(val).trim().toLowerCase()] || null
 }
 
+// yyyy-mm-dd → dd.mm.yyyy
+function formatDateDMY(val) {
+  if (!val) return ''
+  const s = String(val).slice(0, 10)
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (m) return `${m[3]}.${m[2]}.${m[1]}`
+  return s
+}
+
+const CAT_REVERSE = { tire: 'shina', wheel: 'disk', accessory: 'aksessuar' }
+
+// Batchlar ro'yxatini import shablon formatida Excel ga eksport qilish
+export function exportBatchesToExcel(batches, filename = 'qoldiq_eksport.xlsx') {
+  const headers = TEMPLATE_COLS.map(c => c.label)
+  const rows = batches.map(b => [
+    formatDateDMY(b.receivedAt),
+    b.productName || '',
+    CAT_REVERSE[b.productCategory] || b.productCategory || '',
+    b.supplierName || '',
+    b.quantityRemaining ?? b.quantity ?? 0,
+    b.unit || 'dona',
+    b.purchasePriceUSD || 0,
+    b.entryUsdRate || 0,
+    b.paidUSD || 0,
+    formatDateDMY(b.dueDate),
+    b.notes || '',
+  ])
+
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+  ws['!cols'] = headers.map((h, i) => ({ wch: [16, 28, 24, 22, 8, 14, 16, 14, 14, 20, 20][i] || 15 }))
+  XLSX.utils.book_append_sheet(wb, ws, 'Qoldiq')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
 // Excel shablon fayli generatsiya qilish
 export function generateTemplate() {
   const headers = TEMPLATE_COLS.map(c => c.label)

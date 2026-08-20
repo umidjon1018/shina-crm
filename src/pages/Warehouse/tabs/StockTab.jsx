@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { Badge, StatCard, Th, Td, SortIcon, CATEGORIES, SEASONS, SEASON_COLORS, stockStatus, STATUS_CONFIG, isPrivileged } from '../whHelpers.jsx'
 import ProductModal from '../components/ProductModal'
 import { updateItemAttributes } from '../../../api/itemService'
+import { exportBatchesToExcel } from '../../../utils/excelIncomeImport'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -235,6 +236,21 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             </select>
           </div>
         ))}
+        {/* Excel eksport */}
+        <div className="flex flex-col gap-1 ml-auto">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1 opacity-0">.</span>
+          <button
+            onClick={() => {
+              const filteredProductIds = new Set(sorted.map(p => p.id))
+              const exportRows = batches.filter(b => b.quantityRemaining > 0 && filteredProductIds.has(b.productId))
+              const today = new Date().toISOString().slice(0, 10)
+              exportBatchesToExcel(exportRows, `qoldiq_${today}.xlsx`)
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap"
+          >
+            <FileDown size={16} /> Excel eksport
+          </button>
+        </div>
       </div>
 
       {/* Table */}
