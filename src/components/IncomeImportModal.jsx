@@ -148,7 +148,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-bg-secondary border border-border rounded-[2rem] w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+      <div className="bg-bg-secondary border border-border rounded-[2rem] w-full max-w-7xl max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-5 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
@@ -300,8 +300,8 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                                 ) : (
                                   <Tooltip message={w?.message}>
                                     <div
-                                      onClick={() => !skip.skip && startEdit(ri, col.key)}
-                                      className={`min-w-[60px] min-h-[24px] px-2 py-1 rounded-lg cursor-pointer transition-all ${!skip.skip ? 'hover:bg-bg-tertiary' : ''} ${w ? cellBorder(w.level) : ''}`}
+                                      onClick={() => startEdit(ri, col.key)}
+                                      className={`min-w-[60px] min-h-[24px] px-2 py-1 rounded-lg cursor-pointer transition-all hover:bg-bg-tertiary ${w ? cellBorder(w.level) : ''}`}
                                     >
                                       {val || <span className="text-text-muted/40">—</span>}
                                     </div>

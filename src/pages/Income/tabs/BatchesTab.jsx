@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle, Users, FileSpreadsheet } from 'lucide-react'
@@ -42,6 +42,34 @@ const BatchesTab = ({ ctx }) => {
   } = ctx
 
   const [showImport, setShowImport] = useState(false)
+
+  // ---- Ustun kengligi drag-resize ----
+  const useColResize = (initial) => {
+    const [widths, setWidths] = useState(initial)
+    const drag = useRef(null)
+    const startResize = useCallback((idx) => (e) => {
+      e.preventDefault()
+      drag.current = { idx, startX: e.clientX, snap: [...widths] }
+      const onMove = (e) => {
+        if (!drag.current) return
+        const { idx, startX, snap } = drag.current
+        const delta = e.clientX - startX
+        const minW = 60
+        const cur = Math.max(minW, snap[idx] + delta)
+        const nxt = Math.max(minW, snap[idx + 1] - delta)
+        if (cur >= minW && nxt >= minW) {
+          setWidths(prev => { const w = [...prev]; w[idx] = cur; w[idx + 1] = nxt; return w })
+        }
+      }
+      const onUp = () => { drag.current = null; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp) }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+    }, [widths])
+    return { widths, startResize }
+  }
+
+  const t1 = useColResize([110, 200, 110, 150, 80, 140, 130, 160, 130, 80])
+  const t2 = useColResize([200, 110, 150, 150, 160, 140, 140, 130, 130, 100])
 
   return (
     <>
@@ -100,29 +128,21 @@ const BatchesTab = ({ ctx }) => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
-                      <col style={{ width: '110px' }} />
-                      <col style={{ width: '180px' }} />
-                      <col style={{ width: '110px' }} />
-                      <col style={{ width: '150px' }} />
-                      <col style={{ width: '80px' }} />
-                      <col style={{ width: '140px' }} />
-                      <col style={{ width: '130px' }} />
-                      <col style={{ width: '160px' }} />
-                      <col style={{ width: '130px' }} />
-                      <col style={{ width: '80px' }} />
+                      {t1.widths.map((w, i) => <col key={i} style={{ width: w + 'px' }} />)}
                     </colgroup>
                     <thead className="bg-bg-tertiary text-xs font-extrabold uppercase tracking-widest text-text-muted border-b border-border">
                       <tr>
-                        <th className="px-4 py-4">{t('col_date')}</th>
-                        <th className="px-4 py-4">{t('col_product')}</th>
-                        <th className="px-4 py-4">{t('col_category')}</th>
-                        <th className="px-4 py-4">{t('col_supplier')}</th>
-                        <th className="px-4 py-4">{t('inc_th_qty')}</th>
-                        <th className="px-4 py-4">{t('inc_th_unit_price')}</th>
-                        <th className="px-4 py-4">{t('inc_th_entry_rate')}</th>
-                        <th className="px-4 py-4">{t('inc_th_total')}</th>
-                        <th className="px-4 py-4">{t('col_status')}</th>
-                        <th className="px-4 py-4 text-right">{t('inc_th_actions')}</th>
+                        {[t('col_date'), t('col_product'), t('col_category'), t('col_supplier'), t('inc_th_qty'), t('inc_th_unit_price'), t('inc_th_entry_rate'), t('inc_th_total'), t('col_status'), t('inc_th_actions')].map((label, i) => (
+                          <th key={i} className="px-4 py-4 relative select-none" style={{ overflow: 'hidden' }}>
+                            <span className={i === 9 ? 'float-right' : ''}>{label}</span>
+                            {i < 9 && (
+                              <span
+                                onMouseDown={t1.startResize(i)}
+                                className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-accent-blue/40 transition-colors"
+                              />
+                            )}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
@@ -275,29 +295,21 @@ const BatchesTab = ({ ctx }) => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
-                      <col style={{ width: '180px' }} />
-                      <col style={{ width: '110px' }} />
-                      <col style={{ width: '150px' }} />
-                      <col style={{ width: '150px' }} />
-                      <col style={{ width: '160px' }} />
-                      <col style={{ width: '140px' }} />
-                      <col style={{ width: '140px' }} />
-                      <col style={{ width: '130px' }} />
-                      <col style={{ width: '130px' }} />
-                      <col style={{ width: '100px' }} />
+                      {t2.widths.map((w, i) => <col key={i} style={{ width: w + 'px' }} />)}
                     </colgroup>
                     <thead className="bg-bg-tertiary text-xs font-extrabold uppercase tracking-widest text-text-muted border-b border-border">
                       <tr>
-                        <th className="px-4 py-4">{t('col_product')}</th>
-                        <th className="px-4 py-4">{t('col_category')}</th>
-                        <th className="px-4 py-4">{t('col_supplier')}</th>
-                        <th className="px-4 py-4">{t('inc_supp_detail_th_paid_usd')}</th>
-                        <th className="px-4 py-4">{t('col_uzs')}</th>
-                        <th className="px-4 py-4">{t('inc_pay_col_rate_diff')}</th>
-                        <th className="px-4 py-4">{t('col_debt_usd')}</th>
-                        <th className="px-4 py-4">{t('col_status')}</th>
-                        <th className="px-4 py-4">{t('inc_debt_due')}</th>
-                        <th className="px-4 py-4 text-right">{t('inc_th_actions')}</th>
+                        {[t('col_product'), t('col_category'), t('col_supplier'), t('inc_supp_detail_th_paid_usd'), t('col_uzs'), t('inc_pay_col_rate_diff'), t('col_debt_usd'), t('col_status'), t('inc_debt_due'), t('inc_th_actions')].map((label, i) => (
+                          <th key={i} className="px-4 py-4 relative select-none" style={{ overflow: 'hidden' }}>
+                            <span className={i === 9 ? 'float-right' : ''}>{label}</span>
+                            {i < 9 && (
+                              <span
+                                onMouseDown={t2.startResize(i)}
+                                className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-accent-blue/40 transition-colors"
+                              />
+                            )}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
