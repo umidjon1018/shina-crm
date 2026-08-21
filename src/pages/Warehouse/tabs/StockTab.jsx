@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
@@ -9,6 +9,7 @@ import { Badge, StatCard, Th, Td, SortIcon, CATEGORIES, SEASONS, SEASON_COLORS, 
 import ProductModal from '../components/ProductModal'
 import { updateItemAttributes } from '../../../api/itemService'
 import { exportBatchesToExcel } from '../../../utils/excelIncomeImport'
+import PriceListModal from '../components/PriceListModal'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -45,6 +46,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [statusFilter, setStatusFilter] = useState('all')
   const [attrFilters, setAttrFilters] = useState({}) // { defId: selectedValue | 'all' }
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [showPriceList, setShowPriceList] = useState(false)
 
   const setAttrFilter = (defId, value) => {
     setAttrFilters(prev => {
@@ -324,20 +326,28 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             </select>
           </div>
         ))}
-        {/* Excel eksport */}
+        {/* Tugmalar */}
         <div className="flex flex-col gap-1 ml-auto">
           <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1 opacity-0">.</span>
-          <button
-            onClick={() => {
-              const filteredProductIds = new Set(sorted.map(p => p.id))
-              const exportRows = batches.filter(b => b.quantityRemaining > 0 && filteredProductIds.has(b.productId))
-              const today = new Date().toISOString().slice(0, 10)
-              exportBatchesToExcel(exportRows, `qoldiq_${today}.xlsx`)
-            }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap"
-          >
-            <FileDown size={16} /> Excel eksport
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowPriceList(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-accent-red/10 text-accent-red border border-accent-red/30 rounded-xl text-sm font-bold hover:bg-accent-red/20 transition-colors whitespace-nowrap"
+            >
+              <Printer size={16} /> Narxnoma
+            </button>
+            <button
+              onClick={() => {
+                const filteredProductIds = new Set(sorted.map(p => p.id))
+                const exportRows = batches.filter(b => b.quantityRemaining > 0 && filteredProductIds.has(b.productId))
+                const today = new Date().toISOString().slice(0, 10)
+                exportBatchesToExcel(exportRows, `qoldiq_${today}.xlsx`)
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap"
+            >
+              <FileDown size={16} /> Excel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -705,6 +715,15 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
           />
         )}
       </AnimatePresence>
+
+      {showPriceList && (
+        <PriceListModal
+          products={sorted}
+          items={items}
+          attributeDefs={productAttributeDefs}
+          onClose={() => setShowPriceList(false)}
+        />
+      )}
     </div>
   )
 }
