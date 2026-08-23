@@ -189,18 +189,18 @@ const StocktakeTab = () => {
               className={`px-4 py-3 cursor-pointer border-b border-border transition-colors flex items-start justify-between gap-2 ${selected?.id === st.id ? 'bg-accent-blue/5 border-l-2 border-l-accent-blue' : 'hover:bg-bg-tertiary/50'}`}
             >
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
+                <p className="text-sm font-bold text-text-primary truncate">{st.notes || fmtDate(st.createdAt)}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
                   {st.status === 'complete'
-                    ? <CheckCircle2 size={12} className="text-accent-green flex-shrink-0" />
-                    : <Clock size={12} className="text-accent-orange flex-shrink-0" />
+                    ? <CheckCircle2 size={11} className="text-accent-green flex-shrink-0" />
+                    : <Clock size={11} className="text-accent-orange flex-shrink-0" />
                   }
-                  <span className={`text-xs font-bold ${st.status === 'complete' ? 'text-accent-green' : 'text-accent-orange'}`}>
+                  <span className={`text-[11px] font-semibold ${st.status === 'complete' ? 'text-accent-green' : 'text-accent-orange'}`}>
                     {st.status === 'complete' ? 'Yakunlangan' : 'Draft'}
                   </span>
+                  <span className="text-[11px] text-text-muted">· {st.itemCount} ta</span>
                 </div>
-                <p className="text-[11px] text-text-muted">{fmtDate(st.createdAt)}</p>
-                <p className="text-[11px] text-text-secondary mt-0.5">{st.itemCount} ta mahsulot</p>
-                {st.notes && <p className="text-[11px] text-text-muted mt-0.5 truncate">{st.notes}</p>}
+                {st.notes && <p className="text-[11px] text-text-muted mt-0.5">{fmtDate(st.createdAt)}</p>}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 {st.status === 'draft' && (
@@ -232,14 +232,14 @@ const StocktakeTab = () => {
             {/* Header */}
             <div className="px-5 py-3.5 border-b border-border flex items-center justify-between flex-shrink-0">
               <div>
-                <div className="flex items-center gap-2">
+                <p className="font-bold text-text-primary text-sm">{selected.notes || fmtDate(selected.createdAt)}</p>
+                <div className="flex items-center gap-2 mt-0.5">
                   {selected.status === 'complete'
                     ? <span className="inline-flex items-center gap-1 text-xs font-bold text-accent-green bg-accent-green/10 px-2 py-0.5 rounded-full"><CheckCircle2 size={11} /> Yakunlangan</span>
                     : <span className="inline-flex items-center gap-1 text-xs font-bold text-accent-orange bg-accent-orange/10 px-2 py-0.5 rounded-full"><Clock size={11} /> Draft</span>
                   }
-                  <span className="text-xs text-text-muted">{fmtDate(selected.createdAt)}</span>
+                  {selected.notes && <span className="text-xs text-text-muted">{fmtDate(selected.createdAt)}</span>}
                 </div>
-                {selected.notes && <p className="text-xs text-text-muted mt-0.5">{selected.notes}</p>}
               </div>
               {selected.status === 'draft' && (
                 <button
@@ -284,7 +284,13 @@ const StocktakeTab = () => {
 
             {/* Jadval */}
             <div className="flex-1 overflow-y-auto no-scrollbar">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col />
+                  <col style={{ width: '90px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '90px' }} />
+                </colgroup>
                 <thead className="bg-bg-tertiary sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-2.5 text-left text-xs font-bold text-text-muted">Mahsulot</th>
@@ -309,15 +315,15 @@ const StocktakeTab = () => {
                         </td>
                         <td className="px-4 py-2.5 text-right">
                           {selected.status === 'draft' ? (
-                            <div className="flex items-center justify-end gap-1.5">
-                              {saving[item.id] && <div className="w-3 h-3 border border-accent-blue border-t-transparent rounded-full animate-spin" />}
+                            <div className="flex items-center justify-end gap-1 pr-1">
+                              {saving[item.id] && <div className="w-3 h-3 flex-shrink-0 border border-accent-blue border-t-transparent rounded-full animate-spin" />}
                               <input
                                 type="number"
                                 min="0"
                                 value={getActualVal(item)}
                                 onChange={e => handleActualChange(item, e.target.value)}
                                 placeholder="—"
-                                className="w-20 text-right px-2 py-1 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary focus:outline-none focus:border-accent-blue"
+                                className="w-16 text-right px-2 py-1 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary focus:outline-none focus:border-accent-blue"
                               />
                             </div>
                           ) : (
