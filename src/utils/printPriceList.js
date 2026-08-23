@@ -21,15 +21,38 @@ function getAttrSummary(productId, items, attributeDefs) {
 
 // ── A4 / A5 jadval format ────────────────────────────────────────────────────
 
-function buildTableHtml({ products, items, attributeDefs, companyName, companyLogo, options }) {
+function buildTableHtml({ products, items, attributeDefs, companyName, companyLogo, options, design }) {
   const { format, showInstallment, showStock, showAttrs = true } = options
+  const hColor  = design?.headerColor  || '#1c1c2e'
+  const aColor  = design?.accentColor  || '#cc0000'
+  const font    = design?.font         || 'Arial'
+  const logoPos = design?.logoPosition || 'left'
+  const footer  = design?.footer       || ''
+
   const isA5 = format === 'a5'
   const fs = isA5 ? '8.5pt' : '10pt'
   const fsSmall = isA5 ? '7pt' : '8.5pt'
 
-  const logoHtml = companyLogo
+  const logoEl = companyLogo
     ? `<img src="${companyLogo}" style="height:36px;object-fit:contain;">`
-    : `<span style="font-size:${isA5 ? '16pt' : '20pt'};font-weight:900;letter-spacing:1px;">${companyName || 'CRM'}</span>`
+    : `<span style="font-size:${isA5 ? '16pt' : '20pt'};font-weight:900;letter-spacing:1px;color:${hColor};">${companyName || 'CRM'}</span>`
+
+  // Logo va sarlavhani joylashtirishda logoPos ga qarab flex tartib
+  const headerInner = logoPos === 'right'
+    ? `<div style="text-align:left;">
+        <div style="font-size:${isA5 ? '14pt' : '17pt'};font-weight:900;color:${hColor};">NARXLAR RO'YXATI</div>
+        <div style="font-size:${fsSmall};color:#999;margin-top:2px;">${fdate()}</div>
+       </div>${logoEl}`
+    : logoPos === 'center'
+    ? `<div style="text-align:center;width:100%;">
+        ${logoEl}
+        <div style="font-size:${isA5 ? '14pt' : '17pt'};font-weight:900;color:${hColor};margin-top:4px;">NARXLAR RO'YXATI</div>
+        <div style="font-size:${fsSmall};color:#999;">${fdate()}</div>
+       </div>`
+    : `${logoEl}<div style="text-align:right;">
+        <div style="font-size:${isA5 ? '14pt' : '17pt'};font-weight:900;color:${hColor};">NARXLAR RO'YXATI</div>
+        <div style="font-size:${fsSmall};color:#999;margin-top:2px;">${fdate()}</div>
+       </div>`
 
   const extraCols = (showInstallment ? 1 : 0) + (showStock ? 1 : 0) + (showAttrs ? 0 : -1)
   const colCount = 6 + extraCols
@@ -39,7 +62,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
     const catProds = products.filter(p => p.category === cat)
     if (!catProds.length) return []
     const catRow = `<tr>
-      <td colspan="${colCount}" style="background:#1c1c2e;color:#fff;font-weight:700;font-size:${fsSmall};
+      <td colspan="${colCount}" style="background:${hColor};color:#fff;font-weight:700;font-size:${fsSmall};
         padding:5px 8px;letter-spacing:1.5px;text-transform:uppercase;">
         ${CAT_LABELS[cat] || cat}
       </td></tr>`
@@ -56,7 +79,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
         <td style="padding:4px 8px;color:#555;font-size:${fs};">${p.size || '—'}</td>
         <td style="padding:4px 8px;color:#555;font-size:${fsSmall};">${season}</td>
         ${showAttrs ? `<td style="padding:4px 8px;color:#666;font-size:${fsSmall};">${attrs || '—'}</td>` : ''}
-        <td style="padding:4px 8px;font-weight:700;text-align:right;color:#c00;font-size:${fs};white-space:nowrap;">${fp(p.cashPrice)} so'm</td>
+        <td style="padding:4px 8px;font-weight:700;text-align:right;color:${aColor};font-size:${fs};white-space:nowrap;">${fp(p.cashPrice)} so'm</td>
         ${showInstallment ? `<td style="padding:4px 8px;text-align:right;color:#555;font-size:${fsSmall};white-space:nowrap;">${fp(p.installmentBasePrice)} so'm</td>` : ''}
         ${showStock ? `<td style="padding:4px 8px;text-align:center;color:#555;font-size:${fsSmall};">${stock}</td>` : ''}
       </tr>`
@@ -64,12 +87,16 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
     return catRow + prodRows
   }).join('')
 
+  const footerHtml = footer
+    ? `<div style="margin-top:8px;font-size:8pt;color:#777;text-align:center;border-top:1px solid #eee;padding-top:6px;">${footer}</div>`
+    : ''
+
   return `<!DOCTYPE html><html><head>
   <meta charset="utf-8">
   <title>Narxnoma — ${companyName}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: Arial, sans-serif; background:#fff; color:#111; }
+    body { font-family: "${font}", sans-serif; background:#fff; color:#111; }
     table { width:100%; border-collapse:collapse; }
     th { background:#f0f0f0; font-size:${fsSmall}; padding:5px 8px; text-align:left;
          border-bottom:2px solid #ccc; white-space:nowrap; }
@@ -81,13 +108,9 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
     }
   </style>
 </head><body>
-  <div style="display:flex;justify-content:space-between;align-items:center;
-              margin-bottom:10px;border-bottom:3px solid #1c1c2e;padding-bottom:8px;">
-    ${logoHtml}
-    <div style="text-align:right;">
-      <div style="font-size:${isA5 ? '14pt' : '17pt'};font-weight:900;color:#1c1c2e;">NARXLAR RO'YXATI</div>
-      <div style="font-size:${fsSmall};color:#999;margin-top:2px;">${fdate()}</div>
-    </div>
+  <div style="display:flex;justify-content:${logoPos === 'center' ? 'center' : 'space-between'};align-items:center;
+              margin-bottom:10px;border-bottom:3px solid ${hColor};padding-bottom:8px;">
+    ${headerInner}
   </div>
   <table>
     <thead><tr>
@@ -103,16 +126,20 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
     </tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
-  <div style="margin-top:12px;font-size:7.5pt;color:#bbb;text-align:center;">
+  <div style="margin-top:10px;font-size:7.5pt;color:#bbb;text-align:center;">
     ${companyName} · ${fdate()} · Jami: ${products.length} ta tovar
   </div>
+  ${footerHtml}
 </body></html>`
 }
 
 // ── Vitrina tegi (kichik karta) format ───────────────────────────────────────
 
-function buildCardHtml({ products, items, attributeDefs, companyName, companyLogo, options }) {
+function buildCardHtml({ products, items, attributeDefs, companyName, companyLogo, options, design }) {
   const { cardSize, showInstallment, showAttrs = true } = options
+  const aColor = design?.accentColor || '#cc0000'
+  const font   = design?.font        || 'Arial'
+  const footer = design?.footer      || ''
 
   // cardSize: 'half' (42×54mm landscape → 54×42) | 'twothird' (57×54mm landscape → 57×42) | 'bankcard' (85×54mm)
   const SIZES = {
@@ -146,7 +173,7 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
   <title>Vitrina teglari — ${companyName}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: Arial, sans-serif; background:#fff; }
+    body { font-family: "${font}", sans-serif; background:#fff; }
     .grid { display:flex; flex-wrap:wrap; gap:3mm; padding:5mm; }
     .card {
       width:${s.w}; height:${s.h};
@@ -162,7 +189,7 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     .brand { font-size:${s.metaSize};  font-weight:700; color:#555; }
     .meta  { font-size:${s.metaSize};  color:#666; }
     .attr  { font-size:${s.metaSize};  color:#888; }
-    .price { font-size:${s.priceSize}; font-weight:900; color:#c00; margin-top:1.5mm; }
+    .price { font-size:${s.priceSize}; font-weight:900; color:${aColor}; margin-top:1.5mm; }
     .som   { font-size:70%; font-weight:400; }
     .inst  { font-size:${s.metaSize};  color:#555; }
     @media print {
@@ -172,12 +199,13 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
   </style>
 </head><body>
   <div class="grid">${cards}</div>
+  ${footer ? `<div style="margin-top:4mm;font-size:7.5pt;color:#999;text-align:center;padding:0 5mm;">${footer}</div>` : ''}
 </body></html>`
 }
 
 // ── Asosiy eksport ───────────────────────────────────────────────────────────
 
-export function printPriceList({ products, items, attributeDefs, companyName, companyLogo, options }) {
+export function printPriceList({ products, items, attributeDefs, companyName, companyLogo, options, design }) {
   const { onlyInStock } = options
   const list = onlyInStock ? products.filter(p => getStock(p.id, items) > 0) : products
 
@@ -185,8 +213,8 @@ export function printPriceList({ products, items, attributeDefs, companyName, co
   if (!win) { alert('Pop-up bloklangan. Brauzer sozlamalaridan ruxsat bering.'); return }
 
   const html = (options.format === 'card')
-    ? buildCardHtml({ products: list, items, attributeDefs, companyName, companyLogo, options })
-    : buildTableHtml({ products: list, items, attributeDefs, companyName, companyLogo, options })
+    ? buildCardHtml({ products: list, items, attributeDefs, companyName, companyLogo, options, design })
+    : buildTableHtml({ products: list, items, attributeDefs, companyName, companyLogo, options, design })
 
   win.document.write(html)
   win.document.close()

@@ -16,7 +16,7 @@ const CARD_SIZES = [
 ]
 
 export default function PriceListModal({ products, items, attributeDefs, onClose }) {
-  const { companyName, companyLogo } = useSettingsStore()
+  const { companyName, companyLogo, priceListSettings } = useSettingsStore()
 
   const [format, setFormat]               = useState('a4')
   const [cardSize, setCardSize]           = useState('medium')
@@ -60,6 +60,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
       companyLogo,
       // onlyInStock: false — mahsulotlar allaqachon filtrlangan
       options: { format, cardSize, showInstallment, onlyInStock: false, showStock, showAttrs },
+      design: priceListSettings,
     })
   }
 

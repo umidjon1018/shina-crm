@@ -10,6 +10,15 @@ export const useSettingsStore = create(
       companyName: 'Shina CRM',
       companyLogo: null, // base64 yoki URL
 
+      // Narxnoma dizayn sozlamalari
+      priceListSettings: {
+        headerColor:  '#1c1c2e',
+        accentColor:  '#cc0000',
+        font:         'Arial',
+        logoPosition: 'left',
+        footer:       '',
+      },
+
       // Sodiqlik dasturi (Mavjud - o'zgarmasin)
       loyaltyMinAmount: 100000,
       loyaltyVisitsRequired: 10,
@@ -179,6 +188,7 @@ export const useSettingsStore = create(
       // USD kursi
       setCompanyName: (name) => set({ companyName: name }),
       setCompanyLogo: (logo) => set({ companyLogo: logo }),
+      setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi
       sidebarLabels: {

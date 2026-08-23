@@ -86,10 +86,27 @@ const ProductsTab = ({ ctx }) => {
     productSearch, setProductSearch,
     productCatFilter, setProductCatFilter,
     productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, addAttributeValue, removeAttributeValue,
+    priceListSettings, setPriceListSettings,
   } = ctx
 
   const [newAttrLabel, setNewAttrLabel] = useState('')
   const [attrValueInputs, setAttrValueInputs] = useState({})
+
+  // Narxnoma dizayn local form
+  const [plForm, setPlForm] = useState(() => ({
+    headerColor:  priceListSettings?.headerColor  ?? '#1c1c2e',
+    accentColor:  priceListSettings?.accentColor  ?? '#cc0000',
+    font:         priceListSettings?.font         ?? 'Arial',
+    logoPosition: priceListSettings?.logoPosition ?? 'left',
+    footer:       priceListSettings?.footer       ?? '',
+  }))
+  const [plSaved, setPlSaved] = useState(false)
+
+  const savePriceListSettings = () => {
+    setPriceListSettings(plForm)
+    setPlSaved(true)
+    setTimeout(() => setPlSaved(false), 2000)
+  }
 
   return (
           <motion.div key="products" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
@@ -322,6 +339,119 @@ const ProductsTab = ({ ctx }) => {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* QISM 1.6 — Narxnoma dizayn sozlamalari */}
+            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-5">
+              <div>
+                <h3 className="text-xl font-syne font-bold text-text-primary">Narxnoma dizayni</h3>
+                <p className="text-xs text-text-muted mt-0.5">Chop etilgan narxnomaning ko'rinishini sozlang</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                {/* Header rangi */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Header rangi</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={plForm.headerColor}
+                      onChange={e => setPlForm(f => ({ ...f, headerColor: e.target.value }))}
+                      className="w-10 h-10 rounded-xl border border-border cursor-pointer bg-bg-tertiary p-1"
+                    />
+                    <div
+                      className="flex-1 h-10 rounded-xl flex items-center px-4"
+                      style={{ background: plForm.headerColor }}
+                    >
+                      <span className="text-white text-xs font-bold tracking-wider">SHINALAR</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Narx rangi */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Narx rangi</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={plForm.accentColor}
+                      onChange={e => setPlForm(f => ({ ...f, accentColor: e.target.value }))}
+                      className="w-10 h-10 rounded-xl border border-border cursor-pointer bg-bg-tertiary p-1"
+                    />
+                    <div className="flex-1 h-10 rounded-xl border border-border bg-bg-tertiary flex items-center px-4">
+                      <span className="text-sm font-bold" style={{ color: plForm.accentColor }}>850 000 so'm</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shrift */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Shrift</label>
+                  <select
+                    value={plForm.font}
+                    onChange={e => setPlForm(f => ({ ...f, font: e.target.value }))}
+                    className="w-full px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                    style={{ fontFamily: plForm.font }}
+                  >
+                    {['Arial', 'Times New Roman', 'Tahoma', 'Georgia', 'Verdana'].map(fn => (
+                      <option key={fn} value={fn} style={{ fontFamily: fn }}>{fn}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Logo joylashuvi */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Logo joylashuvi</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'left',   label: 'Chap' },
+                      { id: 'center', label: 'Markaz' },
+                      { id: 'right',  label: 'O\'ng' },
+                    ].map(pos => (
+                      <button
+                        key={pos.id}
+                        onClick={() => setPlForm(f => ({ ...f, logoPosition: pos.id }))}
+                        className={`py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                          plForm.logoPosition === pos.id
+                            ? 'border-accent-blue bg-accent-blue/10 text-accent-blue'
+                            : 'border-border bg-bg-tertiary text-text-secondary hover:border-text-muted'
+                        }`}
+                      >
+                        {pos.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Kolontitul matni */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-text-muted">
+                  Kolontitul (pastki matn)
+                </label>
+                <input
+                  type="text"
+                  value={plForm.footer}
+                  onChange={e => setPlForm(f => ({ ...f, footer: e.target.value }))}
+                  placeholder="Masalan: +998 90 123 45 67 · Toshkent, Chilonzor ko'chasi 12"
+                  className="w-full px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={savePriceListSettings}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    plSaved
+                      ? 'bg-accent-green/10 text-accent-green border border-accent-green/30'
+                      : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'
+                  }`}
+                >
+                  {plSaved ? <CheckCircle size={16} /> : null}
+                  {plSaved ? 'Saqlandi' : 'Saqlash'}
+                </button>
+              </div>
             </div>
 
             {/* QISM 2 — Barkodlar bloki */}
