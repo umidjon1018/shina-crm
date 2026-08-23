@@ -348,6 +348,46 @@ const ProductsTab = ({ ctx }) => {
                 <p className="text-xs text-text-muted mt-0.5">Chop etilgan narxnomaning ko'rinishini sozlang</p>
               </div>
 
+              {/* Logo yuklash */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Kompaniya logosi</label>
+                <div className="flex items-center gap-4">
+                  {/* Preview */}
+                  <div className="w-20 h-14 rounded-xl border border-border bg-bg-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {companyLogo
+                      ? <img src={companyLogo} alt="logo" className="w-full h-full object-contain p-1" />
+                      : <span className="text-[9px] text-text-muted text-center leading-tight px-1">Logo<br/>yo'q</span>
+                    }
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="flex items-center gap-2 px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-secondary cursor-pointer hover:bg-bg-primary hover:border-accent-blue transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          const reader = new FileReader()
+                          reader.onload = ev => setCompanyLogo(ev.target.result)
+                          reader.readAsDataURL(file)
+                          e.target.value = ''
+                        }}
+                      />
+                      Rasm yuklash (PNG, JPG, SVG)
+                    </label>
+                    {companyLogo && (
+                      <button
+                        onClick={() => setCompanyLogo(null)}
+                        className="px-4 py-2 bg-accent-red/10 text-accent-red border border-accent-red/20 rounded-xl text-xs font-medium hover:bg-accent-red/20 transition-colors text-left"
+                      >
+                        Logoni o'chirish
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
                 {/* Header rangi */}
