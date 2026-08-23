@@ -1445,24 +1445,27 @@ const ProductsTab = ({ ctx }) => {
                                           <p className="font-medium text-text-primary text-xs truncate max-w-[180px]">{p.name}</p>
                                         </td>
                                         {bulkFields.cash && (
-                                          <td className="px-3 py-2 text-right">
-                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.cashPrice||0).toLocaleString('uz-UZ')}</span>
+                                          <td className="px-3 py-2 text-right whitespace-nowrap">
+                                            <span className="text-text-muted text-xs">{(p.cashPrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className="text-text-muted text-xs mx-1">→</span>
                                             <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
                                               {applyBulkChange(p.cashPrice||0).toLocaleString('uz-UZ')}
                                             </span>
                                           </td>
                                         )}
                                         {bulkFields.min && (
-                                          <td className="px-3 py-2 text-right">
-                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.minSalePrice||0).toLocaleString('uz-UZ')}</span>
+                                          <td className="px-3 py-2 text-right whitespace-nowrap">
+                                            <span className="text-text-muted text-xs">{(p.minSalePrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className="text-text-muted text-xs mx-1">→</span>
                                             <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
                                               {applyBulkChange(p.minSalePrice||0).toLocaleString('uz-UZ')}
                                             </span>
                                           </td>
                                         )}
                                         {bulkFields.installment && (
-                                          <td className="px-3 py-2 text-right">
-                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.installmentBasePrice||0).toLocaleString('uz-UZ')}</span>
+                                          <td className="px-3 py-2 text-right whitespace-nowrap">
+                                            <span className="text-text-muted text-xs">{(p.installmentBasePrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className="text-text-muted text-xs mx-1">→</span>
                                             <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
                                               {applyBulkChange(p.installmentBasePrice||0).toLocaleString('uz-UZ')}
                                             </span>
