@@ -130,7 +130,14 @@ const ReturnsHistoryTab = ({ ctx }) => {
                     </td>
                     <td className="px-3 py-3 text-right font-bold text-accent-red whitespace-nowrap">{formatPrice(r.displayAmount, som)}</td>
                     <td className="px-3 py-3 text-right text-text-primary whitespace-nowrap">{(r.additionalPayment || 0) > 0 ? formatPrice(r.additionalPayment, som) : '—'}</td>
-                    <td className="px-3 py-3 text-text-secondary whitespace-nowrap">{r.payLabel}</td>
+                    <td className="px-3 py-3 text-text-secondary whitespace-nowrap">
+                      <div className="flex flex-col gap-0.5">
+                        <span>{r.payLabel}</span>
+                        {r.originalSaleCardType && (
+                          <span className="text-[10px] text-text-muted font-bold uppercase">{r.originalSaleCardType}</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-3 py-3 text-text-muted"><span className="block truncate" title={r.reasonLabel || '—'}>{r.reasonLabel || '—'}</span></td>
                   </tr>
                 )

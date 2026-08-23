@@ -165,6 +165,7 @@ export const useSalesState = () => {
   const [buShowNewCustomerModal, setBuShowNewCustomerModal] = useState(false)
   const [buDiscountPercent, setBuDiscountPercent] = useState(0)
   const [buPaymentType, setBuPaymentType] = useState('cash')
+  const [buCardType, setBuCardType] = useState(null)
   const [buSource, setBuSource] = useState('walk_in')
   const [buInstallmentOrgId, setBuInstallmentOrgId] = useState('')
   const [buInstallmentTermMonths, setBuInstallmentTermMonths] = useState(3)
@@ -1159,6 +1160,7 @@ export const useSalesState = () => {
         soldByName: (user?.fullName || user?.name || user?.username || 'Xodim'),
         contractNumber: buPaymentType === 'transfer' ? buContractNumber : null,
         source: buSource,
+        cardType: buPaymentType === 'card' ? buCardType : null,
       }
 
       try {
@@ -1413,6 +1415,7 @@ export const useSalesState = () => {
         ...r,
         // customerName: originalSale dan olish — u bog'langandan keyin yangilanadi
         customerName: originalSale?.customerName || r.customerName || "Noma'lum",
+        originalSaleCardType: originalSale?.cardType || null,
         originalCustomerName: originalSale?.originalCustomerName || r.originalCustomerName || null,
         soldAt: r.soldAt || originalSale?.soldAt || null,
         soldBy: r.soldBy || originalSale?.soldBy || null,
@@ -1711,6 +1714,7 @@ export const useSalesState = () => {
     buScrapCategory, setBuScrapCategory, buSelectedCustomer, setBuSelectedCustomer,
     buCustomerSearch, setBuCustomerSearch, buShowNewCustomerModal, setBuShowNewCustomerModal,
     buDiscountPercent, setBuDiscountPercent, buPaymentType, setBuPaymentType,
+    buCardType, setBuCardType,
     buSource, setBuSource, buInstallmentOrgId, setBuInstallmentOrgId,
     buInstallmentTermMonths, setBuInstallmentTermMonths,
     buContractNumber, setBuContractNumber, buIsSubmitting, setBuIsSubmitting,

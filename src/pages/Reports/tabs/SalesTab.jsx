@@ -441,9 +441,14 @@ const SalesTab = ({ ctx }) => {
                             })()}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-flex px-2 py-0.5 rounded-lg bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
-                              {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('rep_pay_bank') }[s.paymentType] || s.paymentType}
-                            </span>
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="inline-flex px-2 py-0.5 rounded-lg bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
+                                {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('rep_pay_bank') }[s.paymentType] || s.paymentType}
+                              </span>
+                              {s.paymentType === 'card' && s.cardType && (
+                                <span className="text-[10px] text-text-muted font-bold uppercase">{s.cardType}</span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-text-secondary">{s.soldByName}</td>
                           <td className="px-6 py-4 text-right">

@@ -185,7 +185,12 @@ const ProfitTab = ({ ctx }) => {
                   <td className="px-3 py-3 text-text-secondary whitespace-nowrap">{formatPrice(item.saleTotal ?? item.totalSale ?? 0, som)}</td>
                   <td className="px-3 py-3 text-center text-text-secondary">{t('sl_inst_org_count', { n: item.qty })}</td>
                   <td className="px-3 py-3 text-text-secondary">
-                    {item.paymentType === 'cash' ? t('pay_cash') : item.paymentType === 'card' ? t('pay_card') : item.paymentType === 'installment' ? t('pay_installment') : item.paymentType}
+                    <div className="flex flex-col gap-0.5">
+                      <span>{item.paymentType === 'cash' ? t('pay_cash') : item.paymentType === 'card' ? t('pay_card') : item.paymentType === 'installment' ? t('pay_installment') : item.paymentType}</span>
+                      {item.paymentType === 'card' && item.cardType && (
+                        <span className="text-[10px] text-text-muted font-bold uppercase">{item.cardType}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     {item.isCancelled ? (

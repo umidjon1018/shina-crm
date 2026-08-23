@@ -35,6 +35,7 @@ const mapSale = (s) => ({
   installmentTermMonths: s.installmentTermMonths ?? null,
   installmentOrgId: s.installmentOrgId ?? s.installment_org ?? null,
   installmentOrgName: s.installmentOrgName ?? s.installment_org_name ?? null,
+  cardType: s.cardType ?? s.card_type ?? null,
   isUsedSale: true,
 })
 

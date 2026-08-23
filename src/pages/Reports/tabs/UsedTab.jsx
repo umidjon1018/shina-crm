@@ -131,7 +131,14 @@ const UsedTab = ({ ctx }) => {
                       return <span className={`font-bold ${profit >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(profit)}</span>
                     }
                   },
-                  { key: 'paymentType', label: t('rep_bu_col_payment'), render: r => <span className="text-text-secondary text-xs">{{ installment: t('pay_installment'), transfer: t('rep_bu_pay_transfer'), cash: t('pay_cash'), card: t('pay_card') }[r.paymentType] || r.paymentType}</span> },
+                  { key: 'paymentType', label: t('rep_bu_col_payment'), render: r => (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-text-secondary text-xs">{{ installment: t('pay_installment'), transfer: t('rep_bu_pay_transfer'), cash: t('pay_cash'), card: t('pay_card') }[r.paymentType] || r.paymentType}</span>
+                      {r.paymentType === 'card' && r.cardType && (
+                        <span className="text-[10px] text-text-muted font-bold uppercase">{r.cardType}</span>
+                      )}
+                    </div>
+                  )},
                   { key: 'soldByName', label: t('col_employee') },
                   { key: 'status', label: t('col_status'), render: r => (
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap ${r.status === 'cancelled' ? 'bg-accent-red/10 text-accent-red' : 'bg-accent-green/10 text-accent-green'}`}>

@@ -18,7 +18,8 @@ const UsedSaleTab = ({ ctx }) => {
     buCart, setBuCart, buCartGroups, buRemoveGroupFromCart,
     buSetGroupTotalPrice, buSuccessSale, setBuSuccessSale,
     buDiscountPercent, setBuDiscountPercent, maxDiscount,
-    buPaymentType, setBuPaymentType, buInstallmentOrgId, setBuInstallmentOrgId,
+    buPaymentType, setBuPaymentType, buCardType, setBuCardType,
+    buInstallmentOrgId, setBuInstallmentOrgId,
     buInstallmentTermMonths, setBuInstallmentTermMonths, installmentOrganizations,
     buContractNumber, setBuContractNumber, buSource, setBuSource, sources,
     buSubtotal, buDiscountAmount, buTotal, buIsSubmitting, buHandleSubmitSale,
@@ -247,12 +248,22 @@ const UsedSaleTab = ({ ctx }) => {
                 { id: 'installment', icon: Calendar, label: t('pay_installment') },
                 { id: 'transfer', icon: ArrowRight, label: t('sl_ns_pay_transfer') },
               ].map(pm => (
-                <button key={pm.id} onClick={() => { setBuPaymentType(pm.id); if (pm.id !== 'installment') setBuInstallmentOrgId('') }}
+                <button key={pm.id} onClick={() => { setBuPaymentType(pm.id); setBuCardType(null); if (pm.id !== 'installment') setBuInstallmentOrgId('') }}
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-left ${buPaymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
                   <pm.icon size={18} className="flex-shrink-0" /><span className="text-xs font-bold">{pm.label}</span>
                 </button>
               ))}
             </div>
+            {buPaymentType === 'card' && (
+              <div className="flex gap-2 flex-wrap">
+                {['uzcard', 'humo', 'visa', 'mastercard'].map(ct => (
+                  <button key={ct} type="button" onClick={() => setBuCardType(buCardType === ct ? null : ct)}
+                    className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all uppercase ${buCardType === ct ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                    {ct === 'uzcard' ? 'UzCard' : ct === 'humo' ? 'Humo' : ct === 'visa' ? 'Visa' : 'Mastercard'}
+                  </button>
+                ))}
+              </div>
+            )}
             {buPaymentType === 'transfer' && (
               <div className="bg-bg-tertiary border border-border rounded-2xl p-4 space-y-3">
                 <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('inc_contract_number')}</label>
