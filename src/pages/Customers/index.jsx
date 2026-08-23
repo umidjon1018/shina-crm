@@ -256,7 +256,7 @@ const Customers = () => {
     [allSales, selectedShopId]
   )
   const shopUsedSales = useMemo(() =>
-    selectedShopId === 'all' ? MOCK_USED_SALES : MOCK_USED_SALES.filter(s => !s.shopId || s.shopId === selectedShopId),
+    selectedShopId === 'all' ? MOCK_USED_SALES : MOCK_USED_SALES.filter(s => s.shopId === selectedShopId),
     [MOCK_USED_SALES, selectedShopId]
   )
 
@@ -463,7 +463,7 @@ const Customers = () => {
     LOYALTY_CONFIG, formatPrice: formatPriceRaw,
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     CustSortIcon,
-    allSales, MOCK_USED_SALES, MOCK_USED_STOCK,
+    allSales: shopSales, MOCK_USED_SALES: shopUsedSales, MOCK_USED_STOCK,
   }
 
   if (loading) return (
