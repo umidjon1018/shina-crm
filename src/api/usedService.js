@@ -101,6 +101,7 @@ const { data } = await api.post('/api/used/sales', {
     customer_name: saleData.customerName || '',
     shop_id: saleData.shopId,
     payment_type: saleData.paymentType || 'cash',
+    card_type: saleData.cardType || null,
     total: saleData.total || 0,
     discount: saleData.discount || 0,
     installment_debt: saleData.installmentDebt || 0,
