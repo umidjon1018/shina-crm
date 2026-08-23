@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/authStore'
 function SettingsTab() {
   const { t, i18n } = useTranslation()
   const {
-    companyName, companyLogo, setCompanyName, setCompanyLogo,
+    companyName, companyLogo, loginIconMode, setCompanyName, setCompanyLogo, setLoginIconMode,
     sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
     aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
     aiModel, setAiModel, aiMonthlyLimit, setAiMonthlyLimit, aiAgentEnabled, toggleAiAgentEnabled,
@@ -59,6 +59,29 @@ function SettingsTab() {
               </label>
               {companyLogo && <button onClick={()=>setCompanyLogo(null)} className="px-3 py-2 rounded-xl bg-accent-red/10 text-accent-red text-xs hover:bg-accent-red/20 transition-colors">{t('adm_set_logo_delete')}</button>}
             </div>
+          </div>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">Login sahifasidagi belgi</label>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: 'animation', label: "Aylanadigan g'ildirak", desc: 'Animatsiyali, brend logosiz' },
+              { id: 'logo',      label: 'Kompaniya logosi',     desc: 'Yuklangan logo ko\'rinadi' },
+            ].map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => setLoginIconMode(opt.id)}
+                disabled={opt.id === 'logo' && !companyLogo}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  loginIconMode === opt.id
+                    ? 'border-accent-red bg-accent-red/10'
+                    : 'border-border bg-bg-tertiary hover:border-text-muted'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                <p className={`text-sm font-bold ${loginIconMode === opt.id ? 'text-accent-red' : 'text-text-primary'}`}>{opt.label}</p>
+                <p className="text-[10px] text-text-muted mt-0.5">{opt.id === 'logo' && !companyLogo ? 'Logo yuklanmagan' : opt.desc}</p>
+              </button>
+            ))}
           </div>
         </div>
         <div>

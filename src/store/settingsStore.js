@@ -10,6 +10,7 @@ export const useSettingsStore = create(
       companyName: 'Shina CRM',
       companyLogo: null,         // ishlayotgan (cropped bo'lishi mumkin) versiya
       companyLogoOriginal: null, // yuklangan asl versiya (crop uchun)
+      loginIconMode: 'animation', // 'animation' | 'logo'
 
 
       // Narxnoma dizayn sozlamalari
@@ -193,6 +194,7 @@ export const useSettingsStore = create(
       setCompanyName: (name) => set({ companyName: name }),
       setCompanyLogo: (logo) => set({ companyLogo: logo }),
       setCompanyLogoOriginal: (logo) => set({ companyLogoOriginal: logo }),
+      setLoginIconMode: (mode) => set({ loginIconMode: mode }),
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi

@@ -26,7 +26,7 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const { checkCredentials, submitSelfie, submitFaceReview, user } = useAuthStore()
   const { lang, setLang } = useLangStore()
-  const { companyName, companyLogo } = useSettingsStore()
+  const { companyName, companyLogo, loginIconMode } = useSettingsStore()
 
   // Oxirgi so'z qizil rangda: "Good Tires" oq + "CRM" qizil
   const nameParts = companyName ? companyName.trim().split(' ') : ['Shina', 'CRM']
@@ -103,7 +103,7 @@ const LoginPage = () => {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-gradient-to-t from-accent-red/20 to-transparent blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-center text-center">
-          {companyLogo ? (
+          {loginIconMode === 'logo' && companyLogo ? (
             <img
               src={companyLogo}
               alt={companyName}
