@@ -21,7 +21,7 @@ const ProductsTab = ({ ctx }) => {
     notificationSettings: _ns, toggleNotification,
     loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     discountSmallMax, discountMediumMax,
-    companyName, companyLogo, setCompanyName, setCompanyLogo,
+    companyName, companyLogo, companyLogoOriginal, setCompanyName, setCompanyLogo, setCompanyLogoOriginal,
     sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
     aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
     roleAccessTrees, customRoles,
@@ -106,8 +106,11 @@ const ProductsTab = ({ ctx }) => {
   const [showCrop, setShowCrop]   = useState(false)
   const [cropPad, setCropPad]     = useState({ top: 0, right: 0, bottom: 0, left: 0 })
 
+  // Asl logo — crop panel har doim shu rasm ustida ishlaydi
+  const srcLogo = companyLogoOriginal || companyLogo
+
   const autoTrimLogo = () => {
-    if (!companyLogo) return
+    if (!srcLogo) return
     const img = new Image()
     img.onload = () => {
       const W = img.width, H = img.height
@@ -129,11 +132,11 @@ const ProductsTab = ({ ctx }) => {
       out.getContext('2d').drawImage(c, l, t, out.width, out.height, 0, 0, out.width, out.height)
       setCompanyLogo(out.toDataURL('image/png'))
     }
-    img.src = companyLogo
+    img.src = srcLogo
   }
 
   const applyCropPad = () => {
-    if (!companyLogo) return
+    if (!srcLogo) return
     const img = new Image()
     img.onload = () => {
       const W = img.width, H = img.height
@@ -148,7 +151,14 @@ const ProductsTab = ({ ctx }) => {
       setShowCrop(false)
       setCropPad({ top:0, right:0, bottom:0, left:0 })
     }
-    img.src = companyLogo
+    img.src = srcLogo
+  }
+
+  const restoreOriginalLogo = () => {
+    if (companyLogoOriginal) {
+      setCompanyLogo(companyLogoOriginal)
+      setCropPad({ top:0, right:0, bottom:0, left:0 })
+    }
   }
 
   const savePriceListSettings = () => {
@@ -423,7 +433,12 @@ const ProductsTab = ({ ctx }) => {
                           const file = e.target.files?.[0]
                           if (!file) return
                           const reader = new FileReader()
-                          reader.onload = ev => { setCompanyLogo(ev.target.result); setShowCrop(false) }
+                          reader.onload = ev => {
+                            setCompanyLogo(ev.target.result)
+                            setCompanyLogoOriginal(ev.target.result) // asl versiya saqlanadi
+                            setShowCrop(false)
+                            setCropPad({ top:0, right:0, bottom:0, left:0 })
+                          }
                           reader.readAsDataURL(file)
                           e.target.value = ''
                         }}
@@ -439,7 +454,7 @@ const ProductsTab = ({ ctx }) => {
                           Oq fon kesish
                         </button>
                         <button
-                          onClick={() => { setCompanyLogo(null); setShowCrop(false) }}
+                          onClick={() => { setCompanyLogo(null); setCompanyLogoOriginal(null); setShowCrop(false) }}
                           className="px-3 py-2 bg-accent-red/10 text-accent-red border border-accent-red/20 rounded-xl text-xs font-medium hover:bg-accent-red/20 transition-colors"
                         >
                           O'chirish
@@ -452,14 +467,24 @@ const ProductsTab = ({ ctx }) => {
                 {/* Crop panel */}
                 {showCrop && companyLogo && (
                   <div className="rounded-xl border border-accent-blue/30 bg-bg-tertiary p-4 space-y-3">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-accent-blue">Kesish (Crop)</p>
-                    {/* Preview with clip */}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-accent-blue">Kesish (Crop)</p>
+                      {companyLogoOriginal && companyLogo !== companyLogoOriginal && (
+                        <button
+                          onClick={restoreOriginalLogo}
+                          className="text-[10px] text-text-muted hover:text-accent-blue underline transition-colors"
+                        >
+                          Aslini tiklash
+                        </button>
+                      )}
+                    </div>
+                    {/* Preview — DOIM asl rasmdan clip ko'rsatiladi */}
                     <div
                       className="w-full h-28 flex items-center justify-center rounded-lg overflow-hidden"
                       style={{ background: 'repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%) 0/16px 16px' }}
                     >
                       <img
-                        src={companyLogo}
+                        src={srcLogo}
                         alt="crop preview"
                         style={{
                           maxWidth: '100%', maxHeight: '100%',

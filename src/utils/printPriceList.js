@@ -146,22 +146,20 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
   const footer    = design?.footer       || ''
 
   const SIZES = {
-    small:    { w:'54mm',   h:'38mm',  headerH:'13mm', logoH:'14px', nameSize:'8.5pt', priceSize:'12.5pt', metaSize:'6pt'   },
-    medium:   { w:'72mm',   h:'46mm',  headerH:'16mm', logoH:'17px', nameSize:'10pt',  priceSize:'15pt',   metaSize:'7pt'   },
-    bankcard: { w:'85.6mm', h:'54mm',  headerH:'19mm', logoH:'20px', nameSize:'11.5pt',priceSize:'17pt',   metaSize:'7.5pt' },
+    small:    { w:'54mm',   h:'38mm',  headerH:'13mm', headerHSmall:'8mm',  logoH:'14px', nameSize:'8.5pt', priceSize:'12.5pt', metaSize:'6pt'   },
+    medium:   { w:'72mm',   h:'46mm',  headerH:'16mm', headerHSmall:'10mm', logoH:'17px', nameSize:'10pt',  priceSize:'15pt',   metaSize:'7pt'   },
+    bankcard: { w:'85.6mm', h:'54mm',  headerH:'19mm', headerHSmall:'12mm', logoH:'20px', nameSize:'11.5pt',priceSize:'17pt',   metaSize:'7.5pt' },
   }
   const s = SIZES[cardSize] || SIZES.medium
+
+  // Fon rejimida header kichik bo'ladi (logo yo'q, faqat tovar nomi)
+  const activeHeaderH = logoMode === 'background' ? s.headerHSmall : s.headerH
 
   // Logo hizalanishi
   const align = logoPos === 'right' ? 'right' : logoPos === 'center' ? 'center' : 'left'
   const flexAlign = logoPos === 'right' ? 'flex-end' : logoPos === 'center' ? 'center' : 'flex-start'
 
-  // Fon logo (background mode)
-  const bgLogoHtml = (logoMode === 'background' && companyLogo)
-    ? `<img src="${companyLogo}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;object-position:${align} center;opacity:0.09;pointer-events:none;">`
-    : ''
-
-  // Header ichidagi logo (normal mode)
+  // Header ichidagi logo (faqat normal modeda)
   const headerLogoHtml = logoMode === 'normal' && companyLogo
     ? `<img src="${companyLogo}" style="height:${s.logoH};object-fit:contain;display:block;margin-bottom:2px;">`
     : logoMode === 'normal' && !companyLogo
@@ -175,13 +173,18 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     const meta = [nameHasSize ? null : p.size, season, p.country].filter(Boolean).join(' · ')
     const brandVisible = p.brand && !p.name?.toLowerCase().startsWith(p.brand.toLowerCase())
 
+    // Fon logo faqat card-body ichida (header ostida), card-body ga relative
+    const bgLogoHtml = (logoMode === 'background' && companyLogo)
+      ? `<img src="${companyLogo}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;object-position:${align} center;opacity:0.1;pointer-events:none;">`
+      : ''
+
     return `<div class="card">
-      ${bgLogoHtml}
-      <div class="card-hdr" style="text-align:${align};align-items:${flexAlign};">
+      <div class="card-hdr" style="text-align:${align};align-items:${flexAlign};min-height:${activeHeaderH};">
         ${headerLogoHtml}
         <div class="name">${p.name}</div>
       </div>
       <div class="card-body">
+        ${bgLogoHtml}
         ${brandVisible ? `<div class="brand">${p.brand}</div>` : ''}
         ${meta ? `<div class="meta">${meta}</div>` : ''}
         ${showAttrs && attrs ? `<div class="attr">${attrs}</div>` : ''}
@@ -199,7 +202,6 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     body { font-family: "${font}", sans-serif; background:#fff; }
     .grid { display:flex; flex-wrap:wrap; gap:3mm; padding:5mm; }
     .card {
-      position:relative;
       width:${s.w}; height:${s.h};
       border:1px dashed #ccc;
       border-radius:2mm;
@@ -209,12 +211,13 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     }
     .card-hdr {
       background:${hColor};
-      min-height:${s.headerH};
-      padding:2.5mm 3.5mm 2mm;
+      padding:2mm 3.5mm 1.5mm;
       display:flex; flex-direction:column;
       justify-content:center;
+      flex-shrink:0;
     }
     .card-body {
+      position:relative;
       flex:1; padding:1.5mm 3.5mm;
       display:flex; flex-direction:column;
       justify-content:center;

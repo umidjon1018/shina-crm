@@ -8,7 +8,9 @@ export const useSettingsStore = create(
     (set, get) => ({
       // Kompaniya ma'lumotlari
       companyName: 'Shina CRM',
-      companyLogo: null, // base64 yoki URL
+      companyLogo: null,         // ishlayotgan (cropped bo'lishi mumkin) versiya
+      companyLogoOriginal: null, // yuklangan asl versiya (crop uchun)
+
 
       // Narxnoma dizayn sozlamalari
       priceListSettings: {
@@ -190,6 +192,7 @@ export const useSettingsStore = create(
       // USD kursi
       setCompanyName: (name) => set({ companyName: name }),
       setCompanyLogo: (logo) => set({ companyLogo: logo }),
+      setCompanyLogoOriginal: (logo) => set({ companyLogoOriginal: logo }),
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi
