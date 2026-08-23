@@ -1,16 +1,19 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer, X } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer, X, ArrowRightLeft } from 'lucide-react'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
+import { useShopStore } from '../../../store/shopStore'
+import { useDataStore } from '../../../store/dataStore'
 import { Badge, StatCard, Th, Td, SortIcon, CATEGORIES, SEASONS, SEASON_COLORS, stockStatus, STATUS_CONFIG, isPrivileged } from '../whHelpers.jsx'
 import ProductModal from '../components/ProductModal'
 import { updateItemAttributes } from '../../../api/itemService'
 import { exportBatchesToExcel } from '../../../utils/excelIncomeImport'
 import PriceListModal from '../components/PriceListModal'
+import api from '../../../api/client'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -22,6 +25,15 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     || 'dona'
   const { hasPermission } = useAuthStore()
   const { productAttributeDefs } = useSettingsStore()
+  const { shops, selectedShopId } = useShopStore()
+  const { bump } = useDataStore()
+  const [transferModal, setTransferModal] = useState(false)
+  const [trProduct, setTrProduct] = useState(null)   // tanlangan mahsulot
+  const [trQty, setTrQty] = useState('')
+  const [trToShop, setTrToShop] = useState('')
+  const [trSaving, setTrSaving] = useState(false)
+  const [trError, setTrError] = useState('')
+  const [trSuccess, setTrSuccess] = useState(false)
   const [search, setSearch] = useState('')
   const [expandedProducts, setExpandedProducts] = useState(new Set())
   const [pendingAttrs, setPendingAttrs] = useState({})     // { itemId: { defId: value|'__none__' } }
@@ -210,6 +222,38 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     setUnlinkedItems(prev => { const n = { ...prev }; delete n[pid]; return n })
   }
 
+  const openTransfer = (product) => {
+    setTrProduct(product || null)
+    setTrQty('')
+    setTrToShop('')
+    setTrError('')
+    setTrSuccess(false)
+    setTransferModal(true)
+  }
+
+  const handleTransfer = async () => {
+    if (!trProduct) return setTrError('Mahsulot tanlang')
+    const qty = parseInt(trQty, 10)
+    if (!qty || qty < 1) return setTrError('Miqdor kiriting')
+    if (!trToShop) return setTrError('Maqsad do\'konni tanlang')
+    const avail = shopStock(trProduct.id)
+    if (qty > avail) return setTrError(`Mavjud: ${avail} ta`)
+    setTrSaving(true)
+    setTrError('')
+    try {
+      await api.post('/api/batches/transfer', {
+        product_id: trProduct.id,
+        from_shop_id: selectedShopId,
+        to_shop_id: trToShop,
+        quantity: qty,
+      })
+      setTrSuccess(true)
+      bump()
+    } catch (err) {
+      setTrError(err?.response?.data?.error || 'Xatolik yuz berdi')
+    } finally { setTrSaving(false) }
+  }
+
   const shopItemCount = (productId, status) =>
     items.filter(i => i.productId === productId && i.status === status && shopBatchIds.has(i.batchId)).length
   const shopStock = (productId) => shopItemCount(productId, 'in_stock')
@@ -278,48 +322,58 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
         <StatCard label={t('wh_stat_value')} value={totalValue.toLocaleString('uz') + ' ' + t('dash_so_m')} icon={BarChart2} cls="bg-accent-green/10 text-accent-green" />
       </div>
 
-      {/* Filters */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-wrap gap-4 items-end">
-        {/* Qidiruv */}
-        <div className="flex flex-col gap-1 flex-1 min-w-48">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('wh_search_ph') || 'Tovar izlash'}</span>
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_search_ph')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
-          </div>
+      {/* 1-qator: Qidiruv + Tugmalar */}
+      <div className="bg-bg-secondary border border-border rounded-2xl px-4 pt-4 pb-3 flex gap-3 items-center">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('wh_search_ph')} className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors" />
         </div>
-        {/* Tovar turi */}
+        <button onClick={() => setShowPriceList(true)} className="flex items-center gap-2 px-4 py-2.5 bg-accent-red/10 text-accent-red border border-accent-red/30 rounded-xl text-sm font-bold hover:bg-accent-red/20 transition-colors whitespace-nowrap">
+          <Printer size={16} /> Narxnoma
+        </button>
+        <button
+          onClick={() => { const ids = new Set(sorted.map(p => p.id)); const rows = batches.filter(b => b.quantityRemaining > 0 && ids.has(b.productId)); exportBatchesToExcel(rows, `qoldiq_${new Date().toISOString().slice(0,10)}.xlsx`) }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap"
+        >
+          <FileDown size={16} /> Excel
+        </button>
+        {selectedShopId !== 'all' && (
+          <button onClick={() => openTransfer(null)} className="flex items-center gap-2 px-4 py-2.5 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-sm font-bold hover:bg-accent-blue/20 transition-colors whitespace-nowrap">
+            <ArrowRightLeft size={16} /> Ko'chirish
+          </button>
+        )}
+      </div>
+
+      {/* 2-qator: Filtrlar */}
+      <div className="bg-bg-secondary border border-border rounded-2xl px-4 py-3 flex flex-wrap gap-3 items-end">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_category')}</span>
-          <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+          <select value={category} onChange={e => setCategory(e.target.value)} className="px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
             {CATEGORIES.map(c => <option key={c} value={c}>{t('cat_' + c)}</option>)}
           </select>
         </div>
-        {/* Mavsum */}
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('wh_th_season')}</span>
-          <select value={season} onChange={e => setSeason(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+          <select value={season} onChange={e => setSeason(e.target.value)} className="px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
             {SEASONS.map(s => <option key={s} value={s}>{t('season_' + s)}</option>)}
           </select>
         </div>
-        {/* Holat */}
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{t('col_status')}</span>
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue">
             <option value="all">{t('wh_all_status')}</option>
             <option value="ok">{t('stock_ok')}</option>
             <option value="low">{t('stock_low')}</option>
             <option value="empty">{t('stock_empty')}</option>
           </select>
         </div>
-        {/* Xususiyat filtrlari — dinamik */}
         {(productAttributeDefs || []).map(def => (
           <div key={def.id} className="flex flex-col gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{def.label}</span>
             <select
               value={attrFilters[def.label] || 'all'}
               onChange={e => setAttrFilter(def.label, e.target.value)}
-              className={`px-3 py-2.5 bg-bg-tertiary border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue ${attrFilters[def.label] && attrFilters[def.label] !== 'all' ? 'border-accent-blue' : 'border-border'}`}
+              className={`px-3 py-2 bg-bg-tertiary border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue ${attrFilters[def.label] && attrFilters[def.label] !== 'all' ? 'border-accent-blue' : 'border-border'}`}
             >
               <option value="all">Barchasi</option>
               {def.values.map(v => <option key={v} value={v}>{v}</option>)}
@@ -327,41 +381,11 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             </select>
           </div>
         ))}
-        {/* Filtrlarni tozalash */}
         {activeAttrFilters.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-transparent px-1">.</span>
-            <button
-              onClick={() => setAttrFilters({})}
-              className="flex items-center gap-1.5 px-3 py-2.5 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-sm font-bold hover:bg-accent-blue/20 transition-colors whitespace-nowrap"
-            >
-              <X size={14} /> Filtrni tozalash
-            </button>
-          </div>
+          <button onClick={() => setAttrFilters({})} className="flex items-center gap-1.5 px-3 py-2 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-sm font-bold hover:bg-accent-blue/20 transition-colors whitespace-nowrap self-end">
+            <X size={14} /> Filtrni tozalash
+          </button>
         )}
-        {/* Tugmalar */}
-        <div className="flex flex-col gap-1 ml-auto">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1 opacity-0">.</span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowPriceList(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent-red/10 text-accent-red border border-accent-red/30 rounded-xl text-sm font-bold hover:bg-accent-red/20 transition-colors whitespace-nowrap"
-            >
-              <Printer size={16} /> Narxnoma
-            </button>
-            <button
-              onClick={() => {
-                const filteredProductIds = new Set(sorted.map(p => p.id))
-                const exportRows = batches.filter(b => b.quantityRemaining > 0 && filteredProductIds.has(b.productId))
-                const today = new Date().toISOString().slice(0, 10)
-                exportBatchesToExcel(exportRows, `qoldiq_${today}.xlsx`)
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap"
-            >
-              <FileDown size={16} /> Excel
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Table */}
@@ -761,6 +785,104 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
           onClose={() => setShowPriceList(false)}
         />
       )}
+
+      {/* Transfer modal */}
+      <AnimatePresence>
+        {transferModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => !trSaving && setTransferModal(false)}>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-md space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-syne font-bold text-text-primary text-lg flex items-center gap-2">
+                  <ArrowRightLeft size={20} className="text-accent-blue" /> Do'konlar arasi ko'chirish
+                </h3>
+                <button onClick={() => setTransferModal(false)} className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-muted"><X size={16} /></button>
+              </div>
+
+              {trSuccess ? (
+                <div className="text-center py-6 space-y-3">
+                  <CheckCircle size={40} className="text-accent-green mx-auto" />
+                  <p className="font-bold text-text-primary">Ko'chirildi!</p>
+                  <p className="text-sm text-text-muted">{trQty} ta <strong>{trProduct?.name}</strong> muvaffaqiyatli ko'chirildi.</p>
+                  <button onClick={() => setTransferModal(false)} className="px-6 py-2 bg-accent-green text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Yopish</button>
+                </div>
+              ) : (
+                <>
+                  {/* Mahsulot tanlash */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-widest">Mahsulot</label>
+                    <select
+                      value={trProduct?.id || ''}
+                      onChange={e => {
+                        const p = sorted.find(p => String(p.id) === e.target.value)
+                        setTrProduct(p || null)
+                        setTrQty('')
+                        setTrError('')
+                      }}
+                      className="w-full px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                    >
+                      <option value="">— Tanlang —</option>
+                      {sorted.filter(p => shopStock(p.id) > 0).map(p => (
+                        <option key={p.id} value={p.id}>{p.name} ({shopStock(p.id)} ta)</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Miqdor */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-widest">
+                      Miqdor {trProduct ? <span className="text-accent-blue normal-case font-normal">(mavjud: {shopStock(trProduct.id)} ta)</span> : ''}
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={trProduct ? shopStock(trProduct.id) : undefined}
+                      value={trQty}
+                      onChange={e => { setTrQty(e.target.value); setTrError('') }}
+                      placeholder="Nechta ko'chirish"
+                      className="w-full px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                    />
+                  </div>
+
+                  {/* Maqsad do'kon */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-widest">Qaysi do'konga</label>
+                    <select
+                      value={trToShop}
+                      onChange={e => { setTrToShop(e.target.value); setTrError('') }}
+                      className="w-full px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                    >
+                      <option value="">— Tanlang —</option>
+                      {shops.filter(s => String(s.id) !== String(selectedShopId)).map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {trError && <p className="text-sm text-accent-red font-medium">{trError}</p>}
+
+                  <div className="flex gap-3 pt-1">
+                    <button onClick={() => setTransferModal(false)} className="flex-1 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors">Bekor</button>
+                    <button
+                      onClick={handleTransfer}
+                      disabled={trSaving}
+                      className="flex-1 py-2.5 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {trSaving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                      Ko'chirish
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
