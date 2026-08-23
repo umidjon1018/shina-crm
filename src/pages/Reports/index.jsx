@@ -27,6 +27,7 @@ import { getIncomeBatches, getSuppliers } from '../../api/incomeService'
 import { getExpenses } from '../../api/expenseService'
 import { getCapital } from '../../api/capitalService'
 import { useShopStore } from '../../store/shopStore'
+import { useDataStore } from '../../store/dataStore'
 import {
   InstagramDM, Modal, Pagination, ModalTable, MonthlyDynamicsChart,
   C, SOURCE_LABELS, CANCEL_REASONS, getCancelReasonLabel,
@@ -96,6 +97,7 @@ export const Reports = () => {
   } = useSettingsStore()
 
   const { selectedShopId } = useShopStore()
+  const { version } = useDataStore()
 
   const [_allSales, setAllSales] = useState([])
   const [MOCK_CUSTOMERS, setCustomers] = useState([])
@@ -135,7 +137,7 @@ export const Reports = () => {
       setUsedStock(usedStock)
       setReturns(returns)
     }).catch(() => {})
-  }, [])
+  }, [version])
 
   const MOCK_SALES = useMemo(() => selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId), [_allSales, selectedShopId])
   const MOCK_EXPENSES = useMemo(() => selectedShopId === 'all' ? _allExpenses : _allExpenses.filter(e => e.shopId === selectedShopId), [_allExpenses, selectedShopId])
