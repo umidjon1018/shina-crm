@@ -21,6 +21,11 @@ export const getWriteoffs = async (shopId) => {
   return data.map(map)
 }
 
+export const addWriteoffExpense = async (id) => {
+  const { data } = await api.post(`/api/writeoffs/${id}/add-expense`)
+  return data
+}
+
 export const createWriteoff = async ({ productId, shopId, quantity, reason, createExpense }) => {
   const { data } = await api.post('/api/writeoffs', {
     product_id: productId,

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, X, CheckCircle, Search, AlertTriangle } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
-import { getWriteoffs, createWriteoff } from '../../../api/writeoffService'
+import { getWriteoffs, createWriteoff, addWriteoffExpense } from '../../../api/writeoffService'
 
 const fmtDate = (iso) => {
   if (!iso) return '—'
@@ -28,6 +28,17 @@ const WriteoffTab = ({ products, items, batches }) => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [addingExpenseId, setAddingExpenseId] = useState(null)
+
+  const handleAddExpense = async (id) => {
+    setAddingExpenseId(id)
+    try {
+      await addWriteoffExpense(id)
+      await loadList()
+    } catch (err) {
+      alert(err?.response?.data?.error || 'Xatolik')
+    } finally { setAddingExpenseId(null) }
+  }
 
   const loadList = async () => {
     setLoading(true)
@@ -143,9 +154,20 @@ const WriteoffTab = ({ products, items, batches }) => {
                   </td>
                   <td className="px-4 py-3 text-text-secondary">{w.reason || '—'}</td>
                   <td className="px-4 py-3">
-                    {w.expenseId
-                      ? <span className="text-xs bg-accent-orange/10 text-accent-orange px-2 py-0.5 rounded-lg font-medium">Xarajatga o'tdi</span>
-                      : <span className="text-text-muted text-xs">—</span>}
+                    {w.expenseId ? (
+                      <span className="text-xs bg-accent-orange/10 text-accent-orange px-2 py-0.5 rounded-lg font-medium">Xarajatga o'tdi</span>
+                    ) : w.totalUzs > 0 ? (
+                      <button
+                        onClick={() => handleAddExpense(w.id)}
+                        disabled={addingExpenseId === w.id}
+                        className="text-xs bg-accent-blue/10 text-accent-blue px-2 py-1 rounded-lg font-medium hover:bg-accent-blue/20 transition-colors disabled:opacity-60 flex items-center gap-1"
+                      >
+                        {addingExpenseId === w.id && <div className="w-3 h-3 border border-accent-blue border-t-transparent rounded-full animate-spin" />}
+                        + Xarajatga qo'sh
+                      </button>
+                    ) : (
+                      <span className="text-text-muted text-xs">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-text-muted text-xs">{w.createdByName || '—'}</td>
                 </tr>
