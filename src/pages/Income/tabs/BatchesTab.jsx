@@ -6,6 +6,7 @@ import { togglePromoPassToCustomer } from '../../../api/incomeService'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPaymentRateDiff } from '../components/incHelpers'
 import IncomeImportModal from '../../../components/IncomeImportModal'
+import ProductImageViewer from '../../../components/ProductImageViewer'
 
 const BatchesTab = ({ ctx }) => {
   const { t } = useTranslation()
@@ -161,12 +162,17 @@ const BatchesTab = ({ ctx }) => {
                               )}
                             </td>
                             <td className="px-4 py-4">
-                              <p className="text-sm font-bold text-text-primary truncate">{batch.productName}</p>
-                              {!batch.purchasePriceUSD && (
-                                <span className="text-[10px] bg-accent-orange/10 text-accent-orange px-2 py-0.5 rounded-full font-bold">
-                                  ⚠️ {t('inc_no_price')}
-                                </span>
-                              )}
+                              <div className="flex items-center gap-2">
+                                <ProductImageViewer productId={batch.productId} size="sm" />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold text-text-primary truncate">{batch.productName}</p>
+                                  {!batch.purchasePriceUSD && (
+                                    <span className="text-[10px] bg-accent-orange/10 text-accent-orange px-2 py-0.5 rounded-full font-bold">
+                                      ⚠️ {t('inc_no_price')}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </td>
                             <td className="px-4 py-4">
                               {(() => {
@@ -324,8 +330,13 @@ const BatchesTab = ({ ctx }) => {
                           <React.Fragment key={batch.id}>
                             <tr className={`hover:bg-bg-tertiary/50 transition-colors ${isExpanded ? 'bg-bg-tertiary/30' : ''}`}>
                               <td className="px-4 py-4">
-                                <p className="text-sm font-bold text-text-primary truncate">{batch.productName}</p>
-                                <p className="text-xs text-text-muted">{new Date(batch.receivedAt).toLocaleDateString('uz-UZ')}</p>
+                                <div className="flex items-center gap-2">
+                                  <ProductImageViewer productId={batch.productId} size="sm" />
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-bold text-text-primary truncate">{batch.productName}</p>
+                                    <p className="text-xs text-text-muted">{new Date(batch.receivedAt).toLocaleDateString('uz-UZ')}</p>
+                                  </div>
+                                </div>
                               </td>
                               <td className="px-4 py-4">
                                 {(() => {

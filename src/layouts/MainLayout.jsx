@@ -83,7 +83,7 @@ export const MainLayout = () => {
   const { isOnline, pendingCount, isSyncing } = useOfflineSync()
   const { getUnreadCount } = useNotificationStore()
   const unreadCount = getUnreadCount()
-  const { companyName, companyLogo, sidebarLabels, hiddenPages, employees, loadEmployees, loadProductCategories } = useSettingsStore()
+  const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories } = useSettingsStore()
   const { shops, selectedShopId, setSelectedShop, loadShops } = useShopStore()
   const activeShops = shops.filter(s => s.isActive)
 
@@ -142,7 +142,14 @@ export const MainLayout = () => {
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-border/20">
           {companyLogo
-            ? <img src={companyLogo} alt="logo" className="w-12 h-12 rounded-xl object-contain flex-shrink-0" />
+            ? <img
+                src={companyLogo}
+                alt="logo"
+                className={`rounded-xl object-contain flex-shrink-0 ${
+                  sidebarLogoSize === 'small'  ? 'w-8 h-8' :
+                  sidebarLogoSize === 'large'  ? 'w-16 h-16' : 'w-12 h-12'
+                }`}
+              />
             : <div className="w-8 h-8 bg-accent-red rounded-lg flex items-center justify-center shadow-glow-red flex-shrink-0">
                 <Package size={16} className="text-white" />
               </div>

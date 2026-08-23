@@ -6,7 +6,7 @@ import {
   Package, Truck, AlertCircle, Edit3, Search, Plus,
   DollarSign, Clock, ChevronDown, ChevronUp, Check, X,
   Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet,
-  BarChart3, TrendingUp
+  BarChart3, TrendingUp, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -29,7 +29,7 @@ const Income = () => {
   const { t } = useTranslation()
   const som = t('unit_som')
   const { user } = useAuthStore()
-  const { productCategories, usdRate, productAttributeDefs } = useSettingsStore()
+  const { productCategories, usdRate, productAttributeDefs, productImages } = useSettingsStore()
   const { bump } = useDataStore()
   const { selectedShopId } = useShopStore()
   const isPrivileged = user?.role === 'admin' || user?.role === 'manager'
@@ -64,12 +64,16 @@ const Income = () => {
     dueDate: '', promoDiscount: '', promoNote: '', notes: '', attributes: {}
   })
   const [editingBatch, setEditingBatch] = useState(null)
+  const [ebImgIdx, setEbImgIdx] = useState(0)
+  const [ebFsOpen, setEbFsOpen] = useState(false)
   const [ebPaidDate, setEbPaidDate] = useState('')
   const [ebDueDate, setEbDueDate] = useState('')
   useEffect(() => {
     if (editingBatch) {
       setEbDueDate(editingBatch.dueDate || '')
       setEbPaidDate(new Date().toISOString().split('T')[0])
+      setEbImgIdx(0)
+      setEbFsOpen(false)
     }
   }, [editingBatch])
   const [editingPayment, setEditingPayment] = useState(null)
@@ -1029,7 +1033,7 @@ const Income = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-syne font-extrabold text-text-primary">{t('inc_edit_batch_title')}</h3>
                   <p className="text-sm text-text-muted">{editingBatch.productName}</p>
@@ -1041,6 +1045,62 @@ const Income = () => {
                   <X size={24} />
                 </button>
               </div>
+
+              {(() => {
+                const imgs = productImages[String(editingBatch.productId)] || []
+                if (!imgs.length) return null
+                return (
+                  <div className="mb-5 space-y-2">
+                    <div
+                      className="relative w-full rounded-2xl overflow-hidden bg-bg-tertiary cursor-pointer group"
+                      style={{ aspectRatio: '16/7' }}
+                      onClick={() => setEbFsOpen(true)}
+                    >
+                      <img src={imgs[ebImgIdx]} alt="" className="w-full h-full object-contain" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Kattalashtirish</span>
+                      </div>
+                      {imgs.length > 1 && (
+                        <>
+                          <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i - 1 + imgs.length) % imgs.length) }} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white"><ChevronLeft size={16} /></button>
+                          <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i + 1) % imgs.length) }} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white"><ChevronRight size={16} /></button>
+                          <div className="absolute bottom-2 right-3 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full font-bold">{ebImgIdx + 1} / {imgs.length}</div>
+                        </>
+                      )}
+                    </div>
+                    {imgs.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                        {imgs.map((img, i) => (
+                          <button key={i} onClick={() => setEbImgIdx(i)} className={`w-14 h-10 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${i === ebImgIdx ? 'border-accent-red' : 'border-border opacity-60 hover:opacity-90'}`}>
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {ebFsOpen && (
+                      <div className="fixed inset-0 bg-black/92 z-[600] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
+                        <button onClick={() => setEbFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
+                        {imgs.length > 1 && (
+                          <>
+                            <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i - 1 + imgs.length) % imgs.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronLeft size={22} /></button>
+                            <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i + 1) % imgs.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronRight size={22} /></button>
+                          </>
+                        )}
+                        <img src={imgs[ebImgIdx]} alt="" className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} />
+                        {imgs.length > 1 && (
+                          <div className="absolute bottom-5 flex gap-1.5">
+                            {imgs.map((img, i) => (
+                              <button key={i} onClick={e => { e.stopPropagation(); setEbImgIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === ebImgIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
+                                <img src={img} alt="" className="w-full h-full object-cover" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="col-span-2">

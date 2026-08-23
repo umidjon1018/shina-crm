@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer } from 'lucide-react'
+import ProductImageViewer from '../../../components/ProductImageViewer'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
 import { useSettingsStore } from '../../../store/settingsStore'
@@ -425,6 +426,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         <span className="text-text-muted flex-shrink-0">
                           {expandedProducts.has(p.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         </span>
+                        <ProductImageViewer productId={p.id} size="sm" />
                         {needsAttrs && <span title="Xususiyat belgilanmagan" className="text-amber-500 flex-shrink-0"><AlertTriangle size={13} /></span>}
                         <p className="font-medium text-text-primary text-sm">{p.name}</p>
                       </div>

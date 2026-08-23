@@ -1,11 +1,16 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSettingsStore } from '../../../store/settingsStore'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
 const ReturnsHistoryTab = ({ ctx }) => {
   const { t } = useTranslation()
   const som = t('unit_som')
+  const { productImages } = useSettingsStore()
+  const [peekProduct, setPeekProduct] = useState(null)
   const {
     returnsHistoryMonthFilter, setReturnsHistoryMonthFilter, returnsMonthOptions2, formatMonthValue,
     filteredCancelledReturns, sortedReturnsHistory,
@@ -71,7 +76,16 @@ const ReturnsHistoryTab = ({ ctx }) => {
                     <div className="space-y-1">
                       {visible.map((it, i) => (
                         <div key={i}>
-                          <div className="text-[11px] font-medium text-text-primary leading-tight truncate" title={it.name}>{it.name}</div>
+                          {(() => {
+                            const hasImg = it.productId && productImages[String(it.productId)]?.length
+                            return (
+                              <div
+                                className={`text-[11px] font-medium text-text-primary leading-tight truncate ${hasImg ? 'cursor-pointer hover:text-accent-blue transition-colors' : ''}`}
+                                title={it.name}
+                                onClick={() => hasImg && setPeekProduct({ id: it.productId, name: it.name })}
+                              >{it.name}</div>
+                            )
+                          })()}
                           {barcodes?.[i] && <div className={`text-[9px] text-text-muted font-mono truncate ${barcodeSelectClass}`}>{barcodes[i]}</div>}
                         </div>
                       ))}
@@ -137,6 +151,24 @@ const ReturnsHistoryTab = ({ ctx }) => {
           </div>
         )}
       </div>
+
+      {peekProduct && (
+        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
+          <div className="bg-bg-secondary border border-border rounded-2xl p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
+              <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {(productImages[String(peekProduct.id)] || []).map((img, i) => (
+                <div key={i} className="aspect-square rounded-xl overflow-hidden border border-border">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }

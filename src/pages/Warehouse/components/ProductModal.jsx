@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
 import { Th, Td, Badge, SEASON_COLORS } from '../whHelpers.jsx'
+import { useSettingsStore } from '../../../store/settingsStore'
 
 const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, productCategories, onClose }) => {
   const { t } = useTranslation()
@@ -12,6 +13,10 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
   const pcs = t('unit_pcs')
   const barcodeSelectClass = userRole === 'admin' ? '' : 'select-none'
   const inStockItems = items.filter(i => i.status === 'in_stock')
+  const { productImages } = useSettingsStore()
+  const images = productImages[String(product.id)] || []
+  const [mainIdx, setMainIdx] = useState(0)
+  const [fsOpen, setFsOpen] = useState(false)
   const shopStock = (productId) => items.filter(i => i.productId === productId && i.status === 'in_stock').length
   const shopItemCount = (productId, status) => items.filter(i => i.productId === productId && i.status === status).length
   const getProductUnit = (productId) =>
@@ -39,6 +44,81 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
 
         {/* Body */}
         <div className="overflow-y-auto no-scrollbar flex-1 p-6 space-y-5">
+          {/* Rasm galereya */}
+          {images.length > 0 && (
+            <div className="space-y-2">
+              {/* Asosiy katta rasm */}
+              <div
+                className="relative w-full rounded-2xl overflow-hidden bg-bg-tertiary cursor-pointer group"
+                style={{ aspectRatio: '16/7' }}
+                onClick={() => setFsOpen(true)}
+              >
+                <img src={images[mainIdx]} alt="" className="w-full h-full object-contain" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">
+                    Kattalashtirish
+                  </span>
+                </div>
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={e => { e.stopPropagation(); setMainIdx(i => (i - 1 + images.length) % images.length) }}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); setMainIdx(i => (i + 1) % images.length) }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                    <div className="absolute bottom-2 right-3 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full font-bold">
+                      {mainIdx + 1} / {images.length}
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Thumbnail strip */}
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setMainIdx(i)}
+                      className={`w-14 h-10 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${i === mainIdx ? 'border-accent-red' : 'border-border opacity-60 hover:opacity-90'}`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fullscreen overlay */}
+          {fsOpen && (
+            <div className="fixed inset-0 bg-black/92 z-[600] flex items-center justify-center" onClick={() => setFsOpen(false)}>
+              <button onClick={() => setFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><X size={20} /></button>
+              {images.length > 1 && (
+                <>
+                  <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i - 1 + images.length) % images.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronLeft size={22} /></button>
+                  <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i + 1) % images.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronRight size={22} /></button>
+                </>
+              )}
+              <img src={images[mainIdx]} alt="" className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} />
+              {images.length > 1 && (
+                <div className="absolute bottom-5 flex gap-1.5">
+                  {images.map((img, i) => (
+                    <button key={i} onClick={e => { e.stopPropagation(); setMainIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === mainIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Info */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[

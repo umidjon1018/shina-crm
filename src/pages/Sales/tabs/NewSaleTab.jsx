@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { useSettingsStore } from '../../../store/settingsStore'
+import ProductImageViewer from '../../../components/ProductImageViewer'
 import { motion } from 'framer-motion'
 import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Minus, Plus, Search, ShoppingBag, ShoppingCart, Star, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -58,6 +60,7 @@ const NewSaleTab = ({ ctx }) => {
   }, [cartItems])
 
   const cartGroups = singleGroups // eski nomi bilan ham ishlaydi (pastda ishlatilgan)
+  const { productImages } = useSettingsStore()
 
   // Guruh uchun umumiy narxni hisoblash
   const getGroupPrice = (group) => group.items.reduce((sum, c) =>
@@ -151,8 +154,19 @@ const NewSaleTab = ({ ctx }) => {
 
                 return (
                   <motion.div key={product.id} layout className="flex items-start gap-3 bg-bg-secondary border border-border rounded-2xl px-4 py-3 group">
-                    <div className="w-10 h-10 bg-bg-tertiary rounded-xl flex items-center justify-center text-accent-red shrink-0 font-bold text-sm mt-0.5">
-                      {count}
+                    <div className="relative w-10 h-10 shrink-0 mt-0.5">
+                      {productImages[String(product.id)]?.[0] ? (
+                        <ProductImageViewer productId={product.id} size="md" className="w-10 h-10" />
+                      ) : (
+                        <div className="w-10 h-10 bg-bg-tertiary rounded-xl flex items-center justify-center text-accent-red font-bold text-sm">
+                          {count}
+                        </div>
+                      )}
+                      {productImages[String(product.id)]?.[0] && (
+                        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-accent-red text-white rounded-full text-[10px] font-bold flex items-center justify-center leading-none">
+                          {count}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-text-primary truncate">{product.name}</p>

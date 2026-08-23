@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { X } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
+import { useSettingsStore } from '../../../store/settingsStore'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
 const HistoryTab = ({ ctx }) => {
   const { t } = useTranslation()
   const som = t('unit_som')
+  const { productImages } = useSettingsStore()
+  const [peekProduct, setPeekProduct] = useState(null) // { id, name }
   const {
     historyMonthFilter, setHistoryMonthFilter, historyMonthOptions, formatMonthValue,
     filteredSalesForHistory, sortedSalesForHistory, historyPage, setHistoryPage,
@@ -86,11 +91,29 @@ const HistoryTab = ({ ctx }) => {
                         const hidden = items.slice(2)
                         return (
                           <div className="flex flex-col gap-0.5">
-                            {visible.map((item, i) => <span key={i} className="text-xs truncate block">{item.name || 'Tovar'}</span>)}
+                            {visible.map((item, i) => {
+                              const hasImg = item.productId && productImages[String(item.productId)]?.length
+                              return (
+                                <span
+                                  key={i}
+                                  className={`text-xs truncate block ${hasImg ? 'cursor-pointer hover:text-accent-blue transition-colors' : ''}`}
+                                  onClick={() => hasImg && setPeekProduct({ id: item.productId, name: item.name })}
+                                >{item.name || 'Tovar'}</span>
+                              )
+                            })}
                             {hidden.length > 0 && (
                               <details className="cursor-pointer select-none">
                                 <summary className="text-[10px] text-accent-blue font-bold list-none">+{hidden.length} ta</summary>
-                                {hidden.map((item, i) => <span key={i} className="text-[10px] block truncate text-text-secondary font-normal">{item.name || 'Tovar'}</span>)}
+                                {hidden.map((item, i) => {
+                                  const hasImg = item.productId && productImages[String(item.productId)]?.length
+                                  return (
+                                    <span
+                                      key={i}
+                                      className={`text-[10px] block truncate text-text-secondary font-normal ${hasImg ? 'cursor-pointer hover:text-accent-blue transition-colors' : ''}`}
+                                      onClick={() => hasImg && setPeekProduct({ id: item.productId, name: item.name })}
+                                    >{item.name || 'Tovar'}</span>
+                                  )
+                                })}
                               </details>
                             )}
                             {items.length === 0 && <span>—</span>}
@@ -240,6 +263,23 @@ const HistoryTab = ({ ctx }) => {
           </div>
         )}
       </div>
+      {peekProduct && (
+        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
+          <div className="bg-bg-secondary border border-border rounded-2xl p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
+              <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {(productImages[String(peekProduct.id)] || []).map((img, i) => (
+                <div key={i} className="aspect-square rounded-xl overflow-hidden border border-border">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }
