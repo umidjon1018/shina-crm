@@ -16,7 +16,8 @@ const CARD_SIZES = [
 ]
 
 export default function PriceListModal({ products, items, attributeDefs, onClose }) {
-  const { companyName, companyLogo, priceListSettings } = useSettingsStore()
+  const { companyName, priceListSettings } = useSettingsStore()
+  const companyLogo = priceListSettings?.logo ?? null  // narxnoma uchun alohida logo
 
   const [format, setFormat]               = useState('a4')
   const [cardSize, setCardSize]           = useState('medium')

@@ -26,10 +26,13 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const { checkCredentials, submitSelfie, submitFaceReview, user } = useAuthStore()
   const { lang, setLang } = useLangStore()
-  const { companyName, companyLogo, loginIconMode } = useSettingsStore()
+  const { companyName, companyLogo, loginIconMode, loginPageTitle } = useSettingsStore()
+
+  // loginPageTitle bo'sh bo'lsa companyName ishlatiladi
+  const displayTitle = loginPageTitle?.trim() || companyName || 'CRM'
 
   // Oxirgi so'z qizil rangda: "Good Tires" oq + "CRM" qizil
-  const nameParts = companyName ? companyName.trim().split(' ') : ['Shina', 'CRM']
+  const nameParts = displayTitle.trim().split(' ')
   const nameRed  = nameParts.pop()
   const nameMain = nameParts.join(' ')
 

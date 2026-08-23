@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/authStore'
 function SettingsTab() {
   const { t, i18n } = useTranslation()
   const {
-    companyName, companyLogo, loginIconMode, setCompanyName, setCompanyLogo, setLoginIconMode,
+    companyName, companyLogo, loginIconMode, loginPageTitle, setCompanyName, setCompanyLogo, setLoginIconMode, setLoginPageTitle,
     sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
     aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
     aiModel, setAiModel, aiMonthlyLimit, setAiMonthlyLimit, aiAgentEnabled, toggleAiAgentEnabled,
@@ -25,6 +25,8 @@ function SettingsTab() {
 
   const [companyNameForm, setCompanyNameForm] = useState(companyName)
   const [companySaved, setCompanySaved] = useState(false)
+  const [loginTitleForm, setLoginTitleForm] = useState(loginPageTitle ?? '')
+  const [loginTitleSaved, setLoginTitleSaved] = useState(false)
   const [showAiKey, setShowAiKey] = useState(false)
   const [aiKeySaved, setAiKeySaved] = useState(false)
 
@@ -86,12 +88,36 @@ function SettingsTab() {
         </div>
         <div>
           <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_company_name')}</label>
+          <p className="text-[10px] text-text-muted mb-1.5">Ilova ichida (sidebar, sarlavha) ko'rinadigan nom</p>
           <div className="flex items-center gap-3">
             <input type="text" value={companyNameForm} onChange={e=>setCompanyNameForm(e.target.value)} placeholder={t('adm_set_company_placeholder')}
               className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm" />
             <button onClick={()=>{ if(!companyNameForm.trim()) return; setCompanyName(companyNameForm.trim()); setCompanySaved(true); setTimeout(()=>setCompanySaved(false),2000) }}
               className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 flex-shrink-0 transition-all ${companySaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'}`}>
               {companySaved ? <CheckCircle size={16}/> : t('save')}
+            </button>
+          </div>
+        </div>
+        <div>
+          <label className="text-text-secondary text-xs font-medium block mb-2">Login sahifasi nomi</label>
+          <p className="text-[10px] text-text-muted mb-1.5">Bo'sh qolsa — yuqoridagi kompaniya nomi ishlatiladi</p>
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={loginTitleForm}
+              onChange={e => setLoginTitleForm(e.target.value)}
+              placeholder={companyName || 'Misol: Good Tires CRM'}
+              className="flex-1 bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm"
+            />
+            <button
+              onClick={() => {
+                setLoginPageTitle(loginTitleForm.trim())
+                setLoginTitleSaved(true)
+                setTimeout(() => setLoginTitleSaved(false), 2000)
+              }}
+              className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 flex-shrink-0 transition-all ${loginTitleSaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'}`}
+            >
+              {loginTitleSaved ? <CheckCircle size={16}/> : 'Saqlash'}
             </button>
           </div>
         </div>

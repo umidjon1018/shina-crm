@@ -8,9 +8,10 @@ export const useSettingsStore = create(
     (set, get) => ({
       // Kompaniya ma'lumotlari
       companyName: 'Shina CRM',
-      companyLogo: null,         // ishlayotgan (cropped bo'lishi mumkin) versiya
-      companyLogoOriginal: null, // yuklangan asl versiya (crop uchun)
-      loginIconMode: 'animation', // 'animation' | 'logo'
+      companyLogo: null,
+      companyLogoOriginal: null,
+      loginIconMode: 'animation',  // 'animation' | 'logo'
+      loginPageTitle: '',          // bo'sh = companyName ishlatiladi
 
 
       // Narxnoma dizayn sozlamalari
@@ -22,6 +23,8 @@ export const useSettingsStore = create(
         logoPosition: 'left',
         logoMode:     'normal',   // 'normal' | 'background'
         footer:       '',
+        logo:         null,       // narxnoma uchun alohida logo
+        logoOriginal: null,       // crop uchun asl versiya
       },
 
       // Sodiqlik dasturi (Mavjud - o'zgarmasin)
@@ -195,6 +198,7 @@ export const useSettingsStore = create(
       setCompanyLogo: (logo) => set({ companyLogo: logo }),
       setCompanyLogoOriginal: (logo) => set({ companyLogoOriginal: logo }),
       setLoginIconMode: (mode) => set({ loginIconMode: mode }),
+      setLoginPageTitle: (title) => set({ loginPageTitle: title }),
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi

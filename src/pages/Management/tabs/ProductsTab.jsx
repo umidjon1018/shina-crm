@@ -21,7 +21,7 @@ const ProductsTab = ({ ctx }) => {
     notificationSettings: _ns, toggleNotification,
     loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     discountSmallMax, discountMediumMax,
-    companyName, companyLogo, companyLogoOriginal, setCompanyName, setCompanyLogo, setCompanyLogoOriginal,
+    companyName, setCompanyName,
     sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
     aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
     roleAccessTrees, customRoles,
@@ -106,8 +106,10 @@ const ProductsTab = ({ ctx }) => {
   const [showCrop, setShowCrop]   = useState(false)
   const [cropPad, setCropPad]     = useState({ top: 0, right: 0, bottom: 0, left: 0 })
 
-  // Asl logo — crop panel har doim shu rasm ustida ishlaydi
-  const srcLogo = companyLogoOriginal || companyLogo
+  // Narxnoma uchun alohida logo — companyLogo bilan bog'liq EMAS
+  const plLogo         = priceListSettings?.logo
+  const plLogoOriginal = priceListSettings?.logoOriginal
+  const srcLogo        = plLogoOriginal || plLogo
 
   const autoTrimLogo = () => {
     if (!srcLogo) return
@@ -130,7 +132,7 @@ const ProductsTab = ({ ctx }) => {
       const out = document.createElement('canvas')
       out.width=r-l+1; out.height=b-t+1
       out.getContext('2d').drawImage(c, l, t, out.width, out.height, 0, 0, out.width, out.height)
-      setCompanyLogo(out.toDataURL('image/png'))
+      setPriceListSettings({ logo: out.toDataURL('image/png') })
     }
     img.src = srcLogo
   }
@@ -147,7 +149,7 @@ const ProductsTab = ({ ctx }) => {
       const canvas = document.createElement('canvas')
       canvas.width=w; canvas.height=h
       canvas.getContext('2d').drawImage(img, lPx, tPx, w, h, 0, 0, w, h)
-      setCompanyLogo(canvas.toDataURL('image/png'))
+      setPriceListSettings({ logo: canvas.toDataURL('image/png') })
       setShowCrop(false)
       setCropPad({ top:0, right:0, bottom:0, left:0 })
     }
@@ -155,8 +157,8 @@ const ProductsTab = ({ ctx }) => {
   }
 
   const restoreOriginalLogo = () => {
-    if (companyLogoOriginal) {
-      setCompanyLogo(companyLogoOriginal)
+    if (plLogoOriginal) {
+      setPriceListSettings({ logo: plLogoOriginal })
       setCropPad({ top:0, right:0, bottom:0, left:0 })
     }
   }
@@ -413,13 +415,13 @@ const ProductsTab = ({ ctx }) => {
                 <div className="flex items-start gap-4">
                   {/* Preview — bosib crop ochiladigan */}
                   <div
-                    onClick={() => companyLogo && setShowCrop(v => !v)}
-                    title={companyLogo ? 'Bosib kesish panelinii ochish' : ''}
-                    className={`w-20 h-14 rounded-xl border border-border flex items-center justify-center overflow-hidden flex-shrink-0 transition-colors ${companyLogo ? 'cursor-pointer hover:border-accent-blue' : 'bg-bg-tertiary'}`}
-                    style={{ background: companyLogo ? 'repeating-conic-gradient(#d0d0d0 0% 25%, #f8f8f8 0% 50%) 0/16px 16px' : undefined }}
+                    onClick={() => plLogo && setShowCrop(v => !v)}
+                    title={plLogo ? 'Bosib kesish panelinii ochish' : ''}
+                    className={`w-20 h-14 rounded-xl border border-border flex items-center justify-center overflow-hidden flex-shrink-0 transition-colors ${plLogo ? 'cursor-pointer hover:border-accent-blue' : 'bg-bg-tertiary'}`}
+                    style={{ background: plLogo ? 'repeating-conic-gradient(#d0d0d0 0% 25%, #f8f8f8 0% 50%) 0/16px 16px' : undefined }}
                   >
-                    {companyLogo
-                      ? <img src={companyLogo} alt="logo" className="w-full h-full object-contain p-1" />
+                    {plLogo
+                      ? <img src={plLogo} alt="logo" className="w-full h-full object-contain p-1" />
                       : <span className="text-[9px] text-text-muted text-center leading-tight px-1">Logo<br/>yo'q</span>
                     }
                   </div>
@@ -434,8 +436,7 @@ const ProductsTab = ({ ctx }) => {
                           if (!file) return
                           const reader = new FileReader()
                           reader.onload = ev => {
-                            setCompanyLogo(ev.target.result)
-                            setCompanyLogoOriginal(ev.target.result) // asl versiya saqlanadi
+                            setPriceListSettings({ logo: ev.target.result, logoOriginal: ev.target.result })
                             setShowCrop(false)
                             setCropPad({ top:0, right:0, bottom:0, left:0 })
                           }
@@ -454,7 +455,7 @@ const ProductsTab = ({ ctx }) => {
                           Oq fon kesish
                         </button>
                         <button
-                          onClick={() => { setCompanyLogo(null); setCompanyLogoOriginal(null); setShowCrop(false) }}
+                          onClick={() => { setPriceListSettings({ logo: null, logoOriginal: null }); setShowCrop(false) }}
                           className="px-3 py-2 bg-accent-red/10 text-accent-red border border-accent-red/20 rounded-xl text-xs font-medium hover:bg-accent-red/20 transition-colors"
                         >
                           O'chirish
@@ -465,11 +466,11 @@ const ProductsTab = ({ ctx }) => {
                 </div>
 
                 {/* Crop panel */}
-                {showCrop && companyLogo && (
+                {showCrop && plLogo && (
                   <div className="rounded-xl border border-accent-blue/30 bg-bg-tertiary p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-accent-blue">Kesish (Crop)</p>
-                      {companyLogoOriginal && companyLogo !== companyLogoOriginal && (
+                      {plLogoOriginal && plLogo !== plLogoOriginal && (
                         <button
                           onClick={restoreOriginalLogo}
                           className="text-[10px] text-text-muted hover:text-accent-blue underline transition-colors"
