@@ -179,7 +179,12 @@ const HistoryTab = ({ ctx }) => {
                     </td>
                     <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
                     <td className="px-4 py-3.5 text-text-secondary">
-                      {s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}
+                      <div className="flex flex-col gap-0.5">
+                        <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
+                        {s.paymentType === 'card' && s.cardType && (
+                          <span className="text-[10px] text-text-muted font-bold uppercase">{s.cardType}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-right">
                       {(() => {
@@ -254,7 +259,12 @@ const HistoryTab = ({ ctx }) => {
                     </td>
                     <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
                     <td className="px-4 py-3.5 text-text-secondary">
-                      {s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}
+                      <div className="flex flex-col gap-0.5">
+                        <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
+                        {s.paymentType === 'card' && s.cardType && (
+                          <span className="text-[10px] text-text-muted font-bold uppercase">{s.cardType}</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -54,6 +54,7 @@ const map = (s) => ({
   installmentPayments: Array.isArray(s.installment_payments) ? s.installment_payments : [],
   bundleDiscountAmount: Number(s.bundle_discount_amount) || 0,
   isBundle: s.is_bundle || false,
+  cardType: s.card_type || null,
   soldAt: s.created_at || '',
   createdAt: s.created_at || '',
   items: (s.items || []).map(mapItem),
@@ -98,6 +99,7 @@ export const createSale = async (saleData) => {
     contract_number: saleData.contractNumber || null,
     bundle_discount_amount: saleData.bundleDiscountAmount || 0,
     is_bundle: saleData.isBundle || false,
+    card_type: saleData.cardType || null,
   })
   return map(data)
 }
