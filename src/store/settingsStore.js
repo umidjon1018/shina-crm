@@ -14,8 +14,10 @@ export const useSettingsStore = create(
       priceListSettings: {
         headerColor:  '#1c1c2e',
         accentColor:  '#cc0000',
+        logoTextColor:'#ffffff',
         font:         'Arial',
         logoPosition: 'left',
+        logoMode:     'normal',   // 'normal' | 'background'
         footer:       '',
       },
 

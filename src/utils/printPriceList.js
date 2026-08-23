@@ -137,39 +137,57 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
 
 function buildCardHtml({ products, items, attributeDefs, companyName, companyLogo, options, design }) {
   const { cardSize, showInstallment, showAttrs = true } = options
-  const aColor  = design?.accentColor  || '#cc0000'
-  const hColor  = design?.headerColor  || '#1c1c2e'
-  const font    = design?.font         || 'Arial'
-  const footer  = design?.footer       || ''
+  const aColor    = design?.accentColor  || '#cc0000'
+  const hColor    = design?.headerColor  || '#1c1c2e'
+  const nameColor = design?.logoTextColor|| '#ffffff'
+  const font      = design?.font         || 'Arial'
+  const logoPos   = design?.logoPosition || 'left'
+  const logoMode  = design?.logoMode     || 'normal'
+  const footer    = design?.footer       || ''
 
   const SIZES = {
-    small:    { w: '54mm',  h: '38mm', logoH: '16px', nameSize: '10pt', priceSize: '13pt', metaSize: '7pt' },
-    medium:   { w: '72mm',  h: '46mm', logoH: '20px', nameSize: '11pt', priceSize: '15pt', metaSize: '7.5pt' },
-    bankcard: { w: '85.6mm',h: '54mm', logoH: '24px', nameSize: '12pt', priceSize: '17pt', metaSize: '8pt' },
+    small:    { w:'54mm',   h:'38mm',  headerH:'13mm', logoH:'14px', nameSize:'8.5pt', priceSize:'12.5pt', metaSize:'6pt'   },
+    medium:   { w:'72mm',   h:'46mm',  headerH:'16mm', logoH:'17px', nameSize:'10pt',  priceSize:'15pt',   metaSize:'7pt'   },
+    bankcard: { w:'85.6mm', h:'54mm',  headerH:'19mm', logoH:'20px', nameSize:'11.5pt',priceSize:'17pt',   metaSize:'7.5pt' },
   }
   const s = SIZES[cardSize] || SIZES.medium
 
-  // Logo yoki kompaniya nomi — tepada kichik
-  const logoHtml = companyLogo
+  // Logo hizalanishi
+  const align = logoPos === 'right' ? 'right' : logoPos === 'center' ? 'center' : 'left'
+  const flexAlign = logoPos === 'right' ? 'flex-end' : logoPos === 'center' ? 'center' : 'flex-start'
+
+  // Fon logo (background mode)
+  const bgLogoHtml = (logoMode === 'background' && companyLogo)
+    ? `<img src="${companyLogo}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;object-position:${align} center;opacity:0.09;pointer-events:none;">`
+    : ''
+
+  // Header ichidagi logo (normal mode)
+  const headerLogoHtml = logoMode === 'normal' && companyLogo
     ? `<img src="${companyLogo}" style="height:${s.logoH};object-fit:contain;display:block;margin-bottom:2px;">`
-    : `<div style="font-size:7pt;font-weight:900;color:${hColor};letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px;">${companyName || 'CRM'}</div>`
+    : logoMode === 'normal' && !companyLogo
+    ? `<div style="font-size:6pt;font-weight:900;color:${nameColor};opacity:0.65;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:1px;">${companyName || ''}</div>`
+    : ''
 
   const cards = products.map(p => {
     const attrs = getAttrSummary(p.id, items, attributeDefs)
     const season = p.season && p.season !== 'NA' ? SEASON_LABELS[p.season] : ''
-    // O'lcham nomda allaqachon bor bo'lsa qayta ko'rsatilmasin
     const nameHasSize = p.size && p.name?.includes(p.size)
     const meta = [nameHasSize ? null : p.size, season, p.country].filter(Boolean).join(' · ')
-    // Brend nomda allaqachon bor bo'lsa ko'rsatilmasin
     const brandVisible = p.brand && !p.name?.toLowerCase().startsWith(p.brand.toLowerCase())
+
     return `<div class="card">
-      ${logoHtml}
-      <div class="name">${p.name}</div>
-      ${brandVisible ? `<div class="brand">${p.brand}</div>` : ''}
-      ${meta ? `<div class="meta">${meta}</div>` : ''}
-      ${showAttrs && attrs ? `<div class="attr">${attrs}</div>` : ''}
-      <div class="price">${fp(p.cashPrice)} <span class="som">so'm</span></div>
-      ${showInstallment && p.installmentBasePrice ? `<div class="inst">Nasiya: ${fp(p.installmentBasePrice)} so'm</div>` : ''}
+      ${bgLogoHtml}
+      <div class="card-hdr" style="text-align:${align};align-items:${flexAlign};">
+        ${headerLogoHtml}
+        <div class="name">${p.name}</div>
+      </div>
+      <div class="card-body">
+        ${brandVisible ? `<div class="brand">${p.brand}</div>` : ''}
+        ${meta ? `<div class="meta">${meta}</div>` : ''}
+        ${showAttrs && attrs ? `<div class="attr">${attrs}</div>` : ''}
+        <div class="price">${fp(p.cashPrice)} <span class="som">so'm</span></div>
+        ${showInstallment && p.installmentBasePrice ? `<div class="inst">Nasiya: ${fp(p.installmentBasePrice)} so'm</div>` : ''}
+      </div>
     </div>`
   }).join('')
 
@@ -181,21 +199,33 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     body { font-family: "${font}", sans-serif; background:#fff; }
     .grid { display:flex; flex-wrap:wrap; gap:3mm; padding:5mm; }
     .card {
+      position:relative;
       width:${s.w}; height:${s.h};
-      border:1.5px dashed #ccc;
-      border-top:3px solid ${hColor};
+      border:1px dashed #ccc;
       border-radius:2mm;
-      padding:3mm 4mm;
-      display:flex; flex-direction:column; justify-content:center;
-      gap:1.2mm;
+      overflow:hidden;
+      display:flex; flex-direction:column;
       page-break-inside:avoid;
+    }
+    .card-hdr {
+      background:${hColor};
+      min-height:${s.headerH};
+      padding:2.5mm 3.5mm 2mm;
+      display:flex; flex-direction:column;
+      justify-content:center;
+    }
+    .card-body {
+      flex:1; padding:1.5mm 3.5mm;
+      display:flex; flex-direction:column;
+      justify-content:center;
+      gap:0.7mm;
       overflow:hidden;
     }
-    .name  { font-size:${s.nameSize};  font-weight:900; color:#111; line-height:1.2; }
+    .name  { font-size:${s.nameSize};  font-weight:900; color:${nameColor}; line-height:1.2; }
     .brand { font-size:${s.metaSize};  font-weight:700; color:#555; }
     .meta  { font-size:${s.metaSize};  color:#666; }
     .attr  { font-size:${s.metaSize};  color:#888; }
-    .price { font-size:${s.priceSize}; font-weight:900; color:${aColor}; margin-top:1.5mm; }
+    .price { font-size:${s.priceSize}; font-weight:900; color:${aColor}; margin-top:1mm; line-height:1; }
     .som   { font-size:70%; font-weight:400; }
     .inst  { font-size:${s.metaSize};  color:#555; }
     @media print {

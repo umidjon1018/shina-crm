@@ -94,13 +94,62 @@ const ProductsTab = ({ ctx }) => {
 
   // Narxnoma dizayn local form
   const [plForm, setPlForm] = useState(() => ({
-    headerColor:  priceListSettings?.headerColor  ?? '#1c1c2e',
-    accentColor:  priceListSettings?.accentColor  ?? '#cc0000',
-    font:         priceListSettings?.font         ?? 'Arial',
-    logoPosition: priceListSettings?.logoPosition ?? 'left',
-    footer:       priceListSettings?.footer       ?? '',
+    headerColor:   priceListSettings?.headerColor   ?? '#1c1c2e',
+    accentColor:   priceListSettings?.accentColor   ?? '#cc0000',
+    logoTextColor: priceListSettings?.logoTextColor ?? '#ffffff',
+    font:          priceListSettings?.font          ?? 'Arial',
+    logoPosition:  priceListSettings?.logoPosition  ?? 'left',
+    logoMode:      priceListSettings?.logoMode      ?? 'normal',
+    footer:        priceListSettings?.footer        ?? '',
   }))
   const [plSaved, setPlSaved] = useState(false)
+  const [showCrop, setShowCrop]   = useState(false)
+  const [cropPad, setCropPad]     = useState({ top: 0, right: 0, bottom: 0, left: 0 })
+
+  const autoTrimLogo = () => {
+    if (!companyLogo) return
+    const img = new Image()
+    img.onload = () => {
+      const W = img.width, H = img.height
+      const c = document.createElement('canvas')
+      c.width = W; c.height = H
+      const ctx = c.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      const d = ctx.getImageData(0, 0, W, H).data
+      const blank = (x, y) => { const i=(y*W+x)*4; return d[i+3]<20||(d[i]>240&&d[i+1]>240&&d[i+2]>240) }
+      let t=0, b=H-1, l=0, r=W-1
+      while (t<H && Array.from({length:W},(_,x)=>x).every(x=>blank(x,t))) t++
+      while (b>t && Array.from({length:W},(_,x)=>x).every(x=>blank(x,b))) b--
+      while (l<W && Array.from({length:H},(_,y)=>y).every(y=>blank(l,y))) l++
+      while (r>l && Array.from({length:H},(_,y)=>y).every(y=>blank(r,y))) r--
+      const p=6
+      t=Math.max(0,t-p); b=Math.min(H-1,b+p); l=Math.max(0,l-p); r=Math.min(W-1,r+p)
+      const out = document.createElement('canvas')
+      out.width=r-l+1; out.height=b-t+1
+      out.getContext('2d').drawImage(c, l, t, out.width, out.height, 0, 0, out.width, out.height)
+      setCompanyLogo(out.toDataURL('image/png'))
+    }
+    img.src = companyLogo
+  }
+
+  const applyCropPad = () => {
+    if (!companyLogo) return
+    const img = new Image()
+    img.onload = () => {
+      const W = img.width, H = img.height
+      const tPx = Math.round(H*cropPad.top/100), bPx = Math.round(H*cropPad.bottom/100)
+      const lPx = Math.round(W*cropPad.left/100), rPx = Math.round(W*cropPad.right/100)
+      const w = W-lPx-rPx, h = H-tPx-bPx
+      if (w<=0||h<=0) return
+      const canvas = document.createElement('canvas')
+      canvas.width=w; canvas.height=h
+      canvas.getContext('2d').drawImage(img, lPx, tPx, w, h, 0, 0, w, h)
+      setCompanyLogo(canvas.toDataURL('image/png'))
+      setShowCrop(false)
+      setCropPad({ top:0, right:0, bottom:0, left:0 })
+    }
+    img.src = companyLogo
+  }
 
   const savePriceListSettings = () => {
     setPriceListSettings(plForm)
@@ -351,9 +400,14 @@ const ProductsTab = ({ ctx }) => {
               {/* Logo yuklash */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Kompaniya logosi</label>
-                <div className="flex items-center gap-4">
-                  {/* Preview */}
-                  <div className="w-20 h-14 rounded-xl border border-border bg-bg-tertiary flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="flex items-start gap-4">
+                  {/* Preview — bosib crop ochiladigan */}
+                  <div
+                    onClick={() => companyLogo && setShowCrop(v => !v)}
+                    title={companyLogo ? 'Bosib kesish panelinii ochish' : ''}
+                    className={`w-20 h-14 rounded-xl border border-border flex items-center justify-center overflow-hidden flex-shrink-0 transition-colors ${companyLogo ? 'cursor-pointer hover:border-accent-blue' : 'bg-bg-tertiary'}`}
+                    style={{ background: companyLogo ? 'repeating-conic-gradient(#d0d0d0 0% 25%, #f8f8f8 0% 50%) 0/16px 16px' : undefined }}
+                  >
                     {companyLogo
                       ? <img src={companyLogo} alt="logo" className="w-full h-full object-contain p-1" />
                       : <span className="text-[9px] text-text-muted text-center leading-tight px-1">Logo<br/>yo'q</span>
@@ -369,7 +423,7 @@ const ProductsTab = ({ ctx }) => {
                           const file = e.target.files?.[0]
                           if (!file) return
                           const reader = new FileReader()
-                          reader.onload = ev => setCompanyLogo(ev.target.result)
+                          reader.onload = ev => { setCompanyLogo(ev.target.result); setShowCrop(false) }
                           reader.readAsDataURL(file)
                           e.target.value = ''
                         }}
@@ -377,15 +431,74 @@ const ProductsTab = ({ ctx }) => {
                       Rasm yuklash (PNG, JPG, SVG)
                     </label>
                     {companyLogo && (
-                      <button
-                        onClick={() => setCompanyLogo(null)}
-                        className="px-4 py-2 bg-accent-red/10 text-accent-red border border-accent-red/20 rounded-xl text-xs font-medium hover:bg-accent-red/20 transition-colors text-left"
-                      >
-                        Logoni o'chirish
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={autoTrimLogo}
+                          className="flex-1 px-3 py-2 bg-bg-tertiary text-text-secondary border border-border rounded-xl text-xs font-medium hover:bg-bg-primary hover:border-accent-blue transition-colors"
+                        >
+                          Oq fon kesish
+                        </button>
+                        <button
+                          onClick={() => { setCompanyLogo(null); setShowCrop(false) }}
+                          className="px-3 py-2 bg-accent-red/10 text-accent-red border border-accent-red/20 rounded-xl text-xs font-medium hover:bg-accent-red/20 transition-colors"
+                        >
+                          O'chirish
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
+
+                {/* Crop panel */}
+                {showCrop && companyLogo && (
+                  <div className="rounded-xl border border-accent-blue/30 bg-bg-tertiary p-4 space-y-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-accent-blue">Kesish (Crop)</p>
+                    {/* Preview with clip */}
+                    <div
+                      className="w-full h-28 flex items-center justify-center rounded-lg overflow-hidden"
+                      style={{ background: 'repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%) 0/16px 16px' }}
+                    >
+                      <img
+                        src={companyLogo}
+                        alt="crop preview"
+                        style={{
+                          maxWidth: '100%', maxHeight: '100%',
+                          clipPath: `inset(${cropPad.top}% ${cropPad.right}% ${cropPad.bottom}% ${cropPad.left}%)`
+                        }}
+                      />
+                    </div>
+                    {[
+                      { k: 'top',    label: 'Tepadan' },
+                      { k: 'bottom', label: 'Pastdan' },
+                      { k: 'left',   label: 'Chapdan' },
+                      { k: 'right',  label: "O'ngdan" },
+                    ].map(({ k, label }) => (
+                      <div key={k} className="flex items-center gap-3">
+                        <span className="text-xs text-text-muted w-16 flex-shrink-0">{label}</span>
+                        <input
+                          type="range" min="0" max="49" value={cropPad[k]}
+                          onChange={e => setCropPad(p => ({ ...p, [k]: +e.target.value }))}
+                          className="flex-1 accent-accent-blue h-1"
+                        />
+                        <span className="text-xs text-text-muted w-8 text-right font-mono">{cropPad[k]}%</span>
+                      </div>
+                    ))}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={() => { setShowCrop(false); setCropPad({ top:0, right:0, bottom:0, left:0 }) }}
+                        className="flex-1 py-2 rounded-xl border border-border text-xs text-text-secondary hover:bg-bg-primary transition-colors"
+                      >
+                        Bekor
+                      </button>
+                      <button
+                        onClick={applyCropPad}
+                        className="flex-1 py-2 rounded-xl bg-accent-blue text-white text-xs font-bold hover:opacity-90 transition-colors"
+                      >
+                        Qo'llash
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -404,7 +517,26 @@ const ProductsTab = ({ ctx }) => {
                       className="flex-1 h-10 rounded-xl flex items-center px-4"
                       style={{ background: plForm.headerColor }}
                     >
-                      <span className="text-white text-xs font-bold tracking-wider">SHINALAR</span>
+                      <span className="text-xs font-bold tracking-wider" style={{ color: plForm.logoTextColor }}>Michelin 65/265R15</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tovar nomi rangi */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Tovar nomi rangi</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={plForm.logoTextColor}
+                      onChange={e => setPlForm(f => ({ ...f, logoTextColor: e.target.value }))}
+                      className="w-10 h-10 rounded-xl border border-border cursor-pointer bg-bg-tertiary p-1"
+                    />
+                    <div
+                      className="flex-1 h-10 rounded-xl flex items-center px-4"
+                      style={{ background: plForm.headerColor }}
+                    >
+                      <span className="text-sm font-bold" style={{ color: plForm.logoTextColor }}>Michelin 65/265R15</span>
                     </div>
                   </div>
                 </div>
@@ -447,7 +579,7 @@ const ProductsTab = ({ ctx }) => {
                     {[
                       { id: 'left',   label: 'Chap' },
                       { id: 'center', label: 'Markaz' },
-                      { id: 'right',  label: 'O\'ng' },
+                      { id: 'right',  label: "O'ng" },
                     ].map(pos => (
                       <button
                         key={pos.id}
@@ -459,6 +591,29 @@ const ProductsTab = ({ ctx }) => {
                         }`}
                       >
                         {pos.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Logo ko'rinish rejimi */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Logo ko'rinish rejimi</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'normal',     label: 'Tepada (oddiy)' },
+                      { id: 'background', label: 'Fon (prozrachli)' },
+                    ].map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => setPlForm(f => ({ ...f, logoMode: m.id }))}
+                        className={`py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                          plForm.logoMode === m.id
+                            ? 'border-accent-blue bg-accent-blue/10 text-accent-blue'
+                            : 'border-border bg-bg-tertiary text-text-secondary hover:border-text-muted'
+                        }`}
+                      >
+                        {m.label}
                       </button>
                     ))}
                   </div>
