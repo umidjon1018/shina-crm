@@ -94,7 +94,7 @@ export const useSalesState = () => {
       setReturnsList(res)
       setLoadingReturns(false)
     })
-  }, [])
+  }, [selectedShopId])
 
   useEffect(() => {
     fetchData()
