@@ -29,6 +29,24 @@ const WriteoffTab = ({ products, items, batches }) => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [addingExpenseId, setAddingExpenseId] = useState(null)
+  const [sortField, setSortField] = useState('createdAt')
+  const [sortDir, setSortDir] = useState('desc')
+
+  const handleSort = (field) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortField(field); setSortDir('asc') }
+  }
+
+  const sorted = useMemo(() => {
+    return [...list].sort((a, b) => {
+      let av = a[sortField], bv = b[sortField]
+      if (typeof av === 'string') av = av.toLowerCase()
+      if (typeof bv === 'string') bv = bv.toLowerCase()
+      if (av < bv) return sortDir === 'asc' ? -1 : 1
+      if (av > bv) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [list, sortField, sortDir])
 
   const handleAddExpense = async (id) => {
     setAddingExpenseId(id)
@@ -128,19 +146,34 @@ const WriteoffTab = ({ products, items, batches }) => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-tertiary text-text-muted text-xs font-semibold uppercase tracking-wide">
-                <th className="text-left px-4 py-3">Sana</th>
-                <th className="text-left px-4 py-3">Tovar</th>
-                <th className="text-left px-4 py-3">Do'kon</th>
-                <th className="text-right px-4 py-3">Miqdor</th>
-                <th className="text-right px-4 py-3">Dona narxi</th>
-                <th className="text-right px-4 py-3">Summa</th>
-                <th className="text-left px-4 py-3">Sabab</th>
-                <th className="text-left px-4 py-3">Xarajat</th>
-                <th className="text-left px-4 py-3">Kim</th>
+                {[
+                  { field: 'createdAt', label: 'Sana', right: false },
+                  { field: 'productName', label: 'Tovar', right: false },
+                  { field: 'shopName', label: "Do'kon", right: false },
+                  { field: 'quantity', label: 'Miqdor', right: true },
+                  { field: 'unitPriceUzs', label: 'Dona narxi', right: true },
+                  { field: 'totalUzs', label: 'Summa', right: true },
+                  { field: 'reason', label: 'Sabab', right: false },
+                  { field: 'expenseId', label: 'Xarajat', right: false },
+                  { field: 'createdByName', label: 'Kim', right: false },
+                ].map(col => (
+                  <th
+                    key={col.field}
+                    onClick={() => handleSort(col.field)}
+                    className={`px-4 py-3 cursor-pointer select-none hover:text-text-primary transition-colors ${col.right ? 'text-right' : 'text-left'}`}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.label}
+                      <span className="text-text-muted/50">
+                        {sortField === col.field ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕'}
+                      </span>
+                    </span>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {list.map(w => (
+              {sorted.map(w => (
                 <tr key={w.id} className="hover:bg-bg-tertiary/50 transition-colors">
                   <td className="px-4 py-3 text-text-muted whitespace-nowrap">{fmtDate(w.createdAt)}</td>
                   <td className="px-4 py-3 text-text-primary font-medium">{w.productName}</td>
