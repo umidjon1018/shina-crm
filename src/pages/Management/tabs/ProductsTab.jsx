@@ -446,7 +446,7 @@ const ProductsTab = ({ ctx }) => {
                       />
                       Rasm yuklash (PNG, JPG, SVG)
                     </label>
-                    {companyLogo && (
+                    {plLogo && (
                       <div className="flex gap-2">
                         <button
                           onClick={autoTrimLogo}
