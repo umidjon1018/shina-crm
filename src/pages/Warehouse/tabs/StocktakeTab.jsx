@@ -19,7 +19,9 @@ const StocktakeTab = () => {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [createLoading, setCreateLoading] = useState(false)
   const [newNotes, setNewNotes] = useState('')
+  const [createError, setCreateError] = useState('')
   const [selected, setSelected] = useState(null) // { ...stocktake, items: [] }
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [localActual, setLocalActual] = useState({}) // { itemId: string (input value) }
@@ -47,14 +49,17 @@ const StocktakeTab = () => {
   useEffect(() => { loadList() }, [selectedShopId])
 
   const handleCreate = async () => {
-    setCreating(false)
-    setLoading(true)
+    setCreateLoading(true)
+    setCreateError('')
     try {
       const st = await createStocktake({ shopId: selectedShopId, notes: newNotes.trim() || null })
       setNewNotes('')
+      setCreating(false)
       await loadList()
       await openDetail(st.id)
-    } catch { setLoading(false) }
+    } catch (err) {
+      setCreateError(err?.response?.data?.error || 'Xatolik yuz berdi')
+    } finally { setCreateLoading(false) }
   }
 
   const handleActualChange = (item, val) => {
@@ -158,9 +163,13 @@ const StocktakeTab = () => {
                   rows={2}
                   className="w-full px-2 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue resize-none"
                 />
+                {createError && <p className="text-[11px] text-accent-red">{createError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={() => setCreating(false)} className="flex-1 py-1.5 border border-border rounded-lg text-xs font-bold text-text-muted hover:bg-bg-tertiary transition-colors">Bekor</button>
-                  <button onClick={handleCreate} className="flex-1 py-1.5 bg-accent-red text-white rounded-lg text-xs font-bold hover:opacity-90 transition-opacity">Yaratish</button>
+                  <button onClick={() => { setCreating(false); setCreateError('') }} className="flex-1 py-1.5 border border-border rounded-lg text-xs font-bold text-text-muted hover:bg-bg-tertiary transition-colors">Bekor</button>
+                  <button onClick={handleCreate} disabled={createLoading} className="flex-1 py-1.5 bg-accent-red text-white rounded-lg text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-1">
+                    {createLoading && <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />}
+                    Yaratish
+                  </button>
                 </div>
               </div>
             </motion.div>
