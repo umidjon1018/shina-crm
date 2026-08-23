@@ -189,6 +189,7 @@ export default {
   wh_tab_used_stock: 'B/U Qoldiq',
   wh_tab_income: 'Kirim',
   wh_tab_barcode: 'Barkod',
+  wh_tab_stocktake: 'Inventarizatsiya',
   wh_stat_total: 'Jami tovarlar',
   wh_stat_low: 'Kam qolgan',
   wh_stat_value: 'Ombor qiymati',

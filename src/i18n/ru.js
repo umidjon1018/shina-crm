@@ -189,6 +189,7 @@ export default {
   wh_tab_used_stock: 'Б/У остаток',
   wh_tab_income: 'Приход',
   wh_tab_barcode: 'Штрих-код',
+  wh_tab_stocktake: 'Инвентаризация',
   wh_stat_total: 'Всего товаров',
   wh_stat_low: 'Заканчивается',
   wh_stat_value: 'Стоимость склада',

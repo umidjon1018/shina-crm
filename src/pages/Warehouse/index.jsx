@@ -15,6 +15,7 @@ import StockTab from './tabs/StockTab'
 import UsedStockTab from './tabs/UsedStockTab'
 import IncomeTab from './tabs/IncomeTab'
 import BarcodeTab from './tabs/BarcodeTab'
+import StocktakeTab from './tabs/StocktakeTab'
 
 const Warehouse = () => {
   const { t } = useTranslation()
@@ -101,6 +102,7 @@ const Warehouse = () => {
             {activeTab === 'used_stock' && <UsedStockTab usedStock={selectedShopId === 'all' ? usedStock : usedStock.filter(u => !u.shopId || u.shopId === selectedShopId)} usedSales={usedSales} productCategories={productCategories} />}
             {activeTab === 'income' && <IncomeTab products={shopProductsList} batches={shopBatches} userRole={user?.role} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} shopBatchIds={shopBatchIds} />}
             {activeTab === 'barcode' && <BarcodeTab products={shopProductsList} batches={shopBatches} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} />}
+            {activeTab === 'stocktake' && <StocktakeTab />}
           </motion.div>
         </AnimatePresence>
       )}
