@@ -6,6 +6,7 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { SortIcon, formatPrice } from '../components/mgmtHelpers'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
+import { renameAttributeKey } from '../../../api/itemService'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -90,7 +91,7 @@ const ProductsTab = ({ ctx }) => {
     priceListSettings, setPriceListSettings,
   } = ctx
 
-  const { productImages, setProductImages } = useSettingsStore()
+  const { productImages, setProductImages, updateProductAttributeDef } = useSettingsStore()
   const [modalImages, setModalImages] = useState([])
 
   useEffect(() => {
@@ -111,6 +112,11 @@ const ProductsTab = ({ ctx }) => {
 
   const [newAttrLabel, setNewAttrLabel] = useState('')
   const [attrValueInputs, setAttrValueInputs] = useState({})
+  const [renamingAttrId, setRenamingAttrId] = useState(null)
+  const [renameAttrValue, setRenameAttrValue] = useState('')
+  const [deletingAttrDef, setDeletingAttrDef] = useState(null) // { id, label }
+  const [renamingSaving, setRenamingSaving] = useState(false)
+  const [attrDupError, setAttrDupError] = useState('')
 
   // Narxnoma dizayn local form
   const [plForm, setPlForm] = useState(() => ({
@@ -327,29 +333,44 @@ const ProductsTab = ({ ctx }) => {
               </div>
 
               {/* Yangi xususiyat qo'shish */}
-              <div className="flex items-center gap-2">
-                <input
-                  value={newAttrLabel}
-                  onChange={e => setNewAttrLabel(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && newAttrLabel.trim()) {
-                      addProductAttributeDef(newAttrLabel.trim())
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    value={newAttrLabel}
+                    onChange={e => { setNewAttrLabel(e.target.value); setAttrDupError('') }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && newAttrLabel.trim()) {
+                        const label = newAttrLabel.trim()
+                        if ((productAttributeDefs || []).some(d => d.label.toLowerCase() === label.toLowerCase())) {
+                          setAttrDupError(`"${label}" xususiyati allaqachon mavjud`)
+                          return
+                        }
+                        addProductAttributeDef(label)
+                        setNewAttrLabel('')
+                        setAttrDupError('')
+                      }
+                    }}
+                    placeholder="Yangi xususiyat nomi (masalan: Rang)"
+                    className={`flex-1 px-3 py-2 bg-bg-tertiary border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none ${attrDupError ? 'border-accent-red' : 'border-border focus:border-accent-blue'}`}
+                  />
+                  <button
+                    onClick={() => {
+                      const label = newAttrLabel.trim()
+                      if (!label) return
+                      if ((productAttributeDefs || []).some(d => d.label.toLowerCase() === label.toLowerCase())) {
+                        setAttrDupError(`"${label}" xususiyati allaqachon mavjud`)
+                        return
+                      }
+                      addProductAttributeDef(label)
                       setNewAttrLabel('')
-                    }
-                  }}
-                  placeholder="Yangi xususiyat nomi (masalan: Rang)"
-                  className="flex-1 px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue"
-                />
-                <button
-                  onClick={() => {
-                    if (!newAttrLabel.trim()) return
-                    addProductAttributeDef(newAttrLabel.trim())
-                    setNewAttrLabel('')
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-accent-red text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-glow-red"
-                >
-                  <Plus size={14} /> Qo'shish
-                </button>
+                      setAttrDupError('')
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-accent-red text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-glow-red"
+                  >
+                    <Plus size={14} /> Qo'shish
+                  </button>
+                </div>
+                {attrDupError && <p className="text-xs text-accent-red pl-1">{attrDupError}</p>}
               </div>
 
               {/* Xususiyatlar ro'yxati */}
@@ -359,14 +380,71 @@ const ProductsTab = ({ ctx }) => {
                 <div className="space-y-3">
                   {(productAttributeDefs || []).map(def => (
                     <div key={def.id} className="border border-border rounded-xl p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-text-primary text-sm">{def.label}</span>
-                        <button
-                          onClick={() => removeProductAttributeDef(def.id)}
-                          className="p-1 hover:bg-accent-red/10 rounded text-text-muted hover:text-accent-red transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                      <div className="flex items-center justify-between gap-2">
+                        {renamingAttrId === def.id ? (
+                          <div className="flex items-center gap-2 flex-1">
+                            <input
+                              value={renameAttrValue}
+                              onChange={e => setRenameAttrValue(e.target.value)}
+                              autoFocus
+                              onKeyDown={async e => {
+                                if (e.key === 'Escape') { setRenamingAttrId(null); setRenameAttrValue('') }
+                                if (e.key === 'Enter') {
+                                  const newLabel = renameAttrValue.trim()
+                                  if (!newLabel || newLabel === def.label) { setRenamingAttrId(null); return }
+                                  if ((productAttributeDefs || []).some(d => d.id !== def.id && d.label.toLowerCase() === newLabel.toLowerCase())) return
+                                  setRenamingSaving(true)
+                                  await renameAttributeKey(def.label, newLabel)
+                                  updateProductAttributeDef(def.id, newLabel)
+                                  setRenamingSaving(false)
+                                  setRenamingAttrId(null)
+                                  setRenameAttrValue('')
+                                }
+                              }}
+                              className="flex-1 px-2 py-1 bg-bg-tertiary border border-accent-blue rounded-lg text-sm text-text-primary focus:outline-none"
+                            />
+                            <button
+                              disabled={renamingSaving}
+                              onClick={async () => {
+                                const newLabel = renameAttrValue.trim()
+                                if (!newLabel || newLabel === def.label) { setRenamingAttrId(null); return }
+                                if ((productAttributeDefs || []).some(d => d.id !== def.id && d.label.toLowerCase() === newLabel.toLowerCase())) return
+                                setRenamingSaving(true)
+                                await renameAttributeKey(def.label, newLabel)
+                                updateProductAttributeDef(def.id, newLabel)
+                                setRenamingSaving(false)
+                                setRenamingAttrId(null)
+                                setRenameAttrValue('')
+                              }}
+                              className="p-1 hover:bg-accent-green/10 rounded text-accent-green transition-colors disabled:opacity-50"
+                            >
+                              <CheckCircle size={14} />
+                            </button>
+                            <button onClick={() => { setRenamingAttrId(null); setRenameAttrValue('') }} className="p-1 hover:bg-bg-tertiary rounded text-text-muted transition-colors">
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-text-primary text-sm flex-1">{def.label}</span>
+                        )}
+                        {renamingAttrId !== def.id && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => { setRenamingAttrId(def.id); setRenameAttrValue(def.label) }}
+                              className="p-1 hover:bg-accent-blue/10 rounded text-text-muted hover:text-accent-blue transition-colors"
+                              title="Nomini o'zgartirish"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                            <button
+                              onClick={() => setDeletingAttrDef(def)}
+                              className="p-1 hover:bg-accent-red/10 rounded text-text-muted hover:text-accent-red transition-colors"
+                              title="O'chirish"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Qiymatlar */}
@@ -420,6 +498,48 @@ const ProductsTab = ({ ctx }) => {
                   ))}
                 </div>
               )}
+
+              {/* Delete confirmation modal */}
+              <AnimatePresence>
+                {deletingAttrDef && (
+                  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setDeletingAttrDef(null)}>
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      onClick={e => e.stopPropagation()}
+                      className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-sm space-y-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent-red/10 flex items-center justify-center flex-shrink-0">
+                          <AlertCircle size={20} className="text-accent-red" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-text-primary">Xususiyatni o'chirish</h4>
+                          <p className="text-sm text-text-muted mt-1">
+                            <span className="font-bold text-text-primary">"{deletingAttrDef.label}"</span> xususiyati o'chiriladi.
+                            Mavjud tovarlar va batchlardagi bu xususiyat qiymatlari o'chirilmaydi — faqat shablon o'chadi.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <button onClick={() => setDeletingAttrDef(null)} className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors">
+                          Bekor qilish
+                        </button>
+                        <button
+                          onClick={() => {
+                            removeProductAttributeDef(deletingAttrDef.id)
+                            setDeletingAttrDef(null)
+                          }}
+                          className="flex-1 px-4 py-2.5 bg-accent-red text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+                        >
+                          O'chirish
+                        </button>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* QISM 1.6 — Narxnoma dizayn sozlamalari */}

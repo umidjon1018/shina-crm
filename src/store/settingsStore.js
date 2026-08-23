@@ -153,6 +153,8 @@ export const useSettingsStore = create(
         set(s => ({ productAttributeDefs: [...s.productAttributeDefs, { id: Date.now().toString(), label, values: [] }] })),
       removeProductAttributeDef: (id) =>
         set(s => ({ productAttributeDefs: s.productAttributeDefs.filter(d => d.id !== id) })),
+      updateProductAttributeDef: (id, newLabel) =>
+        set(s => ({ productAttributeDefs: s.productAttributeDefs.map(d => d.id === id ? { ...d, label: newLabel } : d) })),
       addAttributeValue: (defId, value) =>
         set(s => ({ productAttributeDefs: s.productAttributeDefs.map(d => d.id === defId ? { ...d, values: [...d.values, value] } : d) })),
       removeAttributeValue: (defId, value) =>

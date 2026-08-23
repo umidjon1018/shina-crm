@@ -74,6 +74,11 @@ export const updateItemAttributes = async (itemId, attributes) => {
   return data
 }
 
+export const renameAttributeKey = async (oldKey, newKey) => {
+  const { data } = await api.patch('/api/items/rename-attribute-key', { old_key: oldKey, new_key: newKey })
+  return data
+}
+
 export const findItemByBarcode = async (barcode) => {
   try {
     const { data } = await api.get(`/api/items/barcode/${encodeURIComponent(barcode)}`)

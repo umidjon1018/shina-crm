@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer } from 'lucide-react'
+import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer, X } from 'lucide-react'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useAuthStore } from '../../../store/authStore'
@@ -319,7 +319,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             <select
               value={attrFilters[def.label] || 'all'}
               onChange={e => setAttrFilter(def.label, e.target.value)}
-              className="px-3 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+              className={`px-3 py-2.5 bg-bg-tertiary border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue ${attrFilters[def.label] && attrFilters[def.label] !== 'all' ? 'border-accent-blue' : 'border-border'}`}
             >
               <option value="all">Barchasi</option>
               {def.values.map(v => <option key={v} value={v}>{v}</option>)}
@@ -327,6 +327,18 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             </select>
           </div>
         ))}
+        {/* Filtrlarni tozalash */}
+        {activeAttrFilters.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-transparent px-1">.</span>
+            <button
+              onClick={() => setAttrFilters({})}
+              className="flex items-center gap-1.5 px-3 py-2.5 bg-accent-blue/10 text-accent-blue border border-accent-blue/30 rounded-xl text-sm font-bold hover:bg-accent-blue/20 transition-colors whitespace-nowrap"
+            >
+              <X size={14} /> Filtrni tozalash
+            </button>
+          </div>
+        )}
         {/* Tugmalar */}
         <div className="flex flex-col gap-1 ml-auto">
           <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1 opacity-0">.</span>
@@ -428,7 +440,30 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         </span>
                         <ProductImageViewer productId={p.id} size="sm" />
                         {needsAttrs && <span title="Xususiyat belgilanmagan" className="text-amber-500 flex-shrink-0"><AlertTriangle size={13} /></span>}
-                        <p className="font-medium text-text-primary text-sm">{p.name}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-text-primary text-sm">{p.name}</p>
+                          {productAttributeDefs?.length > 0 && (() => {
+                            const productItems = items.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))
+                            const attrSummary = productAttributeDefs.map(def => {
+                              const vals = [...new Set(productItems.map(i => getItemAttrs(i)?.[def.label]).filter(Boolean))]
+                              if (!vals.length) return null
+                              return { label: def.label, vals }
+                            }).filter(Boolean)
+                            if (!attrSummary.length) return null
+                            return (
+                              <div className="flex flex-wrap gap-1 mt-0.5">
+                                {attrSummary.map(({ label, vals }) => (
+                                  <span key={label} className="inline-flex items-center gap-1 text-[10px] text-text-muted">
+                                    <span className="text-text-muted/60">{label}:</span>
+                                    {vals.map(v => (
+                                      <span key={v} className="px-1.5 py-0 bg-accent-blue/10 text-accent-blue rounded font-medium">{v}</span>
+                                    ))}
+                                  </span>
+                                ))}
+                              </div>
+                            )
+                          })()}
+                        </div>
                       </div>
                     </td>
                     {(() => {
