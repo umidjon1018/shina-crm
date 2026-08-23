@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { User, Lock, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { useLangStore } from '../store/langStore'
+import { useSettingsStore } from '../store/settingsStore'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
@@ -25,6 +26,12 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const { checkCredentials, submitSelfie, submitFaceReview, user } = useAuthStore()
   const { lang, setLang } = useLangStore()
+  const { companyName, companyLogo } = useSettingsStore()
+
+  // Oxirgi so'z qizil rangda: "Good Tires" oq + "CRM" qizil
+  const nameParts = companyName ? companyName.trim().split(' ') : ['Shina', 'CRM']
+  const nameRed  = nameParts.pop()
+  const nameMain = nameParts.join(' ')
 
   const [step, setStep] = useState('credentials')
   const [username, setUsername] = useState('')
@@ -96,11 +103,19 @@ const LoginPage = () => {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-gradient-to-t from-accent-red/20 to-transparent blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-center text-center">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}>
-            <TireIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
-          </motion.div>
+          {companyLogo ? (
+            <img
+              src={companyLogo}
+              alt={companyName}
+              className="w-24 h-24 lg:w-32 lg:h-32 object-contain drop-shadow-[0_0_15px_rgba(230,57,70,0.4)]"
+            />
+          ) : (
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}>
+              <TireIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
+            </motion.div>
+          )}
           <h1 className="mt-8 text-4xl lg:text-6xl font-syne font-extrabold text-white tracking-tighter">
-            GOOD TIRES <span className="text-accent-red">CRM</span>
+            {nameMain && <>{nameMain} </>}<span className="text-accent-red">{nameRed}</span>
           </h1>
           <p className="mt-4 text-text-muted text-lg font-dm max-w-[280px]">
             {t('login_tagline')}
