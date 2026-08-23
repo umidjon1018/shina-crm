@@ -23,7 +23,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
   const [showInstallment, setShowInstallment] = useState(false)
   const [onlyInStock, setOnlyInStock]     = useState(true)
   const [showStock, setShowStock]         = useState(false)
-  const [attrFilters, setAttrFilters]     = useState({})  // { defLabel: value | 'all' }
+  const [showAttrs, setShowAttrs]         = useState(true)
 
   // Boshlang'ich tanlov — barcha mahsulotlar belgilangan
   const [selectedIds, setSelectedIds] = useState(() => new Set(products.map(p => p.id)))
@@ -34,31 +34,8 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
     return products.filter(p => items.some(i => i.productId === p.id && i.status === 'in_stock'))
   }, [products, items, onlyInStock])
 
-  // 2. Attribute filtridan keyin (modal ichidagi dropdown)
-  const visibleList = useMemo(() => {
-    const active = Object.entries(attrFilters).filter(([, v]) => v && v !== 'all')
-    if (!active.length) return baseList
-    return baseList.filter(p => {
-      const pItems = items.filter(i => i.productId === p.id && i.status === 'in_stock')
-      return active.every(([label, val]) => pItems.some(i => i.attributes?.[label] === val))
-    })
-  }, [baseList, items, attrFilters])
-
-  // Har bir attribute def uchun mavjud qiymatlar (baseList dan)
-  const attrOptions = useMemo(() => {
-    if (!attributeDefs?.length) return {}
-    return Object.fromEntries(attributeDefs.map(def => {
-      const vals = [...new Set(
-        baseList.flatMap(p =>
-          items
-            .filter(i => i.productId === p.id && i.status === 'in_stock')
-            .map(i => i.attributes?.[def.label])
-            .filter(v => v != null && v !== '')
-        )
-      )].sort()
-      return [def.label, vals]
-    }))
-  }, [attributeDefs, baseList, items])
+  // 2. Visible list = base list (attribute filter yo'q)
+  const visibleList = baseList
 
   // Chop etilishi kerak bo'lgan mahsulotlar
   const selectedVisible = visibleList.filter(p => selectedIds.has(p.id))
@@ -82,7 +59,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
       companyName,
       companyLogo,
       // onlyInStock: false — mahsulotlar allaqachon filtrlangan
-      options: { format, cardSize, showInstallment, onlyInStock: false, showStock },
+      options: { format, cardSize, showInstallment, onlyInStock: false, showStock, showAttrs },
     })
   }
 
@@ -183,34 +160,17 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
                   </div>
                 </label>
               )}
+              {attributeDefs?.length > 0 && (
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-bg-tertiary cursor-pointer hover:bg-bg-primary transition-colors">
+                  <input type="checkbox" checked={showAttrs} onChange={e => setShowAttrs(e.target.checked)} className="w-4 h-4 accent-accent-red" />
+                  <div>
+                    <p className="text-sm text-text-primary">Xususiyatlarni ko'rsatish</p>
+                    <p className="text-[10px] text-text-muted">Rim, mavsum va boshqa xususiyatlar chiqadi</p>
+                  </div>
+                </label>
+              )}
             </div>
           </div>
-
-          {/* Xususiyat filtri */}
-          {attributeDefs?.length > 0 && (
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3">Xususiyat filtri</p>
-              <div className="flex flex-wrap gap-3">
-                {attributeDefs.map(def => {
-                  const opts = attrOptions[def.label] || []
-                  if (!opts.length) return null
-                  return (
-                    <div key={def.id || def.label} className="flex flex-col gap-1">
-                      <span className="text-[10px] text-text-muted px-1">{def.label}</span>
-                      <select
-                        value={attrFilters[def.label] || 'all'}
-                        onChange={e => setAttrFilters(prev => ({ ...prev, [def.label]: e.target.value }))}
-                        className="px-3 py-2 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue min-w-[100px]"
-                      >
-                        <option value="all">Barchasi</option>
-                        {opts.map(v => <option key={v} value={v}>{v}</option>)}
-                      </select>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Tovarlar ro'yxati (checkbox bilan) */}
           <div>

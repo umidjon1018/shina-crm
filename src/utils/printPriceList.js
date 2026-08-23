@@ -22,7 +22,7 @@ function getAttrSummary(productId, items, attributeDefs) {
 // ── A4 / A5 jadval format ────────────────────────────────────────────────────
 
 function buildTableHtml({ products, items, attributeDefs, companyName, companyLogo, options }) {
-  const { format, showInstallment, showStock } = options
+  const { format, showInstallment, showStock, showAttrs = true } = options
   const isA5 = format === 'a5'
   const fs = isA5 ? '8.5pt' : '10pt'
   const fsSmall = isA5 ? '7pt' : '8.5pt'
@@ -31,7 +31,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
     ? `<img src="${companyLogo}" style="height:36px;object-fit:contain;">`
     : `<span style="font-size:${isA5 ? '16pt' : '20pt'};font-weight:900;letter-spacing:1px;">${companyName || 'CRM'}</span>`
 
-  const extraCols = (showInstallment ? 1 : 0) + (showStock ? 1 : 0)
+  const extraCols = (showInstallment ? 1 : 0) + (showStock ? 1 : 0) + (showAttrs ? 0 : -1)
   const colCount = 6 + extraCols
 
   let rowNum = 0
@@ -55,7 +55,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
         <td style="padding:4px 8px;color:#555;font-size:${fs};">${p.brand || '—'}</td>
         <td style="padding:4px 8px;color:#555;font-size:${fs};">${p.size || '—'}</td>
         <td style="padding:4px 8px;color:#555;font-size:${fsSmall};">${season}</td>
-        <td style="padding:4px 8px;color:#666;font-size:${fsSmall};">${attrs || '—'}</td>
+        ${showAttrs ? `<td style="padding:4px 8px;color:#666;font-size:${fsSmall};">${attrs || '—'}</td>` : ''}
         <td style="padding:4px 8px;font-weight:700;text-align:right;color:#c00;font-size:${fs};white-space:nowrap;">${fp(p.cashPrice)} so'm</td>
         ${showInstallment ? `<td style="padding:4px 8px;text-align:right;color:#555;font-size:${fsSmall};white-space:nowrap;">${fp(p.installmentBasePrice)} so'm</td>` : ''}
         ${showStock ? `<td style="padding:4px 8px;text-align:center;color:#555;font-size:${fsSmall};">${stock}</td>` : ''}
@@ -96,7 +96,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
       <th>Brend</th>
       <th>O'lcham</th>
       <th>Mavsum</th>
-      <th>Xususiyat</th>
+      ${showAttrs ? '<th>Xususiyat</th>' : ''}
       <th class="r">Naqd narx</th>
       ${showInstallment ? '<th class="r">Nasiya narxi</th>' : ''}
       ${showStock ? '<th class="r" style="width:50px;">Qoldiq</th>' : ''}
@@ -112,7 +112,7 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
 // ── Vitrina tegi (kichik karta) format ───────────────────────────────────────
 
 function buildCardHtml({ products, items, attributeDefs, companyName, companyLogo, options }) {
-  const { cardSize, showInstallment } = options
+  const { cardSize, showInstallment, showAttrs = true } = options
 
   // cardSize: 'half' (42×54mm landscape → 54×42) | 'twothird' (57×54mm landscape → 57×42) | 'bankcard' (85×54mm)
   const SIZES = {
@@ -135,7 +135,7 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
       <div class="name">${p.name}</div>
       ${p.brand ? `<div class="brand">${p.brand}</div>` : ''}
       ${meta ? `<div class="meta">${meta}</div>` : ''}
-      ${attrs ? `<div class="attr">${attrs}</div>` : ''}
+      ${showAttrs && attrs ? `<div class="attr">${attrs}</div>` : ''}
       <div class="price">${fp(p.cashPrice)} <span class="som">so'm</span></div>
       ${showInstallment && p.installmentBasePrice ? `<div class="inst">Nasiya: ${fp(p.installmentBasePrice)} so'm</div>` : ''}
     </div>`
