@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Package, AlertTriangle, XCircle, CheckCircle, BarChart2, Eye, ChevronRight, ChevronDown, Tag, FileDown, Link2, Unlink, Printer, X, ArrowRightLeft } from 'lucide-react'
@@ -37,6 +37,23 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [historyModal, setHistoryModal] = useState(false)
   const [historyRows, setHistoryRows] = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [transferSummary, setTransferSummary] = useState({}) // { productId: { in: N, out: N } }
+
+  useEffect(() => {
+    if (!selectedShopId || selectedShopId === 'all') { setTransferSummary({}); return }
+    api.get('/api/batches/transfers', { params: { shop_id: selectedShopId } })
+      .then(({ data }) => {
+        const map = {}
+        data.forEach(r => {
+          const pid = String(r.product_id)
+          if (!map[pid]) map[pid] = { in: 0, out: 0 }
+          if (String(r.from_shop_id) === String(selectedShopId)) map[pid].out += Number(r.quantity)
+          if (String(r.to_shop_id) === String(selectedShopId)) map[pid].in += Number(r.quantity)
+        })
+        setTransferSummary(map)
+      })
+      .catch(() => setTransferSummary({}))
+  }, [selectedShopId])
   const [search, setSearch] = useState('')
   const [expandedProducts, setExpandedProducts] = useState(new Set())
   const [pendingAttrs, setPendingAttrs] = useState({})     // { itemId: { defId: value|'__none__' } }
@@ -432,6 +449,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                   </span>
                 </Th>
                 <Th right>{t('wh_th_in_qty')}</Th>
+                {selectedShopId !== 'all' && <Th right>Ko'chirish</Th>}
                 <Th right>{t('wh_th_remaining')}</Th>
                 <Th right>{t('sold')}</Th>
                 <Th sortable right onClick={() => handleSort('cashPrice')}>
@@ -447,7 +465,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             </thead>
             <tbody className="divide-y divide-border">
               {sorted.length === 0 ? (
-                <tr><td colSpan={canSeePurchasePrice ? 12 : 11} className="text-center py-12 text-text-muted">{t('wh_no_product')}</td></tr>
+                <tr><td colSpan={canSeePurchasePrice ? 13 : 12} className="text-center py-12 text-text-muted">{t('wh_no_product')}</td></tr>
               ) : sorted.map(p => {
                 const status = shopStockStatus(p)
                 const { key: statusKey, icon: StatusIcon, cls } = STATUS_CONFIG[status]
@@ -515,11 +533,22 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     })()}
                     <Td><Badge cls={SEASON_COLORS[p.season] || 'text-text-muted bg-bg-tertiary'}>{t('season_' + p.season) || '—'}</Badge></Td>
                     <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>
-                    {(() => { const unit = getProductUnit(p.id); return (<>
+                    {(() => { const unit = getProductUnit(p.id); const tr = transferSummary[String(p.id)]; const netTr = tr ? (tr.in - tr.out) : 0; return (<>
                     <td className="px-4 py-3.5 text-right">
                       <span className="text-text-secondary">{batches.filter(b => b.productId === p.id && b.batchType !== 'transfer_in').reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
+                    {selectedShopId !== 'all' && (
+                      <td className="px-4 py-3.5 text-right">
+                        {netTr === 0 ? (
+                          <span className="text-text-muted text-xs">—</span>
+                        ) : (
+                          <span className={`text-sm font-bold ${netTr > 0 ? 'text-accent-green' : 'text-accent-red'}`}>
+                            {netTr > 0 ? '+' : ''}{netTr}
+                          </span>
+                        )}
+                      </td>
+                    )}
                     <td className="px-4 py-3.5 text-right">
                       <span className="font-bold text-text-primary">{shopStock(p.id)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
@@ -583,7 +612,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       }
                       return true
                     })
-                    const colCount = canSeePurchasePrice ? 12 : 11
+                    const colCount = canSeePurchasePrice ? 13 : 12
                     const hasDefs = productAttributeDefs?.length > 0
                     return (
                       <tr>
