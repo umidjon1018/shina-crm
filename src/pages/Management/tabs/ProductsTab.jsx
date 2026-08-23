@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, Image as ImageIcon, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react'
+import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, Image as ImageIcon, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X, TrendingUp, TrendingDown } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { SortIcon, formatPrice } from '../components/mgmtHelpers'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
 import { renameAttributeKey } from '../../../api/itemService'
+import { bulkUpdatePrices } from '../../../api/productService'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -112,6 +113,39 @@ const ProductsTab = ({ ctx }) => {
 
   const [newAttrLabel, setNewAttrLabel] = useState('')
   const [attrValueInputs, setAttrValueInputs] = useState({})
+
+  // Ommaviy narx o'zgartirish
+  const [selectedProductIds, setSelectedProductIds] = useState(new Set())
+  const [bulkPriceModal, setBulkPriceModal] = useState(false)
+  const [bulkFields, setBulkFields] = useState({ cash: true, min: false, installment: false })
+  const [bulkDir, setBulkDir] = useState('+') // '+' | '-'
+  const [bulkType, setBulkType] = useState('%') // '%' | 'sum'
+  const [bulkValue, setBulkValue] = useState('')
+  const [bulkSaving, setBulkSaving] = useState(false)
+
+  const toggleSelectProduct = (id) => setSelectedProductIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  const toggleSelectAll = () => {
+    if (selectedProductIds.size === pagedProducts.length && pagedProducts.every(p => selectedProductIds.has(p.id))) {
+      setSelectedProductIds(new Set())
+    } else {
+      setSelectedProductIds(new Set(pagedProducts.map(p => p.id)))
+    }
+  }
+
+  const applyBulkChange = (price) => {
+    const v = parseFloat(bulkValue) || 0
+    let delta = bulkType === '%' ? Math.round(price * v / 100) : v
+    return bulkDir === '+' ? price + delta : Math.max(0, price - delta)
+  }
+
+  const bulkSelectedProducts = useMemo(
+    () => (sortedProducts || []).filter(p => selectedProductIds.has(p.id)),
+    [sortedProducts, selectedProductIds]
+  )
   const [renamingAttrId, setRenamingAttrId] = useState(null)
   const [renameAttrValue, setRenameAttrValue] = useState('')
   const [deletingAttrDef, setDeletingAttrDef] = useState(null) // { id, label }
@@ -999,9 +1033,29 @@ const ProductsTab = ({ ctx }) => {
                   </select>
                 </div>
               </div>
+
+              {/* Ommaviy narx o'zgartirish tugmasi */}
+              {selectedProductIds.size > 0 && (
+                <div className="flex items-center justify-between px-2 py-2 bg-accent-blue/5 border border-accent-blue/20 rounded-xl">
+                  <span className="text-xs font-bold text-accent-blue">{selectedProductIds.size} ta tovar tanlandi</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => setSelectedProductIds(new Set())} className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-bg-tertiary transition-colors">
+                      Bekor
+                    </button>
+                    <button
+                      onClick={() => setBulkPriceModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-blue text-white rounded-lg text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <DollarSign size={13} /> Narx o'zgartirish
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm border-collapse table-fixed" style={{ minWidth: '1200px' }}>
+                <table className="w-full text-left text-sm border-collapse table-fixed" style={{ minWidth: '1230px' }}>
                   <colgroup>
+                    <col style={{ width: '36px' }} />
                     <col style={{ width: '200px' }} />
                     <col style={{ width: '110px' }} />
                     <col style={{ width: '130px' }} />
@@ -1015,6 +1069,14 @@ const ProductsTab = ({ ctx }) => {
                   </colgroup>
                   <thead className="bg-bg-tertiary">
                     <tr>
+                      <th className="px-3 py-3">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-accent-blue cursor-pointer"
+                          checked={pagedProducts.length > 0 && pagedProducts.every(p => selectedProductIds.has(p.id))}
+                          onChange={toggleSelectAll}
+                        />
+                      </th>
                       <th
                         className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs cursor-pointer hover:text-text-primary select-none whitespace-nowrap"
                         onClick={() => handleSort('name')}
@@ -1083,7 +1145,16 @@ const ProductsTab = ({ ctx }) => {
                       const threshold = p.lowStockThreshold || 0
 
                       return (
-                        <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
+                        <tr key={p.id} className={`transition-colors ${selectedProductIds.has(p.id) ? 'bg-accent-blue/5' : 'hover:bg-bg-tertiary/50'}`}>
+                          <td className="px-3 py-3">
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-accent-blue cursor-pointer"
+                              checked={selectedProductIds.has(p.id)}
+                              onChange={() => toggleSelectProduct(p.id)}
+                              onClick={e => e.stopPropagation()}
+                            />
+                          </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               {productImages[String(p.id)]?.[0] ? (
@@ -1259,6 +1330,186 @@ const ProductsTab = ({ ctx }) => {
                   </div>
 		</div>
                 )}
+
+                {/* Ommaviy narx o'zgartirish modal */}
+                <AnimatePresence>
+                  {bulkPriceModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4" onClick={() => setBulkPriceModal(false)}>
+                      <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        onClick={e => e.stopPropagation()}
+                        className="bg-bg-secondary border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+                      >
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+                          <div>
+                            <h3 className="font-syne font-bold text-text-primary">Narx o'zgartirish</h3>
+                            <p className="text-xs text-text-muted mt-0.5">{bulkSelectedProducts.length} ta tovar tanlandi</p>
+                          </div>
+                          <button onClick={() => setBulkPriceModal(false)} className="p-2 rounded-xl hover:bg-bg-tertiary text-text-muted transition-colors"><X size={18} /></button>
+                        </div>
+
+                        <div className="overflow-y-auto no-scrollbar flex-1 p-6 space-y-5">
+                          {/* Qaysi narxni o'zgartirish */}
+                          <div className="space-y-2">
+                            <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Qaysi narxni o'zgartirish</p>
+                            <div className="flex gap-3">
+                              {[
+                                { key: 'cash', label: 'Naqd narx' },
+                                { key: 'min', label: 'Minimal narx' },
+                                { key: 'installment', label: 'Nasiya narxi' },
+                              ].map(({ key, label }) => (
+                                <label key={key} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={bulkFields[key]}
+                                    onChange={e => setBulkFields(prev => ({ ...prev, [key]: e.target.checked }))}
+                                    className="w-4 h-4 accent-accent-blue"
+                                  />
+                                  <span className="text-sm text-text-secondary">{label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* O'zgartirish parametrlari */}
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="space-y-1">
+                              <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Yo'nalish</p>
+                              <div className="flex gap-2">
+                                {[
+                                  { v: '+', label: 'Oshirish', Icon: TrendingUp, cls: 'text-accent-green border-accent-green bg-accent-green/10' },
+                                  { v: '-', label: 'Kamaytirish', Icon: TrendingDown, cls: 'text-accent-red border-accent-red bg-accent-red/10' },
+                                ].map(({ v, label, Icon, cls }) => (
+                                  <button
+                                    key={v}
+                                    onClick={() => setBulkDir(v)}
+                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 border rounded-xl text-xs font-bold transition-colors ${bulkDir === v ? cls : 'border-border text-text-muted hover:bg-bg-tertiary'}`}
+                                  >
+                                    <Icon size={13} /> {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Tur</p>
+                              <div className="flex gap-2">
+                                {[{ v: '%', label: 'Foiz (%)' }, { v: 'sum', label: "So'm" }].map(({ v, label }) => (
+                                  <button
+                                    key={v}
+                                    onClick={() => setBulkType(v)}
+                                    className={`flex-1 py-2 border rounded-xl text-xs font-bold transition-colors ${bulkType === v ? 'border-accent-blue text-accent-blue bg-accent-blue/10' : 'border-border text-text-muted hover:bg-bg-tertiary'}`}
+                                  >
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Miqdor</p>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={bulkValue}
+                                  onChange={e => setBulkValue(e.target.value)}
+                                  placeholder="0"
+                                  className="w-full px-3 py-2 pr-8 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-text-muted">
+                                  {bulkType === '%' ? '%' : "so'm"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Preview jadval */}
+                          {bulkValue && parseFloat(bulkValue) > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Ko'rib chiqish</p>
+                              <div className="overflow-y-auto max-h-56 no-scrollbar border border-border rounded-xl">
+                                <table className="w-full text-sm">
+                                  <thead className="bg-bg-tertiary sticky top-0">
+                                    <tr>
+                                      <th className="px-3 py-2 text-left text-xs font-bold text-text-muted">Tovar</th>
+                                      {bulkFields.cash && <th className="px-3 py-2 text-right text-xs font-bold text-text-muted">Naqd</th>}
+                                      {bulkFields.min && <th className="px-3 py-2 text-right text-xs font-bold text-text-muted">Minimal</th>}
+                                      {bulkFields.installment && <th className="px-3 py-2 text-right text-xs font-bold text-text-muted">Nasiya</th>}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-border">
+                                    {bulkSelectedProducts.map(p => (
+                                      <tr key={p.id} className="hover:bg-bg-tertiary/30">
+                                        <td className="px-3 py-2">
+                                          <p className="font-medium text-text-primary text-xs truncate max-w-[180px]">{p.name}</p>
+                                        </td>
+                                        {bulkFields.cash && (
+                                          <td className="px-3 py-2 text-right">
+                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.cashPrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
+                                              {applyBulkChange(p.cashPrice||0).toLocaleString('uz-UZ')}
+                                            </span>
+                                          </td>
+                                        )}
+                                        {bulkFields.min && (
+                                          <td className="px-3 py-2 text-right">
+                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.minSalePrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
+                                              {applyBulkChange(p.minSalePrice||0).toLocaleString('uz-UZ')}
+                                            </span>
+                                          </td>
+                                        )}
+                                        {bulkFields.installment && (
+                                          <td className="px-3 py-2 text-right">
+                                            <span className="text-text-muted line-through text-[10px] mr-1">{(p.installmentBasePrice||0).toLocaleString('uz-UZ')}</span>
+                                            <span className={`font-bold text-xs ${bulkDir === '+' ? 'text-accent-green' : 'text-accent-red'}`}>
+                                              {applyBulkChange(p.installmentBasePrice||0).toLocaleString('uz-UZ')}
+                                            </span>
+                                          </td>
+                                        )}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-border flex-shrink-0 flex gap-3">
+                          <button onClick={() => setBulkPriceModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors">
+                            Bekor qilish
+                          </button>
+                          <button
+                            disabled={bulkSaving || !parseFloat(bulkValue) || (!bulkFields.cash && !bulkFields.min && !bulkFields.installment)}
+                            onClick={async () => {
+                              setBulkSaving(true)
+                              try {
+                                const updates = bulkSelectedProducts.map(p => ({
+                                  id: p.id,
+                                  ...(bulkFields.cash && { cashPrice: applyBulkChange(p.cashPrice||0) }),
+                                  ...(bulkFields.min && { minSalePrice: applyBulkChange(p.minSalePrice||0) }),
+                                  ...(bulkFields.installment && { installmentBasePrice: applyBulkChange(p.installmentBasePrice||0) }),
+                                }))
+                                await bulkUpdatePrices(updates)
+                                await refreshProducts()
+                                setBulkPriceModal(false)
+                                setSelectedProductIds(new Set())
+                                setBulkValue('')
+                              } finally {
+                                setBulkSaving(false)
+                              }
+                            }}
+                            className="flex-1 px-4 py-2.5 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+                          >
+                            {bulkSaving ? 'Saqlanmoqda...' : `${bulkSelectedProducts.length} ta tovarga qo'llash`}
+                          </button>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </AnimatePresence>
 
                 {/* Edit Product Modal */}
                 <AnimatePresence>

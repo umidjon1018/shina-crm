@@ -102,3 +102,14 @@ export const updateProductPrice = async (id, { cashPrice, minSalePrice }) => {
   })
   return map(data)
 }
+
+export const bulkUpdatePrices = async (updates) => {
+  // updates: [{ id, cashPrice?, minSalePrice?, installmentBasePrice? }]
+  await Promise.all(updates.map(({ id, cashPrice, minSalePrice, installmentBasePrice }) =>
+    api.put(`/api/products/${id}`, {
+      ...(cashPrice !== undefined && { cash_price: cashPrice }),
+      ...(minSalePrice !== undefined && { min_sale_price: minSalePrice }),
+      ...(installmentBasePrice !== undefined && { installment_base_price: installmentBasePrice }),
+    })
+  ))
+}
