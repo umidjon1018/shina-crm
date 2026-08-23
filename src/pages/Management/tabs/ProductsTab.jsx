@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react'
+import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, Image as ImageIcon, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react'
+import { useSettingsStore } from '../../../store/settingsStore'
 import { SortIcon, formatPrice } from '../components/mgmtHelpers'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
@@ -88,6 +89,25 @@ const ProductsTab = ({ ctx }) => {
     productAttributeDefs, addProductAttributeDef, removeProductAttributeDef, addAttributeValue, removeAttributeValue,
     priceListSettings, setPriceListSettings,
   } = ctx
+
+  const { productImages, setProductImages } = useSettingsStore()
+  const [modalImages, setModalImages] = useState([])
+
+  useEffect(() => {
+    if (editingProduct?.isModal) {
+      setModalImages(productImages[String(editingProduct.id)] || [])
+    }
+  }, [editingProduct?.id, editingProduct?.isModal])
+
+  const handleModalImageUpload = (e) => {
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = ev => setModalImages(prev => [...prev, ev.target.result])
+      reader.readAsDataURL(file)
+    })
+    e.target.value = ''
+  }
 
   const [newAttrLabel, setNewAttrLabel] = useState('')
   const [attrValueInputs, setAttrValueInputs] = useState({})
@@ -938,8 +958,23 @@ const ProductsTab = ({ ctx }) => {
                       return (
                         <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
                           <td className="px-4 py-3">
-                            <p className="font-bold text-text-primary truncate">{p.name}</p>
-                            <p className="text-xs text-text-muted truncate">{p.brand} • {t('country_' + p.country, { defaultValue: p.country })}</p>
+                            <div className="flex items-center gap-2">
+                              {productImages[String(p.id)]?.[0] ? (
+                                <img
+                                  src={productImages[String(p.id)][0]}
+                                  alt=""
+                                  className="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-border"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-lg bg-bg-tertiary flex-shrink-0 border border-border flex items-center justify-center">
+                                  <ImageIcon size={14} className="text-text-muted opacity-40" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="font-bold text-text-primary truncate">{p.name}</p>
+                                <p className="text-xs text-text-muted truncate">{p.brand} • {t('country_' + p.country, { defaultValue: p.country })}</p>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             {(() => {
@@ -1234,6 +1269,43 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
+                          {/* SECTION 1.5: Rasmlar */}
+                          <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
+                            Rasmlar
+                          </p>
+
+                          <div className="col-span-2 space-y-3">
+                            <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-border rounded-xl text-sm text-text-muted cursor-pointer hover:border-accent-blue hover:text-accent-blue transition-colors">
+                              <ImageIcon size={16} />
+                              Rasm yuklash (PNG, JPG, WEBP)
+                              <input type="file" accept="image/*" multiple className="hidden" onChange={handleModalImageUpload} />
+                            </label>
+                            {modalImages.length > 0 && (
+                              <div className="grid grid-cols-4 gap-2">
+                                {modalImages.map((img, idx) => (
+                                  <div key={idx} className="relative group aspect-square">
+                                    <img src={img} alt="" className="w-full h-full object-cover rounded-xl border border-border" />
+                                    {idx === 0 && (
+                                      <span className="absolute top-1 left-1 text-[9px] bg-accent-green text-white px-1.5 py-0.5 rounded font-bold leading-none">
+                                        Asosiy
+                                      </span>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => setModalImages(prev => prev.filter((_, i) => i !== idx))}
+                                      className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity flex"
+                                    >
+                                      <X size={10} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {modalImages.length > 1 && (
+                              <p className="text-[10px] text-text-muted">Birinchi rasm asosiy (thumbnail) sifatida ishlatiladi</p>
+                            )}
+                          </div>
+
                           {/* SECTION 2: Narxlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
                             {t('mgmt_section_prices')}
@@ -1338,7 +1410,7 @@ const ProductsTab = ({ ctx }) => {
 
                             const categoryId = document.getElementById('p_category')?.value || ''
                             if (editingProduct.isNew === true) {
-                              await createProduct({
+                              const created = await createProduct({
                                 name, brand, country, size, season,
                                 cashPrice, minSalePrice, installmentBasePrice,
                                 warrantyDays, lowStockThreshold,
@@ -1346,6 +1418,9 @@ const ProductsTab = ({ ctx }) => {
                                 attribute, carCategory, notes,
                                 installmentMonths,
                               })
+                              if (created?.id && modalImages.length > 0) {
+                                setProductImages(created.id, modalImages)
+                              }
                             } else {
                               await apiUpdateProduct(editingProduct.id, {
                                 name, brand, country, size, season,
@@ -1355,6 +1430,7 @@ const ProductsTab = ({ ctx }) => {
                                 attribute, carCategory, notes,
                                 installmentMonths,
                               })
+                              setProductImages(editingProduct.id, modalImages)
                             }
                             await refreshProducts()
                             bump()

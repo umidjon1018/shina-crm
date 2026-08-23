@@ -12,7 +12,14 @@ export const useSettingsStore = create(
       companyLogoOriginal: null,
       loginIconMode: 'animation',  // 'animation' | 'logo'
       loginPageTitle: '',          // bo'sh = companyName ishlatiladi
+      sidebarLogoSize: 'medium',   // 'small'|'medium'|'large'
 
+
+      // Tovar rasmlari: { [productId]: base64[] }
+      productImages: {},
+      setProductImages: (productId, images) => set(s => ({
+        productImages: { ...s.productImages, [String(productId)]: images }
+      })),
 
       // Narxnoma dizayn sozlamalari
       priceListSettings: {
@@ -199,6 +206,7 @@ export const useSettingsStore = create(
       setCompanyLogoOriginal: (logo) => set({ companyLogoOriginal: logo }),
       setLoginIconMode: (mode) => set({ loginIconMode: mode }),
       setLoginPageTitle: (title) => set({ loginPageTitle: title }),
+      setSidebarLogoSize: (size) => set({ sidebarLogoSize: size }),
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi
