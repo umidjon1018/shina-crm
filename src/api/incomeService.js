@@ -30,6 +30,7 @@ const mapBatch = (b) => ({
   promoPassToCustomer: b.promo_pass_to_customer ?? false,
   attributes: b.attributes || {},
   unit: b.unit || 'dona',
+  batchType: b.batch_type || 'purchase',
   hasMissingPrice: b.has_missing_price || false,
   receivedAt: b.received_at || b.created_at || '',
   receivedByName: b.received_by_name || '',

@@ -34,6 +34,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [trSaving, setTrSaving] = useState(false)
   const [trError, setTrError] = useState('')
   const [trSuccess, setTrSuccess] = useState(false)
+  const [historyModal, setHistoryModal] = useState(false)
+  const [historyRows, setHistoryRows] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [expandedProducts, setExpandedProducts] = useState(new Set())
   const [pendingAttrs, setPendingAttrs] = useState({})     // { itemId: { defId: value|'__none__' } }
@@ -231,6 +234,17 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     setTransferModal(true)
   }
 
+  const openHistory = async () => {
+    setHistoryModal(true)
+    setHistoryLoading(true)
+    try {
+      const params = selectedShopId && selectedShopId !== 'all' ? { shop_id: selectedShopId } : {}
+      const { data } = await api.get('/api/batches/transfers', { params })
+      setHistoryRows(data)
+    } catch { setHistoryRows([]) }
+    finally { setHistoryLoading(false) }
+  }
+
   const handleTransfer = async () => {
     if (!trProduct) return setTrError('Mahsulot tanlang')
     const qty = parseInt(trQty, 10)
@@ -342,6 +356,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             <ArrowRightLeft size={16} /> Ko'chirish
           </button>
         )}
+        <button onClick={openHistory} className="flex items-center gap-2 px-4 py-2.5 bg-bg-tertiary text-text-secondary border border-border rounded-xl text-sm font-bold hover:bg-bg-tertiary/80 transition-colors whitespace-nowrap">
+          Tarix
+        </button>
       </div>
 
       {/* 2-qator: Filtrlar */}
@@ -500,7 +517,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>
                     {(() => { const unit = getProductUnit(p.id); return (<>
                     <td className="px-4 py-3.5 text-right">
-                      <span className="text-text-secondary">{batches.filter(b => b.productId === p.id).reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
+                      <span className="text-text-secondary">{batches.filter(b => b.productId === p.id && b.batchType !== 'transfer_in').reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
                     <td className="px-4 py-3.5 text-right">
@@ -879,6 +896,62 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                   </div>
                 </>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Transfer tarixi modali */}
+      <AnimatePresence>
+        {historyModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setHistoryModal(false)}>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-2xl space-y-4 max-h-[80vh] flex flex-col"
+            >
+              <div className="flex items-center justify-between flex-shrink-0">
+                <h3 className="font-syne font-bold text-text-primary text-lg flex items-center gap-2">
+                  <ArrowRightLeft size={20} className="text-accent-blue" /> Ko'chirish tarixi
+                </h3>
+                <button onClick={() => setHistoryModal(false)} className="p-1.5 rounded-lg hover:bg-bg-tertiary text-text-muted"><X size={16} /></button>
+              </div>
+              <div className="overflow-y-auto flex-1">
+                {historyLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="w-6 h-6 border-2 border-accent-blue border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : historyRows.length === 0 ? (
+                  <p className="text-center text-text-muted py-10 text-sm">Ko'chirish tarixi yo'q</p>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 px-3 text-text-muted font-semibold text-xs">Sana</th>
+                        <th className="text-left py-2 px-3 text-text-muted font-semibold text-xs">Mahsulot</th>
+                        <th className="text-left py-2 px-3 text-text-muted font-semibold text-xs">Dan</th>
+                        <th className="text-left py-2 px-3 text-text-muted font-semibold text-xs">Ga</th>
+                        <th className="text-right py-2 px-3 text-text-muted font-semibold text-xs">Miqdor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historyRows.map(row => (
+                        <tr key={row.id} className="border-b border-border/50 hover:bg-bg-tertiary/50">
+                          <td className="py-2.5 px-3 text-text-muted whitespace-nowrap">
+                            {new Date(row.created_at).toLocaleDateString('uz-UZ', { day:'2-digit', month:'2-digit', year:'numeric' })}
+                          </td>
+                          <td className="py-2.5 px-3 text-text-primary font-medium">{row.product_name}</td>
+                          <td className="py-2.5 px-3 text-text-secondary">{row.from_shop_name}</td>
+                          <td className="py-2.5 px-3 text-text-secondary">{row.to_shop_name}</td>
+                          <td className="py-2.5 px-3 text-right font-bold text-accent-blue">{row.quantity} ta</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </motion.div>
           </div>
         )}
