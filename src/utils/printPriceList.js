@@ -137,30 +137,35 @@ function buildTableHtml({ products, items, attributeDefs, companyName, companyLo
 
 function buildCardHtml({ products, items, attributeDefs, companyName, companyLogo, options, design }) {
   const { cardSize, showInstallment, showAttrs = true } = options
-  const aColor = design?.accentColor || '#cc0000'
-  const font   = design?.font        || 'Arial'
-  const footer = design?.footer      || ''
+  const aColor  = design?.accentColor  || '#cc0000'
+  const hColor  = design?.headerColor  || '#1c1c2e'
+  const font    = design?.font         || 'Arial'
+  const footer  = design?.footer       || ''
 
-  // cardSize: 'half' (42×54mm landscape → 54×42) | 'twothird' (57×54mm landscape → 57×42) | 'bankcard' (85×54mm)
   const SIZES = {
-    small:    { w: '54mm',  h: '38mm', nameSize: '10pt', priceSize: '13pt', metaSize: '7pt' },
-    medium:   { w: '72mm',  h: '46mm', nameSize: '11pt', priceSize: '15pt', metaSize: '7.5pt' },
-    bankcard: { w: '85.6mm',h: '54mm', nameSize: '12pt', priceSize: '17pt', metaSize: '8pt' },
+    small:    { w: '54mm',  h: '38mm', logoH: '16px', nameSize: '10pt', priceSize: '13pt', metaSize: '7pt' },
+    medium:   { w: '72mm',  h: '46mm', logoH: '20px', nameSize: '11pt', priceSize: '15pt', metaSize: '7.5pt' },
+    bankcard: { w: '85.6mm',h: '54mm', logoH: '24px', nameSize: '12pt', priceSize: '17pt', metaSize: '8pt' },
   }
   const s = SIZES[cardSize] || SIZES.medium
 
+  // Logo yoki kompaniya nomi — tepada kichik
   const logoHtml = companyLogo
-    ? `<img src="${companyLogo}" style="height:10px;object-fit:contain;display:block;margin-bottom:2px;">`
-    : `<div style="font-size:7pt;font-weight:900;color:#888;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px;">${companyName || 'CRM'}</div>`
+    ? `<img src="${companyLogo}" style="height:${s.logoH};object-fit:contain;display:block;margin-bottom:2px;">`
+    : `<div style="font-size:7pt;font-weight:900;color:${hColor};letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px;">${companyName || 'CRM'}</div>`
 
   const cards = products.map(p => {
     const attrs = getAttrSummary(p.id, items, attributeDefs)
     const season = p.season && p.season !== 'NA' ? SEASON_LABELS[p.season] : ''
-    const meta = [p.size, season, p.country].filter(Boolean).join(' · ')
+    // O'lcham nomda allaqachon bor bo'lsa qayta ko'rsatilmasin
+    const nameHasSize = p.size && p.name?.includes(p.size)
+    const meta = [nameHasSize ? null : p.size, season, p.country].filter(Boolean).join(' · ')
+    // Brend nomda allaqachon bor bo'lsa ko'rsatilmasin
+    const brandVisible = p.brand && !p.name?.toLowerCase().startsWith(p.brand.toLowerCase())
     return `<div class="card">
       ${logoHtml}
       <div class="name">${p.name}</div>
-      ${p.brand ? `<div class="brand">${p.brand}</div>` : ''}
+      ${brandVisible ? `<div class="brand">${p.brand}</div>` : ''}
       ${meta ? `<div class="meta">${meta}</div>` : ''}
       ${showAttrs && attrs ? `<div class="attr">${attrs}</div>` : ''}
       <div class="price">${fp(p.cashPrice)} <span class="som">so'm</span></div>
@@ -177,7 +182,8 @@ function buildCardHtml({ products, items, attributeDefs, companyName, companyLog
     .grid { display:flex; flex-wrap:wrap; gap:3mm; padding:5mm; }
     .card {
       width:${s.w}; height:${s.h};
-      border:1.5px dashed #bbb;
+      border:1.5px dashed #ccc;
+      border-top:3px solid ${hColor};
       border-radius:2mm;
       padding:3mm 4mm;
       display:flex; flex-direction:column; justify-content:center;
