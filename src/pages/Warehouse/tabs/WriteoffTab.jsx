@@ -121,6 +121,8 @@ const WriteoffTab = ({ products, items, batches }) => {
                 <th className="text-left px-4 py-3">Tovar</th>
                 <th className="text-left px-4 py-3">Do'kon</th>
                 <th className="text-right px-4 py-3">Miqdor</th>
+                <th className="text-right px-4 py-3">Dona narxi</th>
+                <th className="text-right px-4 py-3">Summa</th>
                 <th className="text-left px-4 py-3">Sabab</th>
                 <th className="text-left px-4 py-3">Xarajat</th>
                 <th className="text-left px-4 py-3">Kim</th>
@@ -133,6 +135,12 @@ const WriteoffTab = ({ products, items, batches }) => {
                   <td className="px-4 py-3 text-text-primary font-medium">{w.productName}</td>
                   <td className="px-4 py-3 text-text-secondary">{w.shopName}</td>
                   <td className="px-4 py-3 text-right font-bold text-accent-red">{w.quantity} ta</td>
+                  <td className="px-4 py-3 text-right text-text-secondary">
+                    {w.unitPriceUzs > 0 ? w.unitPriceUzs.toLocaleString('uz-UZ') + ' so\'m' : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-right font-bold text-text-primary">
+                    {w.totalUzs > 0 ? w.totalUzs.toLocaleString('uz-UZ') + ' so\'m' : '—'}
+                  </td>
                   <td className="px-4 py-3 text-text-secondary">{w.reason || '—'}</td>
                   <td className="px-4 py-3">
                     {w.expenseId

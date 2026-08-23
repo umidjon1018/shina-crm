@@ -9,6 +9,8 @@ const map = (w) => ({
   quantity: Number(w.quantity),
   reason: w.reason || '',
   expenseId: w.expense_id ? String(w.expense_id) : null,
+  totalUzs: Number(w.total_uzs) || 0,
+  unitPriceUzs: Number(w.unit_price_uzs) || 0,
   createdByName: w.created_by_name || '',
   createdAt: w.created_at || '',
 })
