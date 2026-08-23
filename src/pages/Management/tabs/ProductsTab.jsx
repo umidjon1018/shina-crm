@@ -510,18 +510,25 @@ const ProductsTab = ({ ctx }) => {
                       onClick={e => e.stopPropagation()}
                       className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-sm space-y-4"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-accent-red/10 flex items-center justify-center flex-shrink-0">
-                          <AlertCircle size={20} className="text-accent-red" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-text-primary">Xususiyatni o'chirish</h4>
-                          <p className="text-sm text-text-muted mt-1">
-                            <span className="font-bold text-text-primary">"{deletingAttrDef.label}"</span> xususiyati o'chiriladi.
-                            Mavjud tovarlar va batchlardagi bu xususiyat qiymatlari o'chirilmaydi — faqat shablon o'chadi.
-                          </p>
-                        </div>
-                      </div>
+                      {(() => {
+                        const affectedCount = (items || []).filter(i => i.status === 'in_stock' && deletingAttrDef.label in (i.attributes || {})).length
+                        return (
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-accent-red/10 flex items-center justify-center flex-shrink-0">
+                              <AlertCircle size={20} className="text-accent-red" />
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-text-primary">Xususiyatni o'chirish</h4>
+                              <p className="text-sm text-text-muted mt-1">
+                                <span className="font-bold text-text-primary">"{deletingAttrDef.label}"</span> xususiyati o'chiriladi.
+                                {affectedCount > 0
+                                  ? <><br /><span className="text-amber-500 font-medium">{affectedCount} ta tovar</span> da bu xususiyat qiymati bor — xarid tarixi o'chadi, lekin tovarlar o'chmaYdi.</>
+                                  : ' Birorta tovar da bu xususiyat belgilanmagan.'}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })()}
                       <div className="flex gap-3">
                         <button onClick={() => setDeletingAttrDef(null)} className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors">
                           Bekor qilish
