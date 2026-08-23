@@ -45,8 +45,8 @@ const ProductImageViewer = ({ productId, size = 'sm', className = '', onFullscre
 
       {fsOpen && (
         <div
-          className="fixed inset-0 bg-black/92 z-[500] flex items-center justify-center"
-          onClick={closeFs}
+          className="fixed inset-0 bg-black z-[500] flex items-center justify-center"
+          onClick={e => { e.stopPropagation(); closeFs() }}
         >
           <button
             onClick={closeFs}

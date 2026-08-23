@@ -230,7 +230,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
       </motion.div>
 
       {fsOpen && createPortal(
-        <div className="fixed inset-0 bg-black/92 z-[9999] flex items-center justify-center" onClick={() => setFsOpen(false)}>
+        <div className="fixed inset-0 bg-black z-[9999] flex items-center justify-center" onClick={() => setFsOpen(false)}>
           <button onClick={() => setFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><X size={20} /></button>
           {images.length > 1 && (
             <>
