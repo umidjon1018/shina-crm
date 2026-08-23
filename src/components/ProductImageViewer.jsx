@@ -66,12 +66,16 @@ const ProductImageViewer = ({ productId, size = 'sm', className = '', onFullscre
             </>
           )}
 
-          <img
-            src={images[fsIdx]}
-            alt=""
-            className="max-w-[90vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl"
+          <div
+            className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl"
             onClick={e => e.stopPropagation()}
-          />
+          >
+            <img
+              src={images[fsIdx]}
+              alt=""
+              className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl"
+            />
+          </div>
 
           {images.length > 1 && (
             <div className="absolute bottom-5 flex gap-2">

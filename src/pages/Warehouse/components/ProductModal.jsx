@@ -106,7 +106,9 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
                   <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i + 1) % images.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronRight size={22} /></button>
                 </>
               )}
-              <img src={images[mainIdx]} alt="" className="max-w-[92vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl" onClick={e => e.stopPropagation()} />
+              <div className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl" onClick={e => e.stopPropagation()}>
+                <img src={images[mainIdx]} alt="" className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl" />
+              </div>
               {images.length > 1 && (
                 <div className="absolute bottom-5 flex gap-1.5">
                   {images.map((img, i) => (
