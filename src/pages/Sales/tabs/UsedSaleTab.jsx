@@ -255,11 +255,16 @@ const UsedSaleTab = ({ ctx }) => {
               ))}
             </div>
             {buPaymentType === 'card' && (
-              <div className="flex gap-2 flex-wrap">
-                {['uzcard', 'humo', 'visa', 'mastercard'].map(ct => (
-                  <button key={ct} type="button" onClick={() => setBuCardType(buCardType === ct ? null : ct)}
-                    className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all uppercase ${buCardType === ct ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
-                    {ct === 'uzcard' ? 'UzCard' : ct === 'humo' ? 'Humo' : ct === 'visa' ? 'Visa' : 'Mastercard'}
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'uzcard', label: 'UzCard' },
+                  { id: 'humo', label: 'Humo' },
+                  { id: 'visa', label: 'Visa' },
+                  { id: 'mastercard', label: 'Mastercard' },
+                ].map(ct => (
+                  <button key={ct.id} type="button" onClick={() => setBuCardType(buCardType === ct.id ? null : ct.id)}
+                    className={`px-3 py-2 rounded-xl border text-[11px] font-bold transition-all ${buCardType === ct.id ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                    {ct.label}
                   </button>
                 ))}
               </div>
