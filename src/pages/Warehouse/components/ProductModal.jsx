@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
@@ -88,31 +89,6 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
                       onClick={() => setMainIdx(i)}
                       className={`w-14 h-10 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${i === mainIdx ? 'border-accent-red' : 'border-border opacity-60 hover:opacity-90'}`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Fullscreen overlay */}
-          {fsOpen && (
-            <div className="fixed inset-0 bg-black/92 z-[600] flex items-center justify-center" onClick={() => setFsOpen(false)}>
-              <button onClick={() => setFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><X size={20} /></button>
-              {images.length > 1 && (
-                <>
-                  <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i - 1 + images.length) % images.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronLeft size={22} /></button>
-                  <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i + 1) % images.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronRight size={22} /></button>
-                </>
-              )}
-              <div className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl" onClick={e => e.stopPropagation()}>
-                <img src={images[mainIdx]} alt="" className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl" />
-              </div>
-              {images.length > 1 && (
-                <div className="absolute bottom-5 flex gap-1.5">
-                  {images.map((img, i) => (
-                    <button key={i} onClick={e => { e.stopPropagation(); setMainIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === mainIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
@@ -252,6 +228,31 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
           </div>
         </div>
       </motion.div>
+
+      {fsOpen && createPortal(
+        <div className="fixed inset-0 bg-black/92 z-[9999] flex items-center justify-center" onClick={() => setFsOpen(false)}>
+          <button onClick={() => setFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><X size={20} /></button>
+          {images.length > 1 && (
+            <>
+              <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i - 1 + images.length) % images.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronLeft size={22} /></button>
+              <button onClick={e => { e.stopPropagation(); setMainIdx(i => (i + 1) % images.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><ChevronRight size={22} /></button>
+            </>
+          )}
+          <div className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <img src={images[mainIdx]} alt="" className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl" />
+          </div>
+          {images.length > 1 && (
+            <div className="absolute bottom-5 flex gap-1.5">
+              {images.map((img, i) => (
+                <button key={i} onClick={e => { e.stopPropagation(); setMainIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === mainIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import DateMaskInput from '../../components/DateMaskInput'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1077,29 +1078,6 @@ const Income = () => {
                         ))}
                       </div>
                     )}
-                    {ebFsOpen && (
-                      <div className="fixed inset-0 bg-black/92 z-[600] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
-                        <button onClick={() => setEbFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
-                        {imgs.length > 1 && (
-                          <>
-                            <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i - 1 + imgs.length) % imgs.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronLeft size={22} /></button>
-                            <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i + 1) % imgs.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronRight size={22} /></button>
-                          </>
-                        )}
-                        <div className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl" onClick={e => e.stopPropagation()}>
-                          <img src={imgs[ebImgIdx]} alt="" className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl" />
-                        </div>
-                        {imgs.length > 1 && (
-                          <div className="absolute bottom-5 flex gap-1.5">
-                            {imgs.map((img, i) => (
-                              <button key={i} onClick={e => { e.stopPropagation(); setEbImgIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === ebImgIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
-                                <img src={img} alt="" className="w-full h-full object-cover" />
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )
               })()}
@@ -1743,6 +1721,34 @@ const Income = () => {
         )}
       </AnimatePresence>
       </div>
+
+      {editingBatch && ebFsOpen && (() => {
+        const imgs = productImages[String(editingBatch.productId)] || []
+        return createPortal(
+          <div className="fixed inset-0 bg-black/92 z-[9999] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
+            <button onClick={() => setEbFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
+            {imgs.length > 1 && (
+              <>
+                <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i - 1 + imgs.length) % imgs.length) }} className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronLeft size={22} /></button>
+                <button onClick={e => { e.stopPropagation(); setEbImgIdx(i => (i + 1) % imgs.length) }} className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><ChevronRight size={22} /></button>
+              </>
+            )}
+            <div className="bg-[#f4f4f5] rounded-2xl p-3 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <img src={imgs[ebImgIdx]} alt="" className="max-w-[85vw] max-h-[82vh] object-contain block rounded-xl" />
+            </div>
+            {imgs.length > 1 && (
+              <div className="absolute bottom-5 flex gap-1.5">
+                {imgs.map((img, i) => (
+                  <button key={i} onClick={e => { e.stopPropagation(); setEbImgIdx(i) }} className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${i === ebImgIdx ? 'border-white' : 'border-white/20 opacity-50 hover:opacity-80'}`}>
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>,
+          document.body
+        )
+      })()}
     </motion.div>
   )
 }
