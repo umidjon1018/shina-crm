@@ -1725,7 +1725,7 @@ const Income = () => {
       {editingBatch && ebFsOpen && (() => {
         const imgs = productImages[String(editingBatch.productId)] || []
         return createPortal(
-          <div className="fixed inset-0 bg-black z-[9999] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9999] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
             <button onClick={() => setEbFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
             {imgs.length > 1 && (
               <>
