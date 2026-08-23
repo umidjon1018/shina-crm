@@ -63,7 +63,7 @@ const Warehouse = () => {
   }
 
   // version o'zgarganda (boshqa sahifadan ma'lumot yangilanganda) qayta yuklash
-  useEffect(() => { loadData() }, [version])
+  useEffect(() => { loadData() }, [version, selectedShopId])
 
   const handleBarcodeRefresh = () => {
     refreshData()
