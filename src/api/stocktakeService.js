@@ -53,6 +53,11 @@ export const completeStocktake = async (id) => {
   return mapSt(data)
 }
 
+export const reopenStocktake = async (id) => {
+  const { data } = await api.post(`/api/stocktakes/${id}/reopen`)
+  return mapSt(data)
+}
+
 export const deleteStocktake = async (id) => {
   await api.delete(`/api/stocktakes/${id}`)
 }

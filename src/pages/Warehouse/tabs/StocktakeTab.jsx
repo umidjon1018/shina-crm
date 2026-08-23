@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ClipboardList, CheckCircle2, Clock, Trash2, X, ChevronRight, Search, AlertTriangle, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
-import { getStocktakes, getStocktake, createStocktake, updateStocktakeItem, completeStocktake, deleteStocktake } from '../../../api/stocktakeService'
+import { getStocktakes, getStocktake, createStocktake, updateStocktakeItem, completeStocktake, reopenStocktake, deleteStocktake } from '../../../api/stocktakeService'
 
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ')
 const fmtDate = (s) => s ? new Date(s).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
@@ -27,6 +27,7 @@ const StocktakeTab = () => {
   const [localActual, setLocalActual] = useState({}) // { itemId: string (input value) }
   const [saving, setSaving] = useState({}) // { itemId: bool }
   const [completing, setCompleting] = useState(false)
+  const [reopening, setReopening] = useState(false)
   const [deleting, setDeleting] = useState(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all') // 'all' | 'ok' | 'diff' | 'unseen'
@@ -88,6 +89,15 @@ const StocktakeTab = () => {
       setSelected(prev => ({ ...prev, status: updated.status, completedAt: updated.completedAt }))
       await loadList()
     } finally { setCompleting(false) }
+  }
+
+  const handleReopen = async () => {
+    setReopening(true)
+    try {
+      const updated = await reopenStocktake(selected.id)
+      setSelected(prev => ({ ...prev, status: updated.status, completedAt: null }))
+      await loadList()
+    } finally { setReopening(false) }
   }
 
   const handleDelete = async (id) => {
@@ -241,15 +251,26 @@ const StocktakeTab = () => {
                   {selected.notes && <span className="text-xs text-text-muted">{fmtDate(selected.createdAt)}</span>}
                 </div>
               </div>
-              {selected.status === 'draft' && (
-                <button
-                  disabled={completing || !summary || summary.filled === 0}
-                  onClick={handleComplete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-green text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  <CheckCircle2 size={14} /> {completing ? 'Yakunlanmoqda...' : 'Yakunlash'}
-                </button>
-              )}
+              <div className="flex gap-2">
+                {selected.status === 'complete' && (
+                  <button
+                    disabled={reopening}
+                    onClick={handleReopen}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-border text-text-secondary rounded-xl text-xs font-bold hover:bg-bg-tertiary transition-colors disabled:opacity-50"
+                  >
+                    <Clock size={14} /> {reopening ? '...' : 'Tahrirlash'}
+                  </button>
+                )}
+                {selected.status === 'draft' && (
+                  <button
+                    disabled={completing || !summary || summary.filled === 0}
+                    onClick={handleComplete}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-green text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={14} /> {completing ? 'Yakunlanmoqda...' : 'Yakunlash'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Summary chips */}
