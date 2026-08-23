@@ -10,7 +10,7 @@ const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' +
 const SuccessModal = ({ sale, onClose, onCancel }) => {
   const { t } = useTranslation()
   const som = i18n.t('unit_som')
-  const { companyName } = useSettingsStore()
+  const { companyName, companyLogo } = useSettingsStore()
   const [timeLeft, setTimeLeft] = useState(300)
 
   useEffect(() => {
@@ -28,14 +28,28 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'width=400,height=600')
     const saleDate = new Date(sale.soldAt).toLocaleString('uz-UZ')
+
     const itemsHtml = sale.items?.length > 0
       ? sale.items.map(i => `
           <tr>
-            <td style="padding:2px 0;font-size:11px;">${i.barcode || '—'}</td>
-            <td style="padding:2px 0;font-size:11px;text-align:right;">${(i.salePrice || 0).toLocaleString('uz-UZ')} ${som}</td>
+            <td style="padding:3px 0;font-size:11px;">
+              ${i.productName ? `<div style="font-weight:600;">${i.productName}</div>` : ''}
+              ${i.barcode ? `<div style="font-size:9px;color:#777;font-family:monospace;">${i.barcode}</div>` : ''}
+            </td>
+            <td style="padding:3px 0;font-size:11px;text-align:right;white-space:nowrap;">${(i.salePrice || 0).toLocaleString('uz-UZ')} ${som}</td>
           </tr>
         `).join('')
       : `<tr><td colspan="2" style="font-size:11px;color:#888;">Tovarlar ro'yxati mavjud emas</td></tr>`
+
+    const logoHtml = companyLogo
+      ? `<img src="${companyLogo}" alt="logo" style="max-width:120px;max-height:60px;object-fit:contain;margin-bottom:6px;" /><br/>`
+      : ''
+
+    const paymentLabel =
+      sale.paymentType === 'cash' ? 'Naqd' :
+      sale.paymentType === 'card' ? 'Karta' :
+      sale.paymentType === 'installment' ? `Muddatli (${sale.installmentMonths || sale.installmentTermMonths || 3} oy)` :
+      "Bank o'tkazma"
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -50,6 +64,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
           .divider { border-top: 1px dashed #000; margin: 8px 0; }
           .bold { font-weight: bold; }
           .small { font-size: 10px; color: #555; }
+          .row { display: flex; justify-content: space-between; font-size: 11px; margin: 2px 0; }
           table { width: 100%; border-collapse: collapse; }
           @media print {
             body { width: 280px; }
@@ -58,33 +73,28 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
         </style>
       </head>
       <body>
-        <div class="center bold" style="font-size:16px;margin-bottom:4px;">${companyName}</div>
-        <div class="center small">${companyName} Do'koni</div>
+        <div class="center" style="margin-bottom:6px;">
+          ${logoHtml}
+          <div class="bold" style="font-size:16px;">${companyName}</div>
+        </div>
         <div class="divider"></div>
-        <div style="font-size:11px;">Chek: <span class="bold">${sale.id}</span></div>
-        <div style="font-size:11px;">Sana: ${saleDate}</div>
-        ${sale.customerName && sale.customerName !== "Noma'lum" ? `<div style="font-size:11px;">Mijoz: ${sale.customerName}</div>` : ''}
+        <div class="row"><span>Chek:</span><span class="bold">${sale.id}</span></div>
+        <div class="row"><span>Sana:</span><span>${saleDate}</span></div>
+        ${sale.soldByName ? `<div class="row"><span>Kassir:</span><span>${sale.soldByName}</span></div>` : ''}
+        ${sale.customerName && sale.customerName !== "Noma'lum" ? `<div class="row"><span>Mijoz:</span><span>${sale.customerName}</span></div>` : ''}
         <div class="divider"></div>
         <table>${itemsHtml}</table>
         <div class="divider"></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;">
-          <span>Subtotal:</span><span>${(sale.subtotal || sale.total).toLocaleString('uz-UZ')} ${som}</span>
-        </div>
+        <div class="row"><span>Subtotal:</span><span>${(sale.subtotal || sale.total).toLocaleString('uz-UZ')} ${som}</span></div>
         ${sale.discount > 0 ? `
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#c00;">
+        <div class="row" style="color:#c00;">
           <span>Chegirma (${sale.discount}%):</span><span>-${Math.round((sale.subtotal||sale.total)*sale.discount/100).toLocaleString('uz-UZ')} ${som}</span>
         </div>` : ''}
         <div class="divider"></div>
-        <div style="display:flex;justify-content:space-between;" class="bold">
-          <span style="font-size:14px;">JAMI:</span>
-          <span style="font-size:14px;">${sale.total.toLocaleString('uz-UZ')} ${som}</span>
+        <div class="row bold" style="font-size:14px;">
+          <span>JAMI:</span><span>${sale.total.toLocaleString('uz-UZ')} ${som}</span>
         </div>
-        <div style="font-size:11px;margin-top:4px;">To'lov: ${
-          sale.paymentType === 'cash' ? 'Naqd' :
-          sale.paymentType === 'card' ? 'Karta' :
-          sale.paymentType === 'installment' ? `Muddatli (${sale.installmentMonths || sale.installmentTermMonths || 3} oy)` :
-          "Bank o'tkazma"
-        }</div>
+        <div class="row" style="margin-top:4px;"><span>To'lov:</span><span>${paymentLabel}</span></div>
         <div class="divider"></div>
         <div class="center small" style="margin-top:8px;">Xarid uchun rahmat!</div>
         <div class="center small">${companyName} — Ishonchli tanlov</div>
