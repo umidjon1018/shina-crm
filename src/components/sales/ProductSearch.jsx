@@ -229,13 +229,13 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
             exit={{ opacity: 0, height: 0 }}
             className="bg-bg-secondary border border-border rounded-2xl overflow-hidden max-h-64 overflow-y-auto no-scrollbar"
           >
-            <table className="w-full text-left text-sm">
+            <table className="w-full table-fixed text-left text-xs sm:text-sm">
               <thead className="bg-bg-tertiary sticky top-0 text-text-muted">
                 <tr>
-                  <th className="px-4 py-2 font-medium">{t('col_product')}</th>
-                  <th className="px-4 py-2 font-medium text-right">{t('sl_ps_th_price')}</th>
-                  <th className="px-4 py-2 font-medium text-right">{allowSold ? t('sold') : t('sl_ps_th_stock')}</th>
-                  <th className="px-4 py-2"></th>
+                  <th className="px-2 sm:px-4 py-2 font-medium">{t('col_product')}</th>
+                  <th className="px-1 sm:px-4 py-2 font-medium text-right w-[5.5rem] sm:w-32">{t('sl_ps_th_price')}</th>
+                  <th className="px-1 sm:px-4 py-2 font-medium text-right w-14 sm:w-24">{allowSold ? t('sold') : t('sl_ps_th_stock')}</th>
+                  <th className="pl-1 pr-2 sm:px-4 py-2 w-10 sm:w-14"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -252,7 +252,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
 
                   return (
                     <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
-                      <td className="px-4 py-3">
+                      <td className="px-2 sm:px-4 py-3 break-words">
                         <p className="font-medium text-text-primary">{p.name}</p>
                         <p className="text-xs text-text-muted">{t('cat_' + p.category, { defaultValue: p.categoryLabel })} · {p.size}</p>
                         {hasActive && canAdd && (
@@ -262,11 +262,11 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                           <span className="block text-[11px] text-accent-red font-semibold">{reason}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right font-medium text-text-primary whitespace-nowrap">
+                      <td className="px-1 sm:px-4 py-3 text-right font-medium text-text-primary sm:whitespace-nowrap">
                         {formatPrice(p.cashPrice)}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                      <td className="px-1 sm:px-4 py-3 text-right">
+                        <span className={`inline-block px-1.5 sm:px-2 py-0.5 rounded-md text-xs font-bold ${
                           (reason || available.length === 0) ? 'bg-accent-red/10 text-accent-red' :
                           !allowSold && available.length <= (p.lowStockThreshold || 3) ? 'bg-accent-orange/10 text-accent-orange' :
                           'bg-accent-green/10 text-accent-green'
@@ -274,7 +274,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                           {allowSold ? available.length : (reason ? inStockAll : available.length - inCartCount)} {available[0]?.unit || 'dona'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="pl-1 pr-2 sm:px-4 py-3 text-right">
                         <button
                           onClick={() => handleAdd(p)}
                           disabled={!canAdd}
