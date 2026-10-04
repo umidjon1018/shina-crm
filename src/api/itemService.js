@@ -1,4 +1,5 @@
 import api from './client'
+import { getQueuedItemIds } from '../utils/offlineQueue'
 
 const mapItem = (i) => ({
   id: String(i.id),
@@ -29,8 +30,8 @@ export const getItems = async (params = {}) => {
   if (params.shopId && params.shopId !== 'all') query.shop_id = params.shopId
   if (params.productId) query.product_id = params.productId
   if (params.status) query.status = params.status
-  const { data } = await api.get('/api/items', { params: query })
-  return data.map(mapItem)
+  const [{ data }, queued] = await Promise.all([api.get('/api/items', { params: query }), getQueuedItemIds()])
+  return data.map(mapItem).map(i => (queued.has(String(i.id)) ? { ...i, status: 'sold' } : i))
 }
 
 export const generateBarcodes = async (itemIds, userId, options = {}) => {
@@ -82,7 +83,9 @@ export const renameAttributeKey = async (oldKey, newKey) => {
 export const findItemByBarcode = async (barcode) => {
   try {
     const { data } = await api.get(`/api/items/barcode/${encodeURIComponent(barcode)}`)
-    const item = mapItem(data)
+    const queued = await getQueuedItemIds()
+    const mapped = mapItem(data)
+    const item = queued.has(String(mapped.id)) ? { ...mapped, status: 'sold' } : mapped
     const product = {
       id: String(data.product_id),
       name: data.product_name || '',

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { clearHttpCache } from '../utils/httpCache'
 import { persist } from 'zustand/middleware'
 import api from '../api/client'
 import { useSettingsStore } from './settingsStore'
@@ -357,6 +358,7 @@ export const useAuthStore = create(
         const { user, isAuthenticated } = get()
         if (isAuthenticated) logSession(user, 'Tizimdan chiqdi (offline)')
         localStorage.removeItem('shina_token')
+        clearHttpCache()
         set({ user: null, token: null, isAuthenticated: false, deviceStatus: 'idle' })
       },
 

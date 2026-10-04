@@ -2593,4 +2593,10 @@ export default {
   sl_resv_err_unavailable: "Bu tovar endi omborda yo'q",
   sl_resv_all_reserved: "\"{{name}}\" ning barcha bo'sh donalari bron qilingan",
   sl_mob_items: "ta tovar",
+  sl_off_title: "Internet yo'q",
+  sl_off_queued: "Sotuv ({{total}} so'm) navbatga yozildi. Internet qaytganda avtomatik yuboriladi — ilovani yopmang.",
+  sl_off_tradein: "Eski tovar qabul qilingan sotuvni internetsiz saqlab bo'lmaydi. Internet qaytgach qayta urinib ko'ring.",
+  sl_off_queue_err: "Sotuvni navbatga yozib bo'lmadi",
+  sl_off_rejected_title: "Offlayn sotuv rad etildi",
+  sl_off_rejected_msg: "{{items}}: {{error}}. Sotuvni tekshirib, qayta rasmiylashtiring.",
 }

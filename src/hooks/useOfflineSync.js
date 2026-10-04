@@ -1,45 +1,49 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { getPendingCount, syncQueue, cleanOldItems } from '../utils/offlineQueue'
 
-export const useOfflineSync = (apiHandler = null) => {
+// apiHandler: async (queueItem) => serverga yuborish. onResult: ({ synced, failed, rejected }) => void
+export const useOfflineSync = (apiHandler = null, onResult = null) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingCount, setPendingCount] = useState(0)
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSync, setLastSync] = useState(null)
+  const syncingRef = useRef(false)
+  const handlerRef = useRef(apiHandler)
+  const resultRef = useRef(onResult)
+  handlerRef.current = apiHandler
+  resultRef.current = onResult
 
-  // Pending count yangilash
   const refreshPendingCount = useCallback(async () => {
     try {
       const count = await getPendingCount()
       setPendingCount(count)
-    } catch {}
+      return count
+    } catch { return 0 }
   }, [])
 
-  // Sinxronizatsiya
   const sync = useCallback(async () => {
-    if (!isOnline || !apiHandler || isSyncing) return
+    if (!navigator.onLine || !handlerRef.current || syncingRef.current) return
+    if (!(await refreshPendingCount())) return
+    syncingRef.current = true
     setIsSyncing(true)
     try {
-      const result = await syncQueue(apiHandler)
+      const result = await syncQueue(handlerRef.current)
       await refreshPendingCount()
       await cleanOldItems()
       setLastSync(new Date())
+      if (result && (result.synced || result.failed)) resultRef.current?.(result)
       return result
-    } catch {}
-    finally {
+    } catch {
+      /* keyingi urinishda */
+    } finally {
+      syncingRef.current = false
       setIsSyncing(false)
     }
-  }, [isOnline, apiHandler, isSyncing, refreshPendingCount])
+  }, [refreshPendingCount])
 
-  // Online/offline hodisalari
   useEffect(() => {
-    const onOnline = () => {
-      setIsOnline(true)
-      // Internet kelganda avtomatik sync
-      setTimeout(() => sync(), 1500)
-    }
+    const onOnline = () => { setIsOnline(true); setTimeout(() => sync(), 1500) }
     const onOffline = () => setIsOnline(false)
-
     window.addEventListener('online', onOnline)
     window.addEventListener('offline', onOffline)
     return () => {
@@ -48,19 +52,13 @@ export const useOfflineSync = (apiHandler = null) => {
     }
   }, [sync])
 
-  // Har 30 sekundda pending count yangilanadi
+  // Ochilganda va har 30 soniyada: navbat bo'lsa yuborishga urinadi
+  // (Wi-Fi bor, lekin server vaqtincha javob bermagan holatlar uchun ham)
   useEffect(() => {
-    refreshPendingCount()
-    const interval = setInterval(refreshPendingCount, 30000)
+    sync()
+    const interval = setInterval(() => { refreshPendingCount(); sync() }, 30000)
     return () => clearInterval(interval)
-  }, [refreshPendingCount])
+  }, [sync, refreshPendingCount])
 
-  return {
-    isOnline,
-    pendingCount,
-    isSyncing,
-    lastSync,
-    sync,
-    refreshPendingCount,
-  }
+  return { isOnline, pendingCount, isSyncing, lastSync, sync, refreshPendingCount }
 }

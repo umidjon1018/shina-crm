@@ -23,6 +23,10 @@ const STEPS = [
     localStorage.removeItem('agent-activities-v2')
     Object.keys(localStorage).filter(k => k.startsWith('ai_analysis_v')).forEach(k => localStorage.removeItem(k))
   }],
+  ['2026-10-05', () => {
+    // Offlayn navbatdagi eski yozuvlar allaqachon serverga yuborilgan sotuvlar — o'chiriladi
+    try { indexedDB.deleteDatabase('shina_crm_offline') } catch { /* */ }
+  }],
 ]
 
 try {

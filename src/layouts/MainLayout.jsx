@@ -23,7 +23,9 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { createSale } from '../api/salesService'
+import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
 import { useShopStore } from '../store/shopStore'
 import { useAuthStore } from '../store/authStore'
@@ -82,7 +84,24 @@ export const MainLayout = () => {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const { isOnline, pendingCount, isSyncing } = useOfflineSync()
+  const { addNotification } = useNotificationStore()
+  const { bump } = useDataStore()
+  // Offlayn navbat: internet qaytganda sotuvlar serverga yuboriladi
+  const syncHandler = useCallback(async (item) => {
+    if (item.type === 'CREATE_SALE') await createSale(item.payload)
+  }, [])
+  const onSyncResult = useCallback(({ synced, rejected = [] }) => {
+    if (synced) bump()
+    rejected.forEach(({ item, error }) => addNotification({
+      type: 'OFFLINE_SALE_REJECTED', severity: 'danger',
+      title: t('sl_off_rejected_title'),
+      message: t('sl_off_rejected_msg', {
+        items: (item.payload?.items || []).map(i => i.name).join(', '),
+        error,
+      }),
+    }))
+  }, [bump, addNotification, t])
+  const { isOnline, pendingCount, isSyncing } = useOfflineSync(syncHandler, onSyncResult)
   const { areaRef, contentRef, zoom, resetZoom } = usePinchZoom()
   const { getUnreadCount } = useNotificationStore()
   const unreadCount = getUnreadCount()

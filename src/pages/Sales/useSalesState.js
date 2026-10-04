@@ -514,7 +514,6 @@ export const useSalesState = () => {
     }
 
     try {
-      await enqueueAction({ type: 'CREATE_SALE', payload: salePayload })
       const res = await apiCreateSale(salePayload)
 
       if (res) {
@@ -605,7 +604,26 @@ export const useSalesState = () => {
         }
       }
     } catch (e) {
-      setAlertModal({ title: 'Xatolik', message: e?.response?.data?.error || 'Xatolik yuz berdi' })
+      if (!e?.response) {
+        // Internet yo'q — sotuv navbatga yoziladi, internet qaytganda avtomatik yuboriladi
+        if (tradeInItems.some(ti => ti.name?.trim())) {
+          setAlertModal({ title: t('sl_off_title'), message: t('sl_off_tradein') })
+        } else {
+          try {
+            await enqueueAction({ type: 'CREATE_SALE', payload: salePayload })
+            clearCart()
+            resetForm()
+            setContractFile(null)
+            fetchData()
+            bump()
+            setAlertModal({ title: t('sl_off_title'), message: t('sl_off_queued', { total: Math.round(total).toLocaleString('uz-UZ') }) })
+          } catch {
+            setAlertModal({ title: 'Xatolik', message: t('sl_off_queue_err') })
+          }
+        }
+      } else {
+        setAlertModal({ title: 'Xatolik', message: e?.response?.data?.error || 'Xatolik yuz berdi' })
+      }
     } finally {
       setIsSubmitting(false)
     }

@@ -124,6 +124,7 @@ export const syncQueue = async (apiHandler) => {
   let synced = 0
   let failed = 0
 
+  const rejected = []
   for (const item of pending) {
     try {
       await updateItemStatus(item.id, 'syncing')
@@ -131,10 +132,32 @@ export const syncQueue = async (apiHandler) => {
       await updateItemStatus(item.id, 'done')
       synced++
     } catch (err) {
-      await updateItemStatus(item.id, 'failed', err.message)
+      if (!err?.response) {
+        // Internet hali yo'q — navbatda qoladi, keyinroq qayta urinadi
+        await updateItemStatus(item.id, 'pending', err?.message || 'network')
+        break
+      }
+      // Server rad etdi (masalan, tovar boshqa qurilmadan sotilgan)
+      const msg = err.response?.data?.error || err.message
+      await updateItemStatus(item.id, 'failed', msg)
+      rejected.push({ item, error: msg })
       failed++
     }
   }
 
-  return { synced, failed }
+  return { synced, failed, rejected }
+}
+
+// Navbatdagi (hali yuborilmagan) sotuvlarning tovar id lari — shu qurilmada qayta sotilmasligi uchun
+export const getQueuedItemIds = async () => {
+  try {
+    const pending = await getPendingItems()
+    const ids = new Set()
+    pending.filter(p => p.type === 'CREATE_SALE').forEach(p =>
+      (p.payload?.items || []).forEach(i => ids.add(String(i.itemId ?? i.id)))
+    )
+    return ids
+  } catch {
+    return new Set()
+  }
 }
