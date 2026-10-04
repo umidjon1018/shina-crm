@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { getLoyaltySettings } from '../../api/settingsService'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Search, UserPlus, Eye, X, CreditCard,
@@ -26,11 +27,8 @@ import MergeModal           from './components/MergeModal'
 const formatPriceRaw = (n) => n?.toLocaleString('uz-UZ')
 const EMPTY_CUST = { name: '', phone: '+998', birthDate: '', instagram: '', carModel: '', gender: '', address: '', email: '', group: '', tags: [] }
 
-const LOYALTY_CONFIG = {
-  bronze: { label: 'Bronze', color: 'bg-orange-100 text-orange-700', next: 5, nextLabel: 'Silver' },
-  silver: { label: 'Silver', color: 'bg-slate-100 text-slate-700', next: 10, nextLabel: 'Gold' },
-  gold:   { label: 'Gold',   color: 'bg-yellow-100 text-yellow-700', next: null, nextLabel: null },
-}
+// Sodiqlik dasturi darajalari ranglari (Boshqaruv → Chegirmalar dagi jamg'arma chegirma darajalari tartibida)
+const TIER_COLORS = ['bg-orange-100 text-orange-700', 'bg-slate-100 text-slate-700', 'bg-yellow-100 text-yellow-700', 'bg-purple-100 text-purple-700']
 
 const Customers = () => {
   const { t } = useTranslation()
@@ -38,6 +36,8 @@ const Customers = () => {
   const { user } = useAuthStore()
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
   const { loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits, usdRate } = useSettingsStore()
+  const [loyaltyCfg, setLoyaltyCfg] = useState(null)
+  useEffect(() => { getLoyaltySettings().then(setLoyaltyCfg).catch(() => {}) }, [])
   const { bump, version } = useDataStore()
   const som = t('unit_som')
   const { selectedShopId } = useShopStore()
@@ -286,12 +286,6 @@ const Customers = () => {
   const getCustomerUsedSales = (customer) =>
     shopUsedSales.filter(s => s.customerId === customer.id && s.status !== 'cancelled')
 
-  // Loyalti uchun: allSales + MOCK_USED_SALES dan qualified kelishlar (har sotuv = 1 kelish)
-  const getQualifiedVisits = (customer) => [
-    ...getCustomerSales(customer).filter(s => s.total >= loyaltyMinAmount),
-    ...getCustomerUsedSales(customer).filter(s => s.total >= loyaltyMinAmount),
-  ]
-
   // Yangi + B/U sotuvlar birgalikda — kelish, tovar va summa shularga qarab hisoblanadi
   const getCustomerAllSales = (customer) => [
     ...getCustomerSales(customer),
@@ -310,12 +304,21 @@ const Customers = () => {
   const getUsedItemsCount = (customer) =>
     getCustomerUsedSales(customer).reduce((sum, s) => sum + (s.items?.length || 0), 0)
 
-  // loyaltyLevel: allSales + MOCK_USED_SALES + settingsStore thresholds asosida dinamik
+  // Sodiqlik darajasi: jami xarid summasi bo'yicha (kassadagi jamg'arma chegirma bilan bir xil qoida)
   const computeLoyaltyLevel = (customer) => {
-    const q = getQualifiedVisits(customer).length
-    if (q >= loyaltyVisitsRequired) return 'gold'
-    if (q >= (silverVisits || 5)) return 'silver'
-    return 'bronze'
+    const tiers = loyaltyCfg?.discountEnabled ? (loyaltyCfg.discountTiers || []) : []
+    const spent = getTotalSpent(customer)
+    let idx = -1
+    tiers.forEach((tr, i) => { if (spent >= tr.minAmount) idx = i })
+    const tier = idx >= 0 ? tiers[idx] : null
+    return {
+      enabled: tiers.length > 0, idx, spent,
+      percent: tier?.percent || 0,
+      next: tiers[idx + 1] || null,
+      isTop: idx >= 0 && idx === tiers.length - 1,
+      color: idx < 0 ? 'bg-bg-tertiary text-text-muted' : TIER_COLORS[Math.min(idx, TIER_COLORS.length - 1)],
+      label: tier ? t('cust_tier_label', { n: tier.percent }) : t('cust_tier_none'),
+    }
   }
 
   const getLastVisit = (customer) => {
@@ -374,7 +377,7 @@ const Customers = () => {
       )
     }
     if (activeFilter === 'gold') {
-      result = result.filter(c => getQualifiedVisits(c).length >= loyaltyVisitsRequired)
+      result = result.filter(c => computeLoyaltyLevel(c).percent > 0)
     }
     if (activeFilter === 'balance') {
       result = result.filter(c => Math.abs(c.balance || 0) > 0)
@@ -425,12 +428,12 @@ const Customers = () => {
       )
     ).length
 
-    const goldCount = visibleCustomers.filter(c => getQualifiedVisits(c).length >= loyaltyVisitsRequired).length
+    const goldCount = visibleCustomers.filter(c => computeLoyaltyLevel(c).percent > 0).length
 
     const balanceCount = visibleCustomers.filter(c => Math.abs(c.balance || 0) > 0).length
 
     return { total, activeInstallments, latePayments, goldCount, balanceCount }
-  }, [customers, selectedShopId, shopCustomerIds, shopSales, loyaltyMinAmount, loyaltyVisitsRequired, version])
+  }, [customers, selectedShopId, shopCustomerIds, shopSales, loyaltyCfg, version])
 
   const handleAddCustomer = async (e) => {
     e.preventDefault()
@@ -496,7 +499,7 @@ const Customers = () => {
     instPaymentSuccess,
     selectedShopId,
     stats, filtered,
-    LOYALTY_CONFIG, formatPrice: formatPriceRaw,
+    formatPrice: formatPriceRaw,
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     CustSortIcon,
     allSales: shopSales, MOCK_USED_SALES: shopUsedSales, MOCK_USED_STOCK,
@@ -615,7 +618,7 @@ const Customers = () => {
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('phone')}>{t('col_phone')} <CustSortIcon col="phone" /></th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">{t('cust_th_car')}</th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('visits')}>{t('cust_th_visits')} <CustSortIcon col="visits" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_qualified')}</th>
+                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_loyalty')}</th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('col_product')}</th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_used_items')}</th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('totalSpent')}>{t('cust_th_total')} <CustSortIcon col="totalSpent" /></th>
@@ -654,7 +657,7 @@ const Customers = () => {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span className="bg-accent-green/10 text-accent-green px-2 py-1 rounded-lg font-bold">
-                      {getQualifiedVisits(c).length}
+                      {computeLoyaltyLevel(c).percent ? `${computeLoyaltyLevel(c).percent}%` : '—'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
@@ -691,9 +694,9 @@ const Customers = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${LOYALTY_CONFIG[computeLoyaltyLevel(c)].color}`}>
-                        {computeLoyaltyLevel(c) === 'gold' && <Star size={10} className="inline mr-1 mb-0.5" />}
-                        {LOYALTY_CONFIG[computeLoyaltyLevel(c)].label}
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${computeLoyaltyLevel(c).color}`}>
+                        {computeLoyaltyLevel(c).isTop && <Star size={10} className="inline mr-1 mb-0.5" />}
+                        {computeLoyaltyLevel(c).label}
                       </span>
                     </div>
                   </td>

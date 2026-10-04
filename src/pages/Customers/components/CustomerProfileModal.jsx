@@ -51,10 +51,6 @@ const CustomerProfileModal = ({ ctx }) => {
     MOCK_SALES.filter(s => s.customerId === customer.id)
   const getCustomerUsedSales = (customer) =>
     (MOCK_USED_SALES || []).filter(s => s.customerId === customer.id && s.status !== 'cancelled')
-  const getQualifiedVisits = (customer) => [
-    ...getCustomerSales(customer).filter(s => s.total >= loyaltyMinAmount),
-    ...getCustomerUsedSales(customer).filter(s => s.total >= loyaltyMinAmount),
-  ]
   const getCustomerAllSales = (customer) => [
     ...getCustomerSales(customer),
     ...getCustomerUsedSales(customer),
@@ -96,7 +92,7 @@ const CustomerProfileModal = ({ ctx }) => {
               {/* Profile Header */}
               <div className="p-8 pb-4 flex items-start justify-between bg-bg-secondary">
                 <div className="flex items-center gap-6">
-                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-extrabold text-3xl ${LOYALTY_CONFIG[computeLoyaltyLevel(selectedCustomer)].color}`}>
+                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-extrabold text-3xl ${computeLoyaltyLevel(selectedCustomer).color}`}>
                     {selectedCustomer.name.charAt(0)}
                   </div>
                   <div>
@@ -106,9 +102,9 @@ const CustomerProfileModal = ({ ctx }) => {
                       {selectedCustomer.phone2 && (
                         <span className="text-sm text-text-muted flex items-center gap-1.5"><Phone size={12} /> {selectedCustomer.phone2} <span className="text-[10px] bg-bg-tertiary px-1.5 py-0.5 rounded">2</span></span>
                       )}
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${LOYALTY_CONFIG[computeLoyaltyLevel(selectedCustomer)].color}`}>
-                        {computeLoyaltyLevel(selectedCustomer) === 'gold' && <Star size={10} className="inline mr-1" />}
-                        {LOYALTY_CONFIG[computeLoyaltyLevel(selectedCustomer)].label} Daraja
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${computeLoyaltyLevel(selectedCustomer).color}`}>
+                        {computeLoyaltyLevel(selectedCustomer).isTop && <Star size={10} className="inline mr-1" />}
+                        {computeLoyaltyLevel(selectedCustomer).label}
                       </span>
                     </div>
                   </div>
@@ -150,13 +146,14 @@ const CustomerProfileModal = ({ ctx }) => {
               <div className="p-8 overflow-y-auto no-scrollbar flex-1 bg-bg-primary" style={{ minHeight: '320px' }}>
                 {modalTab === 'general' && (
                   <div className="space-y-8">
-                    {computeLoyaltyLevel(selectedCustomer) === 'gold' && (
+                    {computeLoyaltyLevel(selectedCustomer).isTop && (
                       <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-center gap-4 text-yellow-700">
                         <div className="w-10 h-10 bg-yellow-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-yellow-500/20">
                           <Star size={20} fill="currentColor" />
                         </div>
                         <div>
                           <p className="font-syne font-extrabold text-lg">{t('cust_vip')}</p>
+                          <p className="text-xs">{t('cust_vip_desc', { percent: computeLoyaltyLevel(selectedCustomer).percent })}</p>
                         </div>
                       </motion.div>
                     )}
@@ -164,7 +161,7 @@ const CustomerProfileModal = ({ ctx }) => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[
                         { label: t('cust_stat_visits'), value: getTotalVisits(selectedCustomer), icon: Calendar },
-                        { label: t('cust_stat_qualified'), value: getQualifiedVisits(selectedCustomer).length, icon: CheckCircle, color: 'text-accent-green' },
+                        { label: t('cust_stat_loyalty'), value: computeLoyaltyLevel(selectedCustomer).percent ? `${computeLoyaltyLevel(selectedCustomer).percent}%` : '—', icon: Star, color: 'text-accent-green' },
                         { label: t('cust_stat_items'), value: getTotalItems(selectedCustomer), icon: Package },
                         { label: t('cust_stat_spent'), value: formatPrice(getTotalSpent(selectedCustomer)), icon: DollarSign },
                       ].map((s, i) => (
@@ -260,29 +257,29 @@ const CustomerProfileModal = ({ ctx }) => {
                           <TrendingUp size={20} className="text-accent-blue" />
                           {t('cust_loyalty_title')}
                         </h4>
-                        {computeLoyaltyLevel(selectedCustomer) !== 'gold' && (
-                          <span className="text-xs text-text-muted">
-                            {t('cust_loyalty_goal', { n: loyaltyVisitsRequired })}
-                          </span>
-                        )}
                       </div>
-                      
-                      <div className="relative h-4 bg-bg-secondary border border-border rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(100, (getQualifiedVisits(selectedCustomer).length / loyaltyVisitsRequired) * 100)}%` }}
-                          className={`absolute top-0 left-0 h-full ${computeLoyaltyLevel(selectedCustomer) === 'gold' ? 'bg-yellow-500' : 'bg-accent-blue'}`}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-between text-[10px] font-extrabold tracking-widest text-text-muted">
-                        <span>{getQualifiedVisits(selectedCustomer).length}/{loyaltyVisitsRequired} {t('cust_th_visits').toUpperCase()}</span>
-                        {getQualifiedVisits(selectedCustomer).length < loyaltyVisitsRequired ? (
-                          <span>{t('cust_loyalty_left', { n: loyaltyVisitsRequired - getQualifiedVisits(selectedCustomer).length })}</span>
-                        ) : (
-                          <span className="text-accent-green">{t('cust_loyalty_max')}</span>
-                        )}
-                      </div>
+                      {(() => {
+                        const lv = computeLoyaltyLevel(selectedCustomer)
+                        if (!lv.enabled) return <p className="text-xs text-text-muted">{t('cust_tier_off')}</p>
+                        const target = lv.next ? lv.next.minAmount : lv.spent
+                        return (
+                          <>
+                            <div className="relative h-4 bg-bg-secondary border border-border rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${lv.next ? Math.min(100, (lv.spent / target) * 100) : 100}%` }}
+                                className={`absolute top-0 left-0 h-full ${lv.isTop ? 'bg-yellow-500' : 'bg-accent-blue'}`}
+                              />
+                            </div>
+                            <div className="flex justify-between gap-2 text-[10px] font-extrabold tracking-widest text-text-muted">
+                              <span>{formatPrice(lv.spent)}{lv.next ? ` / ${formatPrice(lv.next.minAmount)}` : ''}</span>
+                              {lv.next
+                                ? <span>{t('cust_tier_left', { amount: formatPrice(lv.next.minAmount - lv.spent), n: lv.next.percent })}</span>
+                                : <span className="text-accent-green">{t('cust_loyalty_max')}</span>}
+                            </div>
+                          </>
+                        )
+                      })()}
                     </div>
                   </div>
                 )}
@@ -311,14 +308,12 @@ const CustomerProfileModal = ({ ctx }) => {
                     <div className="space-y-4">
                       {customerSales.map((sale) => {
                         const isCancelled = sale.status === 'cancelled'
-                        const isQualified = !isCancelled && sale.total >= loyaltyMinAmount
                         const saleDate = new Date(sale.soldAt).toLocaleDateString('uz-UZ', {
                           year: 'numeric', month: '2-digit', day: '2-digit'
                         })
                         return (
                           <div key={sale.id} className={`border rounded-2xl overflow-hidden transition-all ${
-                            isCancelled ? 'border-accent-red/20 bg-accent-red/5' :
-                            isQualified ? 'border-border bg-bg-secondary/30' : 'border-accent-orange/20 bg-accent-orange/5'
+                            isCancelled ? 'border-accent-red/20 bg-accent-red/5' : 'border-border bg-bg-secondary/30'
                           }`}>
                             <div className="p-4 bg-bg-secondary border-b border-border space-y-3">
                               <div className="flex items-center gap-3 flex-wrap">
@@ -334,16 +329,9 @@ const CustomerProfileModal = ({ ctx }) => {
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                {isCancelled ? (
+                                {isCancelled && (
                                   <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-accent-red/10 text-accent-red flex items-center gap-1">
                                     <X size={10} /> {t('cust_cancelled')}
-                                  </span>
-                                ) : (
-                                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1 ${
-                                    isQualified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                  }`}>
-                                    {isQualified ? <Check size={10} /> : <X size={10} />}
-                                    {isQualified ? t('cust_qualified_yes') : t('cust_qualified_no')}
                                   </span>
                                 )}
                                 <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-bg-tertiary text-text-muted">
@@ -357,11 +345,6 @@ const CustomerProfileModal = ({ ctx }) => {
                               </div>
                             </div>
                             <div className="p-4">
-                              {!isCancelled && !isQualified && (
-                                <p className="text-[10px] text-accent-orange mb-3 flex items-center gap-1 font-medium">
-                                  <Info size={10} /> {t('cust_not_qualified_reason', { total: formatPrice(sale.total), min: formatPrice(loyaltyMinAmount) })}
-                                </p>
-                              )}
                               <div className="space-y-2">
                                 {(sale.items || []).map((item, idx) => (
                                   <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-border/50 last:border-0">
@@ -634,14 +617,12 @@ const CustomerProfileModal = ({ ctx }) => {
                           <div className="space-y-4">
                             {allUsedSales.map(sale => {
                               const isCancelled = sale.status === 'cancelled'
-                              const isQualified = !isCancelled && sale.total >= loyaltyMinAmount
                               const saleDate = new Date(sale.soldAt).toLocaleDateString('uz-UZ', {
                                 year: 'numeric', month: '2-digit', day: '2-digit'
                               })
                               return (
                                 <div key={sale.id} className={`border rounded-2xl overflow-hidden transition-all ${
-                                  isCancelled ? 'border-accent-red/20 bg-accent-red/5' :
-                                  isQualified ? 'border-border bg-bg-secondary/30' : 'border-accent-orange/20 bg-accent-orange/5'
+                                  isCancelled ? 'border-accent-red/20 bg-accent-red/5' : 'border-border bg-bg-secondary/30'
                                 }`}>
                                   <div className="p-4 bg-bg-secondary border-b border-border space-y-3">
                                     <div className="flex items-center gap-3 flex-wrap">
@@ -652,16 +633,9 @@ const CustomerProfileModal = ({ ctx }) => {
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      {isCancelled ? (
+                                      {isCancelled && (
                                         <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-accent-red/10 text-accent-red flex items-center gap-1">
                                           <X size={10} /> {t('cust_cancelled')}
-                                        </span>
-                                      ) : (
-                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase flex items-center gap-1 ${
-                                          isQualified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                        }`}>
-                                          {isQualified ? <Check size={10} /> : <X size={10} />}
-                                          {isQualified ? t('cust_qualified_yes') : t('cust_qualified_no')}
                                         </span>
                                       )}
                                       <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-bg-tertiary text-text-muted">
@@ -675,11 +649,6 @@ const CustomerProfileModal = ({ ctx }) => {
                                     </div>
                                   </div>
                                   <div className="p-4">
-                                    {!isCancelled && !isQualified && (
-                                      <p className="text-[10px] text-accent-orange mb-3 flex items-center gap-1 font-medium">
-                                        <Info size={10} /> {t('cust_not_qualified_reason', { total: formatPrice(sale.total), min: formatPrice(loyaltyMinAmount) })}
-                                      </p>
-                                    )}
                                     <div className="space-y-2">
                                       {(sale.items || []).map((item, idx) => (
                                         <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-border/50 last:border-0">
