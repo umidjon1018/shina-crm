@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import { Navigate } from 'react-router-dom'
 import { Suspense } from 'react'
 import PageLoader from '../components/PageLoader'
+import UpdateBanner from '../components/UpdateBanner'
 
 export const AuthLayout = () => {
   const { isAuthenticated, deviceStatus } = useAuthStore()
@@ -18,6 +19,7 @@ export const AuthLayout = () => {
       <Suspense fallback={<PageLoader />}>
         <Outlet />
       </Suspense>
+      <UpdateBanner autoApply />
     </div>
   )
 }

@@ -27,6 +27,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { createSale } from '../api/salesService'
 import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
+import UpdateBanner from '../components/UpdateBanner'
 import { useShopStore } from '../store/shopStore'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
@@ -386,6 +387,7 @@ export const MainLayout = () => {
         )}
       </main>
 
+      <UpdateBanner />
       <AnimatePresence>
         {showProfile && (
           <ProfileModal

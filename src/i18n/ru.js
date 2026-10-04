@@ -2590,4 +2590,6 @@ export default {
   sl_off_queue_err: "Не удалось сохранить продажу в очередь",
   sl_off_rejected_title: "Офлайн-продажа отклонена",
   sl_off_rejected_msg: "{{items}}: {{error}}. Проверьте и оформите продажу заново.",
+  pwa_update_ready: "Доступна новая версия приложения",
+  pwa_update_btn: "Обновить",
 }

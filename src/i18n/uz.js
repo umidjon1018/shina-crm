@@ -2599,4 +2599,6 @@ export default {
   sl_off_queue_err: "Sotuvni navbatga yozib bo'lmadi",
   sl_off_rejected_title: "Offlayn sotuv rad etildi",
   sl_off_rejected_msg: "{{items}}: {{error}}. Sotuvni tekshirib, qayta rasmiylashtiring.",
+  pwa_update_ready: "Ilovaning yangi versiyasi tayyor",
+  pwa_update_btn: "Yangilash",
 }

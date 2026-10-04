@@ -28,9 +28,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      selfDestroying: true,
-      devOptions: { enabled: true, type: 'module' },
+      // Ilova fayllari telefonda — internetsiz ham ochiladi. Yangi versiya o'zi qayta yuklamaydi
+      // (sotuv o'rtasida savat yo'qolmasligi uchun) — UpdateBanner orqali qo'llanadi
+      registerType: 'prompt',
+      injectRegister: false,
+      devOptions: { enabled: false },
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'],
       manifest: {
         name: 'Shina CRM | GoodTires',
@@ -50,9 +52,12 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,woff2,webmanifest}'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         navigateFallback: '/index.html',
+        // API so'rovlari service worker'dan o'tmaydi (offlayn ma'lumot keshi alohida — utils/httpCache)
+        navigateFallbackDenylist: [/^\/api\//, /^\/models\//],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
