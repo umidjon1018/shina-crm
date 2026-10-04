@@ -195,6 +195,8 @@ const Sales = () => {
           promoResult: state.promoResult, afterPromo: state.afterPromo, appliedCode: state.appliedCode, setAppliedCode: state.setAppliedCode,
           giftCard: state.giftCard, setGiftCard: state.setGiftCard, giftCardUsed: state.giftCardUsed, codeError: state.codeError,
           setCodeError: state.setCodeError, codeChecking: state.codeChecking, applyCode: state.applyCode, codeIgnored: state.codeIgnored,
+          udsInfo: state.udsInfo, setUdsInfo: state.setUdsInfo, udsPointsInput: state.udsPointsInput, setUdsPointsInput: state.setUdsPointsInput,
+          udsPointsUsed: state.udsPointsUsed, onlineProviders: state.onlineProviders, onlinePayment: state.onlinePayment, setOnlinePayment: state.setOnlinePayment,
           handleDiscountChange, pendingDiscountReqId, setPendingDiscountReqId,
           discountSmallMax, updateNotification,
           paymentType, setPaymentType, cardType, setCardType, installmentOrgId, setInstallmentOrgId,

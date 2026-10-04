@@ -113,6 +113,9 @@ export const createSale = async (saleData) => {
     promo_discount_amount: saleData.promoDiscountAmount || 0,
     gift_card_code: saleData.giftCardCode || null,
     gift_card_used: saleData.giftCardUsed || 0,
+    uds_code: saleData.udsCode || null,
+    uds_points: saleData.udsPoints || 0,
+    online_payment_id: saleData.onlinePaymentId || null,
   })
   return map(data)
 }

@@ -82,6 +82,14 @@ export const PERMISSION_TREE = [
     ]
   },
   {
+    id: 'integrations', label: 'Integratsiyalar', children: [
+      { id: 'integrations.api', label: "Internet-do'kon (API)" },
+      { id: 'integrations.bot', label: 'Telegram botda qoldiq' },
+      { id: 'integrations.uds', label: 'UDS' },
+      { id: 'integrations.payments', label: 'Payme, Click, Apelsin' },
+    ]
+  },
+  {
     id: 'management', label: 'Boshqaruv', children: [
       { id: 'management.notifications', label: 'Ogohlantirishlar' },
       { id: 'management.products', label: 'Tovarlar' },

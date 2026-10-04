@@ -22,7 +22,7 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  Megaphone
+  Megaphone, Plug
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -51,6 +51,7 @@ const PAGE_KEYS = {
   '/income': 'income',
   '/expenses': 'expenses',
   '/marketing': 'marketing',
+  '/integrations': 'integrations',
   '/reports': 'reports',
   '/ai-agent': 'ai_agent',
   '/management': 'management',
@@ -305,6 +306,9 @@ export const MainLayout = () => {
 
           {/* Other */}
           <SidebarSection label={t('nav_other')}>
+            {hasPermission('integrations') && !hidden.includes('integrations') && (
+              <SidebarItem to="/integrations" icon={Plug} label={getSlLabel('integrations') || t('int_page_title')} isActive={isActive('/integrations')} onClick={closeSidebar} replace={isSidebarOpen} />
+            )}
             {hasPermission('ai_agent') && !hidden.includes('aiAgent') && (
               <SidebarItem to="/ai-agent" icon={Bot} label={getSlLabel('aiAgent') || t('ai_agent')} isActive={isActive('/ai-agent')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}

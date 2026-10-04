@@ -282,6 +282,7 @@ function SettingsTab() {
             { key:'marketing', icon:'📣', defaultLabel: t('mkt_page_title') },
             { key:'income', icon:'📈', defaultLabel: t('income') }, { key:'expenses', icon:'💳', defaultLabel: t('fin_page_title') },
             { key:'reports', icon:'📊', defaultLabel: t('reports') }, { key:'aiAgent', icon:'🤖', defaultLabel: t('ai_agent') },
+            { key:'integrations', icon:'🔌', defaultLabel: t('int_page_title') },
             { key:'management', icon:'⚡', defaultLabel: t('management') },
           ].map(({ key, icon, defaultLabel }) => {
             const isHidden = (hiddenPages||[]).includes(key)

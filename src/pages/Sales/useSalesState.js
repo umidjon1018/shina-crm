@@ -22,6 +22,7 @@ import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
 import { resolveCode } from '../../api/marketingService'
+import { getUdsStatus, findUdsCustomer, getPaymentProviders } from '../../api/integrationService'
 import { evaluatePromotions } from '../../utils/promoEngine'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
@@ -279,10 +280,30 @@ export const useSalesState = () => {
   const [giftCard, setGiftCard] = useState(null) // { code, balance }
   const [codeError, setCodeError] = useState('')
   const [codeChecking, setCodeChecking] = useState(false)
+  // UDS va onlayn to'lov (integratsiyalar)
+  const [udsEnabled, setUdsEnabled] = useState(false)
+  const [udsInfo, setUdsInfo] = useState(null) // { code, name, points, maxPoints }
+  const [udsPointsInput, setUdsPointsInput] = useState('')
+  const [onlineProviders, setOnlineProviders] = useState([])
+  const [onlinePayment, setOnlinePayment] = useState(null) // { id, provider }
+  useEffect(() => {
+    getUdsStatus().then(s => setUdsEnabled(!!s.enabled)).catch(() => {})
+    getPaymentProviders().then(setOnlineProviders).catch(() => {})
+  }, [])
+
   const applyCode = async (raw) => {
     const code = String(raw || '').trim()
     if (!code) return false
     setCodeChecking(true); setCodeError('')
+    // UDS kodi — 6 xonali raqam
+    if (udsEnabled && /^\d{6}$/.test(code)) {
+      try {
+        const u = await findUdsCustomer(code, Math.round(total))
+        setUdsInfo(u); setUdsPointsInput('')
+        setCodeChecking(false)
+        return true
+      } catch {}
+    }
     try {
       const r = await resolveCode(code, selectedCustomer?.id)
       if (r.type === 'gift_card') setGiftCard({ code: r.code, balance: r.balance })
@@ -295,7 +316,7 @@ export const useSalesState = () => {
       setCodeChecking(false)
     }
   }
-  const clearMarketing = () => { setAppliedCode(null); setGiftCard(null); setCodeError('') }
+  const clearMarketing = () => { setAppliedCode(null); setGiftCard(null); setCodeError(''); setUdsInfo(null); setUdsPointsInput(''); setOnlinePayment(null) }
 
   // Avtomatik aksiyalar (yetkazib beruvchi chegirmasi mijozga uzatilgan partiyalar ham aksiya sifatida)
   const promoResult = useMemo(() => {
@@ -354,7 +375,10 @@ export const useSalesState = () => {
   const giftCardUsed = (giftCard && paymentType !== 'installment')
     ? Math.max(0, Math.min(Math.floor(giftCard.balance), Math.round(total) - balanceUsed))
     : 0
-  const payable = Math.max(0, Math.round(total) - balanceUsed - giftCardUsed)
+  const udsPointsUsed = (udsInfo && paymentType !== 'installment')
+    ? Math.max(0, Math.min(Math.round(Number(udsPointsInput) || 0), Math.floor(udsInfo.maxPoints || 0), Math.round(total) - balanceUsed - giftCardUsed))
+    : 0
+  const payable = Math.max(0, Math.round(total) - balanceUsed - giftCardUsed - udsPointsUsed)
   const cashbackPreview = (paymentType !== 'installment' && (loyaltyInfo?.cashbackPercent || 0) > 0 && payable > 0 && payable >= (loyaltyInfo?.cashbackMinSale || 0))
     ? Math.round(payable * loyaltyInfo.cashbackPercent / 100)
     : 0
@@ -508,7 +532,7 @@ export const useSalesState = () => {
       })),
       customerId: selectedCustomer?.id || null,
       customerName: selectedCustomer?.name || 'Noma\'lum',
-      paymentType,
+      paymentType: onlinePayment ? 'card' : paymentType,
       installmentMonths: paymentType === 'installment' ? installmentTermMonths : null,
       installmentTermMonths: paymentType === 'installment' ? installmentTermMonths : null,
       installmentOrgId: paymentType === 'installment' ? installmentOrgId : null,
@@ -537,6 +561,9 @@ export const useSalesState = () => {
       promoDetails: promoResult.applied.map(a => ({ promoId: String(a.promoId), name: a.name, kind: a.kind, amount: a.amount, code: a.code })),
       promoDiscountAmount: promoDiscount,
       giftCardCode: giftCardUsed > 0 ? giftCard.code : null,
+      udsCode: udsInfo ? udsInfo.code : null,
+      udsPoints: udsPointsUsed,
+      onlinePaymentId: onlinePayment ? onlinePayment.id : null,
       giftCardUsed,
       bundleDiscountAmount,
       isBundle: cartIsBundleSale,
@@ -548,7 +575,7 @@ export const useSalesState = () => {
       soldByName: (user?.fullName || user?.name || user?.username || 'Xodim'),
       contractNumber: paymentType === 'transfer' ? contractNumber : null,
       contractFileName: paymentType === 'transfer' ? contractFile?.name || null : null,
-      cardType: paymentType === 'card' ? cardType : null,
+      cardType: onlinePayment ? onlinePayment.provider : (paymentType === 'card' ? cardType : null),
       source: source,
       isNewCustomer: isNewCustomer,
       profit: cartItems.reduce((acc, c) => {
@@ -1814,6 +1841,8 @@ export const useSalesState = () => {
     maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
     promoResult, afterPromo, appliedCode, setAppliedCode, giftCard, setGiftCard, giftCardUsed, codeError, setCodeError,
     codeChecking, applyCode, clearMarketing, codeIgnored,
+    udsEnabled, udsInfo, setUdsInfo, udsPointsInput, setUdsPointsInput, udsPointsUsed,
+    onlineProviders, onlinePayment, setOnlinePayment,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
     customerBalance, balanceUsed, payable, cashbackPreview,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,

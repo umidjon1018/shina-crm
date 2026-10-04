@@ -1,12 +1,14 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Gift, Minus, Plus, Search, ShoppingBag, ShoppingCart, Star, Tag, Ticket, Trash2, UserPlus, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CheckCircle2, CreditCard, Gift, Minus, Plus, QrCode, Search, ShoppingBag, ShoppingCart, Star, Tag, Ticket, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 import ProductSearch from '../../../components/sales/ProductSearch'
 import MobileSellBar from '../../../components/sales/MobileSellBar'
+import OnlinePaymentModal from '../../../components/OnlinePaymentModal'
+import { AnimatePresence } from 'framer-motion'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
@@ -35,7 +37,14 @@ const NewSaleTab = ({ ctx }) => {
     customerBalance, balanceUsed, payable, cashbackPreview,
     promoResult, afterPromo, appliedCode, setAppliedCode, giftCard, setGiftCard, giftCardUsed,
     codeError, setCodeError, codeChecking, applyCode, codeIgnored,
+    udsInfo, setUdsInfo, udsPointsInput, setUdsPointsInput, udsPointsUsed,
+    onlineProviders, onlinePayment, setOnlinePayment,
   } = ctx
+  const [showOnlinePay, setShowOnlinePay] = useState(false)
+  const [autoSubmit, setAutoSubmit] = useState(false)
+  useEffect(() => {
+    if (autoSubmit && onlinePayment) { setAutoSubmit(false); handleSubmitSale() }
+  }, [autoSubmit, onlinePayment])
   const [codeInput, setCodeInput] = useState('')
   const promoBlocks = promoResult?.blocksManualDiscount
   const groupPromo = (items) => {
@@ -445,6 +454,22 @@ const NewSaleTab = ({ ctx }) => {
                 </div>
               )}
               {giftCard && paymentType === 'installment' && <p className="text-[11px] text-text-muted">{t('mkt_pos_gc_no_installment')}</p>}
+              {udsInfo && (
+                <div className="rounded-lg bg-purple-500/10 px-3 py-2 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-bold text-purple-500 min-w-0 truncate">UDS · {udsInfo.name || udsInfo.code}{udsInfo.test ? ` (${t('int_test')})` : ''}</span>
+                    <button onClick={() => { setUdsInfo(null); setUdsPointsInput('') }}><X size={13} className="text-purple-500" /></button>
+                  </div>
+                  <p className="text-[11px] text-text-muted">{t('int_uds_points', { points: formatPrice(udsInfo.points, ''), max: formatPrice(udsInfo.maxPoints, '') })}</p>
+                  {paymentType !== 'installment' && udsInfo.maxPoints > 0 && (
+                    <div className="flex gap-2">
+                      <input type="number" min="0" value={udsPointsInput} onChange={e => setUdsPointsInput(e.target.value)} placeholder={t('int_uds_points_ph')}
+                        className="flex-1 min-w-0 px-3 py-1.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-purple-500" />
+                      <button onClick={() => setUdsPointsInput(String(Math.min(udsInfo.maxPoints, Math.round(total))))} className="px-2.5 py-1.5 rounded-lg bg-purple-500 text-white text-xs font-bold">{t('int_uds_max')}</button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -483,6 +508,19 @@ const NewSaleTab = ({ ctx }) => {
                 </button>
               ))}
             </div>
+
+            {onlineProviders?.length > 0 && paymentType !== 'installment' && cartItems.length > 0 && (
+              onlinePayment ? (
+                <div className="flex items-center gap-2 text-xs font-bold text-accent-green bg-accent-green/10 rounded-xl px-3 py-2">
+                  <CheckCircle2 size={14} /> {t('int_pos_paid', { provider: onlinePayment.provider })}
+                </div>
+              ) : (
+                <button onClick={() => setShowOnlinePay(true)} disabled={payable <= 0}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-accent-blue text-accent-blue text-xs font-bold hover:bg-accent-blue/5 disabled:opacity-40">
+                  <QrCode size={15} /> {t('int_pos_qr_btn', { list: onlineProviders.map(p => p.id[0].toUpperCase() + p.id.slice(1)).join(' / ') })}
+                </button>
+              )
+            )}
 
             {paymentType === 'card' && (
               <div className="grid grid-cols-4 gap-2">
@@ -647,6 +685,18 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-base font-syne font-extrabold text-text-primary">{t('sl_ns_total_label')}</span>
               <span className="text-base font-syne font-extrabold text-accent-green">{formatPrice(total, som)}</span>
             </div>
+            {udsPointsUsed > 0 && (
+              <div className="flex justify-between text-xs">
+                <span className="text-purple-500">{t('int_uds_row')}</span>
+                <span className="text-purple-500 font-medium">-{formatPrice(udsPointsUsed, som)}</span>
+              </div>
+            )}
+            {udsPointsUsed > 0 && giftCardUsed === 0 && balanceUsed === 0 && (
+              <div className="flex justify-between">
+                <span className="text-sm font-syne font-extrabold text-text-primary">{t('sl_loy_payable')}</span>
+                <span className="text-sm font-syne font-extrabold text-accent-green">{formatPrice(payable, som)}</span>
+              </div>
+            )}
             {giftCardUsed > 0 && (
               <div className="flex justify-between text-xs">
                 <span className="text-accent-green flex items-center gap-1"><Gift size={11} /> {t('mkt_pos_gc_row')}</span>
@@ -697,6 +747,15 @@ const NewSaleTab = ({ ctx }) => {
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showOnlinePay && (
+          <OnlinePaymentModal amount={payable} providers={onlineProviders} shopId={ctx.selectedShopId !== 'all' ? ctx.selectedShopId : null} customerId={selectedCustomer?.id}
+            paidActionLabel={t('int_pos_finish')}
+            onPaid={(p) => { setOnlinePayment({ id: p.id, provider: p.provider }); setPaymentType('card'); setCardType(p.provider); setShowOnlinePay(false); setAutoSubmit(true) }}
+            onClose={() => setShowOnlinePay(false)} />
+        )}
+      </AnimatePresence>
 
       <MobileSellBar targetRef={sellBtnRef} count={cartItems.length} payLabel={payLabel} total={payable}
         onSell={handleSubmitSale} disabled={sellDisabled} submitting={isSubmitting} label={t('sl_ns_sell_btn')} resetKey={cartItems.length > 0} />
