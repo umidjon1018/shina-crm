@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useLangStore } from '../store/langStore'
 import { useShopStore } from '../store/shopStore'
+import DashboardSummary from '../components/DashboardSummary'
 
 const fmt = (n) => new Intl.NumberFormat('uz-UZ').format(Math.round(n))
 
@@ -139,60 +140,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          icon={TrendingUp}
-          label={t('dash_today_sales')}
-          value={stats.todayTotal > 0 ? fmt(stats.todayTotal) + ' ' + t('dash_so_m') : '—'}
-          sub={t('dash_sales_count', { count: stats.todaySalesCount })}
-          color="bg-green-500/10 text-green-500"
-        />
-        <KpiCard
-          icon={Package}
-          label={t('col_in_stock')}
-          value={stats.inStock + ' ' + t('unit_pcs')}
-          sub={t('dash_all_products')}
-          color="bg-blue-500/10 text-blue-500"
-        />
-        <KpiCard
-          icon={ShoppingCart}
-          label={t('dash_debt')}
-          value={stats.debtUSD > 0 ? '$' + fmt(stats.debtUSD) : '—'}
-          sub={t('dash_debt_sub')}
-          color="bg-red-600/10 text-red-500"
-        />
-        <KpiCard
-          icon={Users}
-          label={t('customers')}
-          value={stats.customers + ' ' + t('unit_pcs')}
-          sub={t('dash_customers_sub')}
-          color="bg-purple-500/10 text-purple-500"
-        />
-      </div>
-
-      {/* Chart */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-6">
-        <h2 className="font-syne font-bold text-lg mb-5">{t('dash_chart_title')}</h2>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={stats.chart} barSize={28}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#888' }} axisLine={false} tickLine={false} />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#888' }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={v => v >= 1000000 ? (v / 1000000).toFixed(1) + 'M' : v >= 1000 ? (v / 1000).toFixed(0) + 'K' : v}
-            />
-            <Tooltip
-              formatter={(v) => [fmt(v) + ' ' + t('dash_so_m'), t('sales')]}
-              contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 12, fontSize: 13, color: '#fff' }}
-              cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-            />
-            <Bar dataKey="total" fill="#E63946" radius={[6, 6, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <DashboardSummary supplierDebtUSD={stats.debtUSD} />
 
       {/* Bottom 2 columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

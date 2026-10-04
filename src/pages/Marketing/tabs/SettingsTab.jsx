@@ -3,6 +3,7 @@ import { AlertCircle, Bot, Cake, CheckCircle2, ExternalLink, Link2, Send } from 
 import { useTranslation } from 'react-i18next'
 import { getTgSettings, saveTgSettings, setupTgWebhook, testTgMessage } from '../../../api/marketingService'
 import { getPromotions } from '../../../api/promotionService'
+import StaffStatsBlock from '../components/StaffStatsBlock'
 
 const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
 const Label = ({ children }) => <label className="text-text-secondary text-xs font-semibold mb-1.5 block">{children}</label>
@@ -139,6 +140,8 @@ const SettingsTab = () => {
           <p className="text-[11px] text-text-muted mt-1">{t('mkt_set_bd_vars')}</p>
         </div>
       </div>
+
+      <div className="xl:col-span-2"><StaffStatsBlock /></div>
 
       <div className="xl:col-span-2 flex items-center gap-3">
         <button onClick={save} disabled={saving} className="px-6 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm disabled:opacity-50">

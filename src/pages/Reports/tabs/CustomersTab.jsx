@@ -47,7 +47,7 @@ const CustomersTab = ({ ctx }) => {
     usedChartCategories,
     getMonthlySalesChart,
     USD_RATE,
-    GOLD_THRESHOLD, SILVER_THRESHOLD,
+    LOYALTY_DESC,
     storeInstallmentOrgs, storeMonthlyTargets, storeEmployeeTargets,
     storeCompanyName,
     MOCK_SALES, MOCK_CUSTOMERS, MOCK_PRODUCTS,
@@ -223,9 +223,9 @@ const CustomersTab = ({ ctx }) => {
                 </div>
                 <div className="space-y-4">
                   {[
-                    { label:t('rep_tier_bronze'), count:customerStats.loyaltyStats.bronze, color:C.orange, desc:`1-${SILVER_THRESHOLD-1} ${t('rep_visits_suffix')}` },
-                    { label:t('rep_tier_silver'), count:customerStats.loyaltyStats.silver, color:C.muted,  desc:`${SILVER_THRESHOLD}-${GOLD_THRESHOLD-1} ${t('rep_visits_suffix')}` },
-                    { label:t('rep_tier_gold'),   count:customerStats.loyaltyStats.gold,   color:'#F59E0B', desc:`${GOLD_THRESHOLD}+ ${t('rep_visits_suffix')}` },
+                    { label:t('rep_tier_bronze'), count:customerStats.loyaltyStats.bronze, color:C.orange, desc:LOYALTY_DESC.bronze },
+                    { label:t('rep_tier_silver'), count:customerStats.loyaltyStats.silver, color:C.muted,  desc:LOYALTY_DESC.silver },
+                    { label:t('rep_tier_gold'),   count:customerStats.loyaltyStats.gold,   color:'#F59E0B', desc:LOYALTY_DESC.gold },
                   ].map(l => (
                     <div key={l.label} className="flex items-center gap-3">
                       <div className="w-16 text-xs font-bold" style={{ color: l.color }}>{l.label}</div>
@@ -422,14 +422,14 @@ const CustomersTab = ({ ctx }) => {
                       }`}>{ { gold: t('rep_tier_gold'), silver: t('rep_tier_silver'), bronze: t('rep_tier_bronze') }[c.loyaltyLevel] || c.loyaltyLevel }</span>
                       <div>
                         <p className="text-text-secondary text-xs">
-                          {c.loyaltyReason === "Tashrif soni to'ldi" ? t('rep_cust_level_reason_visits') : (c.loyaltyReason || t('rep_cust_level_reason_visits'))}
+                          {c.loyaltyReason}
                         </p>
                         <p className="text-text-muted text-xs">{c.loyaltyGrantedAt ? `${c.loyaltyGrantedAt}${t('rep_cust_level_granted_suffix')}` : '—'}</p>
                       </div>
                     </div>
                     {c.nextLevel && (
                       <p className="text-text-muted text-xs text-right">
-                        <span className="font-bold text-accent-orange">+{c.nextLevel.need} {t('rep_visits_suffix')}</span> → {c.nextLevel.level.toUpperCase()}
+                        <span className="font-bold text-accent-orange">+{c.nextLevel.need}</span> → {c.nextLevel.level.toUpperCase()}
                       </p>
                     )}
                   </div>
@@ -634,7 +634,7 @@ const CustomersTab = ({ ctx }) => {
                       </div>
                       {c.nextLevel && (
                         <div className="mt-2 pt-2 border-t border-border/50 text-xs text-text-muted">
-                          {c.nextLevel.level.toUpperCase()}{t('rep_loyalty_need_prefix')}<span className="font-bold text-accent-orange">{c.nextLevel.need} {t('rep_visits_suffix')}</span>
+                          {c.nextLevel.level.toUpperCase()}{t('rep_loyalty_need_prefix')}<span className="font-bold text-accent-orange">{c.nextLevel.need}</span>
                         </div>
                       )}
                     </div>
@@ -690,7 +690,7 @@ const CustomersTab = ({ ctx }) => {
                                 <p className="text-text-primary font-medium">{c.loyaltyGrantedAt}</p>
                                 <p className="text-text-muted text-xs mb-0.5 mt-2">{t('rep_col_grant_reason')}</p>
                                 <p className="text-text-primary text-sm font-medium">
-                                  {c.loyaltyReason === "Tashrif soni to'ldi" ? t('rep_cust_level_reason_visits') : c.loyaltyReason}
+                                  {c.loyaltyReason}
                                 </p>
                               </div>
                             </div>
@@ -732,9 +732,9 @@ const CustomersTab = ({ ctx }) => {
                   className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue/50 mb-4"
                 />
                 {[
-                  { level:'gold',   label:t('rep_tier_gold'),   color:'#F59E0B', desc:`${GOLD_THRESHOLD}+ ${t('rep_visits_suffix')}` },
-                  { level:'silver', label:t('rep_tier_silver'), color: C.muted,  desc:`${SILVER_THRESHOLD}-${GOLD_THRESHOLD-1} ${t('rep_visits_suffix')}` },
-                  { level:'bronze', label:t('rep_tier_bronze'), color: C.orange, desc:`1-${SILVER_THRESHOLD-1} ${t('rep_visits_suffix')}` },
+                  { level:'gold',   label:t('rep_tier_gold'),   color:'#F59E0B', desc:LOYALTY_DESC.gold },
+                  { level:'silver', label:t('rep_tier_silver'), color: C.muted,  desc:LOYALTY_DESC.silver },
+                  { level:'bronze', label:t('rep_tier_bronze'), color: C.orange, desc:LOYALTY_DESC.bronze },
                 ].map(tier => {
                   const members = [...customerStats.ltvList]
                     .filter(c => c.loyaltyLevel === tier.level && (!q || c.name.toLowerCase().includes(q)))
@@ -768,7 +768,7 @@ const CustomersTab = ({ ctx }) => {
                                   <div className="text-right">
                                     <p className="text-text-muted text-xs">{t('rep_lbl_next_level')}</p>
                                     <p className="font-bold text-sm" style={{ color: tier.color }}>
-                                      +{c.nextLevel.need} {t('rep_visits_suffix')} → {c.nextLevel.level.toUpperCase()}
+                                      +{c.nextLevel.need} → {c.nextLevel.level.toUpperCase()}
                                     </p>
                                   </div>
                                 )}

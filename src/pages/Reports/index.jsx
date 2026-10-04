@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { getLoyaltySettings } from '../../api/settingsService'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
@@ -6,7 +7,7 @@ import {
   ChevronDown, ArrowUpRight, ArrowDownRight, ShoppingCart,
   DollarSign, AlertTriangle, Award, Truck, Clock, Target,
   CreditCard, RefreshCw, Activity, Eye,
-  UserCheck, UserX, Repeat, Star, MapPin, CircleX, Recycle
+  UserCheck, UserX, Repeat, Star, MapPin, CircleX, Recycle, Boxes, ArrowLeftRight, Store, PieChart as PieIcon, Send
 } from 'lucide-react'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -27,6 +28,12 @@ import { getIncomeBatches, getSuppliers } from '../../api/incomeService'
 import { getExpenses } from '../../api/expenseService'
 import { getCapital } from '../../api/capitalService'
 import { useShopStore } from '../../store/shopStore'
+import ProductsReportTab from './tabs/ProductsReportTab'
+import MovementTab from './tabs/MovementTab'
+import SupplyTab from './tabs/SupplyTab'
+import ShopsReportTab from './tabs/ShopsReportTab'
+import SegmentsTab from './tabs/SegmentsTab'
+import TelegramStatsButton from './components/TelegramStatsButton'
 import { useDataStore } from '../../store/dataStore'
 import {
   InstagramDM, Modal, Pagination, ModalTable, MonthlyDynamicsChart,
@@ -81,7 +88,7 @@ export const Reports = () => {
     return `${t('rep_month_' + parseInt(mo))} ${y}`
   }
 
-  const { user } = useAuthStore()
+  const { user, hasPermission } = useAuthStore()
   const isPrivileged = user?.role === 'admin' || user?.role === 'manager'
   const {
     employees: storeEmployees,
@@ -149,8 +156,18 @@ export const Reports = () => {
 
   // Bir joyda aniqlangan konstantalar — barcha joylarda shu ishlatiladi
   const USD_RATE         = storeUsdRate              || 12700
-  const GOLD_THRESHOLD   = storeLoyaltyVisitsRequired || 10
-  const SILVER_THRESHOLD = storeSilverVisits || 5
+  // Sodiqlik darajalari (Boshqaruv → Chegirmalar, jamg'arma chegirma): bronze = darajasiz, silver = chegirma darajasida, gold = eng yuqori daraja
+  const [loyaltyCfg, setLoyaltyCfg] = useState(null)
+  useEffect(() => { getLoyaltySettings().then(setLoyaltyCfg).catch(() => {}) }, [])
+  const loyaltyTiers = loyaltyCfg?.discountEnabled ? [...(loyaltyCfg.discountTiers || [])].sort((a, b) => a.minAmount - b.minAmount) : []
+  const tierIndex = (spent) => { let i = -1; loyaltyTiers.forEach((tr, k) => { if (spent >= tr.minAmount) i = k }); return i }
+  const levelOf = (spent) => { const i = tierIndex(spent); return i < 0 ? 'bronze' : i === loyaltyTiers.length - 1 ? 'gold' : 'silver' }
+  const _m = (v) => Math.round(v).toLocaleString('uz-UZ')
+  const LOYALTY_DESC = loyaltyTiers.length ? {
+    bronze: `< ${_m(loyaltyTiers[0].minAmount)}`,
+    silver: loyaltyTiers.length > 1 ? `${_m(loyaltyTiers[0].minAmount)} – ${_m(loyaltyTiers[loyaltyTiers.length - 1].minAmount)}` : '—',
+    gold: `${_m(loyaltyTiers[loyaltyTiers.length - 1].minAmount)}+ (${loyaltyTiers[loyaltyTiers.length - 1].percent}%)`,
+  } : { bronze: '—', silver: '—', gold: '—' }
 
   const getCatLabel = (catId) => {
     if (!catId || catId === '—') return '—'
@@ -193,7 +210,7 @@ export const Reports = () => {
   }
 
   const [showExportMenu, setShowExportMenu] = React.useState(false)
-  const [activeTab, setActiveTab] = useState('sales')
+  const [activeTabRaw, setActiveTab] = useState('sales')
   const [period, setPeriod] = useState('all')
   const [stockCategory, setStockCategory] = useState('all')
 
@@ -904,19 +921,15 @@ export const Reports = () => {
       const lastVisit = (_custSalesAll[_custSalesAll.length - 1]?.soldAt?.slice(0, 10))
         || c.lastVisit
         || TODAY
-      const minAmt2 = storeLoyaltyMinAmount || 100000
-      // Customers.jsx bilan bir xil: yangi + B/U sotuvlardan qualified sotuvlar soni
-      const qualifiedVisits = _custSalesAll.filter(s => s.total >= minAmt2).length
+      const qualifiedVisits = _custSalesAll.length
       // totalVisits = yangi + B/U sotuvlar soni (cancelled emas).
       // MOCK_CUSTOMERS.visits massivi sotuvlar bilan mos kelmaydi,
       // shuning uchun yagona manba sifatida sotuvlar ishlatiladi.
       const totalVisits = _custSalesAll.length
-      const computedLevel = qualifiedVisits >= GOLD_THRESHOLD ? 'gold'
-        : qualifiedVisits >= SILVER_THRESHOLD ? 'silver'
-        : 'bronze'
       // Yangi + B/U sotuvlardan haqiqiy sotuv summasi
       const customerSales = _custSalesAll
       const totalSpent = customerSales.reduce((s,x) => s+x.total, 0)
+      const computedLevel = levelOf(totalSpent)
       // Minimal 30 kun ishlatiladi (yangi mijoz uchun LTV ni oshirib ko'rsatmaslik uchun)
       const days       = Math.max(30, Math.round((new Date(TODAY) - new Date(firstVisit)) / 86400000))
       const avgMonthly = Math.round(totalSpent / (days / 30))
@@ -939,9 +952,8 @@ export const Reports = () => {
         avgInterval = Math.round(intervals.reduce((s,x) => s+x, 0) / intervals.length)
       }
 
-      const nextLevel = computedLevel === 'bronze' ? { level:'silver', need: Math.max(0, SILVER_THRESHOLD - qualifiedVisits) }
-        : computedLevel === 'silver' ? { level:'gold', need: Math.max(0, GOLD_THRESHOLD - qualifiedVisits) }
-        : null
+      const _next = loyaltyTiers[tierIndex(totalSpent) + 1]
+      const nextLevel = _next ? { level: `${_next.percent}%`, need: `${_m(_next.minAmount - totalSpent)} ${t('unit_som')}` } : null
 
       const daysSinceLastVisit = Math.round((new Date(TODAY) - new Date(lastVisit)) / 86400000)
       const churnRisk = daysSinceLastVisit > 180 ? 'high'
@@ -953,15 +965,14 @@ export const Reports = () => {
       const todayMonth = parseInt(TODAY.split('-')[1])
       const isBirthdayMonth = birthMonth === todayMonth
 
-      // loyaltyGrantedAt: Silver/Gold ga o'tgan sana — N-chi qualified sotuv sanasi
-      const threshold = computedLevel === 'gold' ? GOLD_THRESHOLD : computedLevel === 'silver' ? SILVER_THRESHOLD : null
-      const sortedQualified = [..._custSalesAll]
-        .filter(s => s.total >= minAmt2)
-        .sort((a, b) => a.soldAt.localeCompare(b.soldAt))
-      const loyaltyGrantedAt = threshold && sortedQualified[threshold - 1]
-        ? sortedQualified[threshold - 1].soldAt?.slice(0, 10)
-        : null
-      const loyaltyReason = "Tashrif soni to'ldi"
+      // loyaltyGrantedAt: joriy darajaga yetgan sana (jami xarid chegaradan o'tgan sotuv)
+      const _tier = loyaltyTiers[tierIndex(totalSpent)]
+      let loyaltyGrantedAt = null
+      if (_tier) {
+        let acc = 0
+        for (const x of _custSalesAll) { acc += x.total; if (acc >= _tier.minAmount) { loyaltyGrantedAt = x.soldAt?.slice(0, 10); break } }
+      }
+      const loyaltyReason = t('rpt_loyalty_reason_amount')
 
       return {
         ...c, totalVisits, totalSpent, avgMonthly, ltv12m: avgMonthly * 12,
@@ -974,19 +985,8 @@ export const Reports = () => {
       }
     }).sort((a,b) => b.totalSpent - a.totalSpent)
 
-    // loyaltyLevel — ltvList bilan bir xil: MOCK_SALES + MOCK_USED_SALES dan (s.total >= loyaltyMinAmount)
-    const loyaltyStatsRaw = { bronze: 0, silver: 0, gold: 0 }
-    const minAmt = storeLoyaltyMinAmount || 100000
-    shopCustomers.forEach(cust => {
-      const qualified = [
-        ...MOCK_SALES.filter(s => s.customerId === cust.id && s.status !== 'cancelled' && s.total >= minAmt),
-        ...MOCK_USED_SALES.filter(s => s.customerId === cust.id && s.status !== 'cancelled' && s.total >= minAmt),
-      ].length
-      if (qualified >= GOLD_THRESHOLD) loyaltyStatsRaw.gold++
-      else if (qualified >= SILVER_THRESHOLD) loyaltyStatsRaw.silver++
-      else loyaltyStatsRaw.bronze++
-    })
-    const loyaltyStats = loyaltyStatsRaw
+    const loyaltyStats = { bronze: 0, silver: 0, gold: 0 }
+    ltvList.forEach(c => { loyaltyStats[c.loyaltyLevel]++ })
 
     const sourceMap = {}
     completed.forEach(s => {
@@ -1037,7 +1037,7 @@ export const Reports = () => {
       totalCustomers: shopCustomers.length,
       churnRiskList, birthdayList, monthlyRetention,
     }
-  }, [period, filterByPeriod, storeLoyaltyVisitsRequired, storeSilverVisits, storeLoyaltyMinAmount, selectedShopId, MOCK_SALES, MOCK_CUSTOMERS, MOCK_USED_SALES])
+  }, [period, filterByPeriod, loyaltyCfg, selectedShopId, MOCK_SALES, MOCK_CUSTOMERS, MOCK_USED_SALES])
 
   // --- TAB 5: EMPLOYEES ---
   // Oylik sotuv dinamikasi hisoblash (universal)
@@ -1738,14 +1738,22 @@ export const Reports = () => {
   }
 
   const tabs = [
-    { id: 'sales',     label: t('rep_tab_sales'),     icon: ShoppingCart },
-    { id: 'stock',     label: t('rep_tab_stock'),     icon: Package },
-    { id: 'customers', label: t('rep_tab_customers'), icon: UserCheck },
-    { id: 'employees', label: t('rep_tab_employees'), icon: Users },
-    { id: 'finance',   label: t('rep_tab_finance'),   icon: Wallet },
-    { id: 'used',      label: t('rep_tab_used'),      icon: Recycle },
-    { id: 'profit',    label: t('rep_tab_profit'),    icon: TrendingUp },
-  ]
+    { id: 'sales',     label: t('rep_tab_sales'),     icon: ShoppingCart, perm: 'reports.sales' },
+    { id: 'products',  label: t('rpt_tab_products'),  icon: Boxes,        perm: 'reports.products' },
+    { id: 'stock',     label: t('rep_tab_stock'),     icon: Package,      perm: 'reports.stock' },
+    { id: 'movement',  label: t('rpt_tab_movement'),  icon: ArrowLeftRight, perm: 'reports.movement' },
+    { id: 'supply',    label: t('rpt_tab_supply'),    icon: Truck,        perm: 'reports.supply' },
+    { id: 'customers', label: t('rep_tab_customers'), icon: UserCheck,    perm: 'reports.customers' },
+    { id: 'segments',  label: t('rpt_tab_segments'),  icon: PieIcon,      perm: 'reports.customers' },
+    { id: 'employees', label: t('rep_tab_employees'), icon: Users,        perm: 'reports.employees' },
+    { id: 'shops',     label: t('rpt_tab_shops'),     icon: Store,        perm: 'reports.shops' },
+    { id: 'finance',   label: t('rep_tab_finance'),   icon: Wallet,       perm: 'reports.finance' },
+    { id: 'used',      label: t('rep_tab_used'),      icon: Recycle,      perm: 'reports.used' },
+    { id: 'profit',    label: t('rep_tab_profit'),    icon: TrendingUp,   perm: 'reports.profit' },
+  ].filter(tab => hasPermission(tab.perm))
+  const activeTab = tabs.some(x => x.id === activeTabRaw) ? activeTabRaw : (tabs[0]?.id || 'sales')
+  const NEW_TABS = ['products', 'movement', 'supply', 'segments', 'shops']
+  const isNewTab = NEW_TABS.includes(activeTab)
 
   const StatCard = ({ icon: Icon, label, value, sub, color = "bg-accent-red/10 text-accent-red", trend }) => (
     <div className="h-full min-w-0 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-accent-red/50 transition-colors">
@@ -1835,7 +1843,7 @@ export const Reports = () => {
     usedChartCategories,
     getMonthlySalesChart,
     USD_RATE,
-    GOLD_THRESHOLD, SILVER_THRESHOLD,
+    LOYALTY_DESC,
     storeInstallmentOrgs, storeMonthlyTargets, storeEmployeeTargets,
     storeCompanyName, storeProductCategories,
     MOCK_SALES, MOCK_PRODUCTS, MOCK_CUSTOMERS, MOCK_ITEMS,
@@ -1852,7 +1860,9 @@ export const Reports = () => {
           <p className="text-text-secondary">{t('rep_subtitle')}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <TelegramStatsButton />
+          {!isNewTab && (<>
           <div className="relative">
             <select
               value={period}
@@ -1891,6 +1901,7 @@ export const Reports = () => {
               </div>
             )}
           </div>
+          </>)}
         </div>
       </div>
 
@@ -1922,6 +1933,11 @@ export const Reports = () => {
         {activeTab === 'employees' && <EmployeesTab ctx={ctx} />}
         {activeTab === 'finance' && <FinanceTab ctx={ctx} />}
         {activeTab === 'used' && <UsedTab ctx={ctx} />}
+        {activeTab === 'products' && <ProductsReportTab />}
+        {activeTab === 'movement' && <MovementTab />}
+        {activeTab === 'supply' && <SupplyTab />}
+        {activeTab === 'segments' && <SegmentsTab />}
+        {activeTab === 'shops' && <ShopsReportTab />}
       </div>
 
     </motion.div>

@@ -57,9 +57,13 @@ export const PERMISSION_TREE = [
   {
     id: 'reports', label: 'Hisobotlar', children: [
       { id: 'reports.sales', label: 'Sotuv' },
+      { id: 'reports.products', label: 'Tovarlar (savdo, samaradorlik)' },
       { id: 'reports.stock', label: 'Qoldiq' },
+      { id: 'reports.movement', label: 'Ombor harakati, sanaga qoldiq' },
+      { id: 'reports.supply', label: 'Kirim va yetkazib beruvchilar' },
       { id: 'reports.customers', label: 'Mijozlar' },
       { id: 'reports.employees', label: 'Xodimlar' },
+      { id: 'reports.shops', label: "Do'konlar" },
       { id: 'reports.finance', label: 'Moliya' },
       { id: 'reports.used', label: "B/U tovarlar" },
       { id: 'reports.profit', label: 'Foyda' },
