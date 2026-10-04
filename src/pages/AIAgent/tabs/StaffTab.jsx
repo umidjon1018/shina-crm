@@ -322,7 +322,7 @@ Shubhali patternlar: ${suspiciousDiscounts.length > 0 ? suspiciousDiscounts.map(
   }, [analysis])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AgentAnalysisPanel
         loading={loading}
         analysis={analysis}

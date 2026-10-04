@@ -65,7 +65,7 @@ const ProductsReportTab = () => {
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
         <div className="flex gap-1 bg-bg-secondary border border-border rounded-xl p-1">

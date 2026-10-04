@@ -148,20 +148,20 @@ function AuditTab() {
             <thead className="bg-bg-tertiary">
               <tr>
                 {[t('col_time'), t('col_employee'), t('adm_audit_col_action'), t('adm_audit_col_entity'), t('adm_audit_col_detail')].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-text-muted uppercase">{h}</th>
+                  <th key={h} className="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] font-bold text-text-muted uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {paginated.map(l => (
                 <tr key={l.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                  <td className="px-4 py-3 text-xs text-text-muted whitespace-nowrap">{formatDateTime(l.timestamp)}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-text-primary whitespace-nowrap">{l.userName || '—'}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted whitespace-nowrap">{formatDateTime(l.timestamp)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-sm font-semibold text-text-primary whitespace-nowrap">{l.userName || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                     <Badge color={ACTION_COLORS[l.actionKey] || ACTION_COLORS[l.action] || 'bg-bg-tertiary text-text-secondary'}>{l.actionKey ? t(l.actionKey) : l.action}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-xs text-text-muted">{l.entity ? (ENTITY_LABELS[l.entity] || l.entity) : '—'}</td>
-                  <td className="px-4 py-3 text-xs text-text-secondary max-w-[200px] truncate">{l.details || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{l.entity ? (ENTITY_LABELS[l.entity] || l.entity) : '—'}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-secondary max-w-[200px] truncate">{l.details || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -183,7 +183,7 @@ function AuditTab() {
       <AnimatePresence>
         {showClear && (
           <ModalWrap onClose={()=>setShowClear(false)} maxW="max-w-sm">
-            <div className="p-6 text-center space-y-4">
+            <div className="p-4 sm:p-6 text-center space-y-4">
               <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto"><AlertTriangle size={28} className="text-accent-red" /></div>
               <div>
                 <h3 className="font-syne font-bold text-lg">{t('adm_audit_clear_title')}</h3>

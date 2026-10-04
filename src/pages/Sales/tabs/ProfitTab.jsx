@@ -33,27 +33,27 @@ const ProfitTab = ({ ctx }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-6"
     >
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 border border-accent-green/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-green/5 text-accent-green">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
+        <div className="p-4 sm:p-6 border border-accent-green/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-green/5 text-accent-green">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{t('sl_profit_total')}</span>
           <h2 className="text-2xl font-syne font-extrabold mt-3">{formatPrice(totalProfit, som)}</h2>
         </div>
-        <div className="p-6 border border-accent-blue/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-blue/5 text-accent-blue">
+        <div className="p-4 sm:p-6 border border-accent-blue/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-blue/5 text-accent-blue">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{t('sl_profit_sales')}</span>
           <h2 className="text-2xl font-syne font-extrabold mt-3">{formatPrice(totalSales, som)}</h2>
         </div>
-        <div className="p-6 border border-accent-orange/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-orange/5 text-accent-orange">
+        <div className="p-4 sm:p-6 border border-accent-orange/20 rounded-3xl flex flex-col justify-between shadow-sm bg-bg-secondary bg-accent-orange/5 text-accent-orange">
           <span className="text-xs font-bold text-text-muted uppercase tracking-wider">{t('sl_profit_items_sold')}</span>
           <h2 className="text-2xl font-syne font-extrabold mt-3">{t('sl_inst_org_count', { n: totalItemsSold })}</h2>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 sm:mb-6">
           <h3 className="font-syne font-bold text-text-primary text-base">{t('sl_profit_table_title')}</h3>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1 bg-bg-tertiary border border-border rounded-xl p-1">
@@ -118,8 +118,8 @@ const ProfitTab = ({ ctx }) => {
             <tbody className="divide-y divide-border/60">
               {sortedProfitItems.slice((profitPage - 1) * 20, profitPage * 20).map(item => (
                 <tr key={item.id} className={`transition-colors text-text-primary ${item.isCancelled ? 'bg-accent-red/5 text-text-muted' : 'hover:bg-bg-tertiary/20'}`}>
-                  <td className="px-3 py-3 whitespace-nowrap text-text-secondary">{new Date(item.soldAt).toLocaleString('uz-UZ')}</td>
-                  <td className="px-3 py-3 truncate font-bold text-text-primary">
+                  <td className="px-3 py-2 sm:py-3 whitespace-nowrap text-text-secondary">{new Date(item.soldAt).toLocaleString('uz-UZ')}</td>
+                  <td className="px-3 py-2 sm:py-3 truncate font-bold text-text-primary">
                     {(() => {
                       const subItems = item.items || []
                       const visible = subItems.slice(0, 2); const hidden = subItems.slice(2)
@@ -152,14 +152,14 @@ const ProfitTab = ({ ctx }) => {
                     })()}
                   </td>
                   {item.isUsedSale ? (
-                    <td className={`px-3 py-3 ${barcodeSelectClass}`}>
+                    <td className={`px-3 py-2 sm:py-3 ${barcodeSelectClass}`}>
                       <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-accent-orange/10 text-accent-orange whitespace-nowrap">{t('sl_profit_used_badge')}</span>
                     </td>
                   ) : (() => {
                     const barcodes = (item.barcodes && item.barcodes.length > 0) ? item.barcodes : (item.barcode && item.barcode !== '—' ? [item.barcode] : [])
                     const visible = barcodes.slice(0, 2); const hidden = barcodes.slice(2)
                     return (
-                      <td className={`px-3 py-3 font-mono text-text-muted ${barcodeSelectClass}`}>
+                      <td className={`px-3 py-2 sm:py-3 font-mono text-text-muted ${barcodeSelectClass}`}>
                         <div className="flex flex-col gap-0.5">
                           {visible.map((b, i) => <span key={i} className="text-[10px] truncate block">{b}</span>)}
                           {hidden.length > 0 && (
@@ -177,14 +177,14 @@ const ProfitTab = ({ ctx }) => {
                     const catObj = productCategories.find(c => c.label === item.categoryLabel || c.id === item.categoryId)
                     const catLabel = catObj ? t('cat_' + catObj.id, { defaultValue: catObj.label }) : (item.categoryLabel || '—')
                     const catColor = getCategoryColor(catObj?.id, productCategories)
-                    return <td className="px-3 py-3 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
+                    return <td className="px-3 py-2 sm:py-3 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
                   })()}
-                  <td className="px-3 py-3 text-text-secondary truncate">{item.customerName}</td>
-                  <td className="px-3 py-3 text-text-secondary truncate">{item.soldByName}</td>
-                  <td className="px-3 py-3 text-text-secondary whitespace-nowrap">{formatPrice(item.purchaseTotal ?? 0, som)}</td>
-                  <td className="px-3 py-3 text-text-secondary whitespace-nowrap">{formatPrice(item.saleTotal ?? item.totalSale ?? 0, som)}</td>
-                  <td className="px-3 py-3 text-center text-text-secondary">{t('sl_inst_org_count', { n: item.qty })}</td>
-                  <td className="px-3 py-3 text-text-secondary">
+                  <td className="px-3 py-2 sm:py-3 text-text-secondary truncate">{item.customerName}</td>
+                  <td className="px-3 py-2 sm:py-3 text-text-secondary truncate">{item.soldByName}</td>
+                  <td className="px-3 py-2 sm:py-3 text-text-secondary whitespace-nowrap">{formatPrice(item.purchaseTotal ?? 0, som)}</td>
+                  <td className="px-3 py-2 sm:py-3 text-text-secondary whitespace-nowrap">{formatPrice(item.saleTotal ?? item.totalSale ?? 0, som)}</td>
+                  <td className="px-3 py-2 sm:py-3 text-center text-text-secondary">{t('sl_inst_org_count', { n: item.qty })}</td>
+                  <td className="px-3 py-2 sm:py-3 text-text-secondary">
                     <div className="flex flex-col gap-0.5">
                       <span>{item.paymentType === 'cash' ? t('pay_cash') : item.paymentType === 'card' ? t('pay_card') : item.paymentType === 'installment' ? t('pay_installment') : item.paymentType}</span>
                       {item.paymentType === 'card' && item.cardType && (
@@ -192,7 +192,7 @@ const ProfitTab = ({ ctx }) => {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-3 whitespace-nowrap">
+                  <td className="px-3 py-2 sm:py-3 whitespace-nowrap">
                     {item.isCancelled ? (
                       <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-accent-red/10 text-accent-red">Bekor</span>
                     ) : item.paymentType === 'installment' ? (
@@ -203,11 +203,11 @@ const ProfitTab = ({ ctx }) => {
                       <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-accent-green/10 text-accent-green">{t('col_done')}</span>
                     )}
                   </td>
-                  <td className="px-3 py-3 text-text-muted whitespace-nowrap">{item.commission > 0 ? formatPrice(item.commission, som) : '—'}</td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-2 sm:py-3 text-text-muted whitespace-nowrap">{item.commission > 0 ? formatPrice(item.commission, som) : '—'}</td>
+                  <td className="px-3 py-2 sm:py-3">
                     <span className={`text-xs font-extrabold ${item.margin >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{item.margin}%</span>
                   </td>
-                  <td className="px-3 py-3 font-bold text-right whitespace-nowrap">
+                  <td className="px-3 py-2 sm:py-3 font-bold text-right whitespace-nowrap">
                     <span className={item.profit >= 0 ? 'text-accent-green' : 'text-accent-red'}>{formatPrice(item.profit, som)}</span>
                   </td>
                 </tr>
@@ -233,7 +233,7 @@ const ProfitTab = ({ ctx }) => {
 
       {peekProduct && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
-          <div className="bg-bg-secondary border border-border rounded-2xl p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
               <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>

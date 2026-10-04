@@ -75,7 +75,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-border">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <h3 className="font-syne font-bold text-lg text-text-primary">
             {isEdit ? t('exp_cap_form_edit_title') : t('exp_tab_capital')}
           </h3>
@@ -83,7 +83,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
             <X size={18} className="text-text-secondary" />
           </button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           {/* Tur */}
           <div>
             <label className="text-text-secondary text-sm mb-1.5 block">{t('exp_cap_form_type')}</label>
@@ -164,7 +164,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
             </div>
           )}
         </div>
-        <div className="flex gap-3 p-5 border-t border-border">
+        <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary transition-colors text-sm font-medium">{t('cancel')}</button>
           <button onClick={handleSubmit} disabled={loading}
             className="flex-1 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50">

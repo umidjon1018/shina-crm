@@ -119,7 +119,7 @@ const LoginPage = () => {
               <TireIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
             </motion.div>
           )}
-          <h1 className="mt-8 text-4xl lg:text-6xl font-syne font-extrabold text-white tracking-tighter">
+          <h1 className="mt-5 sm:mt-8 text-4xl lg:text-6xl font-syne font-extrabold text-white tracking-tighter">
             {nameMain && <>{nameMain} </>}<span className="text-accent-red">{nameRed}</span>
           </h1>
           <p className="mt-4 text-text-muted text-lg font-dm max-w-[280px]">
@@ -162,11 +162,11 @@ const LoginPage = () => {
             >
               <div className="bg-bg-secondary p-8 lg:p-10 rounded-[2rem] border border-border shadow-2xl">
                 <div className="mb-10">
-                  <h2 className="text-3xl font-syne font-bold text-text-primary">{t('welcome')} 👋</h2>
+                  <h2 className="text-2xl sm:text-3xl font-syne font-bold text-text-primary">{t('welcome')} 👋</h2>
                   <p className="text-text-secondary mt-2">{t('login_subtitle')}</p>
                 </div>
 
-                <form onSubmit={handleCredentials} className="space-y-6">
+                <form onSubmit={handleCredentials} className="space-y-4 sm:space-y-6">
                   <Input
                     label={t('username')}
                     icon={User}
@@ -210,7 +210,7 @@ const LoginPage = () => {
                   </Button>
                 </form>
               </div>
-              <p className="mt-8 text-center text-text-muted text-sm">
+              <p className="mt-5 sm:mt-8 text-center text-text-muted text-sm">
                 {t('login_terms')}{' '}
                 <span className="text-text-secondary hover:underline cursor-pointer">{t('terms_link')}</span>{' '}
                 {t('terms_end')}
@@ -228,9 +228,9 @@ const LoginPage = () => {
               transition={{ duration: 0.3 }}
               className="w-full max-w-md"
             >
-              <div className="bg-bg-secondary p-8 rounded-[2rem] border border-border shadow-2xl">
+              <div className="bg-bg-secondary p-5 sm:p-8 rounded-[2rem] border border-border shadow-2xl">
                 {selfieError && (
-                  <div className="mb-6 bg-accent-red/10 border border-accent-red/20 rounded-xl p-4 flex items-center gap-3 text-accent-red">
+                  <div className="mb-4 sm:mb-6 bg-accent-red/10 border border-accent-red/20 rounded-xl p-4 flex items-center gap-3 text-accent-red">
                     <AlertCircle size={20} />
                     <span className="text-sm font-medium">{selfieError}</span>
                   </div>

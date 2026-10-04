@@ -70,7 +70,7 @@ const CustomerTelegramTab = ({ customer }) => {
         )}
       </div>
       <div className="space-y-2">
-        {list.length === 0 && <p className="text-sm text-text-muted text-center py-6">{t('mkt_tg_cust_empty')}</p>}
+        {list.length === 0 && <p className="text-sm text-text-muted text-center py-4 sm:py-6">{t('mkt_tg_cust_empty')}</p>}
         {list.map(m => (
           <div key={m.id} className="bg-bg-secondary border border-border rounded-xl px-4 py-3">
             <div className="flex items-center justify-between gap-2 text-[11px] mb-1">

@@ -129,7 +129,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
   const colCount = 13
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label={t('wh_bu_in_stock')} value={inStockItems.length} icon={Package} cls="bg-accent-blue/10 text-accent-blue" />
         <StatCard label={t('wh_bu_sold')} value={soldItems.length} icon={CheckCircle} cls="bg-accent-green/10 text-accent-green" />
@@ -211,7 +211,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                     onClick={() => hasDefs && toggleExpand(u._key)}
                     className={`transition-colors ${hasDefs ? 'cursor-pointer' : ''} ${needsAttrs ? 'bg-amber-400/10 hover:bg-amber-400/20' : 'hover:bg-bg-tertiary/50'}`}
                   >
-                    <td className="px-2 py-3.5 whitespace-nowrap text-sm text-text-muted">
+                    <td className="px-2 py-2.5 sm:py-3.5 whitespace-nowrap text-sm text-text-muted">
                       {u.acquiredAt ? (
                         <>
                           <div>{new Date(u.acquiredAt).toLocaleDateString('uz-UZ')}</div>
@@ -219,7 +219,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                         </>
                       ) : '—'}
                     </td>
-                    <td className="px-2 py-3.5 whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         {hasDefs && <span className="text-text-muted flex-shrink-0">{isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span>}
                         {needsAttrs && <AlertTriangle size={13} className="text-amber-500 flex-shrink-0" />}
@@ -227,27 +227,27 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                       </div>
                     </td>
                     <Td nowrap><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></Td>
-                    <td className="px-2 py-3.5 whitespace-nowrap text-sm text-text-muted">
+                    <td className="px-2 py-2.5 sm:py-3.5 whitespace-nowrap text-sm text-text-muted">
                       <div>{u.replacedProductName || '—'}</div>
                       {u.replacedItemBarcode && <div className="text-[10px] font-mono text-text-muted/70 mt-0.5">{u.replacedItemBarcode}</div>}
                     </td>
                     <Td nowrap muted>{u.customerName || '—'}</Td>
-                    <td className="px-2 py-3.5 text-right whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 text-right whitespace-nowrap">
                       <span className="font-medium text-text-primary text-sm">{u.qty}</span>
                     </td>
-                    <td className="px-2 py-3.5 text-right whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 text-right whitespace-nowrap">
                       <span className="font-medium text-text-primary text-sm">{(u.acquiredPrice || 0).toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span>
                     </td>
-                    <td className="px-2 py-3.5 text-right whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 text-right whitespace-nowrap">
                       <span className="font-medium text-text-primary text-sm">{((u.acquiredPrice || 0) * u.qty).toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span>
                     </td>
                     <Td nowrap muted>{u.employeeName || '—'}</Td>
-                    <td className="px-2 py-3.5 whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 whitespace-nowrap">
                       <Badge cls={statusCfg.cls}>{t(statusCfg.key)}</Badge>
                     </td>
-                    <td className="px-2 py-3.5 whitespace-nowrap text-sm text-text-muted">
+                    <td className="px-2 py-2.5 sm:py-3.5 whitespace-nowrap text-sm text-text-muted">
                       {u.soldAt ? (
                         <>
                           <div>{new Date(u.soldAt).toLocaleDateString('uz-UZ')}</div>
@@ -256,7 +256,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                       ) : '—'}
                     </td>
                     <Td nowrap muted>{u.buyerName}</Td>
-                    <td className="px-2 py-3.5 text-right whitespace-nowrap">
+                    <td className="px-2 py-2.5 sm:py-3.5 text-right whitespace-nowrap">
                       {u.totalSellPrice
                         ? <><span className="font-medium text-text-primary text-sm">{u.totalSellPrice.toLocaleString('uz')}</span><span className="text-text-muted text-xs ml-1">{t('dash_so_m')}</span></>
                         : <span className="text-text-muted text-xs">—</span>}
@@ -267,7 +267,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
                   {hasDefs && isExpanded && (
                     <tr key={u._key + '_exp'}>
                       <td colSpan={colCount} className={`px-0 py-0 border-b border-border ${needsAttrs ? 'bg-amber-400/10' : 'bg-bg-tertiary/30'}`}>
-                        <div className="px-8 py-3">
+                        <div className="px-5 sm:px-8 py-3">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="border-b border-border/50">

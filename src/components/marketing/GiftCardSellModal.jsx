@@ -68,10 +68,10 @@ const GiftCardSellModal = ({ shopId, onClose, onSold, presetCode = '' }) => {
           <button onClick={onClose} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
         </div>
         {sold ? (
-          <div className="p-6 space-y-4 text-center">
+          <div className="p-4 sm:p-6 space-y-4 text-center">
             <CheckCircle2 size={40} className="mx-auto text-accent-green" />
             <p className="text-text-secondary text-sm">{t('mkt_gc_sold_msg', { amount: fmt(sold.nominal) })}</p>
-            <div className="rounded-2xl border-2 border-dashed border-accent-red/40 bg-accent-red/5 p-5">
+            <div className="rounded-2xl border-2 border-dashed border-accent-red/40 bg-accent-red/5 p-4 sm:p-5">
               <p className="text-[11px] uppercase tracking-widest text-text-muted mb-1">{t('mkt_gc_code')}</p>
               <p className="font-mono font-extrabold text-2xl text-text-primary tracking-wider break-all">{sold.code}</p>
               <p className="text-sm text-accent-red font-bold mt-1">{fmt(sold.nominal)} {t('unit_som')}</p>

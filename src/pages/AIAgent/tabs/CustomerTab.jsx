@@ -80,7 +80,7 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="bg-bg-primary border border-border rounded-2xl p-6 w-full max-w-md">
+        className="bg-bg-primary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-semibold text-text-primary flex items-center gap-2">
             <Package size={16} className="text-accent-blue" /> Tovar bron qilish
@@ -155,7 +155,7 @@ function CustomerProfileModal({ customer, sales, reservations, onClose, onReserv
         className="bg-bg-primary border border-border rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-bg-primary z-10">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border sticky top-0 bg-bg-primary z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-accent-blue/10 border border-accent-blue/20 flex items-center justify-center text-lg font-bold text-accent-blue">
               {customer.name?.charAt(0)?.toUpperCase() || '?'}
@@ -168,7 +168,7 @@ function CustomerProfileModal({ customer, sales, reservations, onClose, onReserv
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-muted"><X size={16} /></button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-4 sm:p-5 space-y-3 sm:space-y-5">
           {/* Aloqa ma'lumotlari */}
           <div className="grid grid-cols-2 gap-3">
             {customer.phone && (
@@ -488,7 +488,7 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       {/* Auto tahlil */}
       <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#3b82f6]" onTriggerRun={triggerRun} triggering={triggering} source={source} lastRun={lastRun} />
 
@@ -557,14 +557,14 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-bg-secondary">
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">Mijoz</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">Telefon</th>
-                      <th className="text-center px-4 py-3 text-text-secondary font-medium">Daraja</th>
-                      <th className="text-right px-4 py-3 text-text-secondary font-medium">Xaridlar</th>
-                      <th className="text-right px-4 py-3 text-text-secondary font-medium">Jami</th>
-                      <th className="text-right px-4 py-3 text-text-secondary font-medium">Qarz</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">Oxirgi xarid</th>
-                      <th className="px-4 py-3"></th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Mijoz</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Telefon</th>
+                      <th className="text-center px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Daraja</th>
+                      <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Xaridlar</th>
+                      <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Jami</th>
+                      <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Qarz</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">Oxirgi xarid</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -577,7 +577,7 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
                         <tr key={c.id}
                           onClick={() => setProfileModal(c)}
                           className={`border-b border-border/50 hover:bg-bg-secondary/50 transition-colors cursor-pointer ${isAtRisk ? 'bg-red-500/3' : ''}`}>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <div className="flex items-center gap-2">
                               <div>
                                 <p className="font-medium text-text-primary">{c.name}</p>
@@ -587,19 +587,19 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
                               {isAtRisk && <AlertTriangle size={13} className="text-accent-red" title="6 oydan beri kelmagan" />}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-text-muted">{c.phone || '—'}</td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{c.phone || '—'}</td>
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                             <span className={`px-2 py-0.5 rounded-full text-xs border ${badge.cls}`}>{badge.label}</span>
                           </td>
-                          <td className="px-4 py-3 text-right text-text-primary">{c.totalOrders}</td>
-                          <td className="px-4 py-3 text-right text-text-primary">{c.totalSpend > 0 ? c.totalSpend.toLocaleString() + " so'm" : '—'}</td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-primary">{c.totalOrders}</td>
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-primary">{c.totalSpend > 0 ? c.totalSpend.toLocaleString() + " so'm" : '—'}</td>
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             {(c.installmentDebt || 0) > 0
                               ? <span className="text-accent-red">{c.installmentDebt.toLocaleString()} so'm</span>
                               : <span className="text-text-muted">—</span>}
                           </td>
-                          <td className="px-4 py-3 text-text-muted">{c.lastSaleDate ? c.lastSaleDate.slice(0, 10) : '—'}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{c.lastSaleDate ? c.lastSaleDate.slice(0, 10) : '—'}</td>
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <button onClick={e => { e.stopPropagation(); setReserveModal(c) }}
                               className="px-2.5 py-1 rounded-lg text-xs border border-accent-blue/30 text-accent-blue hover:bg-accent-blue/10 transition-colors flex items-center gap-1">
                               <Package size={11} /> Bron

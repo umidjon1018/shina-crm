@@ -25,7 +25,7 @@ export default function PendingApproval() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-md bg-bg-secondary border border-border rounded-2xl p-8 flex flex-col items-center gap-6 text-center"
+        className="w-full max-w-md bg-bg-secondary border border-border rounded-2xl p-5 sm:p-8 flex flex-col items-center gap-3 sm:gap-6 text-center"
       >
         {/* Icon */}
         <div className="relative">

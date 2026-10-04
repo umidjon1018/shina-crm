@@ -97,9 +97,9 @@ const EmployeesTab = ({ ctx }) => {
   } = ctx
 
   return (
-          <motion.div key="employees" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">
+          <motion.div key="employees" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3 sm:space-y-5">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_employees_title')}</h3>
                 <p className="text-sm text-text-secondary">{t('emp_subtitle')}</p>
@@ -135,7 +135,7 @@ const EmployeesTab = ({ ctx }) => {
                   <motion.div
                     key={emp.id}
                     layout
-                    className="bg-bg-secondary border border-border rounded-2xl p-5 flex items-start gap-4 hover:border-border-hover transition-all"
+                    className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex items-start gap-4 hover:border-border-hover transition-all"
                   >
                     {/* Avatar */}
                     <div className="w-12 h-12 bg-accent-red/10 text-accent-red rounded-2xl flex items-center justify-center font-extrabold text-lg flex-shrink-0">

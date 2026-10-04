@@ -78,7 +78,7 @@ const CashflowTab = () => {
   const selectCls = 'bg-bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red cursor-pointer'
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
         <button onClick={load} className="p-2.5 rounded-xl border border-border bg-bg-secondary text-text-secondary hover:text-text-primary">
@@ -137,7 +137,7 @@ const CashflowTab = () => {
               const tot = list.reduce((s, k) => s + k.total, 0)
               return (
                 <div key={d} className="bg-bg-secondary border border-border rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <h3 className="font-syne font-bold text-sm text-text-primary flex items-center gap-2">
                       {d === 'in' ? <ArrowDownLeft size={16} className="text-accent-green" /> : <ArrowUpRight size={16} className="text-accent-red" />}
                       {d === 'in' ? t('fin_cf_in_by_kind') : t('fin_cf_out_by_kind')}
@@ -196,27 +196,27 @@ const CashflowTab = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_date')}</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_type')}</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_note')}</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('fin_cf_account')}</th>
-                      <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
-                      <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_amount')}</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_date')}</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_type')}</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_note')}</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('fin_cf_account')}</th>
+                      <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
+                      <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_amount')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginated.map((r, i) => (
                       <tr key={`${r.kind}-${r.ref}-${r.ts}-${i}`} className="border-b border-border/50 hover:bg-bg-tertiary/50">
-                        <td className="px-4 py-2.5 text-text-secondary whitespace-nowrap text-xs">{fmtTs(r.ts)}</td>
-                        <td className="px-4 py-2.5 whitespace-nowrap">
+                        <td className="px-3 sm:px-4 py-2.5 text-text-secondary whitespace-nowrap text-xs">{fmtTs(r.ts)}</td>
+                        <td className="px-3 sm:px-4 py-2.5 whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${r.dir === 'in' ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
                             {r.dir === 'in' ? <ArrowDownLeft size={11} /> : <ArrowUpRight size={11} />} {kindLabel(r.kind)}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-text-primary max-w-[260px] truncate">{rowNote(r) || '—'}</td>
-                        <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{pmLabel(r.method, t)}</td>
-                        <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{r.who || '—'}</td>
-                        <td className={`px-4 py-2.5 text-right font-semibold whitespace-nowrap ${r.dir === 'in' ? 'text-accent-green' : 'text-accent-red'}`}>
+                        <td className="px-3 sm:px-4 py-2.5 text-text-primary max-w-[260px] truncate">{rowNote(r) || '—'}</td>
+                        <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{pmLabel(r.method, t)}</td>
+                        <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{r.who || '—'}</td>
+                        <td className={`px-3 sm:px-4 py-2.5 text-right font-semibold whitespace-nowrap ${r.dir === 'in' ? 'text-accent-green' : 'text-accent-red'}`}>
                           {r.dir === 'in' ? '+' : '−'}{fmtUZS(r.amount)}
                         </td>
                       </tr>

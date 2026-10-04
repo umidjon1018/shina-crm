@@ -74,7 +74,7 @@ const Warehouse = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-2xl font-syne font-extrabold tracking-tight text-text-primary">{t('warehouse')}</h1>
         <p className="text-text-secondary text-sm">{t('wh_subtitle')}</p>

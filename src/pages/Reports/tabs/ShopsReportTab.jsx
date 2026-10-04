@@ -42,7 +42,7 @@ const ShopsReportTab = () => {
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
       {error && <div className="text-sm text-accent-red bg-accent-red/10 px-4 py-3 rounded-xl">{error}</div>}
       {!data ? <div className="p-12 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div> : (

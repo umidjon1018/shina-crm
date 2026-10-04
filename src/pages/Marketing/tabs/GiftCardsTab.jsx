@@ -124,28 +124,28 @@ const GiftCardsTab = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-xs">
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_gc_code')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_gc_nominal')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_gc_balance')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_status')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_gc_customer')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_gc_sold_at')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_expires')}</th>
-                  <th className="px-4 py-3" />
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_gc_code')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_gc_nominal')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_gc_balance')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_status')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_gc_customer')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_gc_sold_at')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_expires')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3" />
                 </tr>
               </thead>
               <tbody>
-                {paginated.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-text-muted">{t('mkt_gc_empty')}</td></tr>}
+                {paginated.length === 0 && <tr><td colSpan={8} className="px-3 sm:px-4 py-10 text-center text-text-muted">{t('mkt_gc_empty')}</td></tr>}
                 {paginated.map(c => (
                   <tr key={c.id} className="border-b border-border/50 hover:bg-bg-tertiary/40">
-                    <td className="px-4 py-2.5 font-mono font-bold text-text-primary whitespace-nowrap">{c.code}</td>
-                    <td className="px-4 py-2.5 text-right whitespace-nowrap text-text-primary">{fmtMoney(c.nominal)}</td>
-                    <td className="px-4 py-2.5 text-right whitespace-nowrap font-semibold text-accent-green">{fmtMoney(c.balance)}</td>
-                    <td className="px-4 py-2.5"><span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${STATUS[c.status]}`}>{t('mkt_gc_st_' + c.status)}</span></td>
-                    <td className="px-4 py-2.5 text-text-secondary text-xs">{c.customerName || '—'}</td>
-                    <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.soldAt ? `${fmtD(c.soldAt)} · ${pmLabel(c.paymentMethod, t)}` : '—'}</td>
-                    <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.expiresAt ? fmtD(c.expiresAt) : '∞'}</td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-3 sm:px-4 py-2.5 font-mono font-bold text-text-primary whitespace-nowrap">{c.code}</td>
+                    <td className="px-3 sm:px-4 py-2.5 text-right whitespace-nowrap text-text-primary">{fmtMoney(c.nominal)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 text-right whitespace-nowrap font-semibold text-accent-green">{fmtMoney(c.balance)}</td>
+                    <td className="px-3 sm:px-4 py-2.5"><span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${STATUS[c.status]}`}>{t('mkt_gc_st_' + c.status)}</span></td>
+                    <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs">{c.customerName || '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.soldAt ? `${fmtD(c.soldAt)} · ${pmLabel(c.paymentMethod, t)}` : '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.expiresAt ? fmtD(c.expiresAt) : '∞'}</td>
+                    <td className="px-3 sm:px-4 py-2.5">
                       <div className="flex items-center justify-end gap-1">
                         {c.status === 'inactive' && (
                           <button onClick={() => openSell(c.code)} className="px-2 py-1 rounded-lg text-[11px] font-bold bg-accent-red/10 text-accent-red">{t('mkt_gc_sell_btn')}</button>

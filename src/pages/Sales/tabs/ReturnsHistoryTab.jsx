@@ -30,7 +30,7 @@ const ReturnsHistoryTab = ({ ctx }) => {
       exit={{ opacity: 0, y: -15 }}
       className="space-y-4"
     >
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
         <h3 className="font-syne font-bold text-text-primary text-lg mb-4 text-white">{t('sl_rh_title')}</h3>
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
@@ -54,17 +54,17 @@ const ReturnsHistoryTab = ({ ctx }) => {
             </colgroup>
             <thead className="bg-bg-tertiary text-text-muted">
               <tr>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_sale_date')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_cancel_date')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_type')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_returned')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('col_new_product')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('col_customer')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('col_employee')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px] text-right">{t('col_amount')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px] text-right">{t('sl_rh_th_extra')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_payment')}</th>
-                <th className="px-3 py-3 font-bold uppercase text-[10px]">{t('col_reason')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_sale_date')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_cancel_date')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_type')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_returned')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('col_new_product')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('col_customer')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('col_employee')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px] text-right">{t('col_amount')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px] text-right">{t('sl_rh_th_extra')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('sl_rh_th_payment')}</th>
+                <th className="px-3 py-2 sm:py-3 font-bold uppercase text-[10px]">{t('col_reason')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -105,24 +105,24 @@ const ReturnsHistoryTab = ({ ctx }) => {
 
                 return (
                   <tr key={r.id} className="hover:bg-bg-tertiary/20 transition-colors align-top">
-                    <td className="px-3 py-3 text-text-secondary whitespace-nowrap">
+                    <td className="px-3 py-2 sm:py-3 text-text-secondary whitespace-nowrap">
                       {r.soldAt ? new Date(r.soldAt).toLocaleString('uz-UZ', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—'}
                     </td>
-                    <td className="px-3 py-3 text-text-secondary whitespace-nowrap">
+                    <td className="px-3 py-2 sm:py-3 text-text-secondary whitespace-nowrap">
                       {r.returnedAt ? new Date(r.returnedAt).toLocaleString('uz-UZ', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—'}
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-2 sm:py-3">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold whitespace-nowrap ${r.type === 'exchange' ? 'bg-accent-blue/10 text-accent-blue' : 'bg-accent-red/10 text-accent-red'}`}>
                         {r.typeLabel || (r.type === 'exchange' ? t('col_exchange') : t('sl_rh_type_cancel'))}
                       </span>
                     </td>
-                    <td className="px-3 py-3"><StackedItems items={retItems} barcodes={r.barcodes} /></td>
-                    <td className="px-3 py-3">{exItems.length > 0 ? <StackedItems items={exItems} barcodes={r.exBarcodes} /> : <span className="text-text-muted">—</span>}</td>
-                    <td className="px-3 py-3 truncate" title={r.customerName}>
+                    <td className="px-3 py-2 sm:py-3"><StackedItems items={retItems} barcodes={r.barcodes} /></td>
+                    <td className="px-3 py-2 sm:py-3">{exItems.length > 0 ? <StackedItems items={exItems} barcodes={r.exBarcodes} /> : <span className="text-text-muted">—</span>}</td>
+                    <td className="px-3 py-2 sm:py-3 truncate" title={r.customerName}>
                       <span className="font-medium text-text-primary">{r.customerName || '—'}</span>
                       {r.originalCustomerName && <div className="text-[9px] text-text-muted line-through">{r.originalCustomerName}</div>}
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-2 sm:py-3">
                       {r.processedBy && String(r.processedBy) !== String(r.soldBy) ? (
                         <>
                           <div className="text-text-secondary truncate">{r.soldByName || '—'}</div>
@@ -132,9 +132,9 @@ const ReturnsHistoryTab = ({ ctx }) => {
                         <div className="text-text-secondary truncate">{r.processedByName || r.soldByName || '—'}</div>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-right font-bold text-accent-red whitespace-nowrap">{formatPrice(r.displayAmount, som)}</td>
-                    <td className="px-3 py-3 text-right text-text-primary whitespace-nowrap">{(r.additionalPayment || 0) > 0 ? formatPrice(r.additionalPayment, som) : '—'}</td>
-                    <td className="px-3 py-3 text-text-secondary whitespace-nowrap">
+                    <td className="px-3 py-2 sm:py-3 text-right font-bold text-accent-red whitespace-nowrap">{formatPrice(r.displayAmount, som)}</td>
+                    <td className="px-3 py-2 sm:py-3 text-right text-text-primary whitespace-nowrap">{(r.additionalPayment || 0) > 0 ? formatPrice(r.additionalPayment, som) : '—'}</td>
+                    <td className="px-3 py-2 sm:py-3 text-text-secondary whitespace-nowrap">
                       <div className="flex flex-col gap-0.5">
                         <span>{r.payLabel}</span>
                         {r.originalSaleCardType && (
@@ -142,7 +142,7 @@ const ReturnsHistoryTab = ({ ctx }) => {
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-text-muted">
+                    <td className="px-3 py-2 sm:py-3 text-text-muted">
                       <div className="flex items-center gap-1.5">
                         <span className="block truncate flex-1" title={r.reasonLabel || '—'}>{r.reasonLabel || '—'}</span>
                         {r.editCount > 0 && <span className="text-[9px] text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
@@ -176,7 +176,7 @@ const ReturnsHistoryTab = ({ ctx }) => {
 
       {peekProduct && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
-          <div className="bg-bg-secondary border border-border rounded-2xl p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
               <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>

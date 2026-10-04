@@ -37,7 +37,7 @@ const TemplatePicker = ({ onPick, onClose }) => {
           <h3 className="font-syne font-bold text-lg text-text-primary">{t('mkt_tpl_title')}</h3>
           <button onClick={onClose} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
         </div>
-        <div className="p-4 sm:p-5 space-y-5">
+        <div className="p-4 sm:p-5 space-y-3 sm:space-y-5">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-widest text-text-muted mb-2 flex items-center gap-1.5"><Sparkles size={13} /> {t('mkt_tpl_simple')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">{SIMPLE_TEMPLATES.map(tpl => <Card key={tpl.id} tpl={tpl} />)}</div>

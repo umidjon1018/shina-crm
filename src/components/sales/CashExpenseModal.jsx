@@ -46,11 +46,11 @@ const CashExpenseModal = ({ shopId, onClose }) => {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-bg-secondary z-10">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border sticky top-0 bg-bg-secondary z-10">
           <h3 className="font-syne font-bold text-lg text-text-primary flex items-center gap-2"><Banknote size={18} className="text-accent-orange" /> {t('fin_cash_title')}</h3>
           <button onClick={onClose} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           {summary && (
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-bg-tertiary rounded-xl p-2.5">

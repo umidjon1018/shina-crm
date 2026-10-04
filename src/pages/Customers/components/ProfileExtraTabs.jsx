@@ -58,7 +58,7 @@ export const PreferencesTab = ({ sales, products }) => {
 
   if (prefs.total === 0) return <Empty icon={Heart} text={t('cust_pref_empty')} />
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <p className="text-xs text-text-muted">{t('cust_pref_hint', { n: prefs.total })}</p>
       {prefs.groups.map(([label, list]) => {
         const max = list[0][1]
@@ -172,11 +172,11 @@ export const BalanceTab = ({ customer, user, selectedShopId, onChanged }) => {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="bg-bg-secondary border border-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-3 sm:space-y-5">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('cust_balance')}</p>
-          <p className={`text-3xl font-syne font-extrabold ${data.balance > 0 ? 'text-accent-green' : data.balance < 0 ? 'text-accent-red' : 'text-text-primary'}`}>{fmt(data.balance)} {t('unit_som')}</p>
+          <p className={`text-2xl sm:text-3xl font-syne font-extrabold ${data.balance > 0 ? 'text-accent-green' : data.balance < 0 ? 'text-accent-red' : 'text-text-primary'}`}>{fmt(data.balance)} {t('unit_som')}</p>
           <p className="text-xs text-text-muted mt-1">{t('cust_balance_hint')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

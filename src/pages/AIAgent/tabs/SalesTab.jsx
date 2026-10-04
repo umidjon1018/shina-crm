@@ -177,7 +177,7 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
   }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), completedSales.length, usedCompleted.length, totalRevenue, totalProfit, avgMargin, returnRate, totalExpenses, installmentDebt, netCapital])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AgentAnalysisPanel
         loading={loading}
         analysis={analysis}

@@ -35,7 +35,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
           <div>
             <h3 className="font-syne font-bold text-text-primary">{product.name}</h3>
             <p className="text-xs text-text-muted">{product.sku}</p>
@@ -44,7 +44,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto no-scrollbar flex-1 p-6 space-y-5">
+        <div className="overflow-y-auto no-scrollbar flex-1 p-4 sm:p-6 space-y-3 sm:space-y-5">
           {/* Rasm galereya */}
           {images.length > 0 && (
             <div className="space-y-2">

@@ -235,11 +235,11 @@ const ProductsTab = ({ ctx }) => {
   }
 
   return (
-          <motion.div key="products" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+          <motion.div key="products" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4 sm:space-y-6">
             
             {/* QISM 1 — Kategoriyalar bloki */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_categories_title')}</h3>
                   <p className="text-xs text-text-muted">{t('mgmt_categories_subtitle')}</p>
@@ -256,10 +256,10 @@ const ProductsTab = ({ ctx }) => {
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-bg-tertiary">
                     <tr>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_name')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('mgmt_col_turnover')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase text-right">{t('mgmt_col_action')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_name')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('mgmt_col_turnover')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase text-right">{t('mgmt_col_action')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -267,7 +267,7 @@ const ProductsTab = ({ ctx }) => {
                       const isEditing = editingCategory?.id === cat.id
                       return (
                         <tr key={cat.id} className={`hover:bg-bg-tertiary/20 transition-colors ${cat.isActive ? '' : 'opacity-50'}`}>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             {isEditing ? (
                               <input
                                 type="text"
@@ -287,7 +287,7 @@ const ProductsTab = ({ ctx }) => {
                               })()
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             {isEditing ? (
                               <input
                                 type="number"
@@ -299,12 +299,12 @@ const ProductsTab = ({ ctx }) => {
                               <span className="text-text-secondary">{t('mgmt_days_unit', { n: cat.turnoverDays })}</span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cat.isActive ? 'bg-accent-green/10 text-accent-green' : 'bg-bg-tertiary text-text-muted'}`}>
                               {cat.isActive ? t('mgmt_status_active') : t('mgmt_status_inactive')}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             {isEditing ? (
                               <div className="flex items-center justify-end gap-2">
                                 <button
@@ -363,7 +363,7 @@ const ProductsTab = ({ ctx }) => {
             </div>
 
             {/* QISM 1.5 — Xususiyatlar shabloni bloki */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-syne font-bold text-text-primary">Xususiyatlar</h3>
@@ -547,7 +547,7 @@ const ProductsTab = ({ ctx }) => {
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.95, opacity: 0 }}
                       onClick={e => e.stopPropagation()}
-                      className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-sm space-y-4"
+                      className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-sm space-y-4"
                     >
                       {(() => {
                         const affectedCount = (items || []).filter(i => i.status === 'in_stock' && deletingAttrDef.label in (i.attributes || {})).length
@@ -589,7 +589,7 @@ const ProductsTab = ({ ctx }) => {
             </div>
 
             {/* QISM 1.6 — Narxnoma dizayn sozlamalari */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-5">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-5">
               <div>
                 <h3 className="text-xl font-syne font-bold text-text-primary">Narxnoma dizayni</h3>
                 <p className="text-xs text-text-muted mt-0.5">Chop etilgan narxnomaning ko'rinishini sozlang</p>
@@ -713,7 +713,7 @@ const ProductsTab = ({ ctx }) => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
 
                 {/* Header rangi */}
                 <div className="space-y-2">
@@ -862,7 +862,7 @@ const ProductsTab = ({ ctx }) => {
             </div>
 
             {/* QISM 2 — Barkodlar bloki */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 flex flex-col" style={{minHeight: '520px'}}>
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 flex flex-col" style={{minHeight: '520px'}}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
                   <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_barcodes_title')}</h3>
@@ -898,9 +898,9 @@ const ProductsTab = ({ ctx }) => {
                     <table className="w-full text-left text-sm border-collapse">
                       <thead className="bg-bg-tertiary">
                         <tr>
-                          <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('mgmt_col_barcode')}</th>
-                          <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_product')}</th>
-                          <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('mgmt_col_barcode')}</th>
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_product')}</th>
+                          <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
@@ -911,13 +911,13 @@ const ProductsTab = ({ ctx }) => {
 
                           return (
                             <tr key={item.id} className={`hover:bg-bg-tertiary/10 transition-colors ${trCls}`}>
-                              <td className={`px-4 py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>
+                              <td className={`px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>
                                 {item.barcode || '—'}
                               </td>
-                              <td className="px-4 py-3 font-semibold text-text-primary">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-text-primary">
                                 {prodName}
                               </td>
-                              <td className="px-4 py-3">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3">
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}`}>
                                   {statusLabel}
                                 </span>
@@ -927,9 +927,9 @@ const ProductsTab = ({ ctx }) => {
                         })}
                         {Array.from({ length: Math.max(0, ITEMS_PER_PAGE - pagedBarcodeItems.length) }).map((_, i) => (
                           <tr key={`empty-${i}`}>
-                            <td className="px-4 py-3 font-mono text-xs text-transparent select-none">&nbsp;</td>
-                            <td className="px-4 py-3 font-semibold text-transparent select-none">&nbsp;</td>
-                            <td className="px-4 py-3">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs text-transparent select-none">&nbsp;</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-transparent select-none">&nbsp;</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3">
                               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-transparent text-transparent select-none">&nbsp;</span>
                             </td>
                           </tr>
@@ -1001,8 +1001,8 @@ const ProductsTab = ({ ctx }) => {
 
             {/* QISM 3 — Tovarlar ro'yxati */}
             <div className="bg-bg-secondary border border-border rounded-3xl overflow-hidden">
-              <div className="flex flex-col gap-3 px-6 py-4 border-b border-border">
-                <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-b border-border">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h3 className="font-syne font-bold text-text-primary text-lg">{t('mgmt_products_list_title')}</h3>
                     <p className="text-xs text-text-muted">
@@ -1074,7 +1074,7 @@ const ProductsTab = ({ ctx }) => {
                   </colgroup>
                   <thead className="bg-bg-tertiary">
                     <tr>
-                      <th className="px-3 py-3">
+                      <th className="px-3 py-2 sm:py-3">
                         <input
                           type="checkbox"
                           className="w-4 h-4 accent-accent-blue cursor-pointer"
@@ -1106,7 +1106,7 @@ const ProductsTab = ({ ctx }) => {
                           {t('mgmt_col_size_season')} <SortIcon field="size" sortField={sortField} sortDir={sortDir} />
                         </span>
                       </th>
-                      <th className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs">{t('mgmt_col_car_attr')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold uppercase tracking-wider text-xs">{t('mgmt_col_car_attr')}</th>
                       <th
                         className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right cursor-pointer hover:text-text-primary select-none whitespace-nowrap"
                         onClick={() => handleSort('cashPrice')}
@@ -1115,7 +1115,7 @@ const ProductsTab = ({ ctx }) => {
                           {t('mgmt_col_prices')} <SortIcon field="cashPrice" sortField={sortField} sortDir={sortDir} />
                         </span>
                       </th>
-                      <th className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs">{t('mgmt_col_installment')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold uppercase tracking-wider text-xs">{t('mgmt_col_installment')}</th>
                       <th
                         className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right cursor-pointer hover:text-text-primary select-none whitespace-nowrap"
                         onClick={() => handleSort('warrantyDays')}
@@ -1124,9 +1124,9 @@ const ProductsTab = ({ ctx }) => {
                           {t('mgmt_col_warranty_turnover')} <SortIcon field="warrantyDays" sortField={sortField} sortDir={sortDir} />
                         </span>
                       </th>
-                      <th className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right">{t('mgmt_col_stock')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right">{t('mgmt_col_barcode_stock')}</th>
-                      <th className="px-4 py-3 text-right"></th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right">{t('mgmt_col_stock')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold uppercase tracking-wider text-xs text-right">{t('mgmt_col_barcode_stock')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-right"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -1151,7 +1151,7 @@ const ProductsTab = ({ ctx }) => {
 
                       return (
                         <tr key={p.id} className={`transition-colors ${selectedProductIds.has(p.id) ? 'bg-accent-blue/5' : 'hover:bg-bg-tertiary/50'}`}>
-                          <td className="px-3 py-3">
+                          <td className="px-3 py-2 sm:py-3">
                             <input
                               type="checkbox"
                               className="w-4 h-4 accent-accent-blue cursor-pointer"
@@ -1160,7 +1160,7 @@ const ProductsTab = ({ ctx }) => {
                               onClick={e => e.stopPropagation()}
                             />
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <div className="flex items-center gap-2">
                               {productImages[String(p.id)]?.[0] ? (
                                 <img
@@ -1179,7 +1179,7 @@ const ProductsTab = ({ ctx }) => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             {(() => {
                               const catColor = getCategoryColor(p.category, productCategories)
                               return (
@@ -1190,11 +1190,11 @@ const ProductsTab = ({ ctx }) => {
                             })()}
                             {isCatInactive && <span className="text-[10px] text-text-muted ml-1.5">{t('mgmt_cat_inactive')}</span>}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <p className="text-sm font-semibold text-text-primary">{p.size}</p>
                             <p className="text-xs text-text-muted">{seasonText}</p>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             {p.carCategory ? (
                               <div>
                                 <p className="text-xs text-text-muted mb-0.5 truncate" title={p.carCategory}>
@@ -1208,7 +1208,7 @@ const ProductsTab = ({ ctx }) => {
                               <p className="text-sm text-text-secondary">{attrText}</p>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             {isEditing ? (
                               <div className="flex flex-col gap-1 items-end">
                                 <div className="flex items-center gap-2">
@@ -1244,7 +1244,7 @@ const ProductsTab = ({ ctx }) => {
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <div className="flex flex-wrap gap-1">
                               {(p.installmentMonths || []).map(m => (
                                 <span key={m} className="bg-accent-blue/10 text-accent-blue text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -1257,24 +1257,24 @@ const ProductsTab = ({ ctx }) => {
                             </div>
 
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             <p className="text-sm font-semibold text-text-primary">{t('mgmt_warranty_label', { n: p.warrantyDays || 0 })}</p>
                             <p className="text-xs text-text-muted">{t('mgmt_turnover_label', { n: turnover })}</p>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
                               stock === 0 ? 'bg-accent-red/10 text-accent-red' :
                               stock <= threshold ? 'bg-accent-orange/10 text-accent-orange' :
                               'bg-accent-green/10 text-accent-green'
                             }`}>{stock} {pUnit}</span>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             <div>
                               <p className="text-xs font-bold text-accent-green">✓ {barcoded} {pUnit}</p>
                               <p className="text-xs font-bold text-accent-orange">✗ {noBarcode} {pUnit}</p>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => setEditingProduct({ ...p, isModal: true })}
@@ -1300,7 +1300,7 @@ const ProductsTab = ({ ctx }) => {
               </div>
 
               {totalProductPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-border">
                   <p className="text-xs text-text-muted">
                     {Math.min(productsPage * ITEMS_PER_PAGE, sortedProducts.length)} / {sortedProducts.length} ta
                   </p>
@@ -1347,7 +1347,7 @@ const ProductsTab = ({ ctx }) => {
                         onClick={e => e.stopPropagation()}
                         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
                       >
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+                        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
                           <div>
                             <h3 className="font-syne font-bold text-text-primary">Narx o'zgartirish</h3>
                             <p className="text-xs text-text-muted mt-0.5">{bulkSelectedProducts.length} ta tovar tanlandi</p>
@@ -1355,7 +1355,7 @@ const ProductsTab = ({ ctx }) => {
                           <button onClick={() => setBulkPriceModal(false)} className="p-2 rounded-xl hover:bg-bg-tertiary text-text-muted transition-colors"><X size={18} /></button>
                         </div>
 
-                        <div className="overflow-y-auto no-scrollbar flex-1 p-6 space-y-5">
+                        <div className="overflow-y-auto no-scrollbar flex-1 p-4 sm:p-6 space-y-3 sm:space-y-5">
                           {/* Qaysi narxni o'zgartirish */}
                           <div className="space-y-2">
                             <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Qaysi narxni o'zgartirish</p>
@@ -1485,7 +1485,7 @@ const ProductsTab = ({ ctx }) => {
                           )}
                         </div>
 
-                        <div className="px-6 py-4 border-t border-border flex-shrink-0 flex gap-3">
+                        <div className="px-4 sm:px-6 py-4 border-t border-border flex-shrink-0 flex gap-3">
                           <button onClick={() => setBulkPriceModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors">
                             Bekor qilish
                           </button>
@@ -1530,9 +1530,9 @@ const ProductsTab = ({ ctx }) => {
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.95, opacity: 0 }}
-                        className="bg-bg-secondary border border-border rounded-[2rem] p-8 w-full max-w-lg shadow-glow-red overflow-y-auto max-h-[90vh] no-scrollbar text-left"
+                        className="bg-bg-secondary border border-border rounded-[2rem] p-5 sm:p-8 w-full max-w-lg shadow-glow-red overflow-y-auto max-h-[90vh] no-scrollbar text-left"
                       >
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
                           <div>
                             <h3 className="text-xl font-syne font-extrabold text-text-primary">
                               {editingProduct.isNew ? t('mgmt_add_product_title') : t('mgmt_edit_product_title')}
@@ -1546,7 +1546,7 @@ const ProductsTab = ({ ctx }) => {
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-2 gap-4 mb-4 sm:mb-6">
                           {/* SECTION 1: Asosiy ma'lumotlar */}
                           <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1">
                             {t('mgmt_section_basic')}
@@ -1735,7 +1735,7 @@ const ProductsTab = ({ ctx }) => {
                             {t('mgmt_section_installment')}
                           </p>
 
-                          <div className="col-span-2 flex gap-6 py-2">
+                          <div className="col-span-2 flex gap-3 sm:gap-6 py-2">
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input type="checkbox" id="p_inst_3" value="3" defaultChecked={editingProduct.installmentMonths?.includes(3)} className="accent-accent-blue w-4 h-4" />
                               <span className="text-sm text-text-primary font-semibold">{t('mgmt_months_unit', { n: 3 })}</span>
@@ -1847,9 +1847,9 @@ const ProductsTab = ({ ctx }) => {
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.9, opacity: 0 }}
-                      className="bg-bg-secondary border border-accent-red/30 rounded-[2rem] p-8 w-full max-w-sm shadow-glow-red"
+                      className="bg-bg-secondary border border-accent-red/30 rounded-[2rem] p-5 sm:p-8 w-full max-w-sm shadow-glow-red"
                     >
-                      <div className="text-center space-y-4 mb-6">
+                      <div className="text-center space-y-4 mb-4 sm:mb-6">
                         <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto">
                           <Trash2 size={24} className="text-accent-red" />
                         </div>

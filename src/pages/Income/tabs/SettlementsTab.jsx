@@ -76,7 +76,7 @@ const LedgerModal = ({ supplier, rows, shopLabel, onClose, t }) => {
                   <td className={`px-3 py-2 text-right font-bold ${balanceCls(l.balance)}`}>{usd(l.balance)}</td>
                 </tr>
               ))}
-              {lines.length === 0 && <tr><td colSpan="6" className="px-3 py-8 text-center text-text-muted">{t('sup_no_entries')}</td></tr>}
+              {lines.length === 0 && <tr><td colSpan="6" className="px-3 py-5 sm:py-8 text-center text-text-muted">{t('sup_no_entries')}</td></tr>}
             </tbody>
           </table>
         </div>
@@ -185,29 +185,29 @@ const SettlementsTab = ({ ctx }) => {
           <table className="w-full text-sm min-w-[760px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
               <tr>
-                <th className="px-4 py-3 text-left">{t('sup_supplier')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_purchased')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_paid')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_returned')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_balance')}</th>
-                <th className="px-4 py-3 text-right"></th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_supplier')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_purchased')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_paid')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_returned')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_balance')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {list.map(x => (
                 <tr key={x.s.id} className="hover:bg-bg-tertiary/40">
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <p className="font-bold text-text-primary">{x.s.name}</p>
                     <p className="text-[11px] text-text-muted">{x.s.phone}{x.overdue > 0 && <span className="text-accent-red font-bold"> · {t('sup_overdue_n', { n: x.overdue })}</span>}</p>
                   </td>
-                  <td className="px-4 py-3 text-right">{usd(x.purchased)}</td>
-                  <td className="px-4 py-3 text-right text-accent-blue">{usd(x.paid)}</td>
-                  <td className="px-4 py-3 text-right text-accent-orange">{x.returned ? usd(x.returned) : '—'}</td>
-                  <td className={`px-4 py-3 text-right font-extrabold ${balanceCls(x.balance)}`}>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">{usd(x.purchased)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-blue">{usd(x.paid)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-orange">{x.returned ? usd(x.returned) : '—'}</td>
+                  <td className={`px-3 sm:px-4 py-2 sm:py-3 text-right font-extrabold ${balanceCls(x.balance)}`}>
                     {usd(Math.abs(x.balance))}
                     <p className="text-[10px] font-normal text-text-muted">{x.balance > 0.005 ? t('sup_we_owe') : x.balance < -0.005 ? t('sup_they_owe') : t('sup_settled')}</p>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex justify-end gap-1.5">
                       <button onClick={() => setLedgerFor(x.s)} title={t('sup_act_title')} className="px-2.5 py-1.5 rounded-lg bg-bg-tertiary border border-border text-text-primary text-xs font-bold flex items-center gap-1"><FileText size={14} />{t('sup_act_short')}</button>
                       {x.openDebt > 0 && <button onClick={() => setPayFor(x)} className="px-2.5 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-bold flex items-center gap-1"><Wallet size={14} />{t('sup_pay_short')}</button>}
@@ -215,7 +215,7 @@ const SettlementsTab = ({ ctx }) => {
                   </td>
                 </tr>
               ))}
-              {list.length === 0 && <tr><td colSpan="6" className="px-4 py-12 text-center text-text-muted"><Scale size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_entries')}</td></tr>}
+              {list.length === 0 && <tr><td colSpan="6" className="px-3 sm:px-4 py-12 text-center text-text-muted"><Scale size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_entries')}</td></tr>}
             </tbody>
           </table>
         </div>

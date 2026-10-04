@@ -490,7 +490,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl"
               >
                 <div className="flex items-start gap-3 mb-4">
                   <Trash2 size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
@@ -576,7 +576,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl"
             >
               <div className="flex items-start gap-3 mb-4">
                 <AlertCircle size={20} className="text-accent-orange flex-shrink-0 mt-0.5" />
@@ -624,7 +624,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 max-w-sm w-full shadow-2xl"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-syne font-bold text-text-primary">Xususiyatlarni o'zgartirish</h3>
@@ -714,7 +714,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 const totalDownload = allGroupItems[0]?.downloadCount || 0
                 return (
                   <>
-                    <div className="flex items-start justify-between p-5 border-b border-border">
+                    <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border">
                       <div>
                         <h3 className="font-syne font-bold text-text-primary">{selectedProduct?.name}</h3>
                         <p className="text-xs text-text-muted mt-0.5">Umumiy barkod · {allGroupItems.length} ta tovar</p>
@@ -727,13 +727,13 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                       </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
                       {/* Barkod + statistika */}
                       <div>
                         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accent-green/10 border border-accent-green/30 ${barcodeSelectClass}`}>
                           <span className="font-mono text-sm font-bold text-accent-green">{detailModal.barcode}</span>
                         </div>
-                        <div className="bg-bg-tertiary rounded-xl p-4 flex items-center gap-6 mt-2">
+                        <div className="bg-bg-tertiary rounded-xl p-4 flex items-center gap-3 sm:gap-6 mt-2">
                           <svg id="modal-group-bc" className="text-text-primary flex-shrink-0" style={{ width: 200 }} />
                           <div className="grid grid-cols-2 gap-3">
                             <div className="bg-bg-secondary rounded-lg p-2.5 text-center">
@@ -803,7 +803,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                 const groupItem = withBarcode[0]
                 return (
                   <>
-                    <div className="flex items-start justify-between p-5 border-b border-border">
+                    <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border">
                       <div>
                         <h3 className="font-syne font-bold text-text-primary">{selectedProduct?.name}</h3>
                         <p className="text-xs text-text-muted mt-0.5">Kirim: {batchDate}{batch.supplierName ? ` · ${batch.supplierName}` : ''}</p>
@@ -816,9 +816,9 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                       </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
                       {withBarcode.length === 0 && (
-                        <div className="text-center py-8">
+                        <div className="text-center py-5 sm:py-8">
                           <Tag size={32} className="text-text-muted mx-auto mb-2" />
                           <p className="text-sm text-text-muted">Bu kirim uchun hali barkod yaratilmagan</p>
                         </div>
@@ -833,7 +833,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-accent-green/10 border border-accent-green/30 ${barcodeSelectClass}`}>
                             <span className="font-mono text-sm font-bold text-accent-green">{uniqueBarcodes[0]}</span>
                           </div>
-                          <div className="bg-bg-tertiary rounded-xl p-4 flex items-center gap-6">
+                          <div className="bg-bg-tertiary rounded-xl p-4 flex items-center gap-3 sm:gap-6">
                             <svg id="modal-group-bc" className="text-text-primary flex-shrink-0" style={{ width: 200 }} />
                             <div className="space-y-2">
                               <div className="grid grid-cols-2 gap-3">
@@ -944,9 +944,9 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         )}
       </AnimatePresence>
 
-      <div className="grid lg:grid-cols-5 gap-6">
+      <div className="grid lg:grid-cols-5 gap-3 sm:gap-6">
         {/* Chap: mahsulot ro'yxati */}
-        <div className="lg:col-span-2 bg-bg-secondary border border-border rounded-2xl p-5 space-y-4">
+        <div className="lg:col-span-2 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4">
           <h3 className="font-syne font-bold text-text-primary">{t('wh_bc_select_product')}</h3>
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -983,7 +983,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         </div>
 
         {/* O'ng: batch kartalar (3 bo'lim) */}
-        <div className="lg:col-span-3 bg-bg-secondary border border-border rounded-2xl p-5 flex flex-col gap-4">
+        <div className="lg:col-span-3 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
           {!selectedProduct ? (
             <div className="flex flex-col items-center justify-center flex-1 py-16 gap-3">
               <Tag size={40} className="text-text-muted" />
@@ -1282,7 +1282,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         </div>
 
         {/* Barcha barkodlar jadvali */}
-        <div className="lg:col-span-5 bg-bg-secondary border border-border rounded-2xl p-6 flex flex-col mt-6" style={{ minHeight: '520px' }}>
+        <div className="lg:col-span-5 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 flex flex-col mt-4 sm:mt-6" style={{ minHeight: '520px' }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-syne font-bold text-text-primary">{t('wh_bc_all_title')}</h3>
@@ -1303,19 +1303,19 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'auto' }}>
               <thead className="bg-bg-tertiary">
                 <tr>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('batchDate')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('batchDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_income_date')} <SortIcon field="batchDate" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('productName')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('productName')}>
                     <span className="inline-flex items-center gap-1">{t('col_product')} <SortIcon field="productName" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('barcodeDate')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('barcodeDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_bc_date')} <SortIcon field="barcodeDate" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Rejim</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Chop/Yuk</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('status')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Rejim</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider whitespace-nowrap">Chop/Yuk</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort1('status')}>
                     <span className="inline-flex items-center gap-1">{t('col_status')} <SortIcon field="status" sortField={sort1Field} sortDir={sort1Dir} /></span>
                   </th>
                 </tr>
@@ -1332,26 +1332,26 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   const isGroupBc = item.barcode && item.barcode.includes('-G')
                   return (
                     <tr key={item.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                      <td className="px-4 py-3 text-xs text-text-muted">{batchDate}</td>
-                      <td className="px-4 py-3 font-semibold text-text-primary truncate">{item.productName}</td>
-                      <td className="px-4 py-3 text-xs text-text-muted">{barcodeDate}</td>
-                      <td className={`px-4 py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>{item.barcode || '—'}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{batchDate}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-text-primary truncate">{item.productName}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{barcodeDate}</td>
+                      <td className={`px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>{item.barcode || '—'}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         {item.barcode && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isGroupBc ? 'bg-accent-blue/10 text-accent-blue' : 'bg-bg-tertiary text-text-muted'}`}>
                             {isGroupBc ? 'Umumiy' : 'Alohida'}
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-text-muted whitespace-nowrap">{countLabel}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted whitespace-nowrap">{countLabel}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${cls}`}>{label}</span>
                       </td>
                     </tr>
                   )
                 })}
                 {allBarcodesPagedItems.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_not_found')}</td></tr>
+                  <tr><td colSpan={7} className="px-3 sm:px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_not_found')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -1370,7 +1370,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         </div>
 
         {/* Sotilgan tovarlar jadvali */}
-        <div className="lg:col-span-5 bg-bg-secondary border border-border rounded-2xl p-6 flex flex-col mt-6" style={{ minHeight: '420px' }}>
+        <div className="lg:col-span-5 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 flex flex-col mt-4 sm:mt-6" style={{ minHeight: '420px' }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-syne font-bold text-text-primary">{t('wh_bc_sold_title')}</h3>
@@ -1391,18 +1391,18 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'auto' }}>
               <thead className="bg-bg-tertiary">
                 <tr>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('batchDate')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('batchDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_income_date')} <SortIcon field="batchDate" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('productName')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('productName')}>
                     <span className="inline-flex items-center gap-1">{t('col_product')} <SortIcon field="productName" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('barcodeDate')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('barcodeDate')}>
                     <span className="inline-flex items-center gap-1">{t('wh_bc_bc_date')} <SortIcon field="barcodeDate" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_bc_sold_date')}</th>
-                  <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('status')}>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_modal_barcode')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider">{t('wh_bc_sold_date')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase tracking-wider cursor-pointer hover:text-text-primary select-none whitespace-nowrap" onClick={() => handleSort2('status')}>
                     <span className="inline-flex items-center gap-1">{t('col_status')} <SortIcon field="status" sortField={sort2Field} sortDir={sort2Dir} /></span>
                   </th>
                 </tr>
@@ -1414,19 +1414,19 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
                   const soldDate = item.soldAt ? new Date(item.soldAt).toLocaleDateString('uz-UZ') : (item.barcodeCreatedAt ? new Date(item.barcodeCreatedAt).toLocaleDateString('uz-UZ') : '—')
                   return (
                     <tr key={item.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                      <td className="px-4 py-3 text-xs text-text-muted">{batchDate}</td>
-                      <td className="px-4 py-3 font-semibold text-text-primary truncate">{item.productName}</td>
-                      <td className="px-4 py-3 text-xs text-text-muted">{barcodeDate}</td>
-                      <td className={`px-4 py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>{item.barcode}</td>
-                      <td className="px-4 py-3 text-xs text-text-muted">{soldDate}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{batchDate}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-text-primary truncate">{item.productName}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{barcodeDate}</td>
+                      <td className={`px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs text-text-primary ${barcodeSelectClass}`}>{item.barcode}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-muted">{soldDate}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-bg-tertiary text-text-muted">{t('sold')}</span>
                       </td>
                     </tr>
                   )
                 })}
                 {soldPagedItems.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_sold_not_found')}</td></tr>
+                  <tr><td colSpan={6} className="px-3 sm:px-4 py-12 text-center text-xs text-text-muted">{t('wh_bc_sold_not_found')}</td></tr>
                 )}
               </tbody>
             </table>

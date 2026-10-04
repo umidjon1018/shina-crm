@@ -345,7 +345,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   }, 0)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label={t('wh_stat_total')} value={shopProducts.length} icon={Package} cls="bg-accent-blue/10 text-accent-blue" />
         <StatCard label={t('wh_stat_low')} value={shopProducts.filter(p => shopStockStatus(p) === 'low').length} icon={AlertTriangle} cls="bg-accent-orange/10 text-accent-orange" />
@@ -492,7 +492,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     className={`transition-colors cursor-pointer ${needsAttrs ? 'bg-amber-400/20 hover:bg-amber-400/30' : 'hover:bg-bg-tertiary/50'}`}
                     onClick={() => toggleExpand(p.id)}
                   >
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       <div className="flex items-center gap-2">
                         <span className="text-text-muted flex-shrink-0">
                           {expandedProducts.has(p.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -534,12 +534,12 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     <Td><Badge cls={SEASON_COLORS[p.season] || 'text-text-muted bg-bg-tertiary'}>{t('season_' + p.season) || '—'}</Badge></Td>
                     <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>
                     {(() => { const unit = getProductUnit(p.id); const tr = transferSummary[String(p.id)]; const netTr = tr ? (tr.in - tr.out) : 0; return (<>
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="text-text-secondary">{batches.filter(b => b.productId === p.id && b.batchType !== 'transfer_in').reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
                     {selectedShopId !== 'all' && (
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                         {netTr === 0 ? (
                           <span className="text-text-muted text-xs">—</span>
                         ) : (
@@ -549,27 +549,27 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         )}
                       </td>
                     )}
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="font-bold text-text-primary">{shopStock(p.id)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="text-text-secondary">{shopItemCount(p.id, 'sold')}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
                     </>) })()}
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="font-medium text-text-primary text-sm">{p.cashPrice.toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{som}</span>
                     </td>
                     {canSeePurchasePrice && (
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                         {maxPurchasePrice > 0
                           ? <><span className="font-medium text-accent-orange text-sm">{maxPurchasePrice.toLocaleString('uz')}</span><span className="text-text-muted text-xs ml-1">{som}</span></>
                           : <span className="text-text-muted text-xs">—</span>}
                       </td>
                     )}
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       {(() => {
                         const soldSales = items.filter(i => i.productId === p.id && i.soldAt && shopBatchIds.has(i.batchId))
                         if (soldSales.length === 0) return <span className="text-text-muted text-xs">—</span>
@@ -586,10 +586,10 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         return <span className={`text-xs font-medium ${cls}`}>{label}</span>
                       })()}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       <Badge cls={cls}><StatusIcon size={12} />{label}</Badge>
                     </td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center">
                       <button
                         onClick={e => { e.stopPropagation(); setSelectedProduct(p) }}
                         className="p-2 rounded-lg hover:bg-bg-tertiary text-text-muted hover:text-accent-blue transition-colors"
@@ -617,7 +617,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     return (
                       <tr>
                         <td colSpan={colCount} className={`px-0 py-0 border-b border-border ${needsAttrs ? 'bg-amber-400/10' : 'bg-bg-tertiary/30'}`}>
-                          <div className="px-8 py-3">
+                          <div className="px-5 sm:px-8 py-3">
                             {inStockItems.length === 0 ? (
                               <p className="text-xs text-text-muted py-2">Omborda birlik yo'q</p>
                             ) : (
@@ -841,7 +841,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-md space-y-4"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-syne font-bold text-text-primary text-lg flex items-center gap-2">
@@ -851,11 +851,11 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
               </div>
 
               {trSuccess ? (
-                <div className="text-center py-6 space-y-3">
+                <div className="text-center py-4 sm:py-6 space-y-3">
                   <CheckCircle size={40} className="text-accent-green mx-auto" />
                   <p className="font-bold text-text-primary">Ko'chirildi!</p>
                   <p className="text-sm text-text-muted">{trQty} ta <strong>{trProduct?.name}</strong> muvaffaqiyatli ko'chirildi.</p>
-                  <button onClick={() => setTransferModal(false)} className="px-6 py-2 bg-accent-green text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Yopish</button>
+                  <button onClick={() => setTransferModal(false)} className="px-4 sm:px-6 py-2 bg-accent-green text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Yopish</button>
                 </div>
               ) : (
                 <>
@@ -939,7 +939,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-2xl space-y-4 max-h-[80vh] flex flex-col"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-2xl space-y-4 max-h-[80vh] flex flex-col"
             >
               <div className="flex items-center justify-between flex-shrink-0">
                 <h3 className="font-syne font-bold text-text-primary text-lg flex items-center gap-2">

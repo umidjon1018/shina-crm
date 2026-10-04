@@ -252,7 +252,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
 
                   return (
                     <tr key={p.id} className="hover:bg-bg-tertiary/50 transition-colors">
-                      <td className="px-2 sm:px-4 py-3 break-words">
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 break-words">
                         <p className="font-medium text-text-primary">{p.name}</p>
                         <p className="text-xs text-text-muted">{t('cat_' + p.category, { defaultValue: p.categoryLabel })} · {p.size}</p>
                         {hasActive && canAdd && (
@@ -262,10 +262,10 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                           <span className="block text-[11px] text-accent-red font-semibold">{reason}</span>
                         )}
                       </td>
-                      <td className="px-1 sm:px-4 py-3 text-right font-medium text-text-primary sm:whitespace-nowrap">
+                      <td className="px-1 sm:px-4 py-2 sm:py-3 text-right font-medium text-text-primary sm:whitespace-nowrap">
                         {formatPrice(p.cashPrice)}
                       </td>
-                      <td className="px-1 sm:px-4 py-3 text-right">
+                      <td className="px-1 sm:px-4 py-2 sm:py-3 text-right">
                         <span className={`inline-block px-1.5 sm:px-2 py-0.5 rounded-md text-xs font-bold ${
                           (reason || available.length === 0) ? 'bg-accent-red/10 text-accent-red' :
                           !allowSold && available.length <= (p.lowStockThreshold || 3) ? 'bg-accent-orange/10 text-accent-orange' :
@@ -274,7 +274,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                           {allowSold ? available.length : (reason ? inStockAll : available.length - inCartCount)} {available[0]?.unit || 'dona'}
                         </span>
                       </td>
-                      <td className="pl-1 pr-2 sm:px-4 py-3 text-right">
+                      <td className="pl-1 pr-2 sm:px-4 py-2 sm:py-3 text-right">
                         <button
                           onClick={() => handleAdd(p)}
                           disabled={!canAdd}

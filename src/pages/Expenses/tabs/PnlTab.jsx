@@ -55,16 +55,16 @@ const PnlTab = () => {
     const good = sign > 0 ? (a - b) >= 0 : (a - b) <= 0
     return (
       <tr className={`border-b border-border/50 ${highlight ? 'bg-bg-tertiary/60' : ''}`}>
-        <td className={`px-4 py-2.5 ${strong ? 'font-bold text-text-primary' : 'text-text-secondary'}`} style={{ paddingLeft: 16 + level * 20 }}>
+        <td className={`px-3 sm:px-4 py-2.5 ${strong ? 'font-bold text-text-primary' : 'text-text-secondary'}`} style={{ paddingLeft: 16 + level * 20 }}>
           {label}{hint && <span className="text-text-muted text-xs ml-1.5">{hint}</span>}
         </td>
-        <td className={`px-4 py-2.5 text-right whitespace-nowrap ${strong ? 'font-bold' : ''} ${a < 0 ? 'text-accent-red' : 'text-text-primary'}`}>
+        <td className={`px-3 sm:px-4 py-2.5 text-right whitespace-nowrap ${strong ? 'font-bold' : ''} ${a < 0 ? 'text-accent-red' : 'text-text-primary'}`}>
           {sign < 0 && a > 0 ? '−' + fmtUZS(a) : fmtUZS(a)}
         </td>
-        <td className="px-4 py-2.5 text-right whitespace-nowrap text-text-muted hidden sm:table-cell">
+        <td className="px-3 sm:px-4 py-2.5 text-right whitespace-nowrap text-text-muted hidden sm:table-cell">
           {sign < 0 && b > 0 ? '−' + fmtUZS(b) : fmtUZS(b)}
         </td>
-        <td className={`px-4 py-2.5 text-right whitespace-nowrap text-xs hidden sm:table-cell ${ch == null || a === b ? 'text-text-muted' : good ? 'text-accent-green' : 'text-accent-red'}`}>
+        <td className={`px-3 sm:px-4 py-2.5 text-right whitespace-nowrap text-xs hidden sm:table-cell ${ch == null || a === b ? 'text-text-muted' : good ? 'text-accent-green' : 'text-accent-red'}`}>
           {ch == null ? '—' : `${ch > 0 ? '+' : ''}${ch}%`}
         </td>
       </tr>
@@ -76,7 +76,7 @@ const PnlTab = () => {
   const prevRevenueAll = p ? p.revenue + p.usedRevenue : 0
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <PeriodPicker preset={preset} range={range} onChange={(pr, r) => { setPreset(pr); setRange(r) }}
           presets={['month', 'last_month', 'quarter', 'year']} />
@@ -106,12 +106,12 @@ const PnlTab = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs">
-                    <th className="text-left px-4 py-2.5 text-text-secondary font-medium">{t('fin_pnl_item')}</th>
-                    <th className="text-right px-4 py-2.5 text-text-secondary font-medium">{t('fin_pnl_current')}</th>
-                    <th className="text-right px-4 py-2.5 text-text-secondary font-medium hidden sm:table-cell">
+                    <th className="text-left px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('fin_pnl_item')}</th>
+                    <th className="text-right px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('fin_pnl_current')}</th>
+                    <th className="text-right px-3 sm:px-4 py-2.5 text-text-secondary font-medium hidden sm:table-cell">
                       {t('fin_pnl_previous')}<div className="font-normal text-text-muted">{fmtDate(prevRange.from)} — {fmtDate(prevRange.to)}</div>
                     </th>
-                    <th className="text-right px-4 py-2.5 text-text-secondary font-medium hidden sm:table-cell">{t('fin_pnl_change')}</th>
+                    <th className="text-right px-3 sm:px-4 py-2.5 text-text-secondary font-medium hidden sm:table-cell">{t('fin_pnl_change')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -130,10 +130,10 @@ const PnlTab = () => {
                   <Row label={t('fin_pnl_other_income')} a={c.totalOtherIncome} b={p.totalOtherIncome} strong />
                   {catRows('incomes').map(r => <Row key={'i' + r.id} label={r.label} a={r.cur} b={r.prev} level={1} />)}
                   <tr className="bg-accent-red/5">
-                    <td className="px-4 py-3 font-extrabold text-text-primary">{t('fin_pnl_net')}</td>
-                    <td className={`px-4 py-3 text-right font-extrabold whitespace-nowrap ${c.netProfit >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(c.netProfit)}</td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap text-text-muted hidden sm:table-cell">{fmtUZS(p.netProfit)}</td>
-                    <td className="px-4 py-3 text-right text-xs hidden sm:table-cell text-text-muted">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 font-extrabold text-text-primary">{t('fin_pnl_net')}</td>
+                    <td className={`px-3 sm:px-4 py-2 sm:py-3 text-right font-extrabold whitespace-nowrap ${c.netProfit >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(c.netProfit)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right whitespace-nowrap text-text-muted hidden sm:table-cell">{fmtUZS(p.netProfit)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs hidden sm:table-cell text-text-muted">
                       {p.netProfit ? `${c.netProfit - p.netProfit >= 0 ? '+' : ''}${Math.round(((c.netProfit - p.netProfit) / Math.abs(p.netProfit)) * 1000) / 10}%` : '—'}
                     </td>
                   </tr>

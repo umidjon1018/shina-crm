@@ -3558,4 +3558,7 @@ export default {
   perm_income_payments: "История платежей",
   perm_income_returns: "Возвраты",
   perm_management_bundles: "Комплекты",
+  page_error_title: "В этом разделе произошла ошибка",
+  page_error_desc: "Остальные разделы работают. Обновите страницу; если повторится — сообщите администратору.",
+  page_error_reload: "Обновить",
 }

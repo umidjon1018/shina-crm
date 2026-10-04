@@ -35,10 +35,10 @@ const InstallmentTab = ({ ctx }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-6"
     >
       {/* A) Muddatli sotuvlar jadvali */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
         <h3 className="font-syne font-bold text-text-primary text-base mb-4 flex items-center gap-2">
           <Calendar size={18} className="text-accent-red" /> {t('sl_inst_list_title')}
         </h3>
@@ -93,7 +93,7 @@ const InstallmentTab = ({ ctx }) => {
                     <div className="flex items-center gap-1">{label} {installmentSortField === key && (installmentSortOrder === 'asc' ? '▲' : '▼')}</div>
                   </th>
                 ))}
-                <th className="px-4 py-3 font-bold uppercase text-center">{t('sl_inst_th_payment')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase text-center">{t('sl_inst_th_payment')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -103,17 +103,17 @@ const InstallmentTab = ({ ctx }) => {
                 const paid = statusInfo.paidAmount
                 return (
                   <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-4 py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-4 py-3.5 truncate font-bold text-text-primary" title={s.itemsNames}>{s.itemsNames}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary" title={s.itemsNames}>{s.itemsNames}</td>
                     {s.isUsedSale ? (
-                      <td className={`px-4 py-3.5 truncate ${barcodeSelectClass}`}>
+                      <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 truncate ${barcodeSelectClass}`}>
                         <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-accent-orange/10 text-accent-orange whitespace-nowrap">{t('sl_inst_used_badge')}</span>
                       </td>
                     ) : (() => {
                       const barcodes = s.items?.map(it => { const b = it.barcode || getItemBarcode(it.itemId); return (b && b !== '—') ? b : null }).filter(Boolean) || []
                       const visible = barcodes.slice(0, 2); const hidden = barcodes.slice(2)
                       return (
-                        <td className={`px-4 py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
+                        <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
                           <div className="flex flex-col gap-0.5">
                             {visible.map((b, i) => <span key={i} className="text-[10px] truncate">{b}</span>)}
                             {hidden.length > 0 && (
@@ -131,22 +131,22 @@ const InstallmentTab = ({ ctx }) => {
                       const catLabel = s.category ? t('cat_' + s.category, { defaultValue: s.category }) : '—'
                       const catObj = productCategories.find(c => c.label === catLabel || c.id === catLabel)
                       const catColor = getCategoryColor(catObj?.id, productCategories)
-                      return <td className="px-4 py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
+                      return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
                     })()}
-                    <td className="px-4 py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
-                    <td className="px-4 py-3.5 text-text-primary font-medium truncate">{s.customerName}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">{s.qty}</td>
-                    <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-4 py-3.5 text-accent-blue font-bold truncate">{s.installmentOrgName}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">{s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—'}</td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-medium truncate">{s.customerName}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.qty}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-accent-blue font-bold truncate">{s.installmentOrgName}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${isFullyPaid ? 'bg-accent-green/10 text-accent-green' : paid > 0 ? 'bg-accent-orange/10 text-accent-orange' : 'bg-accent-red/10 text-accent-red'}`}>
                         {s.installmentStatus}
                       </span>
                     </td>
-                    {canPercent && <td className="px-4 py-3.5 text-text-secondary">{s.installmentCommissionPercent ?? installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0}%</td>}
-                    {canPercent && <td className={`px-4 py-3.5 text-text-muted font-mono ${barcodeSelectClass}`}>{formatPrice(s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0) / 100)), som)}</td>}
-                    <td className="px-4 py-3.5 text-center">
+                    {canPercent && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.installmentCommissionPercent ?? installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0}%</td>}
+                    {canPercent && <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted font-mono ${barcodeSelectClass}`}>{formatPrice(s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0) / 100)), som)}</td>}
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center">
                       {!isFullyPaid ? (
                         <button onClick={() => { setCustomerPayModal({ customerId: s.customerId, customerName: s.customerName }); setCustomerPaySaleId(null); setCustomerPayAmount('') }}
                           className="px-2.5 py-1 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-lg text-[10px] font-bold hover:bg-accent-green/20 transition-colors">
@@ -175,7 +175,7 @@ const InstallmentTab = ({ ctx }) => {
       </div>
 
       {/* B) Nasiya tashkilotlari */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden animate-fade-in">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden animate-fade-in">
         <h3 className="font-syne font-bold text-text-primary text-base mb-4 flex items-center gap-2">
           <TrendingUp size={18} className="text-accent-green" /> {t('sl_inst_orgs_title')}
         </h3>
@@ -184,7 +184,7 @@ const InstallmentTab = ({ ctx }) => {
             <thead className="bg-bg-tertiary text-text-muted">
               <tr>
                 {[t('sl_inst_org_th_name'), t('sl_inst_org_th_percent'), t('sl_inst_org_th_total_sales'), t('sl_inst_org_th_month_sales'), t('sl_inst_org_th_total_paid'), t('sl_inst_org_th_month_paid'), t('sl_inst_org_th_total_comm'), t('sl_inst_org_th_month_comm'), t('sl_inst_org_th_debt'), t('sl_inst_org_detail_btn')].map((label, i) => (
-                  (canOrgComm || ![1, 6, 7].includes(i)) && <th key={i} className={`px-4 py-3 font-bold uppercase ${[2,3].includes(i) ? 'text-center' : ''}`}>{label}</th>
+                  (canOrgComm || ![1, 6, 7].includes(i)) && <th key={i} className={`px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase ${[2,3].includes(i) ? 'text-center' : ''}`}>{label}</th>
                 ))}
               </tr>
             </thead>
@@ -200,16 +200,16 @@ const InstallmentTab = ({ ctx }) => {
                 const totalDebt = orgSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? s.total), 0)
                 return (
                   <tr key={org.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-4 py-3.5 font-bold">{org.name}</td>
-                    {canOrgComm && <td className="px-4 py-3.5 text-text-secondary">{org.commissionPercent}%</td>}
-                    <td className="px-4 py-3.5 text-center text-text-secondary">{t('sl_inst_org_count', { n: orgSales.length })}</td>
-                    <td className="px-4 py-3.5 text-center text-accent-blue">{t('sl_inst_org_count', { n: thisMonthSales.length })}</td>
-                    <td className="px-4 py-3.5 text-accent-green">{formatPrice(totalPaid, som)}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">{formatPrice(thisMonthPaid, som)}</td>
-                    {canOrgComm && <td className="px-4 py-3.5 text-text-muted">{formatPrice(totalComm, som)}</td>}
-                    {canOrgComm && <td className="px-4 py-3.5 text-text-muted">{formatPrice(thisMonthComm, som)}</td>}
-                    <td className="px-4 py-3.5 font-bold text-accent-red">{formatPrice(totalDebt, som)}</td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-bold">{org.name}</td>
+                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{org.commissionPercent}%</td>}
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center text-text-secondary">{t('sl_inst_org_count', { n: orgSales.length })}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center text-accent-blue">{t('sl_inst_org_count', { n: thisMonthSales.length })}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-accent-green">{formatPrice(totalPaid, som)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{formatPrice(thisMonthPaid, som)}</td>
+                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted">{formatPrice(totalComm, som)}</td>}
+                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted">{formatPrice(thisMonthComm, som)}</td>}
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-bold text-accent-red">{formatPrice(totalDebt, som)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center">
                       <button onClick={() => { setDetailedOrg(org); setOrgMonthFilter('all') }}
                         className="px-3 py-1 bg-accent-blue text-white rounded-lg font-bold text-[10px]">{t('sl_inst_org_detail_btn')}</button>
                     </td>
@@ -244,7 +244,7 @@ const InstallmentTab = ({ ctx }) => {
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onClick={() => setDetailedOrg(null)}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto no-scrollbar space-y-6 shadow-2xl">
+              className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto no-scrollbar space-y-4 sm:space-y-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
                 <h3 className="text-lg font-syne font-extrabold text-text-primary">{t('sl_inst_modal_title', { name: detailedOrg.name })}</h3>
                 <button onClick={() => setDetailedOrg(null)} className="text-text-muted hover:text-text-primary"><X size={20} /></button>
@@ -352,7 +352,7 @@ const InstallmentTab = ({ ctx }) => {
                       <tr>
                         <th className="px-3 py-2 w-8"></th>
                         {[t('col_product'), t('col_customer'), t('col_date'), t('sl_inst_modal_th_total'), t('sl_inst_modal_th_term'), t('sl_inst_modal_th_qty'), t('sl_inst_modal_th_debt')].map((l, i) => (
-                          <th key={i} className="px-4 py-2 font-bold uppercase">{l}</th>
+                          <th key={i} className="px-3 sm:px-4 py-2 font-bold uppercase">{l}</th>
                         ))}
                       </tr>
                     </thead>
@@ -371,13 +371,13 @@ const InstallmentTab = ({ ctx }) => {
                               <td className="px-3 py-2.5 text-center">
                                 {!isFullyPaid && <input type="checkbox" checked={isChecked} onChange={() => setSelectedPayoutSaleId(isChecked ? null : s.id)} className="w-3.5 h-3.5 accent-blue-500 cursor-pointer" />}
                               </td>
-                              <td className="px-4 py-2.5 font-bold text-text-primary">{s.items?.map(i => i.name).join(', ') || '—'}</td>
-                              <td className="px-4 py-2.5 text-text-secondary">{s.customerName}</td>
-                              <td className="px-4 py-2.5 text-text-muted">{new Date(s.soldAt).toLocaleDateString('uz-UZ')}</td>
-                              <td className="px-4 py-2.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                              <td className="px-4 py-2.5 text-text-secondary">{s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—'}</td>
-                              <td className="px-4 py-2.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0} ta</td>
-                              <td className="px-4 py-2.5">
+                              <td className="px-3 sm:px-4 py-2.5 font-bold text-text-primary">{s.items?.map(i => i.name).join(', ') || '—'}</td>
+                              <td className="px-3 sm:px-4 py-2.5 text-text-secondary">{s.customerName}</td>
+                              <td className="px-3 sm:px-4 py-2.5 text-text-muted">{new Date(s.soldAt).toLocaleDateString('uz-UZ')}</td>
+                              <td className="px-3 sm:px-4 py-2.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
+                              <td className="px-3 sm:px-4 py-2.5 text-text-secondary">{s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—'}</td>
+                              <td className="px-3 sm:px-4 py-2.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0} ta</td>
+                              <td className="px-3 sm:px-4 py-2.5">
                                 <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${isFullyPaid ? 'bg-accent-green/10 text-accent-green' : si.paidAmount > 0 ? 'bg-accent-orange/10 text-accent-orange' : 'bg-accent-red/10 text-accent-red'}`}>
                                   {statusLabel} {si.debtAmount > 0 && `(${formatPrice(si.debtAmount, som)})`}
                                 </span>
@@ -402,7 +402,7 @@ const InstallmentTab = ({ ctx }) => {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[130] flex items-center justify-center p-4"
             onClick={() => { setCustomerPayModal(null); setCustomerPaySaleId(null); setCustomerPayAmount('') }}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto no-scrollbar space-y-4 shadow-2xl">
+              className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto no-scrollbar space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
                 <div>
                   <h3 className="text-base font-syne font-extrabold text-text-primary">{customerPayModal.customerName}</h3>

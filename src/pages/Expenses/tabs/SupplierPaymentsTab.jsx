@@ -90,7 +90,7 @@ const SupplierPaymentsTab = () => {
   const monthTotal = useMemo(() => filtered.reduce((s, p) => s + p.amountUZS, 0), [filtered])
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <MonthFilterBar months={months} filterMonth={filterMonth} setFilterMonth={(m) => { setFilterMonth(m); resetPage() }} resetPage={resetPage} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -117,19 +117,19 @@ const SupplierPaymentsTab = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_date')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_product')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('exp_sup_col_pay_type')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_note')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">USD</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">UZS</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_date')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_product')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('exp_sup_col_pay_type')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_note')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">USD</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">UZS</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedPayments.map(group => (
                   <Fragment key={group.supplierId}>
                     <tr className="bg-bg-tertiary border-b border-border">
-                      <td colSpan={4} className="px-4 py-2.5">
+                      <td colSpan={4} className="px-3 sm:px-4 py-2.5">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-lg bg-purple-500/10 flex items-center justify-center">
                             <Truck size={12} className="text-purple-400" />
@@ -140,32 +140,32 @@ const SupplierPaymentsTab = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 text-right">
+                      <td className="px-3 sm:px-4 py-2.5 text-right">
                         <p className="font-bold text-text-primary text-sm">${fmtNum(group.totalUSD)}</p>
                       </td>
-                      <td className="px-4 py-2.5 text-right">
+                      <td className="px-3 sm:px-4 py-2.5 text-right">
                         <p className="text-text-secondary text-xs">{fmtUZS(group.totalUZS)}</p>
                       </td>
                     </tr>
                     {group.payments.map(pay => (
                       <tr key={pay.id} className="border-b border-border/30 hover:bg-bg-tertiary/50 transition-colors">
-                        <td className="px-4 py-2.5 text-text-secondary whitespace-nowrap text-xs">{fmtDate(pay.date)}</td>
-                        <td className="px-4 py-2.5 text-text-primary max-w-[180px] truncate">{pay.productName}</td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 sm:px-4 py-2.5 text-text-secondary whitespace-nowrap text-xs">{fmtDate(pay.date)}</td>
+                        <td className="px-3 sm:px-4 py-2.5 text-text-primary max-w-[180px] truncate">{pay.productName}</td>
+                        <td className="px-3 sm:px-4 py-2.5">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-purple-500/10 text-purple-400">
                             {pay.type === 'cash_uzs' ? t('exp_pay_cash_uzs') : pay.type === 'cash_usd' ? t('exp_pay_cash_usd') : pay.type === 'transfer' ? t('exp_pay_bank') : pay.type}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-text-secondary max-w-[140px] truncate text-xs">{(() => {
+                        <td className="px-3 sm:px-4 py-2.5 text-text-secondary max-w-[140px] truncate text-xs">{(() => {
                           const raw = pay.note || ''
                           if (raw === "Dastlabki tolov" || raw === "Dastlabki to'lov") return t('pay_note_initial')
                           return raw || '—'
                         })()}</td>
-                        <td className="px-4 py-2.5 text-right font-semibold text-text-primary whitespace-nowrap">
+                        <td className="px-3 sm:px-4 py-2.5 text-right font-semibold text-text-primary whitespace-nowrap">
                           ${fmtNum(pay.amountUSD)}
                           <span className="text-text-secondary text-xs ml-1">@ {fmtNum(pay.usdRate)}</span>
                         </td>
-                        <td className="px-4 py-2.5 text-right text-text-secondary whitespace-nowrap text-xs">{fmtUZS(pay.amountUZS)}</td>
+                        <td className="px-3 sm:px-4 py-2.5 text-right text-text-secondary whitespace-nowrap text-xs">{fmtUZS(pay.amountUZS)}</td>
                       </tr>
                     ))}
                   </Fragment>

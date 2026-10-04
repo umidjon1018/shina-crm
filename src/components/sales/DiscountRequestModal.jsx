@@ -12,7 +12,7 @@ const DiscountRequestModal = ({ discount, requiredRole, cartItems, cartTotal, on
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-sm space-y-5"
+        className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-sm space-y-3 sm:space-y-5"
       >
         <div className="flex items-center justify-between">
           <div>

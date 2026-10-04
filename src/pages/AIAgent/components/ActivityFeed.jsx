@@ -20,7 +20,7 @@ function AgentActivityFeed({ agentId }) {
   const unreadCount = list.filter(a => !a.read).length
 
   if (list.length === 0)
-    return <p className="text-xs text-text-muted text-center py-6">{t('ai_feed_empty')}</p>
+    return <p className="text-xs text-text-muted text-center py-4 sm:py-6">{t('ai_feed_empty')}</p>
 
   return (
     <div className="space-y-3">

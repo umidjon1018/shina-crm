@@ -119,7 +119,7 @@ const WriteoffTab = ({ products, items, batches }) => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="font-syne font-bold text-text-primary text-lg">Hisobdan chiqarish</h2>
           <p className="text-sm text-text-muted">Shikastlangan yoki yaroqsiz tovarlarni hisobdan chiqarish</p>
@@ -175,18 +175,18 @@ const WriteoffTab = ({ products, items, batches }) => {
             <tbody className="divide-y divide-border">
               {sorted.map(w => (
                 <tr key={w.id} className="hover:bg-bg-tertiary/50 transition-colors">
-                  <td className="px-4 py-3 text-text-muted whitespace-nowrap">{fmtDate(w.createdAt)}</td>
-                  <td className="px-4 py-3 text-text-primary font-medium">{w.productName}</td>
-                  <td className="px-4 py-3 text-text-secondary">{w.shopName}</td>
-                  <td className="px-4 py-3 text-right font-bold text-accent-red">{w.quantity} ta</td>
-                  <td className="px-4 py-3 text-right text-text-secondary">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted whitespace-nowrap">{fmtDate(w.createdAt)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary font-medium">{w.productName}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary">{w.shopName}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-accent-red">{w.quantity} ta</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-secondary">
                     {w.unitPriceUzs > 0 ? w.unitPriceUzs.toLocaleString('uz-UZ') + ' so\'m' : '—'}
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-text-primary">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">
                     {w.totalUzs > 0 ? w.totalUzs.toLocaleString('uz-UZ') + ' so\'m' : '—'}
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{w.reason || '—'}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary">{w.reason || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     {w.expenseId ? (
                       <span className="text-xs bg-accent-orange/10 text-accent-orange px-2 py-0.5 rounded-lg font-medium">Xarajatga o'tdi</span>
                     ) : w.totalUzs > 0 ? (
@@ -202,7 +202,7 @@ const WriteoffTab = ({ products, items, batches }) => {
                       <span className="text-text-muted text-xs">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text-muted text-xs">{w.createdByName || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted text-xs">{w.createdByName || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -219,7 +219,7 @@ const WriteoffTab = ({ products, items, batches }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-md space-y-4"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-syne font-bold text-text-primary text-lg flex items-center gap-2">
@@ -229,7 +229,7 @@ const WriteoffTab = ({ products, items, batches }) => {
               </div>
 
               {success ? (
-                <div className="text-center py-6 space-y-3">
+                <div className="text-center py-4 sm:py-6 space-y-3">
                   <CheckCircle size={40} className="text-accent-green mx-auto" />
                   <p className="font-bold text-text-primary">Hisobdan chiqarildi!</p>
                   <p className="text-sm text-text-muted">{qty} ta <strong>{selProduct?.name}</strong> muvaffaqiyatli chiqarildi.</p>

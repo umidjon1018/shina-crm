@@ -73,7 +73,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border flex-shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <Printer size={20} className="text-accent-red" />
             <h2 className="text-lg font-bold text-text-primary">Narxnoma chop etish</h2>
@@ -84,7 +84,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
         </div>
 
         {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1 p-5 space-y-6">
+        <div className="overflow-y-auto flex-1 p-4 sm:p-5 space-y-4 sm:space-y-6">
 
           {/* Format tanlash */}
           <div>
@@ -189,7 +189,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
             </div>
             <div className="border border-border rounded-xl overflow-hidden" style={{ maxHeight: '220px', overflowY: 'auto' }}>
               {visibleList.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-text-muted">Tovar topilmadi</div>
+                <div className="px-4 py-5 sm:py-8 text-center text-sm text-text-muted">Tovar topilmadi</div>
               ) : visibleList.map((p, i) => {
                 const checked = selectedIds.has(p.id)
                 return (
@@ -224,7 +224,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-border flex-shrink-0">
+        <div className="flex gap-3 p-4 sm:p-5 border-t border-border flex-shrink-0">
           <button
             onClick={onClose}
             className="flex-1 py-3 rounded-xl border border-border text-text-secondary text-sm font-medium hover:bg-bg-tertiary transition-colors"

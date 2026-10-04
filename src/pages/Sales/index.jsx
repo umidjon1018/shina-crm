@@ -119,7 +119,7 @@ const Sales = () => {
   const activeTab = SALES_TABS.includes(pickedTab) ? pickedTab : SALES_TABS[0]
 
   return (
-    <div className="min-h-[calc(100vh-120px)] space-y-6">
+    <div className="min-h-[calc(100vh-120px)] space-y-4 sm:space-y-6">
       {shopPickCallback && (
         <ShopPickerModal
           onConfirm={(shopId) => { const cb = shopPickCallback; setShopPickCallback(null); cb(shopId) }}
@@ -142,14 +142,15 @@ const Sales = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              title={tab.label}
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
                 activeTab === tab.id
                   ? 'bg-accent-red text-white shadow-glow-red'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               <tab.icon size={16} />
-              <span>{tab.label}</span>
+              <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
             </button>
           ))}
           {cartItems.length > 0 && activeTab === 'new_sale' && (
@@ -293,7 +294,7 @@ const Sales = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-sm space-y-4"
+              className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-sm space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-syne font-extrabold text-text-primary">{t('cust_new')}</h3>
@@ -381,7 +382,7 @@ const Sales = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-sm space-y-4"
+              className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-sm space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-syne font-extrabold text-text-primary">{t('cust_new')}</h3>
@@ -495,7 +496,7 @@ const Sales = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-3xl p-6 w-full max-w-sm space-y-6"
+              className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-sm space-y-4 sm:space-y-6"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-syne font-extrabold text-text-primary">{t('sl_cancel_title')}</h3>
@@ -598,7 +599,7 @@ const Sales = () => {
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
               exit={{ opacity: 0, scale: 0.95 }} 
-              className="bg-bg-secondary border border-border p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl"
+              className="bg-bg-secondary border border-border p-4 sm:p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl"
             >
               <h3 className="font-syne font-bold text-text-primary text-base">{alertModal.title}</h3>
               <p className="text-xs text-text-secondary leading-relaxed">{alertModal.message}</p>

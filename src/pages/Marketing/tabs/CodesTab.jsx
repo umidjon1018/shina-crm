@@ -147,36 +147,36 @@ const ReportView = () => {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-xs">
-              <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_source')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_codes')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_uses')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_customers')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_revenue')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_discount')}</th>
-              <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_avg')}</th>
+              <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_source')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_codes')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_uses')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_customers')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_revenue')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_discount')}</th>
+              <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_avg')}</th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">{t('mkt_rep_empty')}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={7} className="px-3 sm:px-4 py-5 sm:py-8 text-center text-text-muted">{t('mkt_rep_empty')}</td></tr>}
             {rows.map((r, i) => (
               <tr key={i} className="border-b border-border/50">
-                <td className="px-4 py-2.5 text-text-primary font-semibold">
+                <td className="px-3 sm:px-4 py-2.5 text-text-primary font-semibold">
                   <span className="inline-flex items-center gap-1.5">{r.kind === 'voucher' ? <Handshake size={13} className="text-purple-500" /> : <Megaphone size={13} className="text-accent-blue" />}{r.name}</span>
                 </td>
-                <td className="px-4 py-2.5 text-right text-text-secondary">{r.codes}</td>
-                <td className="px-4 py-2.5 text-right text-text-primary font-semibold">{r.uses}</td>
-                <td className="px-4 py-2.5 text-right text-text-secondary">{r.customers}</td>
-                <td className="px-4 py-2.5 text-right text-accent-green font-semibold whitespace-nowrap">{fmtMoney(r.revenue)}</td>
-                <td className="px-4 py-2.5 text-right text-accent-orange whitespace-nowrap">{fmtMoney(r.discount)}</td>
-                <td className="px-4 py-2.5 text-right text-text-secondary whitespace-nowrap">{r.uses ? fmtMoney(r.revenue / r.uses) : '—'}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-text-secondary">{r.codes}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-text-primary font-semibold">{r.uses}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-text-secondary">{r.customers}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-accent-green font-semibold whitespace-nowrap">{fmtMoney(r.revenue)}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-accent-orange whitespace-nowrap">{fmtMoney(r.discount)}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-text-secondary whitespace-nowrap">{r.uses ? fmtMoney(r.revenue / r.uses) : '—'}</td>
               </tr>
             ))}
             {rows.length > 0 && (
               <tr className="bg-bg-tertiary/60 font-bold">
-                <td className="px-4 py-2.5 text-text-primary">{t('fin_cf_total')}</td><td />
-                <td className="px-4 py-2.5 text-right text-text-primary">{total.uses}</td><td />
-                <td className="px-4 py-2.5 text-right text-accent-green whitespace-nowrap">{fmtMoney(total.revenue)}</td>
-                <td className="px-4 py-2.5 text-right text-accent-orange whitespace-nowrap">{fmtMoney(total.discount)}</td><td />
+                <td className="px-3 sm:px-4 py-2.5 text-text-primary">{t('fin_cf_total')}</td><td />
+                <td className="px-3 sm:px-4 py-2.5 text-right text-text-primary">{total.uses}</td><td />
+                <td className="px-3 sm:px-4 py-2.5 text-right text-accent-green whitespace-nowrap">{fmtMoney(total.revenue)}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right text-accent-orange whitespace-nowrap">{fmtMoney(total.discount)}</td><td />
               </tr>
             )}
           </tbody>
@@ -261,28 +261,28 @@ const CodesTab = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-xs">
-                <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_code')}</th>
-                <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_channel')}</th>
-                <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_code_discount')}</th>
-                <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_uses')}</th>
-                <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('mkt_rep_revenue')}</th>
-                <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('mkt_expires')}</th>
-                <th className="px-4 py-3" />
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_code')}</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_channel')}</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_code_discount')}</th>
+                <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_uses')}</th>
+                <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_rep_revenue')}</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('mkt_expires')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3" />
               </tr>
             </thead>
             <tbody>
-              {list.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">{t('mkt_code_empty')}</td></tr>}
+              {list.length === 0 && <tr><td colSpan={7} className="px-3 sm:px-4 py-5 sm:py-8 text-center text-text-muted">{t('mkt_code_empty')}</td></tr>}
               {list.map(c => (
                 <tr key={c.id} className="border-b border-border/50">
-                  <td className="px-4 py-2.5 font-mono font-bold text-text-primary whitespace-nowrap">{c.code}
+                  <td className="px-3 sm:px-4 py-2.5 font-mono font-bold text-text-primary whitespace-nowrap">{c.code}
                     {!c.isActive && <span className="ml-1.5 font-sans px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-500/10 text-gray-500">{t('mkt_status_off')}</span>}
                   </td>
-                  <td className="px-4 py-2.5 text-text-secondary">{c.channel || '—'}</td>
-                  <td className="px-4 py-2.5 text-text-secondary text-xs max-w-[200px] truncate">{c.promotionName || '—'}</td>
-                  <td className="px-4 py-2.5 text-right text-text-primary">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''}</td>
-                  <td className="px-4 py-2.5 text-right text-accent-green whitespace-nowrap">{fmtMoney(c.revenue)}</td>
-                  <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.expiresAt ? fmtD(c.expiresAt) : '∞'}</td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-3 sm:px-4 py-2.5 text-text-secondary">{c.channel || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs max-w-[200px] truncate">{c.promotionName || '—'}</td>
+                  <td className="px-3 sm:px-4 py-2.5 text-right text-text-primary">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''}</td>
+                  <td className="px-3 sm:px-4 py-2.5 text-right text-accent-green whitespace-nowrap">{fmtMoney(c.revenue)}</td>
+                  <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{c.expiresAt ? fmtD(c.expiresAt) : '∞'}</td>
+                  <td className="px-3 sm:px-4 py-2.5">
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => toggle(c)} className={`p-1.5 rounded-lg ${c.isActive ? 'text-accent-green' : 'text-text-muted'}`}><Power size={14} /></button>
                       <button onClick={() => remove(c)} className="p-1.5 rounded-lg text-text-secondary hover:text-accent-red"><Trash2 size={14} /></button>

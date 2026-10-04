@@ -150,7 +150,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-bg-secondary border border-border rounded-[2rem] w-full max-w-7xl max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-5 sm:px-8 py-5 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <FileSpreadsheet size={22} className="text-accent-green" />
             <h2 className="font-syne font-extrabold text-lg text-text-primary">Excel orqali kirim</h2>
@@ -171,11 +171,11 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-4 sm:py-6">
 
           {/* ===== QADAM 1: Shablon ===== */}
           {step === 1 && (
-            <div className="space-y-6 text-center py-4">
+            <div className="space-y-4 sm:space-y-6 text-center py-4">
               <div className="w-16 h-16 bg-accent-green/10 rounded-2xl flex items-center justify-center mx-auto">
                 <Download size={32} className="text-accent-green" />
               </div>
@@ -186,7 +186,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                   Yulduzcha (*) bilan belgilangan ustunlar majburiy.
                 </p>
               </div>
-              <div className="bg-bg-tertiary border border-border rounded-2xl p-5 text-left max-w-lg mx-auto">
+              <div className="bg-bg-tertiary border border-border rounded-2xl p-4 sm:p-5 text-left max-w-lg mx-auto">
                 <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Shablon ustunlari</p>
                 <div className="space-y-1.5">
                   {TEMPLATE_COLS.map(col => (
@@ -199,7 +199,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                   ))}
                 </div>
               </div>
-              <button onClick={downloadTemplate} className="inline-flex items-center gap-2 px-6 py-3 bg-accent-green text-white rounded-xl font-bold hover:opacity-90 transition-opacity">
+              <button onClick={downloadTemplate} className="inline-flex items-center gap-2 px-4 sm:px-6 py-3 bg-accent-green text-white rounded-xl font-bold hover:opacity-90 transition-opacity">
                 <Download size={18} /> Shablonni yuklab olish (.xlsx)
               </button>
               <div>
@@ -212,7 +212,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
 
           {/* ===== QADAM 2: Fayl yuklash ===== */}
           {step === 2 && (
-            <div className="space-y-6 py-4">
+            <div className="space-y-4 sm:space-y-6 py-4">
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
                 onDragLeave={() => setDragOver(false)}
@@ -270,9 +270,9 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                 <table className="w-full text-xs">
                   <thead className="bg-bg-tertiary text-text-muted uppercase tracking-wider">
                     <tr>
-                      <th className="px-3 py-3 text-left w-8">#</th>
+                      <th className="px-3 py-2 sm:py-3 text-left w-8">#</th>
                       {TEMPLATE_COLS.map(col => (
-                        <th key={col.key} className="px-3 py-3 text-left whitespace-nowrap">{col.label.split('(')[0].trim()}</th>
+                        <th key={col.key} className="px-3 py-2 sm:py-3 text-left whitespace-nowrap">{col.label.split('(')[0].trim()}</th>
                       ))}
                     </tr>
                   </thead>
@@ -322,7 +322,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
                 <button
                   onClick={startImport}
                   disabled={validRows.length === 0}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-accent-blue text-white rounded-xl font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-accent-blue text-white rounded-xl font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Import qilish ({validRows.length} ta)
                 </button>
@@ -332,7 +332,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
 
           {/* ===== QADAM 4: Import ===== */}
           {step === 4 && (
-            <div className="py-6 space-y-6">
+            <div className="py-4 sm:py-6 space-y-4 sm:space-y-6">
               {importing ? (
                 <div className="text-center space-y-4">
                   <div className="w-14 h-14 mx-auto border-4 border-accent-blue border-t-transparent rounded-full animate-spin" />
@@ -397,14 +397,14 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
 
         {/* Footer nav — faqat 1-2 qadam */}
         {step <= 2 && (
-          <div className="px-8 py-4 border-t border-border shrink-0 flex justify-between items-center">
+          <div className="px-5 sm:px-8 py-4 border-t border-border shrink-0 flex justify-between items-center">
             {step === 1 ? (
               <span />
             ) : (
               <button onClick={() => setStep(s => s - 1)} className="text-sm text-text-muted hover:text-text-primary">← Orqaga</button>
             )}
             {step === 1 && (
-              <button onClick={() => setStep(2)} className="flex items-center gap-2 px-6 py-2.5 bg-accent-blue text-white rounded-xl font-bold hover:opacity-90">
+              <button onClick={() => setStep(2)} className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-accent-blue text-white rounded-xl font-bold hover:opacity-90">
                 Fayl yuklash →
               </button>
             )}

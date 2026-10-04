@@ -56,7 +56,7 @@ const StockTab = ({ ctx }) => {
 
   return (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
               <div className="cursor-pointer" onClick={() => openModal('totalItemsModal')}>
                 <StatCard icon={Package} label={t('rep_stock_total')} value={stockStats.totalItems} sub={t('rep_stock_in_warehouse_sub')} />
               </div>
@@ -72,8 +72,8 @@ const StockTab = ({ ctx }) => {
             </div>
 
             {isPrivileged && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6 lg:col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-6">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 lg:col-span-2">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-syne font-bold text-text-primary">{t('rep_modal_capital_dist_title')}</h4>
@@ -114,7 +114,7 @@ const StockTab = ({ ctx }) => {
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6 overflow-hidden">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 overflow-hidden">
                   <h4 className="font-syne font-bold text-text-primary mb-1">{t('rep_turnover_standards')}</h4>
                   <p className="text-text-secondary text-sm mb-4">{t('rep_standard_vs_current')}</p>
                   <div className="space-y-3 overflow-y-auto max-h-[220px]">
@@ -187,7 +187,7 @@ const StockTab = ({ ctx }) => {
             </div>
 
             <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_warehouse_stock')}</h4>
                 <div className="flex items-center gap-2 text-xs text-text-muted">
                   <div className="w-2 h-2 rounded-full bg-accent-red" /> {t('stock_empty')}
@@ -198,50 +198,50 @@ const StockTab = ({ ctx }) => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-bg-tertiary border-b border-border">
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary whitespace-nowrap">#</th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'productName')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap">#</th>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'productName')}>
                         <span className="inline-flex items-center gap-1">
                           {t('col_product')} <SortIcon table="stock" col="productName" />
                         </span>
                       </th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'category')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'category')}>
                         <span className="inline-flex items-center gap-1">
                           {t('col_category')} <SortIcon table="stock" col="category" />
                         </span>
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'inStock')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'inStock')}>
                         <span className="inline-flex items-center gap-1 justify-center w-full">
                           {t('rep_col_remaining')} <SortIcon table="stock" col="inStock" />
                         </span>
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'daysLeft')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'daysLeft')}>
                         <span className="inline-flex items-center gap-1 justify-center w-full">
                           {t('rep_col_est_out')} <SortIcon table="stock" col="daysLeft" />
                         </span>
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_turnover')}</th>
-                      {isPrivileged && <th className="text-right px-6 py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_purchase_price')}</th>}
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_turnover')}</th>
+                      {isPrivileged && <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_purchase_price')}</th>}
                       {isPrivileged && (
-                        <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'margin')}>
+                        <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'margin')}>
                           <span className="inline-flex items-center gap-1 justify-end w-full">
                             {t('col_margin')} % <SortIcon table="stock" col="margin" />
                           </span>
                         </th>
                       )}
-                      {isPrivileged && <th className="text-right px-6 py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_capital')}</th>}
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'lastSoldAt')}>
+                      {isPrivileged && <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_col_capital')}</th>}
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'lastSoldAt')}>
                         <span className="inline-flex items-center gap-1 justify-center w-full">
                           {t('rep_col_last_sold')} <SortIcon table="stock" col="lastSoldAt" />
                         </span>
                       </th>
                       {isPrivileged && (
-                        <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'lastReceivedAt')}>
+                        <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'lastReceivedAt')}>
                           <span className="inline-flex items-center gap-1 justify-center w-full">
                             {t('rep_col_receive_date')} <SortIcon table="stock" col="lastReceivedAt" />
                           </span>
                         </th>
                       )}
-                      <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'inStock')}>
+                      <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary whitespace-nowrap" onClick={() => toggleSort('stock', 'inStock')}>
                         <span className="inline-flex items-center gap-1 justify-end w-full">
                           {t('col_status')} <SortIcon table="stock" col="inStock" />
                         </span>
@@ -262,13 +262,13 @@ const StockTab = ({ ctx }) => {
                           isLow   ? 'bg-accent-orange/5' :
                           'hover:bg-bg-tertiary'
                         }`}>
-                          <td className="px-6 py-4 text-text-muted">{idx + 1}</td>
-                          <td className="px-6 py-4 font-medium text-text-primary">{s.productName}</td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted">{idx + 1}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 font-medium text-text-primary">{s.productName}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4">
                             {renderCatBadge(s.category)}
                           </td>
-                          <td className="px-6 py-4 text-center font-bold text-text-primary">{s.inStock} <span className="text-xs text-text-muted font-normal">{s.unit || 'dona'}</span></td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center font-bold text-text-primary">{s.inStock} <span className="text-xs text-text-muted font-normal">{s.unit || 'dona'}</span></td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                             {s.inStock === 0 ? (
                               <span className="text-accent-red text-xs font-bold">{t('stock_empty')}</span>
                             ) : s.daysLeft === null ? (
@@ -281,7 +281,7 @@ const StockTab = ({ ctx }) => {
                               <span className="text-accent-green text-xs">{s.daysLeft} {t('rep_days_suffix')}</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                             {s.turnoverStatus === 'out' ? (
                               <span className="text-text-muted text-xs">—</span>
                             ) : s.turnoverStatus === 'slow' ? (
@@ -294,14 +294,14 @@ const StockTab = ({ ctx }) => {
                               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-bg-tertiary text-text-secondary">{t('rep_turnover_normal')}</span>
                             )}
                           </td>
-                          {isPrivileged && <td className="px-6 py-4 text-right text-text-secondary">{fmtNum(s.purchasePrice)}</td>}
+                          {isPrivileged && <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right text-text-secondary">{fmtNum(s.purchasePrice)}</td>}
                           {isPrivileged && (
-                            <td className="px-6 py-4 text-right text-sm font-bold" style={{ color: s.margin >= 20 ? C.green : s.margin >= 10 ? C.orange : C.red }}>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right text-sm font-bold" style={{ color: s.margin >= 20 ? C.green : s.margin >= 10 ? C.orange : C.red }}>
                               {s.margin}%
                             </td>
                           )}
-                          {isPrivileged && <td className="px-6 py-4 text-right font-bold text-accent-blue">{fmtNum(s.inStock * s.purchasePrice)}</td>}
-                          <td className="px-6 py-4 text-center text-xs">
+                          {isPrivileged && <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-accent-blue">{fmtNum(s.inStock * s.purchasePrice)}</td>}
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center text-xs">
                             {s.lastSoldAt ? (
                               <span className={s.daysSinceLastSold !== null && s.daysSinceLastSold > 60 ? 'text-accent-blue font-bold' : 'text-text-muted'}>
                                 {s.lastSoldAt}
@@ -312,9 +312,9 @@ const StockTab = ({ ctx }) => {
                             ) : <span className="text-text-muted">—</span>}
                           </td>
                           {isPrivileged && (
-                            <td className="px-6 py-4 text-center text-text-muted text-xs">{s.lastReceivedAt || '—'}</td>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center text-text-muted text-xs">{s.lastReceivedAt || '—'}</td>
                           )}
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                               isOut ? 'bg-accent-red/10 text-accent-red' :
                               isLow ? 'bg-accent-orange/10 text-accent-orange' :
@@ -329,7 +329,7 @@ const StockTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
-              <div className="px-6 py-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
+              <div className="px-4 sm:px-6 py-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
                 <span>{stockStats.withDaysLeft.length} {t('rep_total_types')}</span>
                 <div className="flex items-center gap-1">
                   <button
@@ -408,7 +408,7 @@ const StockTab = ({ ctx }) => {
 
               return (
                 <Modal open title={t('rep_modal_total_stock_title')} subtitle={t('rep_modal_total_stock_sub')} size="lg" onClose={closeModal}>
-                  <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: `repeat(${cats.length}, minmax(0, 1fr))` }}>
+                  <div className="grid gap-3 mb-4 sm:mb-6" style={{ gridTemplateColumns: `repeat(${cats.length}, minmax(0, 1fr))` }}>
                     {cats.map(c => (
                       <div key={c.cat} className="bg-bg-tertiary rounded-xl p-4 text-center flex flex-col justify-between">
                         <div>
@@ -430,7 +430,7 @@ const StockTab = ({ ctx }) => {
                   </div>
 
                   {/* Vizual taqsimot */}
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-6">
                     <p className="text-text-secondary text-sm font-medium mb-2">{t('rep_distribution')}</p>
                     <div className="flex rounded-full overflow-hidden h-6 bg-bg-tertiary/20">
                       {cats.map(c => {
@@ -460,11 +460,11 @@ const StockTab = ({ ctx }) => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_col_month')} <MonthSortBtn /></th>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_col_month')} <MonthSortBtn /></th>
                           {cats.map(c => (
-                            <th key={c.cat} className="text-center px-4 py-3 font-medium" style={{ color: c.color }}>{c.label}</th>
+                            <th key={c.cat} className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: c.color }}>{c.label}</th>
                           ))}
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">{t('rep_col_total', 'Jami')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_col_total', 'Jami')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
@@ -478,11 +478,11 @@ const StockTab = ({ ctx }) => {
                           const total = Object.values(catMap).reduce((s,x) => s+x, 0)
                           return (
                             <tr key={m} className="hover:bg-bg-tertiary transition-colors">
-                              <td className="px-4 py-3 font-medium text-text-primary">{monthNames[m]}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{monthNames[m]}</td>
                               {cats.map(c => (
-                                <td key={c.cat} className="px-4 py-3 text-center font-bold" style={{ color: c.color }}>{catMap[c.cat]||0} {t('unit_pcs')}</td>
+                                <td key={c.cat} className="px-3 sm:px-4 py-2 sm:py-3 text-center font-bold" style={{ color: c.color }}>{catMap[c.cat]||0} {t('unit_pcs')}</td>
                               ))}
-                              <td className="px-4 py-3 text-right font-bold text-text-primary">{total} {t('unit_pcs')}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">{total} {t('unit_pcs')}</td>
                             </tr>
                           )
                         })}
@@ -527,7 +527,7 @@ const StockTab = ({ ctx }) => {
               return (
                 <Modal open title={t('rep_modal_potential_profit_title')} subtitle={t('rep_modal_potential_profit_sub')} size="lg" onClose={closeModal}>
                   {/* Summary */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                     <div className="bg-bg-tertiary rounded-xl p-4 text-center">
                       <p className="text-text-muted text-xs mb-1">{t('rep_stock_potential')}</p>
                       <p className="font-syne font-bold text-accent-green text-xl">{fmtUZS(stockStats.potentialRevenue)}</p>
@@ -544,7 +544,7 @@ const StockTab = ({ ctx }) => {
 
                   {/* Kategoriya bo'yicha */}
                   <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_potential_by_category')}</p>
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-3 mb-4 sm:mb-6">
                     {catData.sort((a,b) => b.profit-a.profit).map((c,i) => (
                       <div key={c.cat} className="bg-bg-tertiary rounded-xl p-4">
                         <div className="flex items-center justify-between mb-3">
@@ -613,7 +613,7 @@ const StockTab = ({ ctx }) => {
                   </div>
 
                   {/* Multi-grid layout */}
-                  <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: `repeat(${dynamicCats.length}, minmax(0, 1fr))` }}>
+                  <div className="grid gap-3 mb-4 sm:mb-6" style={{ gridTemplateColumns: `repeat(${dynamicCats.length}, minmax(0, 1fr))` }}>
                     {dynamicCats.map(c => {
                       const pct = totalFrozenCapital > 0 ? Math.round(c.value / totalFrozenCapital * 100) : 0
                       return (
@@ -635,7 +635,7 @@ const StockTab = ({ ctx }) => {
                   </div>
 
                   {/* Vizual taqsimot */}
-                  <div className="mb-6 bg-bg-tertiary/40 border border-border/50 rounded-2xl p-4">
+                  <div className="mb-4 sm:mb-6 bg-bg-tertiary/40 border border-border/50 rounded-2xl p-4">
                     <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_total_share_ratio')}</p>
                     <div className="flex rounded-full overflow-hidden h-8 bg-bg-tertiary">
                       {dynamicCats.map(c => {
@@ -696,7 +696,7 @@ const StockTab = ({ ctx }) => {
                   />
 
                   {/* Jadval 2 — Oylik kirim partiyalari (tagida, full width) */}
-                  <p className="text-text-secondary text-sm font-medium mb-3 mt-8">{t('rep_monthly_income_batches')}</p>
+                  <p className="text-text-secondary text-sm font-medium mb-3 mt-5 sm:mt-8">{t('rep_monthly_income_batches')}</p>
                   <ModalTable
                     data={MOCK_INCOME_BATCHES.sort((a,b) => {
                       const aDate = a.dueDate || ''
@@ -759,7 +759,7 @@ const StockTab = ({ ctx }) => {
               return (
                 <Modal open title={t('rep_modal_frozen_capital_title')} subtitle={t('rep_modal_frozen_capital_sub')} size="2xl" onClose={closeModal}>
                   {/* Summary */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                     <div className="bg-bg-tertiary rounded-xl p-4 text-center flex flex-col justify-between items-center">
                       <div>
                         <p className="text-text-muted text-xs mb-1">{t('rep_total_frozen')}</p>
@@ -789,7 +789,7 @@ const StockTab = ({ ctx }) => {
 
                   {/* Sekin aylanuvchilar alohida */}
                   {stockStats.withDaysLeft.filter(x => x.turnoverStatus === 'slow').length > 0 && (
-                    <div className="mb-6 bg-accent-orange/5 border border-accent-orange/20 rounded-xl p-4">
+                    <div className="mb-4 sm:mb-6 bg-accent-orange/5 border border-accent-orange/20 rounded-xl p-4">
                       <p className="text-accent-orange font-bold text-sm mb-3 flex items-center gap-2">
                         <AlertTriangle size={16} />
                         {t('rep_slow_moving_capital_alert')}
@@ -854,7 +854,7 @@ const StockTab = ({ ctx }) => {
               return (
                 <Modal open title={t('rep_modal_low_stock_title')} subtitle={t('rep_modal_low_stock_sub')} size="lg" onClose={closeModal}>
                   {/* Tugagan tovarlar */}
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-6">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-2.5 h-2.5 rounded-full bg-accent-red" />
                       <p className="text-text-primary font-syne font-bold">{t('rep_out_of_stock_title')} — {stockStats.outOfStockItems.length} {t('unit_pcs')}</p>

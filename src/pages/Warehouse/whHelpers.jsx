@@ -33,7 +33,7 @@ const isPrivileged = (role) => role === 'admin' || role === 'manager'
 // UI HELPERS
 // ============================
 const TabBtn = ({ active, onClick, children }) => (
-  <button onClick={onClick} className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${active ? 'bg-accent-red text-white shadow-glow-red' : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
+  <button onClick={onClick} className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap shrink-0 ${active ? 'bg-accent-red text-white shadow-glow-red' : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
     {children}
   </button>
 )
@@ -41,17 +41,17 @@ const Badge = ({ cls, children }) => (
   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${cls}`}>{children}</span>
 )
 const StatCard = ({ label, value, icon: Icon, cls }) => (
-  <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${cls}`}><Icon size={20} /></div>
+  <div className="bg-bg-secondary border border-border rounded-2xl p-3 sm:p-5 flex items-center gap-2.5 sm:gap-4 min-w-0">
+    <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${cls}`}><Icon size={18} /></div>
     <div className="min-w-0">
-      <p className="text-lg sm:text-xl font-syne font-bold text-text-primary leading-tight [overflow-wrap:anywhere]">{value}</p>
-      <p className="text-sm text-text-secondary">{label}</p>
+      <p className="text-base sm:text-xl font-syne font-bold text-text-primary leading-tight [overflow-wrap:anywhere]">{value}</p>
+      <p className="text-xs sm:text-sm text-text-secondary">{label}</p>
     </div>
   </div>
 )
 const Th = ({ children, right, onClick, sortable, nowrap }) => (
   <th
-    className={`${nowrap ? 'px-2 py-3 whitespace-nowrap' : 'px-4 py-3'} text-xs font-bold text-text-muted uppercase tracking-wider ${right ? 'text-right' : 'text-left'} ${sortable ? 'cursor-pointer hover:text-text-primary select-none whitespace-nowrap' : ''}`}
+    className={`${nowrap ? 'px-2 py-2 sm:py-3 whitespace-nowrap' : 'px-3 sm:px-4 py-2 sm:py-3'} text-xs font-bold text-text-muted uppercase tracking-wider ${right ? 'text-right' : 'text-left'} ${sortable ? 'cursor-pointer hover:text-text-primary select-none whitespace-nowrap' : ''}`}
     onClick={onClick}
   >
     {children}
@@ -63,7 +63,7 @@ const SortIcon = ({ field, sortField, sortDir }) => {
   return <span className="text-accent-blue ml-1 text-[10px] inline-block flex-shrink-0">{sortDir === 'asc' ? '▲' : '▼'}</span>
 }
 const Td = ({ children, right, muted, nowrap }) => (
-  <td className={`${nowrap ? 'px-2' : 'px-4'} py-3.5 text-sm ${nowrap ? 'whitespace-nowrap' : ''} ${right ? 'text-right' : ''} ${muted ? 'text-text-muted' : 'text-text-primary'}`}>{children}</td>
+  <td className={`${nowrap ? 'px-2' : 'px-3 sm:px-4'} py-2.5 sm:py-3.5 text-sm ${nowrap ? 'whitespace-nowrap' : ''} ${right ? 'text-right' : ''} ${muted ? 'text-text-muted' : 'text-text-primary'}`}>{children}</td>
 )
 
 export { TABS, USED_STOCK_STATUS_CONFIG, CATEGORIES, SEASONS, SEASON_COLORS, stockStatus, STATUS_CONFIG, isPrivileged, TabBtn, Badge, StatCard, Th, SortIcon, Td }

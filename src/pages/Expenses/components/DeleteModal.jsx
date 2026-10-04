@@ -10,7 +10,7 @@ const DeleteModal = ({ title, desc, onClose, onConfirm }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-        className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-6">
+        className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-4 sm:p-6">
         <div className="flex flex-col items-center text-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-accent-red/10 flex items-center justify-center">
             <Trash2 size={24} className="text-accent-red" />

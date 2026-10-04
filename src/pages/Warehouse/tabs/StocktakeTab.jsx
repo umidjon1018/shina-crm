@@ -231,7 +231,7 @@ const StocktakeTab = () => {
       {/* O'ng panel — detal */}
       <div className="flex-1 bg-bg-secondary border border-border rounded-2xl flex flex-col overflow-hidden">
         {!selected ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-5 sm:p-8">
             <ClipboardList size={40} className="text-text-muted opacity-30" />
             <p className="text-text-muted text-sm">Inventarizatsiyani tanlang yoki yangi yarating</p>
           </div>
@@ -314,10 +314,10 @@ const StocktakeTab = () => {
                 </colgroup>
                 <thead className="bg-bg-tertiary sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-2.5 text-left text-xs font-bold text-text-muted">Mahsulot</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold text-text-muted">Tizimda</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold text-text-muted">Haqiqatda</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold text-text-muted">Farq</th>
+                    <th className="px-3 sm:px-4 py-2.5 text-left text-xs font-bold text-text-muted">Mahsulot</th>
+                    <th className="px-3 sm:px-4 py-2.5 text-right text-xs font-bold text-text-muted">Tizimda</th>
+                    <th className="px-3 sm:px-4 py-2.5 text-right text-xs font-bold text-text-muted">Haqiqatda</th>
+                    <th className="px-3 sm:px-4 py-2.5 text-right text-xs font-bold text-text-muted">Farq</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -328,13 +328,13 @@ const StocktakeTab = () => {
                     const hasDiff = diff !== null && diff !== 0
                     return (
                       <tr key={item.id} className={`transition-colors ${hasDiff ? 'bg-accent-red/5' : diff === 0 ? 'bg-accent-green/5' : ''} hover:bg-bg-tertiary/40`}>
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 sm:px-4 py-2.5">
                           <span className="text-sm font-medium text-text-primary">{item.productName}</span>
                         </td>
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-3 sm:px-4 py-2.5 text-right">
                           <span className="text-sm font-bold text-text-secondary">{fmt(item.expectedQty)}</span>
                         </td>
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-3 sm:px-4 py-2.5 text-right">
                           {selected.status === 'draft' ? (
                             <div className="flex items-center justify-end gap-1 pr-1">
                               {saving[item.id] && <div className="w-3 h-3 flex-shrink-0 border border-accent-blue border-t-transparent rounded-full animate-spin" />}
@@ -353,7 +353,7 @@ const StocktakeTab = () => {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-3 sm:px-4 py-2.5 text-right">
                           <DiffBadge diff={diff} />
                         </td>
                       </tr>
@@ -375,7 +375,7 @@ const StocktakeTab = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-bg-secondary border border-border rounded-2xl p-6 w-full max-w-sm space-y-4"
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-sm space-y-4"
             >
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-accent-red/10 flex items-center justify-center flex-shrink-0">

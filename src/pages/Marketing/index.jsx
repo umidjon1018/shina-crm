@@ -37,9 +37,9 @@ const Marketing = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('mkt_page_title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('mkt_page_title')}</h1>
         <p className="text-text-secondary text-sm mt-0.5">{t('mkt_page_subtitle')}</p>
       </div>
 

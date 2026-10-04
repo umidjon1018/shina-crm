@@ -153,38 +153,38 @@ const SupplierReturnsTab = ({ ctx }) => {
           <table className="w-full text-sm min-w-[820px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
               <tr>
-                <th className="px-4 py-3 text-left">{t('sup_document')}</th>
-                <th className="px-4 py-3 text-left">{t('col_date')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_supplier')}</th>
-                <th className="px-4 py-3 text-left">{t('col_product')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_qty')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_return_amount')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_reason')}</th>
-                <th className="px-4 py-3"></th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_document')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('col_date')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_supplier')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('col_product')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_qty')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_return_amount')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_reason')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {paged.map(r => (
                 <tr key={r.id} className={r.status === 'cancelled' ? 'bg-accent-red/5' : 'hover:bg-bg-tertiary/40'}>
-                  <td className="px-4 py-3 font-bold text-text-primary whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-text-primary whitespace-nowrap">
                     {r.returnNumber}
                     {r.status === 'cancelled' && <span className="ml-1.5 px-1.5 py-0.5 rounded bg-accent-red/10 text-accent-red text-[10px]">{t('sup_cancelled_badge')}</span>}
                     <p className="text-[11px] font-normal text-text-muted">{r.batchNumber}</p>
                   </td>
-                  <td className="px-4 py-3 text-text-muted whitespace-nowrap">{fmtDate(r.createdAt)}<p className="text-[11px]">{r.createdByName}</p></td>
-                  <td className="px-4 py-3 text-text-primary">{r.supplierName}</td>
-                  <td className="px-4 py-3 text-text-primary">{r.productName}</td>
-                  <td className="px-4 py-3 text-right font-bold">{r.quantity}</td>
-                  <td className="px-4 py-3 text-right font-bold text-accent-orange">{usd(r.amountUSD)}</td>
-                  <td className="px-4 py-3 text-xs text-text-secondary max-w-[220px]">{r.reason}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted whitespace-nowrap">{fmtDate(r.createdAt)}<p className="text-[11px]">{r.createdByName}</p></td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{r.supplierName}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{r.productName}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold">{r.quantity}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-accent-orange">{usd(r.amountUSD)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs text-text-secondary max-w-[220px]">{r.reason}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                     {r.status === 'active' && ['admin', 'manager'].includes(user?.role) && (confirmId === r.id
                       ? <button onClick={() => cancel(r.id)} className="px-2.5 py-1.5 rounded-lg bg-accent-red text-white text-xs font-bold whitespace-nowrap">{t('sup_confirm_undo')}</button>
                       : <button onClick={() => setConfirmId(r.id)} title={t('sup_undo_return')} className="p-1.5 text-text-muted hover:text-accent-red"><RotateCcw size={16} /></button>)}
                   </td>
                 </tr>
               ))}
-              {paged.length === 0 && <tr><td colSpan="8" className="px-4 py-12 text-center text-text-muted"><Undo2 size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_returns')}</td></tr>}
+              {paged.length === 0 && <tr><td colSpan="8" className="px-3 sm:px-4 py-12 text-center text-text-muted"><Undo2 size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_returns')}</td></tr>}
             </tbody>
           </table>
         </div>

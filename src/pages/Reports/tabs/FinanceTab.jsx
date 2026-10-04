@@ -73,7 +73,7 @@ const FinanceTab = ({ ctx }) => {
           !isPrivileged ? <LockedTab /> : (
             <>
               {financeStats.overdueDebts.length > 0 && (
-                <div className="bg-accent-red/15 border-2 border-accent-red/40 rounded-2xl p-5 mb-6">
+                <div className="bg-accent-red/15 border-2 border-accent-red/40 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <AlertTriangle size={18} className="text-accent-red" />
@@ -108,7 +108,7 @@ const FinanceTab = ({ ctx }) => {
               )}
 
               {financeStats.urgentDebts.length > 0 && (
-                <div className="bg-accent-orange/10 border border-accent-orange/30 rounded-2xl p-5 mb-6">
+                <div className="bg-accent-orange/10 border border-accent-orange/30 rounded-2xl p-4 sm:p-5 mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <AlertTriangle size={18} className="text-accent-orange" />
@@ -157,7 +157,7 @@ const FinanceTab = ({ ctx }) => {
                     sub={t('rep_fin_installment_sales_count', { count: financeStats.installmentSales.length })}
                     color="bg-purple-500/10 text-purple-500" />
                 </div>
-                <div className="bg-bg-secondary border border-border rounded-2xl p-5">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-text-secondary text-sm font-medium">{t('rep_fin_usd_rate')}</p>
                     <DollarSign size={20} className="text-accent-green" />
@@ -187,7 +187,7 @@ const FinanceTab = ({ ctx }) => {
                     sub={t('rep_fin_injected_minus_returned')}
                     color="bg-accent-blue/10 text-accent-blue" />
                 </div>
-                <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-green/40 transition-colors" onClick={() => openModal('roiModal')}>
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 cursor-pointer hover:border-accent-green/40 transition-colors" onClick={() => openModal('roiModal')}>
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-text-secondary text-sm font-medium">{t('rep_fin_roi')}</p>
                     <TrendingUp size={20} className="text-accent-purple" />
@@ -200,12 +200,12 @@ const FinanceTab = ({ ctx }) => {
               </div>
 
               {/* MOCK — replace with: GET /api/finance/cash-balance */}
-              <div className={`rounded-2xl p-6 border-2 mt-6 cursor-pointer hover:opacity-90 transition-opacity ${financeStats.cashBalance >= 0 ? 'border-accent-green bg-accent-green/5' : 'border-accent-red bg-accent-red/5'}`}
+              <div className={`rounded-2xl p-4 sm:p-6 border-2 mt-4 sm:mt-6 cursor-pointer hover:opacity-90 transition-opacity ${financeStats.cashBalance >= 0 ? 'border-accent-green bg-accent-green/5' : 'border-accent-red bg-accent-red/5'}`}
                 onClick={() => openModal('cashFlowModal')}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <p className="text-text-secondary text-sm font-medium mb-1">{t('rep_fin_cash_balance')}</p>
-                    <h2 className="text-4xl font-syne font-extrabold" style={{ color: financeStats.cashBalance >= 0 ? C.green : C.red }}>
+                    <h2 className="text-3xl sm:text-4xl font-syne font-extrabold" style={{ color: financeStats.cashBalance >= 0 ? C.green : C.red }}>
                       {fmtUZS(financeStats.cashBalance)}
                     </h2>
                     <p className="text-text-muted text-xs mt-1">{t('rep_fin_cash_balance_desc')}</p>
@@ -222,7 +222,7 @@ const FinanceTab = ({ ctx }) => {
 
               {/* Nasiya tashkilotlari hisoboti */}
               {financeStats.orgStats && financeStats.orgStats.length > 0 && (
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6 mb-6">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-5">
                     <div>
                       <h4 className="font-syne font-bold text-text-primary">{t('rep_fin_installment_org_report')}</h4>
@@ -235,7 +235,7 @@ const FinanceTab = ({ ctx }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                     {financeStats.orgStats.map(org => (
-                      <div key={org.id} className="bg-bg-tertiary rounded-2xl p-5">
+                      <div key={org.id} className="bg-bg-tertiary rounded-2xl p-4 sm:p-5">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <p className="font-syne font-bold text-text-primary">{org.name}</p>
@@ -309,8 +309,8 @@ const FinanceTab = ({ ctx }) => {
                 </div>
               )}
 
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6 mb-6">
-                <div className="flex items-center justify-between mb-5">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_fin_cash_flow')}</h4>
                     <p className="text-text-secondary text-sm">{t('rep_fin_cash_flow_desc')}</p>
@@ -413,10 +413,10 @@ const FinanceTab = ({ ctx }) => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-6 mt-6">
+              <div className="flex flex-col gap-3 sm:gap-6 mt-4 sm:mt-6">
                 {/* Kapital harakati */}
                 <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden w-full">
-                  <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                  <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                     <h4 className="font-syne font-bold text-text-primary">{t('exp_tab_capital')}</h4>
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
@@ -424,17 +424,17 @@ const FinanceTab = ({ ctx }) => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'date')}>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'date')}>
                             {t('col_date')} <SortIcon table="capital" col="date" />
                           </th>
-                          <th className="text-center px-4 py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'type')}>
+                          <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'type')}>
                             {t('rep_fin_col_type')} <SortIcon table="capital" col="type" />
                           </th>
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary">{t('col_source')}</th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'amountUZS')}>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('col_source')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('capital', 'amountUZS')}>
                             {t('col_amount')} <SortIcon table="capital" col="amountUZS" />
                           </th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_fin_col_balance')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary whitespace-nowrap">{t('rep_fin_col_balance')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
@@ -444,17 +444,17 @@ const FinanceTab = ({ ctx }) => {
                             : financeStats.capitalWithRunning.filter(c => c.date && c.date.startsWith(modalFilter))
                           return filteredCapData.map((c) => (
                           <tr key={c.id} className="hover:bg-bg-tertiary transition-colors">
-                            <td className="px-4 py-3 text-text-muted whitespace-nowrap">{c.date}</td>
-                            <td className="px-4 py-3 text-center whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted whitespace-nowrap">{c.date}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                 c.type === 'inject' ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-blue/10 text-accent-blue'
                               }`}>
                                 {c.type === 'inject' ? t('rep_fin_badge_inject') : t('rep_fin_badge_return')}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-text-secondary text-sm">{i18n.language === 'ru' ? (c.sourceRu || c.source) : c.source}</td>
-                            <td className="px-4 py-3 text-right font-bold text-text-primary whitespace-nowrap">{fmtUZS(c.amountUZS)}</td>
-                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-sm">{i18n.language === 'ru' ? (c.sourceRu || c.source) : c.source}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary whitespace-nowrap">{fmtUZS(c.amountUZS)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right whitespace-nowrap">
                               <span className={`font-bold text-sm ${c.runningTotal >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
                                 {fmtUZS(c.runningTotal)}
                               </span>
@@ -464,8 +464,8 @@ const FinanceTab = ({ ctx }) => {
                       </tbody>
                     </table>
                   </div>
-                  <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-bg-tertiary">
-                    <div className="flex items-center gap-6 text-sm">
+                  <div className="px-4 sm:px-6 py-3 border-t border-border flex items-center justify-between bg-bg-tertiary">
+                    <div className="flex items-center gap-3 sm:gap-6 text-sm">
                       <span className="text-text-muted">{t('rep_fin_total_injected_label')} <span className="font-bold text-accent-green">{fmtUZS(financeStats.totalInjected)}</span></span>
                       <span className="text-text-muted">{t('rep_fin_total_returned_label')} <span className="font-bold text-accent-red">{fmtUZS(financeStats.totalReturned)}</span></span>
                       <span className="text-text-muted">{t('rep_fin_total_net_label')} <span className="font-bold text-accent-blue">{fmtUZS(financeStats.netCapital)}</span></span>
@@ -474,7 +474,7 @@ const FinanceTab = ({ ctx }) => {
                 </div>
                 {/* Kirim qarzlar jadvali */}
                 <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden w-full">
-                  <div className="px-6 py-4 border-b border-border">
+                  <div className="px-4 sm:px-6 py-4 border-b border-border">
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_fin_incoming_debts')}</h4>
                   </div>
                   <div className="overflow-x-auto">
@@ -545,7 +545,7 @@ const FinanceTab = ({ ctx }) => {
                       </tbody>
                     </table>
                   </div>
-                  <div className="px-6 py-3 border-t border-border bg-bg-tertiary flex items-center gap-6 text-sm">
+                  <div className="px-4 sm:px-6 py-3 border-t border-border bg-bg-tertiary flex items-center gap-3 sm:gap-6 text-sm">
                     <span className="text-text-muted">{t('rep_fin_total_debt_label')} <span className="font-bold text-accent-red">${financeStats.totalDebtUSD}</span></span>
                     <span className="text-text-muted">{t('rep_fin_total_paid_label')} <span className="font-bold text-accent-green">${MOCK_INCOME_BATCHES.reduce((s,x)=>s+x.paidUSD,0)}</span></span>
                     <span className="text-text-muted">{t('rep_fin_uzs_equivalent_label')} <span className="font-bold text-accent-orange">{fmtUZS(Math.round(financeStats.totalDebtUSD * USD_RATE))}</span></span>
@@ -660,7 +660,7 @@ const FinanceTab = ({ ctx }) => {
                       {t('rep_fin_modal_injections_count', { count: MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all' || c.date && c.date.startsWith(modalFilter))).length })}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                     {financeStats.monthlyInjected.map(m => (
                       <div key={m.month} className="bg-bg-tertiary rounded-xl p-4 text-center">
                         <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -669,7 +669,7 @@ const FinanceTab = ({ ctx }) => {
                     ))}
                   </div>
                   <MonthlyDynamicsChart data={financeStats.monthlyInjected} dataKey="value" color={C.green} formatter={v => fmtUZS(v)} name={t('rep_fin_modal_value')} />
-                  <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_fin_modal_inject_history')}</p>
+                  <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_inject_history')}</p>
                   <ModalTable
                     data={MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all'||c.date && c.date.startsWith(modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
                     pageSize={10}
@@ -688,7 +688,7 @@ const FinanceTab = ({ ctx }) => {
                   <div className="flex items-center justify-between mb-5">
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
-                  <div className="bg-bg-tertiary rounded-xl p-4 mb-6 flex items-center justify-between">
+                  <div className="bg-bg-tertiary rounded-xl p-4 mb-4 sm:mb-6 flex items-center justify-between">
                     <div>
                       <p className="text-text-muted text-xs mb-1">{t('rep_fin_modal_total_returned')}</p>
                       <p className="font-syne font-bold text-accent-red text-2xl">{fmtUZS(financeStats.totalReturned)}</p>
@@ -698,7 +698,7 @@ const FinanceTab = ({ ctx }) => {
                       <p className="font-syne font-bold text-accent-orange text-2xl">{financeStats.returnPct}%</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                     {financeStats.monthlyReturned.map(m => (
                       <div key={m.month} className="bg-bg-tertiary rounded-xl p-4 text-center">
                         <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -707,7 +707,7 @@ const FinanceTab = ({ ctx }) => {
                     ))}
                   </div>
                   <MonthlyDynamicsChart data={financeStats.monthlyReturned} dataKey="value" color={C.red} formatter={v => fmtUZS(v)} name={t('rep_fin_modal_value')} />
-                  <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_fin_modal_return_history')}</p>
+                  <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_return_history')}</p>
                   <ModalTable
                     data={MOCK_CAPITAL.filter(c => c.type==='return' && (modalFilter==='all'||c.date && c.date.startsWith(modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
                     pageSize={10}
@@ -726,7 +726,7 @@ const FinanceTab = ({ ctx }) => {
                   <div className="flex items-center justify-between mb-5">
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                     <div className="bg-accent-green/5 border border-accent-green/20 rounded-xl p-4 text-center">
                       <p className="text-text-muted text-xs mb-1">{t('rep_fin_capital_injected')}</p>
                       <p className="font-syne font-bold text-accent-green text-xl">{fmtUZS(financeStats.totalInjected)}</p>
@@ -741,7 +741,7 @@ const FinanceTab = ({ ctx }) => {
                     </div>
                   </div>
                   <MonthlyDynamicsChart data={financeStats.monthlyCapital} dataKey="net" color={C.blue} formatter={v => fmtUZS(v)} name={t('col_net_profit')} />
-                  <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_fin_modal_history')}</p>
+                  <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_history')}</p>
                   <ModalTable
                     data={financeStats.capitalWithRunning.filter(c => modalFilter==='all'||c.date && c.date.startsWith(modalFilter))}
                     pageSize={10}
@@ -784,7 +784,7 @@ const FinanceTab = ({ ctx }) => {
                       return diff > 10 && (modalFilter==='all'||x.dueDate.startsWith(modalFilter))
                     })},
                   ].map(section => section.items.length > 0 && (
-                    <div key={section.key} className="mb-6">
+                    <div key={section.key} className="mb-4 sm:mb-6">
                       <p className={`text-sm font-bold mb-3 text-${section.color}`}>
                         {section.label} — {t('rep_fin_modal_items_count', { count: section.items.length })}
                       </p>
@@ -816,7 +816,7 @@ const FinanceTab = ({ ctx }) => {
                   <div className="flex items-center justify-between mb-5">
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-2 gap-3 mb-4 sm:mb-6">
                     <div className="bg-bg-tertiary rounded-xl p-4">
                       <p className="text-text-muted text-xs mb-1">{t('rep_fin_modal_total_expected')}</p>
                       <p className="font-syne font-bold text-purple-500 text-2xl">{fmtUZS(financeStats.installmentReceivable)}</p>
@@ -1049,9 +1049,9 @@ const FinanceTab = ({ ctx }) => {
                         </div>
 
                         {/* ROI natija */}
-                        <div className="bg-bg-tertiary rounded-xl p-5 text-center mb-4">
+                        <div className="bg-bg-tertiary rounded-xl p-4 sm:p-5 text-center mb-4">
                           <p className="text-text-muted text-xs mb-2">{t('rep_fin_roi')}</p>
-                          <p className="font-syne font-bold text-4xl" style={{ color: (financeStats.roi||0) >= 0 ? C.green : C.red }}>
+                          <p className="font-syne font-bold text-3xl sm:text-4xl" style={{ color: (financeStats.roi||0) >= 0 ? C.green : C.red }}>
                             {financeStats.roi}%
                           </p>
                           <p className="text-text-muted text-sm mt-2">
@@ -1082,7 +1082,7 @@ const FinanceTab = ({ ctx }) => {
                 )
                 return (
                   <Modal open title={t('rep_fin_modal_inv_pay_title')} subtitle={t('rep_fin_modal_inv_pay_sub')} size="xl" onClose={closeModal}>
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                       {months.map(([m, d]) => (
                         <div key={m} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{MONTH_NAMES_INV[m] || m}</p>

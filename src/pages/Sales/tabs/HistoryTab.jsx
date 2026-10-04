@@ -33,7 +33,7 @@ const HistoryTab = ({ ctx }) => {
       className="space-y-4"
     >
       {/* Yangi sotuvlar tarixi */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
         <h3 className="font-syne font-bold text-text-primary text-lg mb-4 text-white">{t('sl_hist_title')}</h3>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
           <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ const HistoryTab = ({ ctx }) => {
                   { key: 'paymentTypeLabel', label: t('sl_hist_th_payment') },
                   { key: 'statusLabel', label: t('sl_hist_th_status'), right: true },
                 ].map(col => (
-                  <th key={col.key} className={`px-4 py-3 font-bold uppercase cursor-pointer hover:text-text-primary select-none transition-colors ${col.right ? 'text-right' : ''}`}
+                  <th key={col.key} className={`px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase cursor-pointer hover:text-text-primary select-none transition-colors ${col.right ? 'text-right' : ''}`}
                     onClick={() => handleHistorySort(col.key)}>
                     <div className={`flex items-center gap-1 ${col.right ? 'justify-end' : ''}`}>
                       {col.label} {historySortField === col.key && (historySortOrder === 'asc' ? '▲' : '▼')}
@@ -87,8 +87,8 @@ const HistoryTab = ({ ctx }) => {
                 const pairBg = exchangePairColors[s.id]
                 return (
                   <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors" style={pairBg ? { backgroundColor: pairBg } : {}}>
-                    <td className="px-4 py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-4 py-3.5 truncate font-bold text-text-primary">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary">
                       {(() => {
                         const items = s.items || []
                         const visible = items.slice(0, 2)
@@ -130,7 +130,7 @@ const HistoryTab = ({ ctx }) => {
                       const visible = barcodes.slice(0, 2)
                       const hidden = barcodes.slice(2)
                       return (
-                        <td className={`px-4 py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
+                        <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
                           <div className="flex flex-col gap-0.5">
                             {visible.map((b, i) => <span key={i} className="text-[10px] truncate">{b}</span>)}
                             {hidden.length > 0 && (
@@ -146,17 +146,17 @@ const HistoryTab = ({ ctx }) => {
                     })()}
                     {(() => {
                       if (s.isBundle) {
-                        return <td className="px-4 py-3.5 truncate"><span className="font-semibold text-sm text-accent-blue">Komplekt</span></td>
+                        return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className="font-semibold text-sm text-accent-blue">Komplekt</span></td>
                       }
                       const catObj = productCategories.find(c => c.id === catId)
                       const catColor = getCategoryColor(catObj?.id, productCategories)
-                      return <td className="px-4 py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
+                      return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
                     })()}
-                    <td className="px-4 py-3.5 truncate">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate">
                       <span className={`font-medium ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</span>
                       {s.originalCustomerName && <div className="text-[9px] text-text-muted line-through">{s.originalCustomerName}</div>}
                     </td>
-                    <td className="px-4 py-3.5 text-text-secondary truncate">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">
                       {(s.status === 'cancelled' || s._isExchange) && s.cancelledBy && String(s.cancelledBy) !== String(s.soldBy) ? (
                         <div className="flex flex-col gap-0.5 leading-tight">
                           <span className="truncate">{s.soldByName || '—'}</span>
@@ -164,13 +164,13 @@ const HistoryTab = ({ ctx }) => {
                         </div>
                       ) : (s.soldByName || '—')}
                     </td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded bg-bg-tertiary text-text-primary text-[10px] whitespace-nowrap">
                         {t('source_' + s.source, { defaultValue: sources.find(src => src.id === s.source)?.label || s.source })}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
-                    <td className="px-4 py-3.5 text-text-secondary whitespace-nowrap">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary whitespace-nowrap">
                       {s.discount > 0
                         ? <span className="text-accent-orange font-semibold whitespace-nowrap">
                             -{s.discount}% ({formatPrice(Math.round((s.subtotal || s.total) * s.discount / 100), som)})
@@ -181,8 +181,8 @@ const HistoryTab = ({ ctx }) => {
                             </span>
                           : <span className="text-text-muted">—</span>}
                     </td>
-                    <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">
                       <div className="flex flex-col gap-0.5">
                         <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
                         {s.paymentType === 'card' && s.cardType && (
@@ -190,7 +190,7 @@ const HistoryTab = ({ ctx }) => {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-right">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       {(() => {
                         let cls, label
                         if (s.status === 'completed' && !s._isExchange) { cls = 'bg-accent-green/10 text-accent-green'; label = t('col_done') }
@@ -236,13 +236,13 @@ const HistoryTab = ({ ctx }) => {
       )}
 
       {/* B/U sotuvlar tarixi */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
         <h3 className="font-syne font-bold text-text-primary text-lg mb-4 text-white">{t('sl_hist_bu_title')}</h3>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
           <div className="text-xs text-text-muted">{t('sl_hist_bu_total', { n: usedSalesList.length })}</div>
         </div>
         {usedSalesList.length === 0 ? (
-          <p className="text-xs text-text-muted text-center py-6">{t('sl_hist_bu_not_found')}</p>
+          <p className="text-xs text-text-muted text-center py-4 sm:py-6">{t('sl_hist_bu_not_found')}</p>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs min-w-[1100px]" style={{ tableLayout: 'fixed' }}>
@@ -255,29 +255,29 @@ const HistoryTab = ({ ctx }) => {
               <thead className="bg-bg-tertiary text-text-muted">
                 <tr>
                   {[t('col_date'), t('col_product_name'), t('col_category'), t('col_customer'), t('col_employee'), t('col_source'), t('sl_hist_th_qty'), t('col_discount'), t('sl_hist_th_total'), t('sl_hist_th_payment')].map((label, i) => (
-                    <th key={i} className="px-4 py-3 font-bold uppercase">{label}</th>
+                    <th key={i} className="px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase">{label}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {usedSalesList.map(s => (
                   <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-4 py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-4 py-3.5 truncate font-bold text-text-primary">{s.items?.map(i => i.name || 'Tovar').join(', ') || '—'}</td>
-                    <td className="px-4 py-3.5 truncate">{(() => { const cat = s.items?.[0]; if (!cat?.category) return '—'; const catColor = getCategoryColor(cat.category, productCategories); return <span className={`font-semibold text-sm ${catColor.text}`}>{t('cat_' + cat.category, { defaultValue: cat.categoryLabel || cat.category })}</span> })()}</td>
-                    <td className="px-4 py-3.5 truncate"><span className={`font-medium ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</span></td>
-                    <td className="px-4 py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
-                    <td className="px-4 py-3.5 whitespace-nowrap">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary">{s.items?.map(i => i.name || 'Tovar').join(', ') || '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate">{(() => { const cat = s.items?.[0]; if (!cat?.category) return '—'; const catColor = getCategoryColor(cat.category, productCategories); return <span className={`font-semibold text-sm ${catColor.text}`}>{t('cat_' + cat.category, { defaultValue: cat.categoryLabel || cat.category })}</span> })()}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-medium ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</span></td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded bg-bg-tertiary text-text-primary text-[10px]">
                         {s.source ? t('source_' + s.source, { defaultValue: sources.find(src => src.id === s.source)?.label || s.source }) : '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
-                    <td className="px-4 py-3.5 text-text-secondary whitespace-nowrap">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary whitespace-nowrap">
                       {s.discount > 0 ? <span className="text-accent-orange font-semibold">-{s.discount}%</span> : <span className="text-text-muted">—</span>}
                     </td>
-                    <td className="px-4 py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">
                       <div className="flex flex-col gap-0.5">
                         <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
                         {s.paymentType === 'card' && s.cardType && (
@@ -294,7 +294,7 @@ const HistoryTab = ({ ctx }) => {
       </div>
       {peekProduct && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
-          <div className="bg-bg-secondary border border-border rounded-2xl p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
               <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>

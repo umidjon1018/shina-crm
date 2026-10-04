@@ -14,21 +14,21 @@ export const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('employees')
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-2xl font-syne font-extrabold tracking-tight text-text-primary">{t('adm_title')}</h1>
         <p className="text-text-muted text-sm mt-1">{t('adm_subtitle')}</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar max-w-full">
         {TABS.map(tab => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
           return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive ? 'bg-accent-red text-white shadow-glow-red' : 'bg-bg-secondary border border-border text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
-              <Icon size={16}/> {t(tab.labelKey)}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} title={t(tab.labelKey)}
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0 ${isActive ? 'bg-accent-red text-white shadow-glow-red' : 'bg-bg-secondary border border-border text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
+              <Icon size={16}/> <span className={isActive ? '' : 'hidden sm:inline'}>{t(tab.labelKey)}</span>
             </button>
           )
         })}

@@ -326,7 +326,7 @@ const NotificationsTab = ({ ctx }) => {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-bg-secondary border border-border rounded-[2rem] p-6 w-full max-w-sm shadow-glow-red"
+                className="bg-bg-secondary border border-border rounded-[2rem] p-4 sm:p-6 w-full max-w-sm shadow-glow-red"
                 onClick={e => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-5">

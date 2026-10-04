@@ -124,7 +124,7 @@ const NewSaleTab = ({ ctx }) => {
         {/* SAVAT — bundle + oddiy */}
         {(bundleGroups.length > 0 || cartGroups.length > 0) && (
           <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                 <ShoppingCart size={18} className="text-accent-red" />
                 Savat tarkibi ({cartItems.length} ta)

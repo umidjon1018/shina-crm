@@ -89,7 +89,7 @@ const SalesTab = ({ ctx }) => {
 
   return (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="cursor-pointer" onClick={() => openModal('salesTotalModal')}>
                 <StatCard icon={ShoppingCart} label={t('rep_total_sales')} value={fmtUZS(salesData.totalSales)} trend={salesData.growthPct} sub={period === 'all' ? t('rep_all_time') : t('rep_selected_period')} />
               </div>
@@ -105,7 +105,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="bg-bg-secondary border border-border rounded-2xl p-5 lg:col-span-2 cursor-pointer hover:border-accent-red/40 transition-colors" onClick={() => openModal('salesTargetModal')}>
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 lg:col-span-2 cursor-pointer hover:border-accent-red/40 transition-colors" onClick={() => openModal('salesTargetModal')}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-text-secondary text-sm font-medium">{t('rep_monthly_target')}</p>
@@ -125,7 +125,7 @@ const SalesTab = ({ ctx }) => {
                 <p className="text-text-muted text-xs mt-1">{t('rep_target_done', { pct: salesData.targetPct })}</p>
               </div>
 
-              <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-orange/40 transition-colors" onClick={() => openModal('installmentModal')}>
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 cursor-pointer hover:border-accent-orange/40 transition-colors" onClick={() => openModal('installmentModal')}>
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-text-secondary text-sm font-medium">{t('rep_installment_debt')}</p>
                   <CreditCard size={20} className="text-accent-orange" />
@@ -135,8 +135,8 @@ const SalesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6 lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 lg:col-span-2">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_daily_dynamics')}</h4>
@@ -178,7 +178,7 @@ const SalesTab = ({ ctx }) => {
                 </div>
               </div>
 
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_pay_types')}</h4>
@@ -212,16 +212,16 @@ const SalesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
               <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_top_products')}</h4>
                   <DetailButton onClick={() => openModal('topProductsModal')} />
                   {/* MOCK — replace with: GET /api/sales/top-products */}
                 </div>
                 <div className="divide-y divide-border/50">
                   {salesData.topProducts.map((p, i) => (
-                    <div key={p.name} className="px-6 py-3 flex items-center justify-between hover:bg-bg-tertiary transition-colors">
+                    <div key={p.name} className="px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-bg-tertiary transition-colors">
                       <div className="flex items-center gap-3">
                         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                           style={{ backgroundColor: [C.red,C.orange,C.blue,C.green,C.purple][i]+'22', color: [C.red,C.orange,C.blue,C.green,C.purple][i] }}>
@@ -237,7 +237,7 @@ const SalesTab = ({ ctx }) => {
 
               <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
                 {/* MOCK — replace with: GET /api/sales/seasonal */}
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_seasonal')}</h4>
                     <p className="text-text-secondary text-sm">{t('rep_seasonal_sub')}</p>
@@ -246,8 +246,8 @@ const SalesTab = ({ ctx }) => {
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-border">
                   {salesData.chartCategories.map(s => (
-                    <div key={s.label} className="p-6 text-center">
-                      <div className="text-3xl font-syne font-extrabold mb-1" style={{ color: s.color }}>{s.count}</div>
+                    <div key={s.label} className="p-4 sm:p-6 text-center">
+                      <div className="text-2xl sm:text-3xl font-syne font-extrabold mb-1" style={{ color: s.color }}>{s.count}</div>
                       <div className="text-text-secondary text-sm">{s.label}</div>
                       <div className="text-text-muted text-xs mt-1">{s.pct}%</div>
                     </div>
@@ -256,8 +256,8 @@ const SalesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6 cursor-pointer hover:border-accent-green/40 transition-colors" onClick={() => openModal('newReturnModal')}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mt-4 sm:mt-6">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 cursor-pointer hover:border-accent-green/40 transition-colors" onClick={() => openModal('newReturnModal')}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_new_vs_return')}</h4>
@@ -293,7 +293,7 @@ const SalesTab = ({ ctx }) => {
                 })()}
               </div>
 
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6 cursor-pointer hover:border-accent-purple/40 transition-colors" onClick={() => openModal('hourModal')}>
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 cursor-pointer hover:border-accent-purple/40 transition-colors" onClick={() => openModal('hourModal')}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_hour_analysis')}</h4>
@@ -314,9 +314,9 @@ const SalesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mt-4 sm:mt-6">
               <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <MapPin size={18} className="text-accent-blue" />
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_sources_title')}</h4>
@@ -325,7 +325,7 @@ const SalesTab = ({ ctx }) => {
                 </div>
                 <div className="divide-y divide-border/50">
                   {salesData.chartSources.sort((a,b)=>b.count-a.count).map((s, i) => (
-                    <div key={s.name} className="px-6 py-3 flex items-center justify-between hover:bg-bg-tertiary transition-colors">
+                    <div key={s.name} className="px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-bg-tertiary transition-colors">
                       <div className="flex items-center gap-3">
                         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-bg-tertiary text-text-secondary">{i+1}</span>
                         <span className="text-text-primary text-sm font-medium">{s.name}</span>
@@ -340,7 +340,7 @@ const SalesTab = ({ ctx }) => {
               </div>
 
               <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <UserX size={18} className="text-accent-red" />
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_cancel_reasons_title')}</h4>
@@ -348,10 +348,10 @@ const SalesTab = ({ ctx }) => {
                   <DetailButton onClick={() => openModal('cancelModal')} />
                 </div>
                 {salesData.chartCancelReasons.length === 0 ? (
-                  <div className="p-6 text-center text-text-muted text-sm">{t('rep_no_cancelled_sales')}</div>
+                  <div className="p-4 sm:p-6 text-center text-text-muted text-sm">{t('rep_no_cancelled_sales')}</div>
                 ) : (
                   <>
-                    <div className="px-6 py-2.5 bg-bg-tertiary/60 border-b border-border flex items-center justify-between">
+                    <div className="px-4 sm:px-6 py-2.5 bg-bg-tertiary/60 border-b border-border flex items-center justify-between">
                       <span className="text-text-muted text-xs">{t('rep_cancel_total')}</span>
                       <span className="font-bold text-accent-red text-sm">{salesData.chartCancelReasons.reduce((s,r)=>s+r.count,0)} {t('unit_pcs')}</span>
                     </div>
@@ -360,7 +360,7 @@ const SalesTab = ({ ctx }) => {
                         const total = salesData.chartCancelReasons.reduce((s,x)=>s+x.count,0) || 1
                         const pct = Math.round(r.count/total*100)
                         return (
-                          <div key={r.name} className="px-6 py-3 hover:bg-bg-tertiary transition-colors">
+                          <div key={r.name} className="px-4 sm:px-6 py-3 hover:bg-bg-tertiary transition-colors">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-text-primary text-sm font-medium">{r.name}</span>
                               <span className="font-bold text-accent-red text-sm">{r.count} {t('unit_pcs')} <span className="text-text-muted text-xs font-normal">({pct}%)</span></span>
@@ -377,8 +377,8 @@ const SalesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-6">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-4 sm:mt-6">
+              <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_top_sales')}</h4>
                 <span className="text-xs text-text-muted">
                   {salesData.filtered.length} {t('unit_pcs')} ({salesData.salesCount} {t('rep_stat_done')}, {salesData.cancelledCount} {t('rep_stat_cancelled')}, {salesData.exchangedCount} {t('rep_stat_exchanged')})
@@ -388,28 +388,28 @@ const SalesTab = ({ ctx }) => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-bg-tertiary border-b border-border">
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary">#</th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'soldAt')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary">#</th>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'soldAt')}>
                         {t('col_date')} <SortIcon table="sales" col="soldAt" />
                       </th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'customerName')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'customerName')}>
                         {t('col_customer')} <SortIcon table="sales" col="customerName" />
                       </th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary">{t('col_source')}</th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'total')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary">{t('col_source')}</th>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'total')}>
                         {t('col_product')} <SortIcon table="sales" col="total" />
                       </th>
-                      <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'total')}>
+                      <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'total')}>
                         {t('col_amount')} <SortIcon table="sales" col="total" />
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'discount')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'discount')}>
                         {t('col_discount')} <SortIcon table="sales" col="discount" />
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary">{t('rep_col_payment')}</th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'soldByName')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_col_payment')}</th>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'soldByName')}>
                         {t('role_seller')} <SortIcon table="sales" col="soldByName" />
                       </th>
-                      <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'status')}>
+                      <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('sales', 'status')}>
                         {t('col_status')} <SortIcon table="sales" col="status" />
                       </th>
                     </tr>
@@ -424,16 +424,16 @@ const SalesTab = ({ ctx }) => {
                       .slice((salesTablePage - 1) * SALES_PAGE_SIZE, salesTablePage * SALES_PAGE_SIZE)
                       .map((s, idx) => (
                         <tr key={s.id} className="hover:bg-bg-tertiary transition-colors">
-                          <td className="px-6 py-4 text-text-muted">{(salesTablePage - 1) * SALES_PAGE_SIZE + idx + 1}</td>
-                          <td className="px-6 py-4 text-text-primary whitespace-nowrap text-sm">{s.soldAt ? fmtSoldAt(s.soldAt) : '—'}</td>
-                          <td className="px-6 py-4 font-medium text-text-primary">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted">{(salesTablePage - 1) * SALES_PAGE_SIZE + idx + 1}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-primary whitespace-nowrap text-sm">{s.soldAt ? fmtSoldAt(s.soldAt) : '—'}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 font-medium text-text-primary">
                             {s.customerName}
                             {s.isNewCustomer && <span className="ml-2 px-1.5 py-0.5 rounded bg-accent-blue/10 text-accent-blue text-[9px] font-bold uppercase tracking-wider">{t('rep_new_badge')}</span>}
                           </td>
-                          <td className="px-6 py-4 text-text-secondary text-xs">{getSourceLabel(s.source)}</td>
-                          <td className="px-6 py-4 font-medium text-text-primary text-sm">{fmtItems(s.items)}</td>
-                          <td className="px-6 py-4 text-right font-bold text-text-primary">{fmtNum(s.total)}</td>
-                          <td className="px-6 py-4 text-center text-text-muted">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs">{getSourceLabel(s.source)}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 font-medium text-text-primary text-sm">{fmtItems(s.items)}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-text-primary">{fmtNum(s.total)}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center text-text-muted">
                             {(() => {
                               const es = enrichSale(s)
                               if (s.discount > 0) return <span className="text-accent-orange font-semibold whitespace-nowrap">-{s.discount}% ({fmtNum(Math.round((s.subtotal || s.total) * s.discount / 100))} so'm)</span>
@@ -441,7 +441,7 @@ const SalesTab = ({ ctx }) => {
                               return <span className="text-text-muted">—</span>
                             })()}
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                             <div className="flex flex-col items-center gap-0.5">
                               <span className="inline-flex px-2 py-0.5 rounded-lg bg-bg-tertiary border border-border text-[10px] font-bold uppercase text-text-secondary">
                                 {{ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('rep_pay_bank') }[s.paymentType] || s.paymentType}
@@ -451,8 +451,8 @@ const SalesTab = ({ ctx }) => {
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-text-secondary">{s.soldByName}</td>
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary">{s.soldByName}</td>
+                          <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                               s.status !== 'cancelled' ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'
                             }`}>
@@ -488,7 +488,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             {/* Oylik dinamika */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_monthly_dynamics')}</p>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {monthlyData.map(m => (
@@ -561,7 +561,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             {/* Oylik dinamika */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_monthly_profit_chart')}</p>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {monthlyData.map(m => (
@@ -581,7 +581,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             {/* Top-5 foydali tovar */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_top_products')}</p>
               <div className="space-y-2">
                 {(() => {
@@ -660,11 +660,11 @@ const SalesTab = ({ ctx }) => {
               <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
               <span className="text-text-muted text-xs">{monthlyData.reduce((s,m)=>s+m.count,0)} {t('unit_pcs')} {t('rep_total_count_suffix')}</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
               {monthlyData.map(m => (
                 <div key={m.month} className="bg-bg-tertiary rounded-xl p-4 text-center">
                   <p className="text-text-muted text-xs mb-1">{m.name}</p>
-                  <p className="font-syne font-bold text-text-primary text-3xl">{m.count}</p>
+                  <p className="font-syne font-bold text-text-primary text-2xl sm:text-3xl">{m.count}</p>
                   <p className="text-text-muted text-xs mb-1">{t('rep_monthly_sales_suffix')}</p>
                   <div className="mt-2">
                     {m.growthCount !== null
@@ -678,7 +678,7 @@ const SalesTab = ({ ctx }) => {
             <MonthlyDynamicsChart data={monthlyData} dataKey="count" color={C.purple} formatter={v => `${v} ${t('unit_pcs')}`} name={t('rep_chart_count')} />
 
             {/* Oylar jadval */}
-            <div className="mt-6">
+            <div className="mt-4 sm:mt-6">
               <ModalTable
                 data={[...monthlyData].reverse()}
                 initialSortKey="month"
@@ -703,7 +703,7 @@ const SalesTab = ({ ctx }) => {
         const monthlyData = [...getMonthlySalesChart()].reverse()
         return (
           <Modal open title={t('rep_modal_target_title')} subtitle={t('rep_modal_target_sub')} size="lg" onClose={closeModal}>
-            <div className="space-y-3 mb-6 overflow-y-auto max-h-[280px] pr-1">
+            <div className="space-y-3 mb-4 sm:mb-6 overflow-y-auto max-h-[280px] pr-1">
               {monthlyData.map(m => (
                 <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -788,7 +788,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             {/* Oylik dinamika */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_monthly_installment_chart')}</p>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {monthlyData.map(m => (
@@ -861,7 +861,7 @@ const SalesTab = ({ ctx }) => {
                 <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
               </div>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-5 sm:space-y-8">
               {displayedMonths.map(m => {
                 const daysInMonth = new Date(parseInt(m.split('-')[0]), parseInt(m.split('-')[1]), 0).getDate()
                 const dailyMap = {}
@@ -956,36 +956,36 @@ const SalesTab = ({ ctx }) => {
                 <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
               </div>
             </div>
-            <div className="rounded-xl border border-border overflow-hidden mb-6">
+            <div className="rounded-xl border border-border overflow-hidden mb-4 sm:mb-6">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-bg-tertiary border-b border-border">
-                    <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_col_month')} <MonthSortBtn /></th>
-                    <th className="text-center px-4 py-3 font-medium text-text-secondary">{t('wh_in_total')}</th>
-                    <th className="text-center px-4 py-3 font-medium" style={{ color: C.green }}>{t('pay_cash')}</th>
-                    <th className="text-center px-4 py-3 font-medium" style={{ color: C.blue }}>{t('pay_card')}</th>
-                    <th className="text-center px-4 py-3 font-medium" style={{ color: C.orange }}>{t('pay_installment')}</th>
-                    <th className="text-center px-4 py-3 font-medium" style={{ color: C.purple }}>{t('rep_pay_bank')}</th>
+                    <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_col_month')} <MonthSortBtn /></th>
+                    <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('wh_in_total')}</th>
+                    <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.green }}>{t('pay_cash')}</th>
+                    <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.blue }}>{t('pay_card')}</th>
+                    <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.orange }}>{t('pay_installment')}</th>
+                    <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.purple }}>{t('rep_pay_bank')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
                   {(msd==='desc'?[...tableData].sort((a,b)=>b.rawMonth?.localeCompare(a.rawMonth||'')||0):[...tableData].sort((a,b)=>a.rawMonth?.localeCompare(b.rawMonth||'')||0)).map(row => (
                     <tr key={row.month} className="hover:bg-bg-tertiary transition-colors">
-                      <td className="px-4 py-3 font-medium text-text-primary">{row.month}</td>
-                      <td className="px-4 py-3 text-center font-bold text-text-primary">{row.total} {t('unit_pcs')}</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{row.month}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-center font-bold text-text-primary">{row.total} {t('unit_pcs')}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                         <span className="font-bold" style={{ color: C.green }}>{row.cash} {t('unit_pcs')}</span>
                         <span className="text-text-muted text-xs ml-1">({row.cashPct}%)</span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                         <span className="font-bold" style={{ color: C.blue }}>{row.card} {t('unit_pcs')}</span>
                         <span className="text-text-muted text-xs ml-1">({row.cardPct}%)</span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                         <span className="font-bold" style={{ color: C.orange }}>{row.installment} {t('unit_pcs')}</span>
                         <span className="text-text-muted text-xs ml-1">({row.instPct}%)</span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                         <span className="font-bold" style={{ color: C.purple }}>{row.transfer} {t('unit_pcs')}</span>
                         <span className="text-text-muted text-xs ml-1">({row.transferPct}%)</span>
                       </td>
@@ -1052,7 +1052,7 @@ const SalesTab = ({ ctx }) => {
                 <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
               </div>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-5 sm:space-y-8">
               {months.map(m => {
                 const sales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m))
                 const prodMap = {}
@@ -1150,7 +1150,7 @@ const SalesTab = ({ ctx }) => {
                 {availableYears.map(y => <option key={y} value={y}>{t('rep_year_suffix', { year: y })}</option>)}
               </select>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {seasons.map(season => {
                 const sales = MOCK_SALES.filter(s => s.status !== 'cancelled' && season.months.some(m => s.soldAt && s.soldAt.startsWith(m)))
                 const catCount = { tire:0, wheel:0, accessory:0 }
@@ -1165,7 +1165,7 @@ const SalesTab = ({ ctx }) => {
                   })
                 })
                 return (
-                  <div key={season.key} className="bg-bg-tertiary rounded-2xl p-5">
+                  <div key={season.key} className="bg-bg-tertiary rounded-2xl p-4 sm:p-5">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-syne font-bold text-text-primary">{season.label}</h4>
                       <div className="flex items-center gap-2">
@@ -1248,7 +1248,7 @@ const SalesTab = ({ ctx }) => {
             </div>
 
             {/* Oylik kartochkalar */}
-            <div className="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-thin">
+            <div className="flex gap-3 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-thin">
               {tableData.map(row => {
                 const total = row.total || 1
                 const newPct = Math.round(row.newCount / total * 100)
@@ -1380,7 +1380,7 @@ const SalesTab = ({ ctx }) => {
         return (
           <Modal open title={t('rep_hour_analysis')} subtitle={t('rep_modal_hour_sub')} size="xl" onClose={closeModal}>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-border pb-4">
+            <div className="flex gap-2 mb-4 sm:mb-6 border-b border-border pb-4">
               {[
                 { key: 'daily',   label: t('rep_hour_tab_daily') },
                 { key: 'monthly', label: t('rep_hour_tab_monthly') },
@@ -1660,15 +1660,15 @@ const SalesTab = ({ ctx }) => {
               <table className="w-full text-sm min-w-[700px]">
                 <thead>
                   <tr className="bg-bg-tertiary border-b border-border">
-                    <th className="text-left px-4 py-3 font-medium text-text-secondary">{t('col_source')}</th>
+                    <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('col_source')}</th>
                     {months.map(m => (
-                      <th key={m} colSpan={2} className="text-center px-4 py-3 font-medium text-text-secondary border-l border-border">
+                      <th key={m} colSpan={2} className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary border-l border-border">
                         {monthNames[m]}
                       </th>
                     ))}
                   </tr>
                   <tr className="bg-bg-tertiary border-b border-border">
-                    <th className="text-left px-4 py-3 text-text-muted text-xs"></th>
+                    <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted text-xs"></th>
                     {months.map(m => (
                       <React.Fragment key={m}>
                         <th className="text-center px-3 py-2 text-text-muted text-xs border-l border-border">{t('rep_col_qty')}</th>
@@ -1680,7 +1680,7 @@ const SalesTab = ({ ctx }) => {
                 <tbody className="divide-y divide-border/50">
                   {srcKeys.map((key, i) => (
                     <tr key={key} className="hover:bg-bg-tertiary transition-colors">
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <span className="font-medium text-sm" style={{ color: colors[i % colors.length] }}>
                           {getSourceLabel(key)}
                         </span>
@@ -1689,10 +1689,10 @@ const SalesTab = ({ ctx }) => {
                         const sales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m) && s.source === key)
                         return (
                           <React.Fragment key={m}>
-                            <td className="px-3 py-3 text-center font-bold text-text-primary border-l border-border/50">
+                            <td className="px-3 py-2 sm:py-3 text-center font-bold text-text-primary border-l border-border/50">
                               {sales.length > 0 ? sales.length : <span className="text-text-muted">—</span>}
                             </td>
-                            <td className="px-3 py-3 text-right text-text-secondary text-xs">
+                            <td className="px-3 py-2 sm:py-3 text-right text-text-secondary text-xs">
                               {sales.length > 0 ? fmtUZS(sales.reduce((s,x) => s+x.total, 0)) : '—'}
                             </td>
                           </React.Fragment>

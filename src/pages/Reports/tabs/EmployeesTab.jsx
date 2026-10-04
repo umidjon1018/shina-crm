@@ -106,7 +106,7 @@ const EmployeesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 mt-6">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 mt-4 sm:mt-6">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_performance_title')}</h4>
@@ -152,8 +152,8 @@ const EmployeesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-6">
-              <div className="px-6 py-4 border-b border-border">
+            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-4 sm:mt-6">
+              <div className="px-4 sm:px-6 py-4 border-b border-border">
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_rating_title')}</h4>
               </div>
               <div className="overflow-x-auto">
@@ -200,13 +200,13 @@ const EmployeesTab = ({ ctx }) => {
                       <tr key={e.id}
                         className="hover:bg-bg-tertiary transition-colors cursor-pointer"
                         onClick={() => { setSelectedEmployee(e); openModal('empProfileModal') }}>
-                        <td className="px-3 py-3 text-text-muted">
+                        <td className="px-3 py-2 sm:py-3 text-text-muted">
                           {idx === 0 ? <Award size={14} className="text-yellow-500" /> :
                            idx === 1 ? <Award size={14} className="text-gray-400" /> :
                            idx === 2 ? <Award size={14} className="text-orange-400" /> :
                            idx + 1}
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-3 py-2 sm:py-3">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold text-[10px] flex-shrink-0">
                               {e.name[0]}
@@ -214,18 +214,18 @@ const EmployeesTab = ({ ctx }) => {
                             <span className="font-medium text-text-primary">{e.name}</span>
                           </div>
                         </td>
-                        <td className="px-3 py-3 text-center text-text-primary font-bold">{e.salesCount}</td>
-                        <td className="px-3 py-3 text-right text-text-primary font-bold">{fmtUZS(e.totalSales)}</td>
-                        <td className="px-3 py-3 text-right font-bold text-text-primary">{fmtUZS(e.avgCheck)}</td>
-                        <td className="px-3 py-3 text-center font-bold text-accent-blue">{e.newCustomers}</td>
-                        <td className="px-3 py-3 text-center font-bold" style={{ color: e.cancelPct > 20 ? C.red : e.cancelPct > 10 ? C.orange : C.green }}>{e.cancelPct}%</td>
-                        <td className="px-3 py-3 text-center text-text-muted">{e.lastSale || '—'}</td>
-                        <td className="px-3 py-3 text-center">
+                        <td className="px-3 py-2 sm:py-3 text-center text-text-primary font-bold">{e.salesCount}</td>
+                        <td className="px-3 py-2 sm:py-3 text-right text-text-primary font-bold">{fmtUZS(e.totalSales)}</td>
+                        <td className="px-3 py-2 sm:py-3 text-right font-bold text-text-primary">{fmtUZS(e.avgCheck)}</td>
+                        <td className="px-3 py-2 sm:py-3 text-center font-bold text-accent-blue">{e.newCustomers}</td>
+                        <td className="px-3 py-2 sm:py-3 text-center font-bold" style={{ color: e.cancelPct > 20 ? C.red : e.cancelPct > 10 ? C.orange : C.green }}>{e.cancelPct}%</td>
+                        <td className="px-3 py-2 sm:py-3 text-center text-text-muted">{e.lastSale || '—'}</td>
+                        <td className="px-3 py-2 sm:py-3 text-center">
                           {e.targetPct !== null
                             ? <span className={`font-bold ${e.targetPct >= 100 ? 'text-accent-green' : e.targetPct >= 70 ? 'text-accent-orange' : 'text-accent-red'}`}>{e.targetPct}%</span>
                             : <span className="text-text-muted">—</span>}
                         </td>
-                        <td className="px-3 py-3 text-center">
+                        <td className="px-3 py-2 sm:py-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             <div className="w-10 h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
                               <div className="h-1.5 rounded-full" style={{ width:`${e.kpi}%`, backgroundColor: e.kpi>=70?C.green:e.kpi>=40?C.orange:C.red }} />
@@ -233,9 +233,9 @@ const EmployeesTab = ({ ctx }) => {
                             <span className="font-bold" style={{ color: e.kpi>=70?C.green:e.kpi>=40?C.orange:C.red }}>{e.kpi}</span>
                           </div>
                         </td>
-                        {isPrivileged && <td className="px-3 py-3 text-right text-accent-green font-medium">{fmtUZS(e.totalProfit)}</td>}
-                        {isPrivileged && <td className="px-3 py-3 text-center text-accent-red">{e.cancelCount}</td>}
-                        {isPrivileged && <td className="px-3 py-3 text-right text-text-muted">{e.avgDiscount}%</td>}
+                        {isPrivileged && <td className="px-3 py-2 sm:py-3 text-right text-accent-green font-medium">{fmtUZS(e.totalProfit)}</td>}
+                        {isPrivileged && <td className="px-3 py-2 sm:py-3 text-center text-accent-red">{e.cancelCount}</td>}
+                        {isPrivileged && <td className="px-3 py-2 sm:py-3 text-right text-text-muted">{e.avgDiscount}%</td>}
                       </tr>
                     ))}
                   </tbody>
@@ -244,8 +244,8 @@ const EmployeesTab = ({ ctx }) => {
             </div>
 
             {isPrivileged && (
-              <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-6">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-4 sm:mt-6">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={18} className="text-accent-orange" />
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_discount_control')}</h4>
@@ -256,26 +256,26 @@ const EmployeesTab = ({ ctx }) => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-bg-tertiary border-b border-border">
-                        <th className="text-left px-6 py-3 text-text-secondary font-medium">{t('role_seller')}</th>
-                        <th className="text-center px-6 py-3 text-text-secondary font-medium">{t('rep_emp_discount_given')}</th>
-                        <th className="text-center px-6 py-3 text-text-secondary font-medium">{t('rep_emp_discount_avg')}</th>
-                        <th className="text-center px-6 py-3 text-text-secondary font-medium">{t('rep_emp_discount_max')}</th>
-                        <th className="text-right px-6 py-3 text-text-secondary font-medium">{t('rep_emp_discount_lost')}</th>
+                        <th className="text-left px-4 sm:px-6 py-2 sm:py-3 text-text-secondary font-medium">{t('role_seller')}</th>
+                        <th className="text-center px-4 sm:px-6 py-2 sm:py-3 text-text-secondary font-medium">{t('rep_emp_discount_given')}</th>
+                        <th className="text-center px-4 sm:px-6 py-2 sm:py-3 text-text-secondary font-medium">{t('rep_emp_discount_avg')}</th>
+                        <th className="text-center px-4 sm:px-6 py-2 sm:py-3 text-text-secondary font-medium">{t('rep_emp_discount_max')}</th>
+                        <th className="text-right px-4 sm:px-6 py-2 sm:py-3 text-text-secondary font-medium">{t('rep_emp_discount_lost')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
                       {employeeStats.empStats.map(e => {
                         return (
                           <tr key={e.id} className="hover:bg-bg-tertiary transition-colors">
-                            <td className="px-6 py-4 font-medium text-text-primary">{e.name}</td>
-                            <td className="px-6 py-4 text-center text-text-primary">{e.discountSales.length} {t('unit_pcs')}</td>
-                            <td className="px-6 py-4 text-center font-bold" style={{ color: e.avgDiscount > 5 ? C.red : e.avgDiscount > 2 ? C.orange : C.green }}>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 font-medium text-text-primary">{e.name}</td>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center text-text-primary">{e.discountSales.length} {t('unit_pcs')}</td>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center font-bold" style={{ color: e.avgDiscount > 5 ? C.red : e.avgDiscount > 2 ? C.orange : C.green }}>
                               {e.avgDiscount}%
                             </td>
-                            <td className="px-6 py-4 text-center font-bold" style={{ color: e.maxDiscount >= 10 ? C.red : e.maxDiscount >= 5 ? C.orange : C.muted }}>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center font-bold" style={{ color: e.maxDiscount >= 10 ? C.red : e.maxDiscount >= 5 ? C.orange : C.muted }}>
                               {e.maxDiscount > 0 ? e.maxDiscount + '%' : '—'}
                             </td>
-                            <td className="px-6 py-4 text-right text-accent-red font-bold">{e.lostRevenue > 0 ? fmtUZS(e.lostRevenue) : '—'}</td>
+                            <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right text-accent-red font-bold">{e.lostRevenue > 0 ? fmtUZS(e.lostRevenue) : '—'}</td>
                           </tr>
                         )
                       })}
@@ -285,8 +285,8 @@ const EmployeesTab = ({ ctx }) => {
               </div>
             )}
 
-            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-6">
-              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mt-4 sm:mt-6">
+              <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                 <div>
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_time_analysis')}</h4>
                   <p className="text-text-secondary text-sm">{t('rep_emp_time_analysis_sub')}</p>
@@ -296,8 +296,8 @@ const EmployeesTab = ({ ctx }) => {
                   <DetailButton onClick={() => openModal('workHoursModal')} />
                 </div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
                   {employeeStats.empStats.map(e => {
                     const slots = ['07-09','09-11','11-13','13-15','15-17','17-19','19-21','21-22']
                     const maxVal = Math.max(...slots.map(s => e.hourMap[s]||0), 1)
@@ -332,14 +332,14 @@ const EmployeesTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 mt-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 mt-4 sm:mt-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_monthly_target_vs_result')}</h4>
                   <p className="text-text-secondary text-sm">{t('rep_emp_by_employee')}</p>
                 </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {employeeStats.empStats.map(e => (
                   <div key={e.id}>
                     <div className="flex items-center justify-between mb-2">
@@ -382,11 +382,11 @@ const EmployeesTab = ({ ctx }) => {
             {/* === MODAL: Faol xodimlar === */}
             {modal === 'activeEmpModal' && (
               <Modal open title={t('rep_emp_modal_activity_title')} subtitle={t('rep_emp_modal_activity_sub')} size="lg" onClose={closeModal}>
-                <div className="flex gap-3 overflow-x-auto pb-2 mb-6">
+                <div className="flex gap-3 overflow-x-auto pb-2 mb-4 sm:mb-6">
                   {sortMonths(employeeStats.monthlyActivity).map(m => (
                     <div key={m.month} className="bg-bg-tertiary rounded-xl p-4 min-w-[180px] flex-shrink-0">
                       <p className="text-text-muted text-xs mb-1">{m.name}</p>
-                      <p className="font-syne font-bold text-accent-blue text-3xl">{m.count}</p>
+                      <p className="font-syne font-bold text-accent-blue text-2xl sm:text-3xl">{m.count}</p>
                       <p className="text-text-muted text-xs mt-1">{t('rep_emp_modal_active_count_suffix')}</p>
                       <div className="mt-2 flex flex-wrap gap-1">
                         {m.emps.map(name => (
@@ -405,7 +405,7 @@ const EmployeesTab = ({ ctx }) => {
                   formatter={v => `${v} ${t('unit_pcs')}`}
                   name={t('rep_chart_count')}
                 />
-                <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_emp_modal_all_employees')}</p>
+                <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_emp_modal_all_employees')}</p>
                 <div className="space-y-2">
                   {employeeStats.empStats.map(e => (
                     <div key={e.id}
@@ -436,7 +436,7 @@ const EmployeesTab = ({ ctx }) => {
             {/* === MODAL: Eng yaxshi sotuvchi === */}
             {modal === 'topSellerModal' && (
               <Modal open title={t('rep_emp_top_seller')} subtitle={t('rep_emp_modal_top_seller_sub')} size="lg" onClose={closeModal}>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {(employeeStats.empStats[0]?.monthly || []).map((m) => {
                     const getEmpMonth = (e) => e.monthly?.find(x => x.month === m.month)
                     const monthRanking = [...employeeStats.empStats]
@@ -444,7 +444,7 @@ const EmployeesTab = ({ ctx }) => {
                     const topByProfit = [...employeeStats.empStats]
                       .sort((a,b) => (getEmpMonth(b)?.profit || 0) - (getEmpMonth(a)?.profit || 0))[0]
                     return (
-                      <div key={m.month} className="bg-bg-tertiary rounded-2xl p-5">
+                      <div key={m.month} className="bg-bg-tertiary rounded-2xl p-4 sm:p-5">
                         <h4 className="font-syne font-bold text-text-primary mb-4">{m.name}</h4>
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div className="bg-bg-secondary rounded-xl p-3">
@@ -518,10 +518,10 @@ const EmployeesTab = ({ ctx }) => {
                     </div>
                   )}
                   {filtered.length === 0
-                    ? <p className="text-text-muted text-center py-8">{t('rep_emp_modal_cancelled_no_data')}</p>
+                    ? <p className="text-text-muted text-center py-5 sm:py-8">{t('rep_emp_modal_cancelled_no_data')}</p>
                     : <div className="space-y-4">
                         {filtered.map(e => (
-                          <div key={e.id} className="bg-bg-tertiary rounded-xl p-5">
+                          <div key={e.id} className="bg-bg-tertiary rounded-xl p-4 sm:p-5">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center font-bold">
@@ -573,7 +573,7 @@ const EmployeesTab = ({ ctx }) => {
             {/* === MODAL: Grafik batafsil === */}
             {modal === 'empChartModal' && (
               <Modal open title={t('rep_emp_performance_title')} subtitle={t('rep_emp_modal_performance_dynamics')} size="xl" onClose={closeModal}>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {(employeeStats.empStats[0]?.monthly || []).map((m, mi) => (
                     <div key={m.month}>
                       <p className="text-text-secondary text-sm font-medium mb-3">{m.name}</p>
@@ -617,7 +617,7 @@ const EmployeesTab = ({ ctx }) => {
               const e = selectedEmployee
               return (
                 <Modal open title={e.name} subtitle={`${{ admin: t('role_admin'), manager: t('role_manager'), employee: t('role_seller') }[e.role] || e.role} • ${e.phone} • ${e.hiredAt}${t('rep_emp_modal_hired_since')}`} size="xl" onClose={closeModal}>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
                     {[
                       { label:t('rep_emp_modal_profile_total_sales'),  value: fmtUZS(e.totalSales),  color: C.blue  },
                       { label:t('perm_sales'),    value: `${e.salesCount} ${t('unit_pcs')}`,   color: C.green },
@@ -633,7 +633,7 @@ const EmployeesTab = ({ ctx }) => {
 
                   {/* Shaxsiy ma'lumotlar — faqat privileged */}
                   {isPrivileged && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
                       <div className="bg-bg-tertiary rounded-xl p-4">
                         <p className="text-text-muted text-xs mb-1">{t('rep_emp_modal_profile_salary')}</p>
                         <p className="font-syne font-bold text-lg text-accent-green">{e.salary ? fmtUZS(e.salary) : '—'}</p>
@@ -656,7 +656,7 @@ const EmployeesTab = ({ ctx }) => {
                   )}
 
                   {/* Oylik maqsad */}
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-6">
                     <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_emp_monthly_target_vs_result')}</p>
                     <div className="space-y-3">
                       {sortMonths(e.monthly).map(m => (
@@ -755,7 +755,7 @@ const EmployeesTab = ({ ctx }) => {
                       r => r._rowKind === 'cancel' && r.cancelledBy && String(r.cancelledBy) !== String(r.soldBy)
                     )
                     return (
-                      <div className="mt-6">
+                      <div className="mt-4 sm:mt-6">
                         <p className="text-text-secondary text-sm font-medium mb-3">
                           {t('rep_emp_modal_profile_cancellations')} ({allRows.length} {t('unit_pcs')})
                         </p>
@@ -807,7 +807,7 @@ const EmployeesTab = ({ ctx }) => {
 
                   {/* Chegirmalar */}
                   {e.discountSales.length > 0 && (
-                    <div className="mt-6">
+                    <div className="mt-4 sm:mt-6">
                       <p className="text-text-secondary text-sm font-medium mb-3">
                         {t('rep_emp_modal_profile_discount_sales')} ({e.discountSales.length} {t('unit_pcs')})
                       </p>
@@ -893,7 +893,7 @@ const EmployeesTab = ({ ctx }) => {
               const getSlot = h => h<9?'07-09':h<11?'09-11':h<13?'11-13':h<15?'13-15':h<17?'15-17':h<19?'17-19':h<21?'19-21':'21-22'
               return (
                 <Modal open title={t('rep_emp_time_analysis')} subtitle={t('rep_emp_time_analysis_sub')} size="xl" onClose={closeModal}>
-                  <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6 border-b border-border pb-4">
                     <div className="flex gap-2">
                       {[{key:'daily', label:t('rep_emp_modal_work_hours_daily')}, {key:'monthly', label:t('rep_emp_modal_work_hours_monthly')}].map(tab => (
                         <button key={tab.key} onClick={() => setHourTab(tab.key)}
@@ -979,7 +979,7 @@ const EmployeesTab = ({ ctx }) => {
                           ? MONTHS_LIST.filter(m => m === modalFilter)
                           : MONTHS_LIST
                         if (displayMonths.length === 0) return (
-                          <p className="text-text-muted text-sm text-center py-8">{t('rep_emp_modal_work_hours_no_data')}</p>
+                          <p className="text-text-muted text-sm text-center py-5 sm:py-8">{t('rep_emp_modal_work_hours_no_data')}</p>
                         )
                         return displayMonths.map(m => {
                         const mSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m))

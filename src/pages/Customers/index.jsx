@@ -517,12 +517,12 @@ const Customers = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-6"
     >
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('cust_title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('cust_title')}</h1>
           <p className="text-text-secondary text-sm">{t('cust_subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -552,7 +552,7 @@ const Customers = () => {
           )}
           <button 
             onClick={() => requireShop(() => setShowAddModal(true))}
-            className="flex items-center gap-2 px-6 py-2.5 bg-accent-red text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-glow-red shrink-0"
+            className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-accent-red text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-glow-red shrink-0"
           >
             <UserPlus size={18} /> <span className="hidden sm:inline">{t('cust_new')}</span>
           </button>
@@ -574,17 +574,17 @@ const Customers = () => {
               if (s.id === 'overdue') { setShowOverdueModal(true); return }
               setActiveFilter(activeFilter === s.id ? null : s.id)
             }}
-            className={`bg-bg-secondary border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0 cursor-pointer transition-all ${
+            className={`bg-bg-secondary border rounded-2xl p-3 sm:p-5 flex items-center gap-2.5 sm:gap-4 min-w-0 cursor-pointer transition-all ${
               (activeFilter === s.id || (s.id === 'all' && activeFilter === null))
                 ? 'border-accent-red ring-2 ring-accent-red/20 shadow-glow-red/10' 
                 : 'border-border hover:border-text-muted'
             }`}
           >
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-              <s.icon size={22} />
+            <div className={`w-9 h-9 sm:w-12 sm:h-12 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+              <s.icon size={20} />
             </div>
             <div className="min-w-0">
-              <p className="text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
+              <p className="text-lg sm:text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
               <p className="text-xs text-text-muted font-medium">{s.label}</p>
             </div>
           </div>
@@ -613,27 +613,27 @@ const Customers = () => {
             </colgroup>
             <thead className="bg-bg-tertiary">
               <tr>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">#</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('name')}>{t('col_customer')} <CustSortIcon col="name" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('phone')}>{t('col_phone')} <CustSortIcon col="phone" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">{t('cust_th_car')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('visits')}>{t('cust_th_visits')} <CustSortIcon col="visits" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_loyalty')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('col_product')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_used_items')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('totalSpent')}>{t('cust_th_total')} <CustSortIcon col="totalSpent" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('col_debt')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('cust_th_balance')}</th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('lastVisit')}>{t('cust_th_last_visit')} <CustSortIcon col="lastVisit" /></th>
-                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('loyaltyLevel')}>{t('col_tier')} <CustSortIcon col="loyaltyLevel" /></th>
-                <th className="px-6 py-4"></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">#</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('name')}>{t('col_customer')} <CustSortIcon col="name" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('phone')}>{t('col_phone')} <CustSortIcon col="phone" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">{t('cust_th_car')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('visits')}>{t('cust_th_visits')} <CustSortIcon col="visits" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_loyalty')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('col_product')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_used_items')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('totalSpent')}>{t('cust_th_total')} <CustSortIcon col="totalSpent" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('col_debt')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('cust_th_balance')}</th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('lastVisit')}>{t('cust_th_last_visit')} <CustSortIcon col="lastVisit" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('loyaltyLevel')}>{t('col_tier')} <CustSortIcon col="loyaltyLevel" /></th>
+                <th className="px-4 sm:px-6 py-2.5 sm:py-4"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.slice((customersPage - 1) * CUSTOMERS_PER_PAGE, customersPage * CUSTOMERS_PER_PAGE).map((c, idx) => (
                 <tr key={c.id} className="hover:bg-bg-tertiary/50 transition-colors group">
-                  <td className="px-6 py-4 text-text-muted font-mono">{(customersPage - 1) * CUSTOMERS_PER_PAGE + idx + 1}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-mono">{(customersPage - 1) * CUSTOMERS_PER_PAGE + idx + 1}</td>
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4">
                     <p className="font-bold text-text-primary">{c.name}</p>
                     <p className="text-[10px] text-text-muted font-mono">{c.id}</p>
                     {(c.group || c.tags?.length > 0) && (
@@ -643,37 +643,37 @@ const Customers = () => {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-text-secondary">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary">
                     <div>{c.phone}</div>
                     {c.phone2 && <div className="text-text-muted text-[10px]">{c.phone2} <span className="bg-bg-tertiary px-1 rounded">2</span></div>}
                   </td>
-                  <td className="px-6 py-4 text-text-secondary text-sm">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-sm">
                     {c.carModel || <span className="text-text-muted">—</span>}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                     <span className="bg-bg-tertiary px-2 py-1 rounded-lg font-bold text-text-primary">
                       {getTotalVisits(c)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                     <span className="bg-accent-green/10 text-accent-green px-2 py-1 rounded-lg font-bold">
                       {computeLoyaltyLevel(c).percent ? `${computeLoyaltyLevel(c).percent}%` : '—'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                     <span className="bg-bg-tertiary px-2 py-1 rounded-lg font-bold text-text-primary">
                       {getTotalItems(c)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                     {getUsedItemsCount(c) > 0
                       ? <span className="bg-accent-orange/10 text-accent-orange px-2 py-1 rounded-lg font-bold">{getUsedItemsCount(c)}</span>
                       : <span className="text-text-muted">—</span>}
                   </td>
-                  <td className="px-6 py-4 text-right font-bold text-text-primary whitespace-nowrap">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-text-primary whitespace-nowrap">
                     {formatPrice(getTotalSpent(c))}
                   </td>
-                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap">
                     {(() => {
                       const debt = allSales.filter(s => s.customerId === c.id && s.paymentType === 'installment' && s.status !== 'cancelled').reduce((sum, s) => sum + (s.installmentDebt ?? s.total ?? 0), 0)
                       return debt > 0
@@ -681,10 +681,10 @@ const Customers = () => {
                         : <span className="text-text-muted">—</span>
                     })()}
                   </td>
-                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap">
                     {c.balance ? <span className={`font-bold ${c.balance > 0 ? 'text-accent-green' : 'text-accent-red'}`}>{formatPrice(c.balance)}</span> : <span className="text-text-muted">—</span>}
                   </td>
-                  <td className="px-6 py-4 text-text-secondary text-xs whitespace-nowrap">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs whitespace-nowrap">
                     {(() => {
                       const lv = getLastVisit(c)
                       if (!lv) return <span className="text-text-muted">—</span>
@@ -692,7 +692,7 @@ const Customers = () => {
                       return <>{new Date(lv).toLocaleDateString('uz-UZ')}<p className="text-[10px] text-text-muted">{days <= 0 ? t('cust_today') : t('cust_days_ago', { n: days })}</p></>
                     })()}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4">
                     <div className="flex items-center gap-2">
                       <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${computeLoyaltyLevel(c).color}`}>
                         {computeLoyaltyLevel(c).isTop && <Star size={10} className="inline mr-1 mb-0.5" />}
@@ -700,7 +700,7 @@ const Customers = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => { setSelectedCustomer(c); setModalTab('general') }}
@@ -742,7 +742,7 @@ const Customers = () => {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={14} className="px-6 py-20 text-center">
+                  <td colSpan={14} className="px-4 sm:px-6 py-20 text-center">
                     <Users size={40} className="mx-auto text-text-muted mb-4 opacity-20" />
                     <p className="text-text-muted">{t('cust_not_found')}</p>
                   </td>
@@ -753,7 +753,7 @@ const Customers = () => {
         </div>
         {/* Pagination */}
         {filtered.length > CUSTOMERS_PER_PAGE && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-border">
             <span className="text-sm text-text-muted">
               {(customersPage - 1) * CUSTOMERS_PER_PAGE + 1}–{Math.min(customersPage * CUSTOMERS_PER_PAGE, filtered.length)} / {filtered.length} ta
             </span>

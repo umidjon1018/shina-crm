@@ -54,7 +54,7 @@ const UsedTab = ({ ctx }) => {
 
   return (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="cursor-pointer" onClick={() => openModal('usedRevenueModal')}>
                 <StatCard icon={Recycle} label={t('rep_bu_card_revenue')} value={fmtUZS(usedData.totalRevenue)} sub={t('dash_sales_count', { count: usedData.salesCount })} color="bg-accent-orange/10 text-accent-orange" />
               </div>
@@ -69,7 +69,7 @@ const UsedTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="cursor-pointer" onClick={() => openModal('usedSoldModal')}>
                 <StatCard icon={ShoppingCart} label={t('rep_bu_card_sold')} value={usedData.soldCount} sub={t('rep_bu_card_sold_sub')} color="bg-accent-green/10 text-accent-green" />
               </div>
@@ -84,7 +84,7 @@ const UsedTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <SectionTitle title={t('rep_bu_section_chart_title')} desc={t('rep_bu_section_chart_desc')} />
                 <MonthFilterSelect value={usedChartMonth} onChange={setUsedChartMonth} />
@@ -113,7 +113,7 @@ const UsedTab = ({ ctx }) => {
               )}
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <SectionTitle title={t('rep_bu_section_history_title')} desc={t('rep_bu_section_history_desc')} />
                 <MonthFilterSelect value={usedHistoryMonth} onChange={setUsedHistoryMonth} />

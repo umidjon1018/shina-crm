@@ -76,7 +76,7 @@ const CustomersTab = ({ ctx }) => {
   return (
           <>
             {customerStats.birthdayList.length > 0 && (
-              <div className="bg-accent-blue/5 border border-accent-blue/30 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
+              <div className="bg-accent-blue/5 border border-accent-blue/30 rounded-2xl px-5 py-4 mb-4 sm:mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🎂</span>
                   <div>
@@ -98,7 +98,7 @@ const CustomersTab = ({ ctx }) => {
               </div>
             )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
               <div className="cursor-pointer" onClick={() => openModal('allCustomersModal')}>
                 <StatCard icon={Users} label={t('rep_cust_total')} value={customerStats.totalCustomers} sub={t('rep_cust_total_sub')} color="bg-accent-blue/10 text-accent-blue" />
               </div>
@@ -113,8 +113,8 @@ const CustomersTab = ({ ctx }) => {
               </div>
             </div>
 
-            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mb-6">
-              <div className="px-6 py-4 border-b border-border flex items-center gap-2">
+            <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden mb-4 sm:mb-6">
+              <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center gap-2">
                 <Star size={16} className="text-yellow-500" />
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_cust_ltv_title')}</h4>
                 <span className="text-text-muted text-xs ml-auto">{t('rep_cust_ltv_desc')}</span>
@@ -123,29 +123,29 @@ const CustomersTab = ({ ctx }) => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-bg-tertiary border-b border-border">
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'name')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'name')}>
                         {t('col_customer')} <SortIcon table="ltv" col="name" />
                       </th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'phone')}>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'phone')}>
                         {t('rep_col_contact')} <SortIcon table="ltv" col="phone" />
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'totalVisits')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'totalVisits')}>
                         {t('rep_col_visits')} <SortIcon table="ltv" col="totalVisits" />
                       </th>
-                      <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'totalSpent')}>
+                      <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'totalSpent')}>
                         {t('rep_col_total_spent')} <SortIcon table="ltv" col="totalSpent" />
                       </th>
-                      <th className="text-right px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'avgCheck')}>
+                      <th className="text-right px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'avgCheck')}>
                         {t('rep_col_avg_check')} <SortIcon table="ltv" col="avgCheck" />
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'cancelCount')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'cancelCount')}>
                         {t('rep_cancelled')} <SortIcon table="ltv" col="cancelCount" />
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary">
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary">
                         {t('rep_col_next_visit')}
                       </th>
-                      <th className="text-center px-6 py-3 font-medium text-text-secondary">{t('rep_col_risk_level')}</th>
-                      <th className="text-left px-6 py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'lastVisit')}>
+                      <th className="text-center px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_col_risk_level')}</th>
+                      <th className="text-left px-4 sm:px-6 py-2 sm:py-3 font-medium text-text-secondary cursor-pointer select-none hover:text-text-primary" onClick={() => toggleSort('ltv', 'lastVisit')}>
                         {t('rep_col_last_visit')} <SortIcon table="ltv" col="lastVisit" />
                       </th>
                     </tr>
@@ -160,7 +160,7 @@ const CustomersTab = ({ ctx }) => {
                       .map(c => (
                       <tr key={c.id} className="hover:bg-bg-tertiary transition-colors cursor-pointer"
                         onClick={() => { setSelectedCustomer(c); openModal('customerProfileModal') }}>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold text-sm flex-shrink-0">{c.name[0]}</div>
                             <div>
@@ -173,32 +173,32 @@ const CustomersTab = ({ ctx }) => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-text-secondary text-xs">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs">
                           <p>{c.phone || '—'}</p>
                           {c.instagram && <p className="text-accent-blue mt-0.5">@{c.instagram}</p>}
                         </td>
-                        <td className="px-6 py-4 text-center font-bold text-text-primary">{c.totalVisits}</td>
-                        <td className="px-6 py-4 text-right font-bold text-text-primary">{fmtUZS(c.totalSpent)}</td>
-                        <td className="px-6 py-4 text-right font-medium text-text-primary">{fmtUZS(c.avgCheck)}</td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center font-bold text-text-primary">{c.totalVisits}</td>
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-text-primary">{fmtUZS(c.totalSpent)}</td>
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-medium text-text-primary">{fmtUZS(c.avgCheck)}</td>
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                           <span className={`font-bold text-sm ${c.cancelledSales.length > 0 ? 'text-accent-red' : 'text-text-muted'}`}>
                             {c.cancelledSales.length > 0 ? `${c.cancelledSales.length} ${t('unit_pcs')}` : '—'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-center text-xs text-text-secondary">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center text-xs text-text-secondary">
                           {c.avgInterval !== null && c.lastVisit ? (() => {
                             const next = new Date(c.lastVisit)
                             next.setDate(next.getDate() + c.avgInterval)
                             return next.toISOString().slice(0,10)
                           })() : '—'}
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
                           {c.churnRisk === 'none' ? <span className="text-accent-green text-xs font-bold">{t('rep_cust_active_badge')}</span> :
                            c.churnRisk === 'low' ? <span className="text-yellow-500 text-xs font-bold">{t('rep_risk_low')}</span> :
                            c.churnRisk === 'medium' ? <span className="text-accent-orange text-xs font-bold">{t('rep_risk_medium')}</span> :
                            <span className="text-accent-red text-xs font-bold">{t('rep_risk_high')}</span>}
                         </td>
-                        <td className="px-6 py-4 text-text-secondary text-xs">
+                        <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs">
                           <p>{c.lastVisit}</p>
                           <p className="mt-0.5 font-medium text-accent-orange">{t('rep_days_ago', { days: c.daysSinceLastVisit })}</p>
                         </td>
@@ -215,8 +215,8 @@ const CustomersTab = ({ ctx }) => {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_loyalty_status_title')}</h4>
                   <DetailButton onClick={() => openModal('loyaltyDetailModal')} />
@@ -254,7 +254,7 @@ const CustomersTab = ({ ctx }) => {
               </div>
 
               <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_sources_title')}</h4>
                     <p className="text-text-secondary text-sm">{t('rep_cust_sources_sub')}</p>
@@ -265,7 +265,7 @@ const CustomersTab = ({ ctx }) => {
                   {customerStats.chartSources.map((s, i) => {
                     const total = customerStats.chartSources.reduce((sum, x) => sum + x.count, 0)
                     return (
-                      <div key={s.name} className="px-6 py-3">
+                      <div key={s.name} className="px-4 sm:px-6 py-3">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-text-primary text-sm">{s.name}</span>
                           <span className="font-bold text-text-primary">{s.count} {t('unit_pcs')}</span>
@@ -284,7 +284,7 @@ const CustomersTab = ({ ctx }) => {
             </div>
 
             {customerStats.churnRiskList.length > 0 && (
-              <div className="bg-accent-orange/5 border border-accent-orange/30 rounded-2xl p-6 mt-6">
+              <div className="bg-accent-orange/5 border border-accent-orange/30 rounded-2xl p-4 sm:p-6 mt-4 sm:mt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle size={20} className="text-accent-orange" />
                   <h4 className="font-syne font-bold text-text-primary">
@@ -399,7 +399,7 @@ const CustomersTab = ({ ctx }) => {
               const c = selectedCustomer
               return (
                 <Modal open title={c.name} subtitle={[c.phone, c.instagram ? `@${c.instagram}` : null].filter(Boolean).join(' • ') || '—'} size="xl" onClose={closeModal}>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
                     {[
                       { label:t('rep_cust_stat_total_spent'), value: fmtUZS(c.totalSpent),  color: C.green  },
                       { label:t('rep_col_visits'),     value: `${c.totalVisits} ${t('unit_pcs')}`, color: C.blue   },
@@ -524,7 +524,7 @@ const CustomersTab = ({ ctx }) => {
                   placeholder={t('rep_search_name')}
                   className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue/50 mb-3"
                 />
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-4 sm:mb-6">
                   {retRows.map(c => (
                     <div key={c.id} className="bg-bg-tertiary rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
@@ -599,7 +599,7 @@ const CustomersTab = ({ ctx }) => {
               <Modal open title={t('rep_modal_ltv_title')} subtitle={t('rep_modal_ltv_sub')} size="lg" onClose={closeModal}>
                 <div className="bg-bg-tertiary rounded-xl p-4 mb-4 text-center">
                   <p className="text-text-muted text-xs mb-1">{t('rep_cust_ltv_sub')}</p>
-                  <p className="font-syne font-bold text-3xl" style={{ color: C.purple }}>{fmtUZS(customerStats.avgLTV)}</p>
+                  <p className="font-syne font-bold text-2xl sm:text-3xl" style={{ color: C.purple }}>{fmtUZS(customerStats.avgLTV)}</p>
                 </div>
                 <input
                   value={cstmSearch} onChange={e => setCstmSearch(e.target.value)}
@@ -659,7 +659,7 @@ const CustomersTab = ({ ctx }) => {
                   className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-blue/50 mb-4"
                 />
                 {silverRows.length === 0
-                  ? <p className="text-text-muted text-center py-8">{t('rep_no_silver_plus')}</p>
+                  ? <p className="text-text-muted text-center py-5 sm:py-8">{t('rep_no_silver_plus')}</p>
                   : <div className="space-y-4">
                       {silverRows.map(c => {
                         const beforeSales = c.customerSales.filter(s => s.soldAt < c.loyaltyGrantedAt)
@@ -668,7 +668,7 @@ const CustomersTab = ({ ctx }) => {
                         const afterAvg    = afterSales.length  > 0 ? Math.round(afterSales.reduce((s,x)=>s+x.total,0)/afterSales.length)   : 0
                         return (
                           <div key={c.id}
-                            className="bg-bg-tertiary rounded-xl p-5 cursor-pointer hover:bg-bg-secondary transition-colors"
+                            className="bg-bg-tertiary rounded-xl p-4 sm:p-5 cursor-pointer hover:bg-bg-secondary transition-colors"
                             onClick={() => { setSelectedCustomer(c); openModal('customerProfileModal') }}>
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-3">
@@ -740,7 +740,7 @@ const CustomersTab = ({ ctx }) => {
                     .filter(c => c.loyaltyLevel === tier.level && (!q || c.name.toLowerCase().includes(q)))
                     .sort((a,b) => a.name.localeCompare(b.name))
                   return (
-                    <div key={tier.level} className="mb-6">
+                    <div key={tier.level} className="mb-4 sm:mb-6">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tier.color }} />
                         <h4 className="font-syne font-bold text-text-primary">{tier.label}</h4>
@@ -794,7 +794,7 @@ const CustomersTab = ({ ctx }) => {
                       MOCK_SALES.some(sale => sale.customerId === c.id && sale.source === s.key)
                     )
                     return (
-                      <div key={s.key} className="bg-bg-tertiary rounded-2xl p-5">
+                      <div key={s.key} className="bg-bg-tertiary rounded-2xl p-4 sm:p-5">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />

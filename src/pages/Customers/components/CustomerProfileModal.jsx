@@ -90,13 +90,13 @@ const CustomerProfileModal = ({ ctx }) => {
               className="relative w-full max-w-4xl bg-bg-primary border border-border rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             >
               {/* Profile Header */}
-              <div className="p-8 pb-4 flex items-start justify-between bg-bg-secondary">
-                <div className="flex items-center gap-6">
-                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-extrabold text-3xl ${computeLoyaltyLevel(selectedCustomer).color}`}>
+              <div className="p-5 sm:p-8 pb-4 flex items-start justify-between bg-bg-secondary">
+                <div className="flex items-center gap-3 sm:gap-6">
+                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-extrabold text-2xl sm:text-3xl ${computeLoyaltyLevel(selectedCustomer).color}`}>
                     {selectedCustomer.name.charAt(0)}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-syne font-extrabold text-text-primary">{selectedCustomer.name}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-syne font-extrabold text-text-primary">{selectedCustomer.name}</h2>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-sm text-text-secondary flex items-center gap-1.5"><Phone size={14} /> {selectedCustomer.phone}</span>
                       {selectedCustomer.phone2 && (
@@ -143,9 +143,9 @@ const CustomerProfileModal = ({ ctx }) => {
               </div>
 
               {/* Content Area */}
-              <div className="p-8 overflow-y-auto no-scrollbar flex-1 bg-bg-primary" style={{ minHeight: '320px' }}>
+              <div className="p-5 sm:p-8 overflow-y-auto no-scrollbar flex-1 bg-bg-primary" style={{ minHeight: '320px' }}>
                 {modalTab === 'general' && (
-                  <div className="space-y-8">
+                  <div className="space-y-5 sm:space-y-8">
                     {computeLoyaltyLevel(selectedCustomer).isTop && (
                       <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-center gap-4 text-yellow-700">
                         <div className="w-10 h-10 bg-yellow-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-yellow-500/20">
@@ -391,7 +391,7 @@ const CustomerProfileModal = ({ ctx }) => {
                         const isDue = !isFullyPaid && sale.installmentDueDate && new Date(sale.installmentDueDate) < today
                         const isOpen = instPaymentSaleId === sale.id
                         return (
-                          <div key={sale.id} className={`bg-bg-secondary border rounded-2xl p-5 space-y-4 transition-all ${
+                          <div key={sale.id} className={`bg-bg-secondary border rounded-2xl p-4 sm:p-5 space-y-4 transition-all ${
                             isFullyPaid ? 'border-accent-green/30' : isDue ? 'border-accent-red shadow-glow-red/5' : 'border-border'
                           }`}>
                             <div className="flex items-start justify-between gap-3">
@@ -563,7 +563,7 @@ const CustomerProfileModal = ({ ctx }) => {
                   }
 
                   return (
-                    <div className="space-y-8">
+                    <div className="space-y-5 sm:space-y-8">
                       {/* Bizdan tovar olgan (trade-in) */}
                       <div className="space-y-4">
                         <h4 className="font-syne font-extrabold text-lg flex items-center gap-2">

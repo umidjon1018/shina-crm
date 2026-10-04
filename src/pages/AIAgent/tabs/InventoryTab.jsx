@@ -148,7 +148,7 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
   }, [agentConfig?.systemPrompt, agentConfig?.tools?.join(), stockByProduct.length, lowStock.length, zeroStock.length, barcodeStats.inStock, barcodeStats.noBarcodeInStock, usedInStock.length])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AgentAnalysisPanel
         loading={loading}
         analysis={analysis}

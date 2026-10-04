@@ -517,11 +517,11 @@ export const Management = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-syne font-extrabold tracking-tight">{t('mgmt_title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight">{t('mgmt_title')}</h1>
           <p className="text-text-secondary">{t('mgmt_subtitle')}</p>
         </div>
       </div>
@@ -534,12 +534,12 @@ export const Management = () => {
           { label: t('mgmt_stat_employees'),   value: employees.filter(e => e.isActive).length, color: 'accent-orange', icon: User },
           { label: t('mgmt_tab_products'),    value: apiProducts.filter(p => p.totalStock > 0).length, color: 'accent-green', icon: Package },
         ].map((s, i) => (
-          <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${s.color}/10 text-${s.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
-              <s.icon size={22} />
+          <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 sm:gap-4 min-w-0">
+            <div className={`w-9 h-9 sm:w-12 sm:h-12 bg-${s.color}/10 text-${s.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+              <s.icon size={20} />
             </div>
             <div className="min-w-0">
-              <p className="text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
+              <p className="text-lg sm:text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
               <p className="text-xs text-text-muted">{s.label}</p>
             </div>
           </div>
@@ -547,17 +547,18 @@ export const Management = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-bg-secondary border border-border rounded-2xl w-fit">
+      <div className="flex sm:flex-wrap items-center gap-2 p-1.5 bg-bg-secondary border border-border rounded-2xl w-fit max-w-full overflow-x-auto no-scrollbar">
         {MG_TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+            title={t(tab.labelKey)}
+            className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 ${
               activeTab === tab.id ? 'bg-accent-red text-white shadow-glow-red' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <tab.icon size={16} />
-            {t(tab.labelKey)}
+            <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{t(tab.labelKey)}</span>
             {tab.id === 'notifications' && unreadCount > 0 && (
               <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">{unreadCount}</span>
             )}
@@ -649,7 +650,7 @@ export const Management = () => {
               className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-3xl h-[88vh] shadow-2xl z-10 flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <div>
                   <h3 className="font-syne font-bold text-lg text-text-primary">{selectedEmployee.name}</h3>
                   <p className="text-xs text-text-muted">{roleLabels[selectedEmployee.role] || selectedEmployee.role}</p>
@@ -680,10 +681,10 @@ export const Management = () => {
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {empModalTab === 'general' ? (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-bg-secondary p-5 border border-border rounded-2xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 bg-bg-secondary p-4 sm:p-5 border border-border rounded-2xl">
                       <div className="space-y-3">
                         <p className="text-xs text-text-muted uppercase font-semibold">{t('emp_section_info')}</p>
                         <div>
@@ -754,7 +755,7 @@ export const Management = () => {
                         ? ['all']
                         : (roleAccessTrees[selectedEmployee.role] || []).filter(p => !p.includes('.'))
                       return (
-                        <div className="bg-bg-secondary p-5 border border-border rounded-2xl">
+                        <div className="bg-bg-secondary p-4 sm:p-5 border border-border rounded-2xl">
                           <p className="text-xs text-text-muted uppercase font-semibold mb-3">{t('emp_section_perms')}</p>
                           <div className="flex flex-wrap gap-2">
                             {perms.map(p => {
@@ -770,7 +771,7 @@ export const Management = () => {
 
                     {/* Admin uchun: login/parolni ko'rish */}
                     {user?.role === 'admin' && (
-                      <div className="bg-bg-secondary p-5 border border-accent-orange/20 rounded-2xl">
+                      <div className="bg-bg-secondary p-4 sm:p-5 border border-accent-orange/20 rounded-2xl">
                         <p className="text-xs text-text-muted uppercase font-semibold mb-3 flex items-center gap-2">
                           <KeyRound size={12} /> {t('emp_login_info')}
                         </p>
@@ -799,7 +800,7 @@ export const Management = () => {
 
                     {/* Xodim o'z parolini o'zgartirishi */}
                     {String(user?.id) === String(selectedEmployee.id) && (
-                      <div className="bg-bg-secondary p-5 border border-border rounded-2xl">
+                      <div className="bg-bg-secondary p-4 sm:p-5 border border-border rounded-2xl">
                         <button
                           onClick={() => setShowEmpPassword(v => !v)}
                           className="flex items-center gap-2 text-xs font-bold text-accent-blue hover:opacity-80 transition-opacity mb-3"
@@ -1100,7 +1101,7 @@ export const Management = () => {
               </div>
 
               {/* Footer */}
-              <div className="p-5 border-t border-border flex justify-end">
+              <div className="p-4 sm:p-5 border-t border-border flex justify-end">
                 <button
                   onClick={() => closeEmpModal()}
                   className="px-5 py-2 bg-bg-tertiary border border-border hover:bg-bg-tertiary/80 text-text-primary rounded-xl text-xs font-bold transition-colors"
@@ -1119,7 +1120,7 @@ export const Management = () => {
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.95, opacity: 0 }}
-                      className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-lg shadow-2xl z-10 p-6"
+                      className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-lg shadow-2xl z-10 p-4 sm:p-6"
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="font-syne font-bold text-text-primary">
@@ -1182,7 +1183,7 @@ export const Management = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-lg shadow-2xl z-10"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <h3 className="font-syne font-bold text-lg text-text-primary">
                   {editingEmployee ? t('emp_edit_title') : t('emp_add_title')}
                 </h3>
@@ -1191,7 +1192,7 @@ export const Management = () => {
                 </button>
               </div>
               
-              <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
+              <div className="p-4 sm:p-5 space-y-4 max-h-[65vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-text-secondary text-xs mb-1.5 block">{t('emp_form_name')} *</label>
@@ -1302,7 +1303,7 @@ export const Management = () => {
                 </div>
               </div>
               
-              <div className="flex gap-3 p-5 border-t border-border">
+              <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
                 <button onClick={() => setShowEmpForm(false)}
                   className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary transition-colors text-sm font-medium">
                   {t('mgmt_btn_cancel')}
@@ -1381,7 +1382,7 @@ export const Management = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-6"
+              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-4 sm:p-6"
             >
               <div className="flex flex-col items-center text-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-accent-red/10 flex items-center justify-center">
@@ -1427,13 +1428,13 @@ export const Management = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <h3 className="font-syne font-bold text-lg text-text-primary">{t('mgmt_source_modal_title')}</h3>
                 <button onClick={() => setShowSourceModal(false)} className="p-1.5 hover:bg-bg-tertiary rounded-lg transition-colors">
                   <X size={18} className="text-text-secondary" />
                 </button>
               </div>
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-4">
                 <div>
                   <label className="text-text-secondary text-sm mb-1.5 block">{t('mgmt_source_field_name')} *</label>
                   <input
@@ -1446,7 +1447,7 @@ export const Management = () => {
                   />
                 </div>
               </div>
-              <div className="flex gap-3 p-5 border-t border-border">
+              <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
                 <button onClick={() => setShowSourceModal(false)}
                   className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary transition-colors text-sm font-medium">
                   {t('mgmt_btn_cancel')}
@@ -1478,7 +1479,7 @@ export const Management = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <h3 className="font-syne font-bold text-lg text-text-primary">
                   {editingOrg ? t('mgmt_org_edit_title') : t('mgmt_org_add_title')}
                 </h3>
@@ -1486,7 +1487,7 @@ export const Management = () => {
                   <X size={18} className="text-text-secondary" />
                 </button>
               </div>
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-4">
                 <div>
                   <label className="text-text-secondary text-xs mb-1.5 block">{t('mgmt_org_field_name')} *</label>
                   <input
@@ -1568,7 +1569,7 @@ export const Management = () => {
                   />
                 </div>
               </div>
-              <div className="flex gap-3 p-5 border-t border-border">
+              <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
                 <button onClick={() => setShowOrgModal(false)}
                   className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary transition-colors text-sm font-medium">
                   {t('mgmt_btn_cancel')}
@@ -1605,7 +1606,7 @@ export const Management = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-bg-secondary border border-border p-6 rounded-3xl max-w-sm w-full space-y-6 shadow-2xl"
+              className="bg-bg-secondary border border-border p-4 sm:p-6 rounded-3xl max-w-sm w-full space-y-4 sm:space-y-6 shadow-2xl"
             >
               <div className="space-y-2">
                 <h3 className="font-syne font-bold text-text-primary text-base">Kategoriya o'chirish</h3>
@@ -1637,7 +1638,7 @@ export const Management = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-bg-secondary border border-border p-6 rounded-3xl max-w-sm w-full space-y-6 shadow-2xl"
+              className="bg-bg-secondary border border-border p-4 sm:p-6 rounded-3xl max-w-sm w-full space-y-4 sm:space-y-6 shadow-2xl"
             >
               <div className="space-y-2">
                 <h3 className="font-syne font-bold text-text-primary text-base">Manba o'chirish</h3>
@@ -1668,7 +1669,7 @@ export const Management = () => {
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
               exit={{ opacity: 0, scale: 0.95 }} 
-              className="bg-bg-secondary border border-border p-6 rounded-3xl max-w-sm w-full space-y-6 shadow-2xl"
+              className="bg-bg-secondary border border-border p-4 sm:p-6 rounded-3xl max-w-sm w-full space-y-4 sm:space-y-6 shadow-2xl"
             >
               <div className="space-y-2">
                 <h3 className="font-syne font-bold text-text-primary text-base">{t('mgmt_org_delete_title')}</h3>

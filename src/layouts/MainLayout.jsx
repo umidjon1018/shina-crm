@@ -1,4 +1,5 @@
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom'
+import PageErrorBoundary from '../components/PageErrorBoundary'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -402,10 +403,10 @@ export const MainLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div ref={areaRef} className="flex-1 overflow-y-auto p-4 lg:p-6 safe-bottom no-scrollbar">
+        <div ref={areaRef} className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 safe-bottom no-scrollbar">
           <div ref={contentRef}>
             <Suspense fallback={<PageLoader />}>
-              <Outlet />
+              <PageErrorBoundary key={location.pathname}><Outlet /></PageErrorBoundary>
             </Suspense>
           </div>
         </div>
@@ -465,7 +466,7 @@ const ProfileModal = ({ user, updateProfile, verifyPassword, onClose }) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-bg-secondary border border-border p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl"
+        className="bg-bg-secondary border border-border p-4 sm:p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl"
       >
         <div className="flex items-center justify-between">
           <h3 className="font-syne font-bold text-text-primary text-base">{t('profile_title')}</h3>

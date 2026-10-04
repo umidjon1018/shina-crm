@@ -43,7 +43,7 @@ const UsedSaleTab = ({ ctx }) => {
         <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-sm">
           {buScrapMode ? (
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                   <Trash2 className="text-accent-red" size={20} /> {t('sl_us_scrap_title')}
                 </h4>
@@ -65,7 +65,7 @@ const UsedSaleTab = ({ ctx }) => {
                 </div>
               )}
               {buScrapGroups.length === 0 ? (
-                <p className="text-xs text-text-muted text-center py-6">{t('sl_us_scrap_not_found')}</p>
+                <p className="text-xs text-text-muted text-center py-4 sm:py-6">{t('sl_us_scrap_not_found')}</p>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto no-scrollbar">
                   {buScrapGroups.map(g => (
@@ -114,7 +114,7 @@ const UsedSaleTab = ({ ctx }) => {
                 </div>
               )}
               {buAvailableGroups.length === 0 ? (
-                <p className="text-xs text-text-muted text-center py-6">{t('sl_us_not_found')}</p>
+                <p className="text-xs text-text-muted text-center py-4 sm:py-6">{t('sl_us_not_found')}</p>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto no-scrollbar">
                   {buAvailableGroups.map(g => (
@@ -143,7 +143,7 @@ const UsedSaleTab = ({ ctx }) => {
 
         {buCart.length > 0 && (
           <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                 <ShoppingCart size={18} className="text-accent-red" />
                 {t('sl_us_cart_title', { n: buCart.length })}

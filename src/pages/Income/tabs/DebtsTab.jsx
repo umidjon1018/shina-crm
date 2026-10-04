@@ -38,7 +38,7 @@ const DebtsTab = ({ ctx }) => {
 
   return (
     <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {shopBatches.filter(b => b.debtUSD > 0).map(batch => {
               const dueDays = getDueDays(batch.dueDate)
               const progress = (batch.paidUSD / batch.totalUSD) * 100
@@ -49,7 +49,7 @@ const DebtsTab = ({ ctx }) => {
                   key={batch.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`bg-bg-secondary border-2 rounded-[2rem] p-6 space-y-6 transition-all ${isUrgent ? 'border-accent-red shadow-glow-red/5' : 'border-border'
+                  className={`bg-bg-secondary border-2 rounded-[2rem] p-4 sm:p-6 space-y-4 sm:space-y-6 transition-all ${isUrgent ? 'border-accent-red shadow-glow-red/5' : 'border-border'
                     }`}
                 >
                   <div className="flex items-start justify-between">

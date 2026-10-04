@@ -285,12 +285,12 @@ const Income = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-4 sm:space-y-6 pb-12"
     >
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-6">
         <div>
-          <h1 className="text-3xl font-syne font-extrabold tracking-tight">{t('inc_title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight">{t('inc_title')}</h1>
           <p className="text-text-secondary text-sm">{t('inc_subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-4">
@@ -334,13 +334,14 @@ const Income = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id
+            title={tab.label}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${activeTab === tab.id
               ? 'bg-bg-tertiary text-text-primary shadow-sm'
               : 'text-text-muted hover:text-text-primary'
               }`}
           >
             <tab.icon size={18} />
-            {tab.label}
+            <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
           </button>
         ))}
       </div>
@@ -366,9 +367,9 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-md shadow-glow-red"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-md shadow-glow-red"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
                   <h3 className="text-xl font-syne font-extrabold text-text-primary">{t('inc_add_payment')}</h3>
                   <p className="text-xs text-text-muted mt-1">{showPaymentModal.productName}</p>
@@ -378,7 +379,7 @@ const Income = () => {
                 </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="bg-bg-tertiary rounded-2xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1">{t('inc_debt_remaining')}</p>
@@ -465,9 +466,9 @@ const Income = () => {
         {/* Supplier o'chirish tasdiqlash modali */}
         {deleteSupplierConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-            <div className="bg-bg-secondary border border-border rounded-[2rem] p-8 w-full max-w-sm shadow-glow-red">
+            <div className="bg-bg-secondary border border-border rounded-[2rem] p-5 sm:p-8 w-full max-w-sm shadow-glow-red">
               <h3 className="text-lg font-syne font-extrabold text-text-primary mb-2">O'chirishni tasdiqlang</h3>
-              <p className="text-sm text-text-secondary mb-6">
+              <p className="text-sm text-text-secondary mb-4 sm:mb-6">
                 <span className="font-bold text-text-primary">"{deleteSupplierConfirm.name}"</span> ni o'chirishni xohlaysizmi? Ma'lumotlar bazada saqlanib qoladi.
               </p>
               <div className="flex gap-3">
@@ -498,9 +499,9 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-lg shadow-glow-red"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-lg shadow-glow-red"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-xl font-syne font-extrabold text-text-primary">
                   {editingSupplier ? t('edit') : t('inc_add_supplier')}
                 </h3>
@@ -509,7 +510,7 @@ const Income = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-5 sm:mb-8">
                 <div className="col-span-2">
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('col_name')}</label>
                   <input
@@ -725,14 +726,14 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-sm shadow-glow-red text-center"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-sm shadow-glow-red text-center"
             >
               <h3 className="text-xl font-syne font-extrabold text-text-primary mb-2">{t('inc_link_modal_title')}</h3>
-              <p className="text-xs text-text-muted mb-6">{showLinkModal.productName}</p>
+              <p className="text-xs text-text-muted mb-4 sm:mb-6">{showLinkModal.productName}</p>
 
               <select
                 id="link_supplier"
-                className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary mb-6 focus:outline-none focus:border-accent-blue"
+                className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary mb-4 sm:mb-6 focus:outline-none focus:border-accent-blue"
               >
                 <option value="">Tanlang...</option>
                 {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -769,16 +770,16 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-xl font-syne font-extrabold text-text-primary">{t('inc_new_batch_modal_title')}</h3>
                 <button onClick={() => { setShowNewBatchModal(false); setNewBatchForm(f => ({ ...f, unit: '' })) }} className="p-2 text-text-muted hover:text-text-primary">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4 sm:mb-6">
                 {/* Tovar tanlash yoki yangi */}
                 <div className="col-span-2 space-y-2">
                   <div className="flex items-center justify-between">
@@ -988,7 +989,7 @@ const Income = () => {
 
               {/* Preview */}
               {newBatchForm.purchasePriceUSD && newBatchForm.entryUsdRate && newBatchForm.quantity && (
-                <div className="bg-bg-tertiary border border-border rounded-2xl p-4 mb-6 grid grid-cols-3 gap-4 text-center">
+                <div className="bg-bg-tertiary border border-border rounded-2xl p-4 mb-4 sm:mb-6 grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-xs text-text-muted">{t('inc_preview_total_usd')}</p>
                     <p className="text-lg font-extrabold font-syne text-text-primary">
@@ -1083,7 +1084,7 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -1133,7 +1134,7 @@ const Income = () => {
                 )
               })()}
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4 sm:mb-6">
                 <div className="col-span-2">
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('col_supplier')}</label>
                   <select
@@ -1301,13 +1302,13 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-md"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-md"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-xl font-syne font-extrabold text-text-primary">{t('inc_edit_payment_title')}</h3>
                 <button onClick={() => setEditingPayment(null)} className="p-2 text-text-muted hover:text-text-primary"><X size={24} /></button>
               </div>
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4 mb-4 sm:mb-6">
                 <div>
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">Summa (USD)</label>
                   <input type="number"
@@ -1378,9 +1379,9 @@ const Income = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto no-scrollbar"
+              className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto no-scrollbar"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
                   <h3 className="text-2xl font-syne font-extrabold text-text-primary">{showSupplierDetail.name}</h3>
                   <p className="text-sm text-text-muted">{showSupplierDetail.contractNumber}</p>
@@ -1410,7 +1411,7 @@ const Income = () => {
                   : 0
 
                 return (
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Shartnoma summary */}
                     <div className="grid grid-cols-3 gap-4">
                       <div className="bg-bg-tertiary rounded-2xl p-4 text-center">
@@ -1606,13 +1607,13 @@ const Income = () => {
                         <table className="w-full text-left text-xs">
                           <thead className="bg-bg-secondary text-text-muted">
                             <tr>
-                              <th className="px-4 py-3">{t('col_product')}</th>
-                              <th className="px-4 py-3">{t('col_date')}</th>
-                              <th className="px-4 py-3">{t('inc_paid_usd')}</th>
-                              <th className="px-4 py-3">{t('col_rate')}</th>
-                              <th className="px-4 py-3">UZS</th>
-                              <th className="px-4 py-3">{t('inc_pay_method')}</th>
-                              <th className="px-4 py-3">{t('inc_debt_remaining')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_product')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_date')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_paid_usd')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_rate')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">UZS</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_pay_method')}</th>
+                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_debt_remaining')}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-border/50">
@@ -1627,25 +1628,25 @@ const Income = () => {
                                   : '—';
                                 return (
                                   <tr key={b.id} className="hover:bg-bg-secondary/50">
-                                    <td className="px-4 py-3 font-medium text-text-primary">{b.productName}</td>
-                                    <td className="px-4 py-3 text-text-muted">
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{b.productName}</td>
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">
                                       {b.payments && b.payments.length > 0
                                         ? [...b.payments].sort((a,x)=>(a.date||'').localeCompare(x.date||'')).slice(-1)[0]?.date
                                         : new Date(b.receivedAt).toLocaleDateString('uz-UZ')}
                                     </td>
-                                    <td className="px-4 py-3 font-bold text-text-primary">
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-text-primary">
                                       {b.paidUSD > 0 ? `$${b.paidUSD}` : '—'}
                                     </td>
-                                    <td className="px-4 py-3 text-text-muted">{formatPrice(b.entryUsdRate)}</td>
-                                    <td className="px-4 py-3 text-text-primary">
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{formatPrice(b.entryUsdRate)}</td>
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">
                                       {paidUZS > 0 ? `${formatPrice(paidUZS)} ${som}` : '—'}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3">
                                       <span className="bg-bg-secondary px-2 py-0.5 rounded text-[10px] uppercase">
                                         {paymentMethods}
                                       </span>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 sm:px-4 py-2 sm:py-3">
                                       <span className={`text-xs font-bold ${b.debtUSD > 0 ? 'text-accent-red' : 'text-accent-green'}`}>
                                         {b.debtUSD > 0 ? `$${b.debtUSD}` : t('inc_debt_paid_full')}
                                       </span>
@@ -1654,7 +1655,7 @@ const Income = () => {
                                 );
                               })}
                               {supplierBatches.length === 0 && (
-                                <tr><td colSpan="7" className="px-4 py-6 text-center text-text-muted">{t('inc_no_batches')}</td></tr>
+                                <tr><td colSpan="7" className="px-3 sm:px-4 py-4 sm:py-6 text-center text-text-muted">{t('inc_no_batches')}</td></tr>
                               )}
                           </tbody>
                         </table>
@@ -1672,7 +1673,7 @@ const Income = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-bg-secondary border border-border rounded-[2rem] p-8 w-full max-w-md shadow-glow-red"
+              className="bg-bg-secondary border border-border rounded-[2rem] p-5 sm:p-8 w-full max-w-md shadow-glow-red"
             >
               <h3 className="text-xl font-syne font-extrabold text-text-primary mb-2">
                 Eski shartnoma qoldig'i
@@ -1682,7 +1683,7 @@ const Income = () => {
                   {formatPrice(contractDialog.contractRemaining)} {som}
                 </span> qolgan.
               </p>
-              <div className="bg-bg-tertiary rounded-2xl p-4 mb-6 space-y-2 text-sm">
+              <div className="bg-bg-tertiary rounded-2xl p-4 mb-4 sm:mb-6 space-y-2 text-sm">
                 <p className="text-text-secondary">
                   <span className="font-bold text-accent-blue">Ha</span> — Eski qoldiq yangi shartnomaga qo'shiladi. Keyingi to'lovlar avval eski shartnomadan ayiriladi.
                 </p>

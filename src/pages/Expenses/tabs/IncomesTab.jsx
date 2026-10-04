@@ -92,7 +92,7 @@ const IncomesTab = ({ currentUser }) => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <MonthFilterBar months={months} filterMonth={filterMonth} setFilterMonth={setFilterMonth} resetPage={resetPage} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -134,13 +134,13 @@ const IncomesTab = ({ currentUser }) => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_date')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_category')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_note')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('fin_payment_method')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_amount')}</th>
-                  <th className="px-4 py-3 text-text-secondary font-medium text-center">{t('exp_col_action')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_date')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_category')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_note')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('fin_payment_method')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_amount')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium text-center">{t('exp_col_action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,24 +150,24 @@ const IncomesTab = ({ currentUser }) => {
                   return (
                     <motion.tr key={inc.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       className="border-b border-border/50 hover:bg-bg-tertiary/50 transition-colors">
-                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">{fmtDate(inc.date)}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary whitespace-nowrap">{fmtDate(inc.date)}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         {cat ? (
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colorCls(cat.color)}`}>
                             <Icon size={12} /> {getCatLabel(cat, t)}
                           </div>
                         ) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-text-primary max-w-[200px] truncate">{inc.note || '—'}</td>
-                      <td className="px-4 py-3 text-text-secondary">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary max-w-[200px] truncate">{inc.note || '—'}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary">
                         <div className="flex items-center gap-1.5"><User size={13} className="shrink-0" />{inc.responsibleName || '—'}</div>
                       </td>
-                      <td className="px-4 py-3 text-text-secondary text-xs whitespace-nowrap">{pmLabel(inc.paymentMethod, t)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-accent-green whitespace-nowrap">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-xs whitespace-nowrap">{pmLabel(inc.paymentMethod, t)}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-semibold text-accent-green whitespace-nowrap">
                         +{fmtUZS(inc.amountUZS)}
                         {inc.currency === 'USD' && <div className="text-text-secondary text-xs font-normal">${fmtNum(inc.amount)} @ {fmtNum(inc.usdRate)}</div>}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button onClick={() => setForm({ edit: inc })}
                             className="p-1.5 hover:bg-blue-500/10 hover:text-blue-400 text-text-secondary rounded-lg transition-colors">

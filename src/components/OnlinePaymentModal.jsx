@@ -63,7 +63,7 @@ const OnlinePaymentModal = ({ amount, providers, shopId, customerId, purpose = '
             </div>
           )}
           {error && <div className="flex items-center gap-2 text-red-500 text-sm bg-red-500/10 px-3 py-2 rounded-lg"><AlertCircle size={15} /> {error}</div>}
-          {provider && !payment && !error && <div className="flex justify-center py-8"><Loader2 className="animate-spin text-text-muted" /></div>}
+          {provider && !payment && !error && <div className="flex justify-center py-5 sm:py-8"><Loader2 className="animate-spin text-text-muted" /></div>}
           {payment && payment.status === 'pending' && (
             <>
               <p className="text-center text-xs text-text-secondary">{t('int_pay_scan', { name: NAMES[payment.provider] })}</p>

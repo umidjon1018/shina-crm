@@ -99,12 +99,12 @@ const ShopExpensesTab = ({ currentUser }) => {
 
   return (
     <ShopRequiredGuard>
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       {/* Month filter */}
       <MonthFilterBar months={months} filterMonth={filterMonth} setFilterMonth={setFilterMonth} resetPage={resetPage} />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={TrendingDown} label={filterMonth ? `${monthLabel(filterMonth, t)} ${t('exp_month_total')}` : t('expenses')} value={fmtUZS(monthTotal)} sub={`${monthExpenses.length} ${t('exp_records')}`} color="bg-accent-red/10 text-accent-red" />
         <StatCard icon={DollarSign} label={t('exp_usd_expenses')} value={fmtUZS(monthExpenses.filter(e => e.currency==='USD').reduce((s,e)=>s+e.amountUZS,0))} sub={`${monthExpenses.filter(e=>e.currency==='USD').length} ${t('unit_pcs')}`} color="bg-green-500/10 text-green-500" />
         <StatCard icon={topCategory ? (ICON_MAP[topCategory.icon]||MoreHorizontal) : TrendingDown} label={t('exp_top_category')} value={topCategory ? getCatLabel(topCategory, t) : '—'} sub={topCategory ? fmtUZS(categoryTotals[topCategory.id]||0) : ''} color="bg-purple-500/10 text-purple-500" />
@@ -113,7 +113,7 @@ const ShopExpensesTab = ({ currentUser }) => {
 
       {/* Kategoriya breakdown */}
       {monthExpenses.length > 0 && (
-        <div className="bg-bg-secondary border border-border rounded-2xl p-5">
+        <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5">
           <h3 className="font-syne font-bold text-text-primary mb-4 text-sm">{t('exp_category_breakdown')}</h3>
           <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
             {sortedCategories(MOCK_EXPENSE_CATEGORIES.filter(c => c.isActive || categoryTotals[c.id])).map(cat => {
@@ -175,15 +175,15 @@ const ShopExpensesTab = ({ currentUser }) => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_date')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('exp_col_period')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_category')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_type')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_note')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_amount')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_uzs')}</th>
-                  <th className="px-4 py-3 text-text-secondary font-medium text-center">{t('exp_col_action')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_date')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('exp_col_period')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_category')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_type')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_note')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('exp_col_responsible')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_amount')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_uzs')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium text-center">{t('exp_col_action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,39 +193,39 @@ const ShopExpensesTab = ({ currentUser }) => {
                   return (
                     <motion.tr key={exp.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.02 }}
                       className="border-b border-border/50 hover:bg-bg-tertiary/50 transition-colors">
-                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">{fmtDate(exp.date)}</td>
-                      <td className="px-4 py-3 text-text-secondary text-xs whitespace-nowrap">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary whitespace-nowrap">{fmtDate(exp.date)}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-xs whitespace-nowrap">
                         {exp.period ? monthLabel(exp.period, t) : <span className="opacity-30">—</span>}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         {cat && (
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colorCls(cat.color)}`}>
                             <Icon size={12} /> {getCatLabel(cat, t)}
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         {exp.expenseType === 'variable'
                           ? <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-accent-orange/10 text-accent-orange">{t('exp_type_variable')}</span>
                           : <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-accent-blue/10 text-accent-blue">{t('exp_type_fixed')}</span>
                         }
                       </td>
-                      <td className="px-4 py-3 text-text-primary max-w-[180px] truncate">{(i18n.language === 'ru' ? exp.noteRu || exp.note : exp.note) || '—'}</td>
-                      <td className="px-4 py-3 text-text-secondary">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary max-w-[180px] truncate">{(i18n.language === 'ru' ? exp.noteRu || exp.note : exp.note) || '—'}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary">
                         <div className="flex items-center gap-1.5"><User size={13} className="shrink-0" />{exp.responsibleName}</div>
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-text-primary whitespace-nowrap">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-semibold text-text-primary whitespace-nowrap">
                         {exp.currency === 'USD' ? `$${fmtNum(exp.amount)}` : fmtUZS(exp.amount)}
                         {exp.currency === 'USD' && <span className="text-text-secondary text-xs ml-1">@ {fmtNum(exp.usdRate)}</span>}
                       </td>
-                      <td className="px-4 py-3 text-right text-text-secondary whitespace-nowrap">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-secondary whitespace-nowrap">
                         {fmtUZS(exp.amountUZS)}
                         <div className="flex items-center justify-end gap-1 mt-0.5">
                           {exp.source === 'cashbox' && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-accent-orange/10 text-accent-orange">{t('fin_cashbox_badge')}</span>}
                           <span className="text-[10px] text-text-muted">{pmLabel(exp.paymentMethod, t)}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button onClick={() => { setEditTarget(exp); setShowForm(true) }}
                             className="p-1.5 hover:bg-blue-500/10 hover:text-blue-400 text-text-secondary rounded-lg transition-colors">

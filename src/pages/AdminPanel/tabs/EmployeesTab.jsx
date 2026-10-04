@@ -144,7 +144,7 @@ function EmployeesTab() {
   const ALL_PERMISSIONS = ALL_PERMISSION_KEYS.map(p => ({ key: p.key, label: t(p.labelKey) }))
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <RoleAccessSection />
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
@@ -183,14 +183,14 @@ function EmployeesTab() {
           <thead className="bg-bg-tertiary">
             <tr>
               {[t('adm_emp_col_name'), t('adm_field_role'), t('adm_emp_col_username'), t('col_phone'), t('adm_emp_col_joined'), t('col_status'), t('adm_emp_col_action')].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-text-muted uppercase">{h}</th>
+                <th key={h} className="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] font-bold text-text-muted uppercase">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {filtered.map(emp => (
               <tr key={emp.id} className={`hover:bg-bg-tertiary/30 transition-colors ${!emp.isActive ? 'opacity-50' : ''}`}>
-                <td className="px-4 py-3 font-semibold text-text-primary">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 font-semibold text-text-primary">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center font-bold text-xs flex-shrink-0">
                       {emp.name?.[0]?.toUpperCase()}
@@ -198,11 +198,11 @@ function EmployeesTab() {
                     {emp.name}
                   </div>
                 </td>
-                <td className="px-4 py-3"><Badge color="bg-accent-blue/10 text-accent-blue">{roleLabels[emp.role] || emp.role}</Badge></td>
-                <td className="px-4 py-3 text-text-muted font-mono text-xs">{emp.username || '—'}</td>
-                <td className="px-4 py-3 text-text-secondary text-xs">{emp.phone || '—'}</td>
-                <td className="px-4 py-3 text-text-muted text-xs">{emp.createdAt ? formatDate(emp.createdAt) : '—'}</td>
-                <td className="px-4 py-3">
+                <td className="px-3 sm:px-4 py-2 sm:py-3"><Badge color="bg-accent-blue/10 text-accent-blue">{roleLabels[emp.role] || emp.role}</Badge></td>
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-mono text-xs">{emp.username || '—'}</td>
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-xs">{emp.phone || '—'}</td>
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted text-xs">{emp.createdAt ? formatDate(emp.createdAt) : '—'}</td>
+                <td className="px-3 sm:px-4 py-2 sm:py-3">
                   <div className="flex items-center gap-1.5">
                     {emp.isActive !== false
                       ? <Badge color="bg-accent-green/10 text-accent-green">{t('adm_emp_status_active')}</Badge>
@@ -210,7 +210,7 @@ function EmployeesTab() {
                     {emp.isBlocked && <Badge color="bg-accent-red/10 text-accent-red">{t('emp_status_blocked')}</Badge>}
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-3 sm:px-4 py-2 sm:py-3">
                   <div className="flex items-center gap-1">
                     {emp.role !== 'admin' && (
                       <button onClick={() => toggleBlock(emp)}
@@ -345,11 +345,11 @@ function EmployeesTab() {
       <AnimatePresence>
         {showModal && (
           <ModalWrap onClose={() => setShowModal(false)}>
-            <div className="flex items-center justify-between p-5 border-b border-border">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
               <h3 className="font-syne font-bold text-lg">{editing ? t('adm_modal_edit_title') : t('adm_modal_add_title')}</h3>
               <button onClick={() => setShowModal(false)} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
             </div>
-            <div className="p-5 space-y-4 overflow-y-auto">
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-text-muted mb-1 block">{t('adm_field_name')} *</label>
@@ -475,7 +475,7 @@ function EmployeesTab() {
                 {saveError}
               </div>
             )}
-            <div className="flex gap-3 p-5 border-t border-border">
+            <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
               <button onClick={()=>setShowModal(false)} className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary text-sm">{t('cancel')}</button>
               <button onClick={save} className="flex-1 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm hover:opacity-90 shadow-glow-red">
                 {editing ? t('save') : t('add')}
@@ -485,7 +485,7 @@ function EmployeesTab() {
         )}
         {deleteTarget && (
           <ModalWrap onClose={()=>setDeleteTarget(null)} maxW="max-w-sm">
-            <div className="p-6 text-center space-y-4">
+            <div className="p-4 sm:p-6 text-center space-y-4">
               <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto">
                 <AlertTriangle size={28} className="text-accent-red" />
               </div>
@@ -502,7 +502,7 @@ function EmployeesTab() {
         )}
         {hardDeleteTarget && (
           <ModalWrap onClose={()=>setHardDeleteTarget(null)} maxW="max-w-sm">
-            <div className="p-6 text-center space-y-4">
+            <div className="p-4 sm:p-6 text-center space-y-4">
               <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto">
                 <AlertTriangle size={28} className="text-accent-red" />
               </div>

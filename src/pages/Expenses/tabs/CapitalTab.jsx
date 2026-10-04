@@ -63,7 +63,7 @@ const CapitalTabWithHeader = () => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex justify-end">
         <button onClick={() => { setEditTarget(null); setShowForm(true) }}
           className="flex items-center gap-2 px-4 py-2.5 bg-accent-red text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity">
@@ -73,7 +73,7 @@ const CapitalTabWithHeader = () => {
 
       <MonthFilterBar months={months} filterMonth={filterMonth} setFilterMonth={(m) => { setFilterMonth(m); resetPage() }} resetPage={resetPage} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={ArrowDownCircle} label={t('exp_cap_injected')} value={fmtUZS(totalInjected)} sub={`${filtered.filter(c => c.type === 'inject').length} ${t('unit_pcs')}`} color="bg-green-500/10 text-green-500" />
         <StatCard icon={ArrowUpCircle} label={t('exp_cap_returned')} value={fmtUZS(totalReturned)} sub={`${filtered.filter(c => c.type === 'return').length} ${t('unit_pcs')}`} color="bg-accent-red/10 text-accent-red" />
         <StatCard icon={Landmark} label={t('exp_cap_balance')} value={fmtUZS(balance)} sub={balance >= 0 ? t('exp_cap_balance_positive') : t('exp_cap_balance_negative')} color={balance >= 0 ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400'} />
@@ -116,34 +116,34 @@ const CapitalTabWithHeader = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_date')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_type')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_source')}</th>
-                  <th className="text-left px-4 py-3 text-text-secondary font-medium">{t('col_note')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_amount')}</th>
-                  <th className="text-right px-4 py-3 text-text-secondary font-medium">{t('col_uzs')}</th>
-                  <th className="px-4 py-3 text-text-secondary font-medium text-center">{t('exp_cap_col_action')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_date')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_type')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_source')}</th>
+                  <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_note')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_amount')}</th>
+                  <th className="text-right px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium">{t('col_uzs')}</th>
+                  <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary font-medium text-center">{t('exp_cap_col_action')}</th>
                 </tr>
               </thead>
               <tbody>
                 {paginated.map((cap, idx) => (
                   <motion.tr key={cap.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.02 }}
                     className="border-b border-border/50 hover:bg-bg-tertiary/50 transition-colors">
-                    <td className="px-4 py-3 text-text-secondary whitespace-nowrap">{fmtDate(cap.date)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary whitespace-nowrap">{fmtDate(cap.date)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${cap.type === 'inject' ? 'bg-green-500/10 text-green-500' : 'bg-accent-red/10 text-accent-red'}`}>
                         {cap.type === 'inject' ? <ArrowDownCircle size={11} /> : <ArrowUpCircle size={11} />}
                         {cap.type === 'inject' ? t('exp_cap_inject') : t('exp_cap_return')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text-primary max-w-[160px] truncate">{(i18n.language === 'ru' ? cap.sourceRu || cap.source : cap.source)}</td>
-                    <td className="px-4 py-3 text-text-secondary max-w-[160px] truncate">{(i18n.language === 'ru' ? cap.noteRu || cap.note : cap.note) || '—'}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-text-primary whitespace-nowrap">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary max-w-[160px] truncate">{(i18n.language === 'ru' ? cap.sourceRu || cap.source : cap.source)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary max-w-[160px] truncate">{(i18n.language === 'ru' ? cap.noteRu || cap.note : cap.note) || '—'}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-semibold text-text-primary whitespace-nowrap">
                       {cap.currency === 'USD' ? `$${fmtNum(cap.amount)}` : fmtUZS(cap.amount)}
                       {cap.currency === 'USD' && <span className="text-text-secondary text-xs ml-1">@ {fmtNum(cap.usdRate)}</span>}
                     </td>
-                    <td className="px-4 py-3 text-right text-text-secondary whitespace-nowrap">{fmtUZS(cap.amountUZS)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-secondary whitespace-nowrap">{fmtUZS(cap.amountUZS)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3">
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => { setEditTarget(cap); setShowForm(true) }} className="p-1.5 hover:bg-blue-500/10 hover:text-blue-400 text-text-secondary rounded-lg transition-colors"><Pencil size={13} /></button>
                         <button onClick={() => setDeleteTarget(cap)} className="p-1.5 hover:bg-accent-red/10 hover:text-accent-red text-text-secondary rounded-lg transition-colors"><Trash2 size={13} /></button>

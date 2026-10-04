@@ -50,15 +50,15 @@ const LoyaltyProgramCard = ({ canEdit }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
         <h3 className="text-xl font-syne font-bold text-text-primary">{t('loy_title')}</h3>
         <p className="text-sm text-text-secondary">{t('loy_subtitle')}</p>
       </div>
 
-      <fieldset disabled={!canEdit} className="space-y-6">
+      <fieldset disabled={!canEdit} className="space-y-4 sm:space-y-6">
         {/* Jamg'arma chegirma */}
-        <div className="bg-bg-secondary border border-border rounded-2xl p-5 space-y-4">
+        <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4">
           <label className="flex items-center justify-between gap-3 cursor-pointer">
             <span className="flex items-center gap-2 font-bold text-text-primary"><Percent size={16} className="text-accent-green" />{t('loy_discount_title')}</span>
             <input type="checkbox" checked={cfg.discountEnabled} onChange={e => set({ discountEnabled: e.target.checked })} />
@@ -68,7 +68,7 @@ const LoyaltyProgramCard = ({ canEdit }) => {
         </div>
 
         {/* Keshbek */}
-        <div className="bg-bg-secondary border border-border rounded-2xl p-5 space-y-4">
+        <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4">
           <span className="flex items-center gap-2 font-bold text-text-primary"><Gift size={16} className="text-accent-blue" />{t('loy_cashback_title')}</span>
           <div className="grid grid-cols-3 gap-2">
             {[['off', t('loy_cb_off')], ['fixed', t('loy_cb_fixed')], ['tiered', t('loy_cb_tiered')]].map(([v, l]) => (
@@ -108,7 +108,7 @@ const LoyaltyProgramCard = ({ canEdit }) => {
       {err && <p className="text-sm text-accent-red">{err}</p>}
       {canEdit && (
         <button onClick={save} disabled={saving}
-          className="px-6 py-3 bg-accent-red text-white rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+          className="px-4 sm:px-6 py-3 bg-accent-red text-white rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
           {saved ? <><CheckCircle size={16} /> {t('loy_saved')}</> : t('loy_save')}
         </button>
       )}

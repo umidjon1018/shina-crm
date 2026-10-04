@@ -58,7 +58,7 @@ const PromoFormModal = ({ initial, onClose, onSaved, products, categories, custo
           <button onClick={onClose} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
         </div>
 
-        <div className="p-4 sm:p-5 space-y-5">
+        <div className="p-4 sm:p-5 space-y-3 sm:space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>{t('mkt_promo_name')}</Label>

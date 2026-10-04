@@ -27,9 +27,9 @@ function ShopsTab() {
   })
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_shops_title')}</h3>
           <p className="text-sm text-text-secondary">{t('mgmt_shops_subtitle')}</p>
@@ -137,7 +137,7 @@ function ShopsTab() {
               exit={{ scale: 0.95, opacity: 0 }}
               className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <h3 className="font-syne font-bold text-lg text-text-primary">
                   {editingShop ? t('mgmt_shop_edit_title') : t('mgmt_shop_add_title')}
                 </h3>
@@ -145,7 +145,7 @@ function ShopsTab() {
                   <X size={18} className="text-text-secondary" />
                 </button>
               </div>
-              <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
+              <div className="p-4 sm:p-5 space-y-4 max-h-[65vh] overflow-y-auto">
                 <div>
                   <label className="text-text-secondary text-sm mb-1.5 block">{t('mgmt_shop_field_name')}</label>
                   <input type="text" value={shopForm.name} onChange={e => setShopForm(f => ({ ...f, name: e.target.value }))} placeholder="GoodTires ..." className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm" />
@@ -192,7 +192,7 @@ function ShopsTab() {
                   </button>
                 </div>
               </div>
-              <div className="flex gap-3 p-5 border-t border-border">
+              <div className="flex gap-3 p-4 sm:p-5 border-t border-border">
                 <button onClick={() => setShowShopForm(false)} className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary transition-colors text-sm font-medium">
                   {t('mgmt_btn_cancel')}
                 </button>
@@ -226,7 +226,7 @@ function ShopsTab() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-6"
+              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-4 sm:p-6"
             >
               <div className="flex flex-col items-center text-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-accent-red/10 flex items-center justify-center">

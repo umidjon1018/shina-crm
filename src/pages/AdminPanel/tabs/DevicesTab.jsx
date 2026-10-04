@@ -148,7 +148,7 @@ function DevicesTab() {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {needsAttention > 0 && (
         <div className="flex items-center gap-3 px-4 py-3 bg-accent-orange/10 border border-accent-orange/30 rounded-xl text-accent-orange text-sm font-semibold">
           <ShieldAlert size={18} /> {needsAttention} {t('adm_dev_pending_alert')}
@@ -314,7 +314,7 @@ function DevicesTab() {
         )}
         {showClearAttempts && (
           <ModalWrap onClose={() => setShowClearAttempts(false)} maxW="max-w-sm">
-            <div className="p-6 text-center space-y-4">
+            <div className="p-4 sm:p-6 text-center space-y-4">
               <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto"><AlertTriangle size={28} className="text-accent-red"/></div>
               <div>
                 <h3 className="font-syne font-bold text-lg">{t('adm_dev_clear_title')}</h3>

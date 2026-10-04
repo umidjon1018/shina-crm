@@ -82,7 +82,7 @@ const MovementTab = () => {
   const loading = view === 'movement' ? !mov : !asOf
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         {view === 'movement'
           ? <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />

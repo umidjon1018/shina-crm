@@ -1852,11 +1852,11 @@ export const Reports = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('reports')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('reports')}</h1>
           <p className="text-text-secondary">{t('rep_subtitle')}</p>
         </div>
 
@@ -1911,12 +1911,13 @@ export const Reports = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative ${
+            title={tab.label}
+            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-sm font-bold whitespace-nowrap transition-all relative shrink-0 ${
               activeTab === tab.id ? 'text-accent-red' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <tab.icon size={18} />
-            {tab.label}
+            <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
             {activeTab === tab.id && (
               <motion.div layoutId="activeReportTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-red" />
             )}
@@ -1925,7 +1926,7 @@ export const Reports = () => {
       </div>
 
       {/* Content */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {activeTab === 'sales' && <SalesTab ctx={ctx} />}
         {activeTab === 'stock' && <StockTab ctx={ctx} />}
         {activeTab === 'profit' && <ProfitTab ctx={ctx} />}

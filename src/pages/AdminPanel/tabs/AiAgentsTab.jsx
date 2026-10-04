@@ -466,7 +466,7 @@ export default function AiAgentsTab() {
   )
 
   if (error) return (
-    <div className="p-6 text-center">
+    <div className="p-4 sm:p-6 text-center">
       <p className="text-sm text-accent-red mb-1">Backend bilan ulanishda xato</p>
       <p className="text-xs text-text-muted">{error}</p>
     </div>

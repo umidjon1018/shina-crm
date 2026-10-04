@@ -150,7 +150,7 @@ function OverviewTab({ onTabChange }) {
   const runningCount   = Object.values(statusMap).filter(r => r.status === 'running').length + runningSet.size
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Holat qatori */}
       <div className="flex items-center gap-4 p-3 rounded-xl border border-border bg-bg-secondary text-xs text-text-secondary flex-wrap">
         <span className="flex items-center gap-1.5">

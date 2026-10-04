@@ -285,7 +285,7 @@ JAVOB: O'zbek tilida, qisqa va amaliy.`
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <div className="flex gap-2">
         {SECTIONS.map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setActiveSection(id)}
@@ -302,7 +302,7 @@ JAVOB: O'zbek tilida, qisqa va amaliy.`
       <AnimatePresence mode="wait">
         {/* ── TAHLIL ── */}
         {activeSection === 'analysis' && (
-          <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+          <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4 sm:space-y-6">
             <AgentAnalysisPanel loading={loading} analysis={analysis} error={error} refresh={refresh} accentColor="text-[#f97316]" onTriggerRun={triggerRun} triggering={triggering} source={source} lastRun={lastRun} />
             <AiChat agentId="pr-agent" colorClass="accent-orange" systemPrompt={systemPrompt}
               placeholder="Marketing strategiyasi, savdoni oshirish, mijozlar haqida so'rang..." />

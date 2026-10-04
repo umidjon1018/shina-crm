@@ -66,6 +66,7 @@ export const AIAgent = () => {
           <button
             key={id}
             onClick={() => setActiveTab(id)}
+            title={label}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0 ${
               activeTab === id
                 ? `${color.bg} ${color.text} ${color.border} border`
@@ -73,12 +74,12 @@ export const AIAgent = () => {
             }`}
           >
             <Icon size={14} />
-            {label}
+            <span className={activeTab === id ? '' : 'hidden sm:inline'}>{label}</span>
           </button>
         ))}
       </div>
 
-      <div className={`px-6 py-3 border-b border-border flex-shrink-0 ${tab.color.bg}`}>
+      <div className={`px-4 sm:px-6 py-3 border-b border-border flex-shrink-0 ${tab.color.bg}`}>
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-lg ${tab.color.bg} border ${tab.color.border} flex items-center justify-center`}>
             <tab.Icon size={15} className={tab.color.text} />
@@ -90,7 +91,7 @@ export const AIAgent = () => {
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

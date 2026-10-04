@@ -144,7 +144,7 @@ const SettingsTab = () => {
       <div className="xl:col-span-2"><StaffStatsBlock /></div>
 
       <div className="xl:col-span-2 flex items-center gap-3">
-        <button onClick={save} disabled={saving} className="px-6 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="px-4 sm:px-6 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm disabled:opacity-50">
           {saving ? t('exp_form_saving') : t('save')}
         </button>
         {msg && <span className={`flex items-center gap-1.5 text-sm ${msg.err ? 'text-accent-red' : 'text-accent-green'}`}>{msg.err ? <AlertCircle size={15} /> : <CheckCircle2 size={15} />} {msg.text}</span>}

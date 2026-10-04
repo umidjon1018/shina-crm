@@ -30,7 +30,7 @@ function fmtAgo(iso) {
 
 function KpiSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
       {[...Array(8)].map((_, i) => (
         <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4 animate-pulse">
           <div className="h-3 bg-bg-tertiary rounded w-2/3 mb-3" />
@@ -44,7 +44,7 @@ function KpiSkeleton() {
 
 function RawFallback({ text }) {
   return (
-    <div className="bg-bg-secondary border border-border rounded-xl p-5 mb-6 text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+    <div className="bg-bg-secondary border border-border rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
       {text}
     </div>
   )
@@ -60,7 +60,7 @@ export default function AgentAnalysisPanel({
 }) {
   if (loading) {
     return (
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Loader2 size={16} className={`animate-spin ${accentColor}`} />
           <span className="text-sm text-text-secondary">
@@ -79,7 +79,7 @@ export default function AgentAnalysisPanel({
 
   if (error) {
     return (
-      <div className="bg-[#E63946]/10 border border-[#E63946]/30 rounded-xl p-4 mb-6 flex items-center justify-between gap-3">
+      <div className="bg-[#E63946]/10 border border-[#E63946]/30 rounded-xl p-4 mb-4 sm:mb-6 flex items-center justify-between gap-3">
         <span className="text-[#E63946] text-sm flex-1">{error}</span>
         <div className="flex items-center gap-2 shrink-0">
           {onTriggerRun && (
@@ -103,7 +103,7 @@ export default function AgentAnalysisPanel({
   if (!analysis) {
     if (!onTriggerRun) return null
     return (
-      <div className="mb-6 flex items-center justify-between gap-3 bg-bg-secondary border border-border rounded-xl px-5 py-4">
+      <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3 bg-bg-secondary border border-border rounded-xl px-5 py-4">
         <span className="text-sm text-text-secondary">Hali agent natijasi yo'q</span>
         <button
           onClick={onTriggerRun}
@@ -132,7 +132,7 @@ export default function AgentAnalysisPanel({
     : '🔵 Stream tahlili'
 
   return (
-    <div className="mb-6 space-y-5">
+    <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="text-sm text-text-secondary flex items-center gap-1.5">
@@ -198,7 +198,7 @@ export default function AgentAnalysisPanel({
 
       {/* Insights — fullwidth */}
       {insights.length > 0 && (
-        <div className="bg-bg-secondary border border-border rounded-xl p-5">
+        <div className="bg-bg-secondary border border-border rounded-xl p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-4">
             <Lightbulb size={16} className="text-amber-400" />
             <span className="text-base font-semibold text-text-primary">Tahlil natijalari</span>
@@ -216,7 +216,7 @@ export default function AgentAnalysisPanel({
 
       {/* Recommendations — fullwidth */}
       {recommendations.length > 0 && (
-        <div className="bg-bg-secondary border border-border rounded-xl p-5">
+        <div className="bg-bg-secondary border border-border rounded-xl p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-4">
             <Zap size={16} className={accentColor} />
             <span className="text-base font-semibold text-text-primary">Tavsiyalar</span>

@@ -102,7 +102,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
   }, [])
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-sm mx-auto">
+    <div className="flex flex-col items-center gap-3 sm:gap-6 w-full max-w-sm mx-auto">
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Title */}
@@ -138,7 +138,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
 
         {/* Idle state */}
         {mode === 'idle' && (
-          <div className="flex flex-col items-center gap-3 p-6 text-center">
+          <div className="flex flex-col items-center gap-3 p-4 sm:p-6 text-center">
             {cameraError ? (
               <>
                 <AlertCircle size={40} className="text-accent-orange" />

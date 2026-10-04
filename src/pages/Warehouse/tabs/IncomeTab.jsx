@@ -164,7 +164,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
 
   return (
     <ShopRequiredGuard>
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid lg:grid-cols-2 gap-3 sm:gap-6">
       {shopPickCallback && (
         <ShopPickerModal
           onConfirm={(shopId) => { const cb = shopPickCallback; setShopPickCallback(null); cb(shopId) }}
@@ -172,8 +172,8 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
         />
       )}
       {/* CHAP PANEL — Tovar tanlash */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-5 flex flex-col gap-4 min-h-[420px]">
-        <div className="flex items-center justify-between">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-4 min-h-[420px]">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-syne font-bold text-text-primary">{t('wh_in_select')}</h3>
           {!isNewProduct ? (
             <button
@@ -244,7 +244,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                 )
               })}
               {filtered.length === 0 && (
-                <p className="text-center text-xs text-text-muted py-8">{t('wh_in_not_found')}</p>
+                <p className="text-center text-xs text-text-muted py-5 sm:py-8">{t('wh_in_not_found')}</p>
               )}
             </div>
           </>
@@ -258,7 +258,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
       </div>
 
       {/* ONG PANEL — Kirim ma'lumotlari */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-5 space-y-4 min-h-[420px] overflow-y-auto no-scrollbar">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 space-y-4 min-h-[420px] overflow-y-auto no-scrollbar">
         <h3 className="font-syne font-bold text-text-primary">{t('wh_in_details')}</h3>
 
         {/* Sana */}

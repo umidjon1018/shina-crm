@@ -54,9 +54,9 @@ const EditCustomerModal = ({ ctx }) => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-bg-primary border border-border rounded-3xl p-8 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar"
+              className="relative w-full max-w-md bg-bg-primary border border-border rounded-3xl p-5 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-2xl font-syne font-extrabold text-text-primary">{t('cust_edit_title')}</h3>
                 <button onClick={() => setEditCustomer(null)} className="p-2 text-text-muted hover:text-accent-red hover:bg-accent-red/10 rounded-xl transition-all">
                   <X size={20} />

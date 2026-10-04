@@ -325,14 +325,14 @@ const ReturnsTab = ({ ctx }) => {
                 </div>
                 <p className="text-[10px] text-text-muted mt-1.5">{t('sl_ret_refund_only_original')}</p>
               </div>
-              <div className="bg-bg-tertiary p-5 rounded-2xl border border-border text-center">
+              <div className="bg-bg-tertiary p-4 sm:p-5 rounded-2xl border border-border text-center">
                 {(() => {
                   const refundVal = returnSale ? Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100)) : 0
                   const toBalance = ((v) => (returnSale?.balanceUsed > 0 && returnSale.total > 0 ? Math.min(returnSale.balanceUsed, Math.round(returnSale.balanceUsed * v / returnSale.total)) : 0))(refundVal)
                   return (
                     <>
                       <p className="text-xs text-text-secondary font-bold">{t('sl_ret_refund_total')}</p>
-                      <h3 className="text-3xl font-syne font-extrabold text-accent-red mt-2">{formatPrice(refundVal - toBalance, som)}</h3>
+                      <h3 className="text-2xl sm:text-3xl font-syne font-extrabold text-accent-red mt-2">{formatPrice(refundVal - toBalance, som)}</h3>
                       {toBalance > 0 && <p className="text-xs text-accent-orange font-bold mt-2">{t('sl_loy_ret_to_balance', { n: formatPrice(toBalance, som) })}</p>}
                     </>
                   )
@@ -375,7 +375,7 @@ const ReturnsTab = ({ ctx }) => {
               )}
 
               {returnSale && returnItems.length > 0 && (
-                <div className="bg-bg-tertiary p-5 rounded-2xl border border-border text-center space-y-2">
+                <div className="bg-bg-tertiary p-4 sm:p-5 rounded-2xl border border-border text-center space-y-2">
                   {(() => {
                     const refundGross = Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100))
                     const refundVal = refundGross - ((v) => (returnSale?.balanceUsed > 0 && returnSale.total > 0 ? Math.min(returnSale.balanceUsed, Math.round(returnSale.balanceUsed * v / returnSale.total)) : 0))(refundGross)
@@ -386,7 +386,7 @@ const ReturnsTab = ({ ctx }) => {
                         <p className="text-xs text-text-secondary font-bold">{t('sl_ret_diff_title')}</p>
                         {diff < 0 ? (
                           <>
-                            <h3 className="text-3xl font-syne font-extrabold text-accent-green">{t('sl_ret_give_back', { amount: formatPrice(Math.abs(diff), som) })}</h3>
+                            <h3 className="text-2xl sm:text-3xl font-syne font-extrabold text-accent-green">{t('sl_ret_give_back', { amount: formatPrice(Math.abs(diff), som) })}</h3>
                             <div className="pt-3">
                               <span className="text-[10px] text-text-muted uppercase font-bold block mb-1">{t('sl_ret_pay_type')}</span>
                               <div className="flex gap-2 justify-center">
@@ -404,7 +404,7 @@ const ReturnsTab = ({ ctx }) => {
                           </>
                         ) : diff > 0 ? (
                           <>
-                            <h3 className="text-3xl font-syne font-extrabold text-accent-red">{t('sl_ret_take_more', { amount: formatPrice(diff, som) })}</h3>
+                            <h3 className="text-2xl sm:text-3xl font-syne font-extrabold text-accent-red">{t('sl_ret_take_more', { amount: formatPrice(diff, som) })}</h3>
                             <div className="pt-3">
                               <span className="text-[10px] text-text-muted uppercase font-bold block mb-1">{t('sl_ret_pay_type')}</span>
                               <div className="flex gap-2 justify-center">

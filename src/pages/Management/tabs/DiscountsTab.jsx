@@ -83,11 +83,11 @@ const DiscountsTab = ({ ctx }) => {
   } = ctx
 
   return (
-          <motion.div key="discounts" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-8 max-w-2xl">
+          <motion.div key="discounts" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5 sm:space-y-8 max-w-2xl">
             <LoyaltyProgramCard canEdit={['admin', 'manager'].includes(user?.role)} />
 
             {/* Blok 2 — Chegirma darajalari */}
-            <div className="space-y-6 pt-6 border-t border-border">
+            <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t border-border">
               <div>
                 <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_discount_levels_title')}</h3>
                 <p className="text-sm text-text-secondary">{t('mgmt_discount_subtitle')}</p>
@@ -135,7 +135,7 @@ const DiscountsTab = ({ ctx }) => {
             <button
               onClick={handleSave}
               disabled={discountForm.discountSmallMax >= discountForm.discountMediumMax}
-              className={`px-8 py-3 rounded-2xl font-syne font-extrabold text-lg transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`px-5 sm:px-8 py-3 rounded-2xl font-syne font-extrabold text-lg transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed ${
                 saved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'
               }`}
             >

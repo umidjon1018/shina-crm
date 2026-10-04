@@ -117,15 +117,15 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-bg-secondary border border-border rounded-[2.5rem] p-8 max-w-md w-full text-center shadow-glow-red"
+        className="bg-bg-secondary border border-border rounded-[2.5rem] p-5 sm:p-8 max-w-md w-full text-center shadow-glow-red"
       >
-        <div className="w-20 h-20 bg-accent-green/10 text-accent-green rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 bg-accent-green/10 text-accent-green rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
           <CheckCircle size={40} />
         </div>
         <h2 className="text-2xl font-syne font-extrabold text-text-primary mb-2">{t('sl_success_title')}</h2>
-        <p className="text-text-secondary text-sm mb-6">{t('sl_success_sale_id')} <span className="font-mono text-text-primary">{sale.id}</span></p>
+        <p className="text-text-secondary text-sm mb-4 sm:mb-6">{t('sl_success_sale_id')} <span className="font-mono text-text-primary">{sale.id}</span></p>
 
-        <div className="bg-bg-tertiary rounded-2xl p-4 mb-6 space-y-3">
+        <div className="bg-bg-tertiary rounded-2xl p-4 mb-4 sm:mb-6 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-text-muted">{t('sl_success_total')}</span>
             <span className="text-text-primary font-bold">{formatPrice(sale.total)}</span>
@@ -158,7 +158,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-4 sm:mb-6">
           <button
             onClick={handlePrint}
             className="flex items-center justify-center gap-2 py-3 bg-bg-tertiary border border-border rounded-xl text-text-primary font-medium hover:bg-border transition-colors"

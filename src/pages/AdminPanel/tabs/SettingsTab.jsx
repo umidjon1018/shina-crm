@@ -88,10 +88,10 @@ function SettingsTab() {
   const [aiKeySaved, setAiKeySaved] = useState(false)
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
 
       {/* Kompaniya */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center"><Building size={20}/></div>
           <div>
@@ -267,7 +267,7 @@ function SettingsTab() {
       </div>
 
       {/* Konfiguratsiya */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-5">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center"><Settings size={20}/></div>
           <div>
@@ -303,7 +303,7 @@ function SettingsTab() {
       </div>
 
       {/* AI Agent */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center"><KeyRound size={20}/></div>

@@ -176,20 +176,20 @@ const MessagesTab = ({ goSettings }) => {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-xs">
-              <th className="text-left px-4 py-2.5 text-text-secondary font-medium">{t('col_date')}</th>
-              <th className="text-left px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_campaign_name')}</th>
-              <th className="text-left px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_text')}</th>
-              <th className="text-right px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_progress')}</th>
+              <th className="text-left px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('col_date')}</th>
+              <th className="text-left px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_campaign_name')}</th>
+              <th className="text-left px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_text')}</th>
+              <th className="text-right px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('mkt_tg_progress')}</th>
             </tr>
           </thead>
           <tbody>
-            {campaigns.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">{t('mkt_tg_no_campaigns')}</td></tr>}
+            {campaigns.length === 0 && <tr><td colSpan={4} className="px-3 sm:px-4 py-5 sm:py-8 text-center text-text-muted">{t('mkt_tg_no_campaigns')}</td></tr>}
             {campaigns.map(c => (
               <tr key={c.id} className="border-b border-border/50">
-                <td className="px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{fmtDT(c.created_at)}</td>
-                <td className="px-4 py-2.5 text-text-primary">{c.name || '—'}<div className="text-[11px] text-text-muted">{c.created_by_name}</div></td>
-                <td className="px-4 py-2.5 text-text-secondary text-xs max-w-[320px] truncate">{c.has_image ? '🖼 ' : ''}{c.text}</td>
-                <td className="px-4 py-2.5 text-right whitespace-nowrap text-xs">
+                <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs whitespace-nowrap">{fmtDT(c.created_at)}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-text-primary">{c.name || '—'}<div className="text-[11px] text-text-muted">{c.created_by_name}</div></td>
+                <td className="px-3 sm:px-4 py-2.5 text-text-secondary text-xs max-w-[320px] truncate">{c.has_image ? '🖼 ' : ''}{c.text}</td>
+                <td className="px-3 sm:px-4 py-2.5 text-right whitespace-nowrap text-xs">
                   <span className="text-accent-green font-bold">{c.sent}</span>
                   {c.failed > 0 && <span className="text-accent-red font-bold"> / {c.failed}</span>}
                   <span className="text-text-muted"> / {c.total}</span>

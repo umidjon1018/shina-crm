@@ -3562,4 +3562,7 @@ export default {
   perm_income_payments: "To'lovlar tarixi",
   perm_income_returns: "Qaytarish",
   perm_management_bundles: "Komplektlar",
+  page_error_title: "Bu bo'limda xatolik yuz berdi",
+  page_error_desc: "Boshqa bo'limlar ishlayapti. Sahifani yangilab ko'ring; takrorlansa — administratorga xabar bering.",
+  page_error_reload: "Yangilash",
 }

@@ -61,27 +61,27 @@ const SaleItemSearch = ({ salesList, onSelectSaleItem, allCustomers }) => {
           <table className="w-full text-left text-sm">
             <thead className="bg-bg-tertiary sticky top-0 text-text-muted">
               <tr>
-                <th className="px-4 py-2 font-medium">{t('sl_sis_th_product')}</th>
-                <th className="px-4 py-2 font-medium">{t('sl_sis_th_customer')}</th>
-                <th className="px-4 py-2 font-medium text-right">{t('col_amount')}</th>
-                <th className="px-4 py-2"></th>
+                <th className="px-3 sm:px-4 py-2 font-medium">{t('sl_sis_th_product')}</th>
+                <th className="px-3 sm:px-4 py-2 font-medium">{t('sl_sis_th_customer')}</th>
+                <th className="px-3 sm:px-4 py-2 font-medium text-right">{t('col_amount')}</th>
+                <th className="px-3 sm:px-4 py-2"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map((row, idx) => (
                 <tr key={`${row.saleId}-${row.itemId}-${idx}`} className="hover:bg-bg-tertiary/50 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <p className="font-medium text-text-primary">{row.name}</p>
                     <p className="text-xs text-text-muted">{row.barcode}</p>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <p className="font-medium text-text-primary">{row.customerName}</p>
                     <p className="text-xs text-text-muted">{row.phone}</p>
                   </td>
-                  <td className="px-4 py-3 text-right font-medium text-text-primary whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-medium text-text-primary whitespace-nowrap">
                     {formatPrice(row.salePrice)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                     <button
                       onClick={() => { onSelectSaleItem(row); setQuery('') }}
                       className="px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-semibold hover:opacity-90 transition-opacity"

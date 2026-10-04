@@ -79,7 +79,7 @@ const BatchesTab = ({ ctx }) => {
             {/* ===== JADVAL 1: KIRIMLAR ===== */}
             <div className="space-y-4">
               {/* Sarlavha + Yangi kirim tugmasi */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-lg font-syne font-extrabold text-text-primary">{t('inc_table1_title')}</h2>
                 <div className="flex items-center gap-2">
                   <button
@@ -134,7 +134,7 @@ const BatchesTab = ({ ctx }) => {
                     <thead className="bg-bg-tertiary text-xs font-extrabold uppercase tracking-widest text-text-muted border-b border-border">
                       <tr>
                         {[t('col_date'), t('col_product'), t('col_category'), t('col_supplier'), t('inc_th_qty'), t('inc_th_unit_price'), t('inc_th_entry_rate'), t('inc_th_total'), t('col_status'), t('inc_th_actions')].map((label, i) => (
-                          <th key={i} className="px-4 py-4 relative select-none" style={{ overflow: 'hidden' }}>
+                          <th key={i} className="px-3 sm:px-4 py-2.5 sm:py-4 relative select-none" style={{ overflow: 'hidden' }}>
                             <span className={i === 9 ? 'float-right' : ''}>{label}</span>
                             {i < 9 && (
                               <span
@@ -151,7 +151,7 @@ const BatchesTab = ({ ctx }) => {
                         const status = statusConfig[batch.paymentStatus]
                         return (
                           <tr key={batch.id} className={`hover:bg-bg-tertiary/50 transition-colors ${batch.hasMissingPrice ? 'border-l-4 border-accent-red' : batch.isFromWarehouse && !batch.purchasePriceUSD ? 'border-l-2 border-accent-blue' : ''}`}>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <p className="text-sm text-text-secondary">
                                 {new Date(batch.receivedAt).toLocaleDateString('uz-UZ')}
                               </p>
@@ -161,7 +161,7 @@ const BatchesTab = ({ ctx }) => {
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <div className="flex items-center gap-2">
                                 <ProductImageViewer productId={batch.productId} size="sm" />
                                 <div className="min-w-0">
@@ -174,7 +174,7 @@ const BatchesTab = ({ ctx }) => {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               {(() => {
                                 const catId = batch.productCategory
                                 const catColor = getCategoryColor(catId, productCategories)
@@ -183,7 +183,7 @@ const BatchesTab = ({ ctx }) => {
                                 return <span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span>
                               })()}
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               {batch.supplierId ? (
                                 <span className="text-sm text-text-secondary">{getSupplierName(batch.supplierId)}</span>
                               ) : (
@@ -195,27 +195,27 @@ const BatchesTab = ({ ctx }) => {
                                 </button>
                               )}
                             </td>
-                            <td className="px-4 py-4 font-bold text-sm text-text-primary">{batch.quantity} {batch.unit || 'dona'}</td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4 font-bold text-sm text-text-primary">{batch.quantity} {batch.unit || 'dona'}</td>
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <p className="text-sm font-bold text-text-primary">${batch.purchasePriceUSD}</p>
                               <p className="text-xs text-text-muted">
                                 {formatPrice(batch.purchasePriceUSD * batch.entryUsdRate)} {t('unit_som')}
                               </p>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <p className="text-sm font-bold text-text-primary">{formatPrice(batch.entryUsdRate)}</p>
                               <p className="text-xs text-text-muted">{t('unit_som')} / $1</p>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <p className="text-sm font-bold text-text-primary">{formatUSD(batch.totalUSD)}</p>
                               <p className="text-xs text-text-muted">{formatPrice(batch.totalUZS_atEntry)} {som}</p>
                             </td>
-                            <td className="px-4 py-4">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${status.bg} ${status.color}`}>
                                 {t(status.key)}
                               </span>
                             </td>
-                            <td className="px-4 py-4 text-right">
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4 text-right">
                               <button
                                 onClick={() => setEditingBatch(batch)}
                                 className="p-2 text-text-muted hover:text-accent-orange rounded-xl transition-colors"
@@ -229,7 +229,7 @@ const BatchesTab = ({ ctx }) => {
                       })}
                       {paged1.length === 0 && (
                         <tr>
-                          <td colSpan="10" className="px-6 py-12 text-center text-text-muted text-sm">
+                          <td colSpan="10" className="px-4 sm:px-6 py-12 text-center text-text-muted text-sm">
                             {t('inc_no_batches')}
                           </td>
                         </tr>
@@ -306,7 +306,7 @@ const BatchesTab = ({ ctx }) => {
                     <thead className="bg-bg-tertiary text-xs font-extrabold uppercase tracking-widest text-text-muted border-b border-border">
                       <tr>
                         {[t('col_product'), t('col_category'), t('col_supplier'), t('inc_supp_detail_th_paid_usd'), t('col_uzs'), t('inc_pay_col_rate_diff'), t('col_debt_usd'), t('col_status'), t('inc_debt_due'), t('inc_th_actions')].map((label, i) => (
-                          <th key={i} className="px-4 py-4 relative select-none" style={{ overflow: 'hidden' }}>
+                          <th key={i} className="px-3 sm:px-4 py-2.5 sm:py-4 relative select-none" style={{ overflow: 'hidden' }}>
                             <span className={i === 9 ? 'float-right' : ''}>{label}</span>
                             {i < 9 && (
                               <span
@@ -329,7 +329,7 @@ const BatchesTab = ({ ctx }) => {
                         return (
                           <React.Fragment key={batch.id}>
                             <tr className={`hover:bg-bg-tertiary/50 transition-colors ${isExpanded ? 'bg-bg-tertiary/30' : ''}`}>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 <div className="flex items-center gap-2">
                                   <ProductImageViewer productId={batch.productId} size="sm" />
                                   <div className="min-w-0">
@@ -338,7 +338,7 @@ const BatchesTab = ({ ctx }) => {
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {(() => {
                                   const product = MOCK_PRODUCTS.find(p => p.id === batch.productId)
                                   const catColor = getCategoryColor(product?.category, productCategories)
@@ -347,14 +347,14 @@ const BatchesTab = ({ ctx }) => {
                                   return <span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span>
                                 })()}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {batch.supplierId ? (
                                   <span className="text-sm text-text-secondary">{getSupplierName(batch.supplierId)}</span>
                                 ) : (
                                   <span className="text-xs text-text-muted">—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {batch.paidUSD > 0 ? (
                                   <>
                                     <p className="text-sm font-bold text-accent-green">{formatUSD(batch.paidUSD)}</p>
@@ -364,34 +364,34 @@ const BatchesTab = ({ ctx }) => {
                                   <span className="text-xs text-text-muted">—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {paidUZS > 0 ? (
                                   <p className="text-sm text-text-primary">{formatPrice(paidUZS)} {som}</p>
                                 ) : (
                                   <span className="text-xs text-text-muted">—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {diff !== null ? (
                                   <span className={`text-sm font-bold ${diff < 0 ? 'text-accent-red' : 'text-accent-green'}`}>
                                     {diff > 0 ? '+' : ''}{formatPrice(diff)} {som} {diff < 0 ? '📉' : '📈'}
                                   </span>
                                 ) : <span className="text-text-muted text-xs">—</span>}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {batch.debtUSD > 0 ? (
                                   <p className="text-sm font-bold text-accent-red">{formatUSD(batch.debtUSD)}</p>
                                 ) : (
                                   <span className="text-xs text-text-muted">—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {(() => {
                                   const s = statusConfig[batch.paymentStatus] || statusConfig.unpaid
                                   return <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${s.bg} ${s.color}`}>{t(s.key)}</span>
                                 })()}
                               </td>
-                              <td className="px-4 py-4">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {batch.debtUSD > 0 && dueDays !== null ? (
                                   <p className={`text-xs font-bold ${dueDays <= 0 ? 'text-accent-red animate-pulse' : dueDays <= 3 ? 'text-accent-orange' : 'text-text-muted'}`}>
                                     {dueDays <= 0 ? t('inc_overdue') : t('inc_days_left', { n: dueDays })}
@@ -400,7 +400,7 @@ const BatchesTab = ({ ctx }) => {
                                   <span className="text-xs text-text-muted">—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-4 text-right">
+                              <td className="px-3 sm:px-4 py-2.5 sm:py-4 text-right">
                                 <div className="flex items-center justify-end gap-1">
                                   <button
                                     onClick={() => setShowPaymentModal(batch)}
@@ -420,7 +420,7 @@ const BatchesTab = ({ ctx }) => {
                             </tr>
                             {isExpanded && (
                               <tr className="bg-bg-tertiary/10">
-                                <td colSpan="10" className="px-6 py-6">
+                                <td colSpan="10" className="px-4 sm:px-6 py-4 sm:py-6">
                                   {/* To'lovlar tarixi — hozirgi koddan aynan ko'chir, o'zgartirma */}
                                   <div className="space-y-4">
                                     <div className="flex items-center justify-between">
@@ -476,30 +476,30 @@ const BatchesTab = ({ ctx }) => {
                                         <table className="w-full text-left text-xs">
                                           <thead className="bg-bg-tertiary text-text-muted">
                                             <tr>
-                                              <th className="px-4 py-3">{t('col_date')}</th>
-                                              <th className="px-4 py-3">{t('inc_pay_col_usd')}</th>
-                                              <th className="px-4 py-3">{t('col_rate')}</th>
-                                              <th className="px-4 py-3">{t('col_uzs')}</th>
-                                              <th className="px-4 py-3">{t('inc_pay_method')}</th>
-                                              <th className="px-4 py-3">{t('col_note')}</th>
-                                              <th className="px-4 py-3">{t('inc_pay_col_rate_diff')}</th>
-                                              <th className="px-4 py-3 text-right">{t('inc_th_actions')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_date')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_pay_col_usd')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_rate')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_uzs')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_pay_method')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('col_note')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3">{t('inc_pay_col_rate_diff')}</th>
+                                              <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('inc_th_actions')}</th>
                                             </tr>
                                           </thead>
                                           <tbody className="divide-y divide-border/50">
                                             {batch.payments.map(p => (
                                               <tr key={p.id}>
-                                                <td className="px-4 py-3 text-text-secondary">{p.date}</td>
-                                                <td className="px-4 py-3 font-bold text-text-primary">{formatUSD(p.amountUSD)}</td>
-                                                <td className="px-4 py-3 text-text-muted">{formatPrice(p.usdRate)}</td>
-                                                <td className="px-4 py-3 text-text-primary">{formatPrice(p.amountUZS)} {t('unit_som')}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary">{p.date}</td>
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-text-primary">{formatUSD(p.amountUSD)}</td>
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{formatPrice(p.usdRate)}</td>
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{formatPrice(p.amountUZS)} {t('unit_som')}</td>
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3">
                                                   <span className="bg-bg-tertiary px-2 py-1 rounded uppercase text-[10px]">
                                                     {p.type === 'cash_uzs' ? t('inc_pay_cash_uzs') : p.type === 'cash_usd' ? t('inc_pay_cash_usd') : t('inc_pay_bank')}
                                                   </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-text-muted italic">{p.note || '—'}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted italic">{p.note || '—'}</td>
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3">
                                                   {(() => {
                                                     const d = calcPaymentRateDiff(p, batch.entryUsdRate)
                                                     return (
@@ -509,7 +509,7 @@ const BatchesTab = ({ ctx }) => {
                                                     )
                                                   })()}
                                                 </td>
-                                                <td className="px-4 py-3 text-right">
+                                                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                                                   <div className="flex items-center justify-end gap-1">
                                                     <button
                                                       onClick={() => setEditingPayment({ batchId: batch.id, payment: { ...p } })}
@@ -558,12 +558,12 @@ const BatchesTab = ({ ctx }) => {
                                               </tr>
                                             ))}
                                             <tr className="bg-bg-tertiary/30 font-bold">
-                                              <td className="px-4 py-3 text-text-muted">{t('inc_pay_total')}:</td>
-                                              <td className="px-4 py-3 text-text-primary">{formatUSD(batch.paidUSD)}</td>
-                                              <td className="px-4 py-3 text-text-muted">{formatPrice(avgRate)} ({t('avg_short')})</td>
-                                              <td className="px-4 py-3 text-text-primary">{formatPrice(paidUZS)} {som}</td>
+                                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{t('inc_pay_total')}:</td>
+                                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{formatUSD(batch.paidUSD)}</td>
+                                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{formatPrice(avgRate)} ({t('avg_short')})</td>
+                                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{formatPrice(paidUZS)} {som}</td>
                                               <td colSpan="2"></td>
-                                              <td className="px-4 py-3">
+                                              <td className="px-3 sm:px-4 py-2 sm:py-3">
                                                 {(() => {
                                                   const totalDiff = batch.payments.reduce((sum, p) => sum + calcPaymentRateDiff(p, batch.entryUsdRate), 0)
                                                   return (
@@ -579,7 +579,7 @@ const BatchesTab = ({ ctx }) => {
                                         </table>
                                       </div>
                                     ) : (
-                                      <div className="bg-bg-tertiary/20 border border-dashed border-border rounded-2xl py-8 text-center">
+                                      <div className="bg-bg-tertiary/20 border border-dashed border-border rounded-2xl py-5 sm:py-8 text-center">
                                         <p className="text-sm text-text-muted italic">Hozircha to'lovlar mavjud emas</p>
                                       </div>
                                     )}
@@ -592,7 +592,7 @@ const BatchesTab = ({ ctx }) => {
                       })}
                       {paged2.length === 0 && (
                         <tr>
-                          <td colSpan="10" className="px-6 py-12 text-center text-text-muted text-sm">
+                          <td colSpan="10" className="px-4 sm:px-6 py-12 text-center text-text-muted text-sm">
                             Ma'lumot topilmadi
                           </td>
                         </tr>
@@ -629,7 +629,7 @@ const BatchesTab = ({ ctx }) => {
             </div>
 
             {/* INVENTORY MATCHING WIDGET */}
-            <div className={`border rounded-[2rem] p-6 mt-6 ${allMatch ? 'border-accent-green/30 bg-accent-green/5' : 'border-accent-red/30 bg-accent-red/5'}`}>
+            <div className={`border rounded-[2rem] p-4 sm:p-6 mt-4 sm:mt-6 ${allMatch ? 'border-accent-green/30 bg-accent-green/5' : 'border-accent-red/30 bg-accent-red/5'}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-xl ${allMatch ? 'bg-accent-green/20 text-accent-green' : 'bg-accent-red/20 text-accent-red'}`}>

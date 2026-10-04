@@ -192,7 +192,7 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-5 border-b border-border">
+        <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 font-bold">
               {customer.name[0]}
@@ -214,7 +214,7 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           {/* Asosiy info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
@@ -297,7 +297,7 @@ function DmConversationsPanel() {
     finally { setDetailLoading(false) }
   }
 
-  if (loading) return <div className="py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
+  if (loading) return <div className="py-5 sm:py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
 
   const convs = data?.conversations || []
   const paged = convs.slice((page - 1) * PS, page * PS)
@@ -313,17 +313,17 @@ function DmConversationsPanel() {
       </div>
 
       {convs.length === 0 ? (
-        <div className="py-8 text-center text-text-muted text-sm">Hali DM suhbat yo'q</div>
+        <div className="py-5 sm:py-8 text-center text-text-muted text-sm">Hali DM suhbat yo'q</div>
       ) : (
         <div className="rounded-2xl border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-secondary text-xs text-text-muted">
-                <th className="text-left px-4 py-2.5">Foydalanuvchi</th>
-                <th className="text-right px-4 py-2.5 hidden sm:table-cell">Xabarlar</th>
-                <th className="text-right px-4 py-2.5 hidden md:table-cell">So'nggi faollik</th>
-                <th className="text-left px-4 py-2.5 hidden lg:table-cell">Oxirgi xabar</th>
-                <th className="px-4 py-2.5 w-6" />
+                <th className="text-left px-3 sm:px-4 py-2.5">Foydalanuvchi</th>
+                <th className="text-right px-3 sm:px-4 py-2.5 hidden sm:table-cell">Xabarlar</th>
+                <th className="text-right px-3 sm:px-4 py-2.5 hidden md:table-cell">So'nggi faollik</th>
+                <th className="text-left px-3 sm:px-4 py-2.5 hidden lg:table-cell">Oxirgi xabar</th>
+                <th className="px-3 sm:px-4 py-2.5 w-6" />
               </tr>
             </thead>
             <tbody>
@@ -333,7 +333,7 @@ function DmConversationsPanel() {
                   onClick={() => openDetail(c)}
                   className={`border-b border-border/50 hover:bg-bg-secondary cursor-pointer transition-colors ${i % 2 === 0 ? '' : 'bg-bg-secondary/30'}`}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
                         {(c.username || c.senderId)[0]?.toUpperCase()}
@@ -345,16 +345,16 @@ function DmConversationsPanel() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-text-secondary hidden sm:table-cell">{c.msgCount} ta</td>
-                  <td className="px-4 py-3 text-right text-xs text-text-muted hidden md:table-cell">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs text-text-secondary hidden sm:table-cell">{c.msgCount} ta</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs text-text-muted hidden md:table-cell">
                     {c.lastMsg ? new Date(c.lastMsg).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
                   </td>
-                  <td className="px-4 py-3 hidden lg:table-cell">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
                     <p className="text-xs text-text-secondary truncate max-w-xs">
                       {c.lastRole === 'assistant' ? '🤖 ' : '👤 '}{c.lastMessage}
                     </p>
                   </td>
-                  <td className="px-4 py-3"><ChevronRight size={14} className="text-text-muted" /></td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3"><ChevronRight size={14} className="text-text-muted" /></td>
                 </tr>
               ))}
             </tbody>
@@ -409,7 +409,7 @@ function BotStatsPanel() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
+  if (loading) return <div className="py-5 sm:py-8 text-center text-text-muted text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Yuklanmoqda...</div>
   if (!stats) return null
 
   const cs = stats.commentSummary || {}
@@ -465,35 +465,35 @@ function BotStatsPanel() {
           <span className="text-xs text-text-muted font-normal">({reservations.length} ta)</span>
         </p>
         {reservations.length === 0 ? (
-          <div className="py-6 text-center text-text-muted text-sm rounded-2xl border border-border">Hali bot orqali bron qilinmagan</div>
+          <div className="py-4 sm:py-6 text-center text-text-muted text-sm rounded-2xl border border-border">Hali bot orqali bron qilinmagan</div>
         ) : (
           <div className="rounded-2xl border border-border overflow-hidden">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-border bg-bg-secondary text-text-muted">
-                  <th className="text-left px-4 py-2.5">Mijoz</th>
-                  <th className="text-left px-4 py-2.5 hidden sm:table-cell">Tovar</th>
-                  <th className="text-right px-4 py-2.5 hidden md:table-cell">Narx</th>
-                  <th className="text-center px-4 py-2.5">Holat</th>
-                  <th className="text-right px-4 py-2.5 hidden lg:table-cell">Vaqt</th>
+                  <th className="text-left px-3 sm:px-4 py-2.5">Mijoz</th>
+                  <th className="text-left px-3 sm:px-4 py-2.5 hidden sm:table-cell">Tovar</th>
+                  <th className="text-right px-3 sm:px-4 py-2.5 hidden md:table-cell">Narx</th>
+                  <th className="text-center px-3 sm:px-4 py-2.5">Holat</th>
+                  <th className="text-right px-3 sm:px-4 py-2.5 hidden lg:table-cell">Vaqt</th>
                 </tr>
               </thead>
               <tbody>
                 {reservations.map((r, i) => (
                   <tr key={r.id} className={`border-b border-border/50 ${i % 2 === 0 ? '' : 'bg-bg-secondary/30'}`}>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3">
                       <p className="text-text-primary font-medium">{r.customerName || '—'}</p>
                       {r.customerPhone && <p className="text-text-muted flex items-center gap-1"><Phone size={10} />{r.customerPhone}</p>}
                     </td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-text-secondary">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 hidden sm:table-cell text-text-secondary">
                       {r.brand && <span className="text-pink-400 mr-1">{r.brand}</span>}
                       {r.productName || '—'}
                       {r.size && <span className="text-text-muted ml-1">({r.size})</span>}
                     </td>
-                    <td className="px-4 py-3 text-right hidden md:table-cell text-accent-green">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden md:table-cell text-accent-green">
                       {r.cashPrice ? r.cashPrice.toLocaleString('uz-UZ') + " so'm" : '—'}
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                       {r.status === 'active' && new Date(r.reservedUntil) > new Date()
                         ? <span className="flex items-center justify-center gap-1 text-accent-green"><CheckCircle size={12} />Aktiv</span>
                         : r.status === 'completed'
@@ -501,7 +501,7 @@ function BotStatsPanel() {
                           : <span className="flex items-center justify-center gap-1 text-text-muted"><XCircle size={12} />Muddati o'tdi</span>
                       }
                     </td>
-                    <td className="px-4 py-3 text-right text-text-muted hidden lg:table-cell">
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-muted hidden lg:table-cell">
                       {new Date(r.createdAt).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </td>
                   </tr>
@@ -621,7 +621,7 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
   }, [igHandle, igEnabled, botStats])
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       {/* Instagram agent tahlili */}
       <AgentAnalysisPanel
         loading={agLoading}
@@ -673,13 +673,13 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-bg-secondary text-xs text-text-muted">
-                  <th className="text-left px-4 py-2.5">Mijoz</th>
-                  <th className="text-left px-4 py-2.5 hidden sm:table-cell">Instagram</th>
-                  <th className="text-left px-4 py-2.5 hidden md:table-cell">Avtomobil</th>
-                  <th className="text-right px-4 py-2.5">Xaridlar</th>
-                  <th className="text-right px-4 py-2.5 hidden md:table-cell">Sarflagan</th>
-                  <th className="text-right px-4 py-2.5 hidden lg:table-cell">Qarz</th>
-                  <th className="px-4 py-2.5 w-6" />
+                  <th className="text-left px-3 sm:px-4 py-2.5">Mijoz</th>
+                  <th className="text-left px-3 sm:px-4 py-2.5 hidden sm:table-cell">Instagram</th>
+                  <th className="text-left px-3 sm:px-4 py-2.5 hidden md:table-cell">Avtomobil</th>
+                  <th className="text-right px-3 sm:px-4 py-2.5">Xaridlar</th>
+                  <th className="text-right px-3 sm:px-4 py-2.5 hidden md:table-cell">Sarflagan</th>
+                  <th className="text-right px-3 sm:px-4 py-2.5 hidden lg:table-cell">Qarz</th>
+                  <th className="px-3 sm:px-4 py-2.5 w-6" />
                 </tr>
               </thead>
               <tbody>
@@ -691,7 +691,7 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
                       onClick={() => setSelected(c)}
                       className={`border-b border-border/50 hover:bg-bg-secondary cursor-pointer transition-colors ${i % 2 === 0 ? '' : 'bg-bg-secondary/30'}`}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
                             {c.name[0]}
@@ -702,16 +702,16 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
                         <span className="text-xs text-pink-400">@{c.instagram}</span>
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell text-xs text-text-secondary">{c.carModel || '—'}</td>
-                      <td className="px-4 py-3 text-right text-xs font-medium text-text-primary">{c.count}</td>
-                      <td className="px-4 py-3 text-right hidden md:table-cell text-xs text-accent-green">{fmtMoney(c.spent)} so'm</td>
-                      <td className="px-4 py-3 text-right hidden lg:table-cell text-xs">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 hidden md:table-cell text-xs text-text-secondary">{c.carModel || '—'}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-text-primary">{c.count}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden md:table-cell text-xs text-accent-green">{fmtMoney(c.spent)} so'm</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden lg:table-cell text-xs">
                         {c.debt ? <span className="text-accent-red">{fmtMoney(c.debt)} so'm</span> : <span className="text-text-muted">—</span>}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-2 sm:py-3">
                         <ChevronRight size={14} className="text-text-muted" />
                       </td>
                     </tr>

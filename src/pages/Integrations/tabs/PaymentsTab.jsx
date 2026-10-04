@@ -92,7 +92,7 @@ const PaymentsTab = () => {
         ))}
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <button onClick={save} className="px-6 py-2.5 rounded-xl bg-accent-red text-white font-bold text-sm">{t('save')}</button>
+        <button onClick={save} className="px-4 sm:px-6 py-2.5 rounded-xl bg-accent-red text-white font-bold text-sm">{t('save')}</button>
         <div className="flex-1"><Msg msg={msg} /></div>
       </div>
 

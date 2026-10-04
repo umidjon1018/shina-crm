@@ -37,17 +37,17 @@ const SuppliersTab = ({ ctx }) => {
   } = ctx
 
   return (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
+          <div className="space-y-5 sm:space-y-8">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-2xl font-syne font-extrabold text-text-primary">{t('inc_suppliers_title')}</h2>
               <button
                 onClick={() => { setEditingSupplier(null); setShowSupplierModal(true); }}
-                className="flex items-center gap-2 px-6 py-3 bg-accent-blue text-white rounded-2xl font-syne font-bold shadow-glow-blue hover:opacity-90 transition-all"
+                className="flex items-center gap-2 px-4 sm:px-6 py-3 bg-accent-blue text-white rounded-2xl font-syne font-bold shadow-glow-blue hover:opacity-90 transition-all"
               >
                 <Plus size={18} /> {t('inc_add_supplier')}
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
               {(selectedShopId === 'all' ? suppliers : suppliers.filter(s => shopBatches.some(b => b.supplierId === s.id))).map(s => {
                 const supplierBatches = shopBatches.filter(b => b.supplierId === s.id)
                 const supplierDebts = supplierBatches.reduce((sum, b) => sum + (b.debtUSD || 0), 0)
@@ -70,7 +70,7 @@ const SuppliersTab = ({ ctx }) => {
                     key={s.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-bg-secondary border border-border rounded-[2.5rem] p-6 space-y-6"
+                    className="bg-bg-secondary border border-border rounded-[2.5rem] p-4 sm:p-6 space-y-4 sm:space-y-6"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">

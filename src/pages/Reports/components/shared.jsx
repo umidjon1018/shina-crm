@@ -137,7 +137,7 @@ const Modal = ({ open, onClose, title, subtitle, children, size = 'lg' }) => {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-border flex-shrink-0">
+        <div className="flex items-start justify-between px-4 sm:px-6 py-5 border-b border-border flex-shrink-0">
           <div>
             <h3 className="text-lg font-syne font-bold text-text-primary">{title}</h3>
             {subtitle && <p className="text-text-muted text-sm mt-0.5">{subtitle}</p>}
@@ -150,7 +150,7 @@ const Modal = ({ open, onClose, title, subtitle, children, size = 'lg' }) => {
           </button>
         </div>
         {/* Body */}
-        <div className="overflow-y-auto overflow-x-auto flex-1 px-6 py-5 min-h-0">
+        <div className="overflow-y-auto overflow-x-auto flex-1 px-4 sm:px-6 py-5 min-h-0">
           {children}
         </div>
       </motion.div>
@@ -228,7 +228,7 @@ const Pagination = ({ total, pageSize, page, onPageChange }) => {
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-t border-border">
+    <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-t border-border">
       <span className="text-xs text-text-muted">
         {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} / {total} ta
       </span>
@@ -356,7 +356,7 @@ const ModalTable = ({ columns, data, pageSize = 10, emptyText, initialSortKey = 
             {paged.map((row, idx) => (
               <tr key={row.id || idx} className="hover:bg-bg-tertiary transition-colors" style={rowStyle ? rowStyle(row) : {}}>
                 {columns.map(col => (
-                  <td key={col.key} className={`px-4 py-3 whitespace-nowrap text-${col.align || 'left'} ${col.tdClass || ''}`}>
+                  <td key={col.key} className={`px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-${col.align || 'left'} ${col.tdClass || ''}`}>
                     {col.render ? col.render(row) : row[col.key] ?? '—'}
                   </td>
                 ))}

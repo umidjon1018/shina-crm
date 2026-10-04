@@ -85,7 +85,7 @@ const MergeModal = ({ ctx }) => {
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 onClick={e => e.stopPropagation()}
-                className="relative w-full max-w-lg bg-bg-primary border border-border rounded-3xl p-7 shadow-2xl space-y-5"
+                className="relative w-full max-w-lg bg-bg-primary border border-border rounded-3xl p-7 shadow-2xl space-y-3 sm:space-y-5"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -263,7 +263,7 @@ const MergeModal = ({ ctx }) => {
                 className="relative w-full max-w-2xl bg-bg-primary border border-border rounded-3xl shadow-2xl overflow-hidden"
                 style={{ maxHeight: '80vh' }}
               >
-                <div className="p-6 border-b border-border flex items-center justify-between">
+                <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-accent-red/10 rounded-xl flex items-center justify-center">
                       <AlertCircle size={20} className="text-accent-red" />
@@ -278,7 +278,7 @@ const MergeModal = ({ ctx }) => {
                   </button>
                 </div>
 
-                <div className="overflow-y-auto p-6 space-y-3" style={{ maxHeight: 'calc(80vh - 80px)' }}>
+                <div className="overflow-y-auto p-4 sm:p-6 space-y-3" style={{ maxHeight: 'calc(80vh - 80px)' }}>
                   {overdueSales.length === 0 ? (
                     <div className="py-12 text-center text-text-muted">Kechikkan to'lovlar mavjud emas</div>
                   ) : overdueSales.map(sale => {

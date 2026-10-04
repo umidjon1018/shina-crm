@@ -135,27 +135,27 @@ const BundlesTab = ({ ctx }) => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-secondary">
-                <th className="text-left px-4 py-3 text-text-muted font-medium text-xs">Nom</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium text-xs">Do'kon</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium text-xs">Tovarlar</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium text-xs">Chegirma</th>
-                <th className="text-left px-4 py-3 text-text-muted font-medium text-xs">Holat</th>
-                <th className="px-4 py-3" />
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-medium text-xs">Nom</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-medium text-xs">Do'kon</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-medium text-xs">Tovarlar</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-medium text-xs">Chegirma</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-medium text-xs">Holat</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3" />
               </tr>
             </thead>
             <tbody>
               {bundles.map((b, i) => (
                 <tr key={b.id} className={`border-b border-border/50 hover:bg-bg-secondary/50 transition-colors ${!b.isActive ? 'opacity-50' : ''}`}>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex items-center gap-2">
                       <ShoppingBag size={14} className="text-accent-red flex-shrink-0" />
                       <span className="font-medium text-text-primary">{b.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-xs">
                     {b.shopId === 'all' ? 'Barcha do\'konlar' : (shops || []).find(s => String(s.id) === String(b.shopId))?.name || b.shopId}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex flex-col gap-0.5">
                       {(b.products || []).map((p, pi) => (
                         <span key={pi} className="text-xs text-text-secondary">
@@ -164,14 +164,14 @@ const BundlesTab = ({ ctx }) => {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     {b.discount > 0 ? (
                       <span className="text-accent-green font-bold text-xs">-{b.discount}%</span>
                     ) : (
                       <span className="text-text-muted text-xs">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <button onClick={() => handleToggle(b)} className="flex items-center gap-1 text-xs">
                       {b.isActive
                         ? <><ToggleRight size={18} className="text-accent-green" /><span className="text-accent-green">Faol</span></>
@@ -179,7 +179,7 @@ const BundlesTab = ({ ctx }) => {
                       }
                     </button>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex items-center gap-1">
                       <button onClick={() => openEdit(b)} className="p-1.5 hover:bg-bg-tertiary rounded-lg text-text-secondary hover:text-text-primary transition-colors">
                         <Pencil size={14} />
@@ -338,7 +338,7 @@ const BundlesTab = ({ ctx }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-5"
+              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-4 sm:p-5"
             >
               <h3 className="font-syne font-bold text-text-primary mb-2">Komplektni o'chirish</h3>
               <p className="text-sm text-text-secondary mb-4">

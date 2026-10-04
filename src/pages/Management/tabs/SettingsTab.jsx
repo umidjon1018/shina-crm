@@ -85,10 +85,10 @@ const SettingsTab = ({ ctx }) => {
 
   return (
     <>
-          <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6 max-w-2xl">
+          <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4 sm:space-y-6 max-w-2xl">
             
             {/* BLOK 0.6 — AI Agent API kaliti */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center">
                   <KeyRound size={20} />
@@ -129,7 +129,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 1 — USD kursi */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent-green/10 text-accent-green rounded-xl flex items-center justify-center">
                   <DollarSign size={20} />
@@ -167,7 +167,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 2 — Do'kon oylik maqsadi */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center">
                   <TrendingUp size={20} />
@@ -293,7 +293,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 3 — Xodim oylik maqsadi */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center">
                   <User size={20} />
@@ -350,7 +350,7 @@ const SettingsTab = ({ ctx }) => {
                         setEmpTargetAmount('')
                         setTimeout(() => setEmpTargetSaved(false), 2000)
                       }}
-                      className={`px-6 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center flex-shrink-0 ${
+                      className={`px-4 sm:px-6 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center flex-shrink-0 ${
                         empTargetSaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'
                       }`}
                     >
@@ -435,7 +435,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 4 — Manbalar */}
-            <div id="customer-sources" className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div id="customer-sources" className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-accent-orange/10 text-accent-orange rounded-xl flex items-center justify-center">
@@ -458,9 +458,9 @@ const SettingsTab = ({ ctx }) => {
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-bg-tertiary">
                     <tr>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_source')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
-                      <th className="px-4 py-3 text-text-muted font-bold text-xs uppercase text-right">{t('mgmt_col_actions')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_source')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase">{t('col_status')}</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted font-bold text-xs uppercase text-right">{t('mgmt_col_actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -468,7 +468,7 @@ const SettingsTab = ({ ctx }) => {
                       const isEditing = editingSourceId === src.id
                       return (
                         <tr key={src.id} className={`hover:bg-bg-tertiary/20 transition-colors ${src.isActive ? '' : 'opacity-50'}`}>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             {isEditing ? (
                               <input
                                 type="text"
@@ -491,12 +491,12 @@ const SettingsTab = ({ ctx }) => {
                               <span className="font-semibold text-text-primary">{t('source_' + src.id, { defaultValue: src.label })}</span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${src.isActive ? 'bg-accent-green/10 text-accent-green' : 'bg-bg-tertiary text-text-muted'}`}>
                               {src.isActive ? t('mgmt_status_active') : t('mgmt_src_inactive')}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => { setEditingSourceId(src.id); setEditingSourceValue(src.label) }}
@@ -530,7 +530,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 5 — Nasiya tashkilotlari */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-accent-red/10 text-accent-red rounded-xl flex items-center justify-center">
@@ -664,7 +664,7 @@ const SettingsTab = ({ ctx }) => {
             </div>
 
             {/* BLOK 6 — Ogohlantirish sozlamalari */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-accent-orange/10 text-accent-orange rounded-xl flex items-center justify-center">
                   <Bell size={20} />

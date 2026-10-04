@@ -279,7 +279,7 @@ const OrderDetailModal = ({ order, usdRate, onClose, onChanged, onEdit, t }) => 
 
   return (
     <SupModal title={order.orderNumber} subtitle={`${order.supplierName} · ${order.shopName}`} onClose={onClose} maxW="max-w-4xl">
-      <div className="space-y-5">
+      <div className="space-y-3 sm:space-y-5">
         <div className="flex flex-wrap items-center gap-2">
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${st.cls}`}>{t(st.key)}</span>
           <span className="text-xs text-text-muted">{t('col_date')}: {fmtDate(order.createdAt)} · {order.createdByName}</span>
@@ -442,14 +442,14 @@ const OrdersTab = ({ ctx }) => {
           <table className="w-full text-sm min-w-[760px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
               <tr>
-                <th className="px-4 py-3 text-left">{t('sup_order_no')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_supplier')}</th>
-                <th className="px-4 py-3 text-left">{t('col_date')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_expected_date')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_received_qty')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_total')}</th>
-                <th className="px-4 py-3 text-right">{t('sup_advance_paid')}</th>
-                <th className="px-4 py-3 text-left">{t('col_status')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_order_no')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_supplier')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('col_date')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_expected_date')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_received_qty')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_total')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('sup_advance_paid')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('col_status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -459,21 +459,21 @@ const OrdersTab = ({ ctx }) => {
                 const late = o.expectedDate && o.expectedDate < today && ['draft', 'sent', 'partial'].includes(o.status)
                 return (
                   <tr key={o.id} onClick={() => setDetailId(o.id)} className="hover:bg-bg-tertiary/50 cursor-pointer">
-                    <td className="px-4 py-3 font-bold text-text-primary">{o.orderNumber}<p className="text-[11px] font-normal text-text-muted">{o.shopName}</p></td>
-                    <td className="px-4 py-3 text-text-primary">{o.supplierName}</td>
-                    <td className="px-4 py-3 text-text-muted">{fmtDate(o.createdAt)}</td>
-                    <td className={`px-4 py-3 ${late ? 'text-accent-red font-bold' : 'text-text-muted'}`}>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-text-primary">{o.orderNumber}<p className="text-[11px] font-normal text-text-muted">{o.shopName}</p></td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-primary">{o.supplierName}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{fmtDate(o.createdAt)}</td>
+                    <td className={`px-3 sm:px-4 py-2 sm:py-3 ${late ? 'text-accent-red font-bold' : 'text-text-muted'}`}>
                       <span className="inline-flex items-center gap-1">{late && <AlertTriangle size={13} />}{o.expectedDate ? fmtDate(o.expectedDate) : '—'}</span>
                     </td>
-                    <td className="px-4 py-3 text-right">{tot.received}/{tot.ordered}{tot.rejected > 0 && <span className="text-accent-red"> (−{tot.rejected})</span>}</td>
-                    <td className="px-4 py-3 text-right font-bold text-text-primary">{usd(tot.total)}</td>
-                    <td className="px-4 py-3 text-right text-accent-blue">{tot.paid > 0 ? usd(tot.paid) : '—'}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${st.cls}`}>{t(st.key)}</span></td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">{tot.received}/{tot.ordered}{tot.rejected > 0 && <span className="text-accent-red"> (−{tot.rejected})</span>}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">{usd(tot.total)}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-blue">{tot.paid > 0 ? usd(tot.paid) : '—'}</td>
+                    <td className="px-3 sm:px-4 py-2 sm:py-3"><span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${st.cls}`}>{t(st.key)}</span></td>
                   </tr>
                 )
               })}
               {paged.length === 0 && (
-                <tr><td colSpan="8" className="px-4 py-12 text-center text-text-muted">
+                <tr><td colSpan="8" className="px-3 sm:px-4 py-12 text-center text-text-muted">
                   <ClipboardList size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_orders')}
                 </td></tr>
               )}

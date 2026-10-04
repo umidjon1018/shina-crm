@@ -83,7 +83,7 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
             </tr>
           </thead>
           <tbody>
-            {shown.length === 0 && <tr><td colSpan={columns.length} className="px-4 py-10 text-center text-text-muted">{emptyText || t('rpt_empty')}</td></tr>}
+            {shown.length === 0 && <tr><td colSpan={columns.length} className="px-3 sm:px-4 py-10 text-center text-text-muted">{emptyText || t('rpt_empty')}</td></tr>}
             {shown.map((r, i) => (
               <tr key={r.id ?? i} className="border-b border-border/50 hover:bg-bg-tertiary/40">
                 {columns.map(c => (

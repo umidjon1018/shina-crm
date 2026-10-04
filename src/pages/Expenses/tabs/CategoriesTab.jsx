@@ -43,13 +43,13 @@ const CategoryFormModal = ({ kind, editData, onClose, onSaved }) => {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-bg-secondary">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border sticky top-0 bg-bg-secondary">
           <h3 className="font-syne font-bold text-lg text-text-primary">
             {editData ? t('fin_cat_edit') : kind === 'income' ? t('fin_cat_add_income') : t('fin_cat_add_expense')}
           </h3>
           <button onClick={onClose} className="p-1.5 hover:bg-bg-tertiary rounded-lg"><X size={18} className="text-text-secondary" /></button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="p-4 sm:p-5 space-y-4">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${colorCls(form.color)}`}><PreviewIcon size={22} /></div>
             <div className="flex-1 space-y-2">
@@ -89,7 +89,7 @@ const CategoryFormModal = ({ kind, editData, onClose, onSaved }) => {
             <div className="flex items-center gap-2 text-red-500 text-sm bg-red-500/10 px-3 py-2 rounded-lg"><AlertCircle size={15} /> {error}</div>
           )}
         </div>
-        <div className="flex gap-3 p-5 border-t border-border sticky bottom-0 bg-bg-secondary">
+        <div className="flex gap-3 p-4 sm:p-5 border-t border-border sticky bottom-0 bg-bg-secondary">
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary hover:bg-bg-tertiary text-sm font-medium">{t('cancel')}</button>
           <button onClick={submit} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-accent-red text-white font-semibold text-sm hover:opacity-90 disabled:opacity-50">
             {saving ? t('exp_form_saving') : editData ? t('save') : t('add')}
@@ -141,7 +141,7 @@ const CategoriesTab = () => {
           </button>
         </div>
         <div className="divide-y divide-border/50">
-          {list.length === 0 && <p className="px-4 py-6 text-center text-text-muted text-sm">{t('fin_no_categories')}</p>}
+          {list.length === 0 && <p className="px-4 py-4 sm:py-6 text-center text-text-muted text-sm">{t('fin_no_categories')}</p>}
           {list.map(cat => {
             const Icon = ICON_MAP[cat.icon] || MoreHorizontal
             return (
@@ -194,7 +194,7 @@ const CategoriesTab = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setConfirmDel(null)} />
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-5 space-y-4">
+              className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 p-4 sm:p-5 space-y-4">
               <h3 className="font-syne font-bold text-text-primary">{t('fin_cat_delete_title', { name: getCatLabel(confirmDel, t) })}</h3>
               <p className="text-text-secondary text-sm">
                 {confirmDel.usedCount ? t('fin_cat_delete_used', { count: confirmDel.usedCount }) : t('fin_cat_delete_unused')}

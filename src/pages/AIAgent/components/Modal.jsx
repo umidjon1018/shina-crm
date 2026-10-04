@@ -16,7 +16,7 @@ function Modal({ open, onClose, title, children }) {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-bg-primary border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-bg-primary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md shadow-2xl"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-text-primary">{title}</h3>

@@ -88,7 +88,7 @@ const ProfitTab = ({ ctx }) => {
   return (
           !isPrivileged ? <LockedTab /> : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div className="cursor-pointer" onClick={() => openModal('profitSalesTotalModal')}>
                   <StatCard icon={ShoppingCart} label={t('rep_profit_total_sales')} value={fmtUZS(profitStats.totalSalesAmt)} sub={t('rep_profit_selected_period')} />
                 </div>
@@ -109,8 +109,8 @@ const ProfitTab = ({ ctx }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-blue/40 transition-colors" onClick={() => openModal('breakEvenModal')}>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 cursor-pointer hover:border-accent-blue/40 transition-colors" onClick={() => openModal('breakEvenModal')}>
                   <p className="text-text-secondary text-sm font-medium mb-1">{t('rep_profit_breakeven')}</p>
                   <h3 className="text-xl font-syne font-bold text-text-primary mb-2">{fmtUZS(profitStats.breakEven)}</h3>
                   <div className="w-full bg-bg-tertiary rounded-full h-2 mb-2">
@@ -122,12 +122,12 @@ const ProfitTab = ({ ctx }) => {
                     <p className="text-xs font-bold text-accent-red">X {t('rep_profit_short', { value: fmtUZS(profitStats.breakEven - grossProfitAll) })}</p>
                   )}
                 </div>
-                <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-red/40 transition-colors" onClick={() => openModal('fixedExpModal')}>
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 cursor-pointer hover:border-accent-red/40 transition-colors" onClick={() => openModal('fixedExpModal')}>
                   <p className="text-text-secondary text-sm font-medium mb-1">{t('rep_profit_fixed_exp')}</p>
                   <h3 className="text-xl font-syne font-bold text-text-primary mb-1">{fmtUZS(profitStats.fixedExpenses)}</h3>
                   <p className="text-xs text-text-muted">{t('rep_profit_fixed_exp_hint')}</p>
                 </div>
-                <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-orange/40 transition-colors" onClick={() => openModal('varExpModal')}>
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 cursor-pointer hover:border-accent-orange/40 transition-colors" onClick={() => openModal('varExpModal')}>
                   <p className="text-text-secondary text-sm font-medium mb-1">{t('rep_profit_var_exp')}</p>
                   <h3 className="text-xl font-syne font-bold text-text-primary mb-1">{fmtUZS(profitStats.varExpenses)}</h3>
                   <p className="text-xs text-text-muted">{t('rep_profit_var_exp_hint')}</p>
@@ -137,8 +137,8 @@ const ProfitTab = ({ ctx }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-syne font-bold text-text-primary">{t('rep_profit_dynamics_title')}</h4>
@@ -163,7 +163,7 @@ const ProfitTab = ({ ctx }) => {
                   </div>
                 </div>
 
-                <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+                <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-syne font-bold text-text-primary">{t('rep_profit_exp_dist_title')}</h4>
@@ -194,7 +194,7 @@ const ProfitTab = ({ ctx }) => {
                 </div>
               </div>
 
-              <div className="bg-bg-secondary border border-border rounded-2xl p-6">
+              <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_profit_exp_trend_title')}</h4>
@@ -246,7 +246,7 @@ const ProfitTab = ({ ctx }) => {
                         <span className="text-text-muted">{filtered.length} {t('unit_pcs')} · {fmtUZS(totalAmt)}</span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                       {[...combinedChart].reverse().map(m => (
                         <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -284,7 +284,7 @@ const ProfitTab = ({ ctx }) => {
                       </div>
                     </div>
                     <MonthlyDynamicsChart data={combinedChart} dataKey="sotuv" color={C.blue} formatter={v => fmtUZS(v)} name="Yangi sotuv" />
-                    <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_profit_sales_list')}</p>
+                    <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_profit_sales_list')}</p>
                     <ModalTable
                       data={filtered}
                       pageSize={10}
@@ -320,7 +320,7 @@ const ProfitTab = ({ ctx }) => {
                         {t('wh_in_total')}: {(() => { const total = filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0); return <span className={`font-bold ${total >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(total)}</span> })()}
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                       {[...profitStats.monthlyChart].reverse().map(m => (
                         <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -350,7 +350,7 @@ const ProfitTab = ({ ctx }) => {
                       const top5 = Object.entries(prodMap).sort((a,b) => b[1].profit-a[1].profit).slice(0,5)
                       if (top5.length === 0) return null
                       return (
-                        <div className="mb-6 mt-6">
+                        <div className="mb-4 sm:mb-6 mt-4 sm:mt-6">
                           <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_profit_top5')}</p>
                           <div className="space-y-2">
                             {top5.map(([name, v], i) => (
@@ -371,7 +371,7 @@ const ProfitTab = ({ ctx }) => {
                       )
                     })()}
 
-                    <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_profit_gross_list')}</p>
+                    <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_profit_gross_list')}</p>
                     <ModalTable
                       data={filtered}
                       pageSize={10}
@@ -429,7 +429,7 @@ const ProfitTab = ({ ctx }) => {
                         {t('wh_in_total')}: <span className="font-bold text-accent-red">{fmtUZS(totalOp)}</span>
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                       {profitStats.monthlyChart.map(m => (
                         <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -439,7 +439,7 @@ const ProfitTab = ({ ctx }) => {
                       ))}
                     </div>
                     <MonthlyDynamicsChart data={profitStats.monthlyChart} dataKey="xarajat" color={C.red} formatter={v => fmtUZS(v)} name={t('rep_chart_expense')} />
-                    <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_profit_exp_list')}</p>
+                    <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_profit_exp_list')}</p>
                     <ModalTable
                       data={filteredExp.sort((a,b) => (b.date||'').localeCompare(a.date||''))}
                       pageSize={10}
@@ -455,9 +455,9 @@ const ProfitTab = ({ ctx }) => {
                       ]}
                     />
                     {(totalInventory > 0 || totalCapReturn > 0) && (
-                      <div className="mt-6 border border-border/50 rounded-xl p-4 bg-bg-tertiary/50">
+                      <div className="mt-4 sm:mt-6 border border-border/50 rounded-xl p-4 bg-bg-tertiary/50">
                         <p className="text-text-muted text-xs font-medium mb-3">{t('rep_profit_extra_outflow')}</p>
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-3 sm:gap-6">
                           {totalInventory > 0 && (
                             <div>
                               <p className="text-text-muted text-xs">{t('rep_profit_inventory_paid')}</p>
@@ -491,7 +491,7 @@ const ProfitTab = ({ ctx }) => {
                         <span className="text-text-muted">{t('rep_profit_total_net_prefix')} <span className="font-bold" style={{ color: (profitStats.netProfit + usedData.totalProfit)>=0?C.green:C.red }}>{fmtUZS(profitStats.netProfit + usedData.totalProfit)}</span></span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
                       {profitStats.monthlyChart.map(m => (
                         <div key={m.month} className="bg-bg-tertiary rounded-xl p-4">
                           <p className="text-text-muted text-xs mb-1">{m.name}</p>
@@ -501,7 +501,7 @@ const ProfitTab = ({ ctx }) => {
                       ))}
                     </div>
                     <MonthlyDynamicsChart data={profitStats.monthlyChart} dataKey="sof" color={C.green} formatter={v => fmtUZS(v)} name={t('col_net_profit')} />
-                    <p className="text-text-secondary text-sm font-medium mt-6 mb-3">{t('rep_profit_daily_breakdown')}</p>
+                    <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_profit_daily_breakdown')}</p>
                     <ModalTable
                       data={filtered}
                       pageSize={10}
@@ -588,13 +588,13 @@ const ProfitTab = ({ ctx }) => {
                       {modalFilter === 'all' ? t('rep_profit_filter_all_time') : monthNames_BE[modalFilter]}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-bg-tertiary rounded-xl p-5">
+                  <div className="grid grid-cols-2 gap-4 mb-4 sm:mb-6">
+                    <div className="bg-bg-tertiary rounded-xl p-4 sm:p-5">
                       <p className="text-text-muted text-xs mb-1">{t('rep_profit_breakeven')}</p>
                       <p className="font-syne font-bold text-accent-blue text-2xl">{fmtUZS(filtBreakEven)}</p>
                       <p className="text-text-muted text-xs mt-1">{t('rep_profit_total_expenses_hint')}</p>
                     </div>
-                    <div className="bg-bg-tertiary rounded-xl p-5">
+                    <div className="bg-bg-tertiary rounded-xl p-4 sm:p-5">
                       <p className="text-text-muted text-xs mb-1">{t('rep_profit_combined_label')}</p>
                       <p className="font-syne font-bold text-text-primary text-2xl">{fmtUZS(filtSalesAmt)}</p>
                       <p className={`text-xs mt-1 font-bold ${filtSalesAmt >= filtBreakEven ? 'text-accent-green' : 'text-accent-red'}`}>
@@ -604,7 +604,7 @@ const ProfitTab = ({ ctx }) => {
                       </p>
                     </div>
                   </div>
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-6">
                     <p className="text-text-secondary text-sm font-medium mb-2">{t('rep_profit_coverage_level')}</p>
                     <div className="w-full bg-bg-tertiary rounded-full h-5">
                       <div className="h-5 rounded-full transition-all flex items-center justify-end pr-2"
@@ -623,11 +623,11 @@ const ProfitTab = ({ ctx }) => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">{t('rep_profit_breakeven_col')}</th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">{t('rep_chart_sales')}</th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">{t('rep_profit_gross_label')}</th>
-                          <th className="text-center px-4 py-3 font-medium text-text-secondary">{t('col_status')}</th>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_profit_breakeven_col')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_chart_sales')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_profit_gross_label')}</th>
+                          <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('col_status')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
@@ -636,14 +636,14 @@ const ProfitTab = ({ ctx }) => {
                           if (!mData) return null
                           return (
                             <tr key={m} className="hover:bg-bg-tertiary transition-colors">
-                              <td className="px-4 py-3 font-medium text-text-primary">{monthNames_BE[m]}</td>
-                              <td className="px-4 py-3 text-right text-text-secondary">{fmtUZS(mData.xarajat)}</td>
-                              <td className="px-4 py-3 text-right font-bold text-text-primary">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{monthNames_BE[m]}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-secondary">{fmtUZS(mData.xarajat)}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">
                                 {fmtUZS(mData.sotuv_total)}
                                 {mData.sotuv_bu > 0 && <span className="block text-[10px] text-amber-400 font-normal">+{fmtUZS(mData.sotuv_bu)} B/U</span>}
                               </td>
-                              <td className="px-4 py-3 text-right font-bold text-accent-green">{fmtUZS(mData.foyda_total || 0)}</td>
-                              <td className="px-4 py-3 text-center">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-accent-green">{fmtUZS(mData.foyda_total || 0)}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${mData.foyda_total >= mData.xarajat ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
                                   {mData.foyda_total >= mData.xarajat ? t('rep_profit_status_ok') : t('rep_profit_status_fail')}
                                 </span>
@@ -663,7 +663,7 @@ const ProfitTab = ({ ctx }) => {
                 const fixedList = MOCK_EXPENSES.filter(e => e.expenseType === 'fixed')
                 return (
                   <Modal open title={t('rep_profit_fixed_exp')} subtitle={t('rep_modal_fixed_exp_sub')} size="lg" onClose={closeModal}>
-                    <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="grid grid-cols-2 gap-3 mb-4 sm:mb-6">
                       <div className="bg-bg-tertiary rounded-xl p-4">
                         <p className="text-text-muted text-xs mb-1">{t('rep_profit_current_period')}</p>
                         <p className="font-syne font-bold text-accent-red text-xl">{fmtUZS(profitStats.fixedExpenses)}</p>
@@ -674,9 +674,9 @@ const ProfitTab = ({ ctx }) => {
                       </div>
                     </div>
                     {/* Oylik dinamika */}
-                    <div className="mb-6">
+                    <div className="mb-4 sm:mb-6">
                       <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_profit_monthly_fixed')}</p>
-                      <div className="space-y-2 overflow-y-auto max-h-[200px] mb-6">
+                      <div className="space-y-2 overflow-y-auto max-h-[200px] mb-4 sm:mb-6">
                         {sortMonths(profitStats.expByMonth).map(m => (
                           <div key={m.month} className="flex items-center justify-between bg-bg-tertiary rounded-xl px-4 py-3">
                             <span className="font-medium text-text-primary">{m.name}</span>
@@ -721,7 +721,7 @@ const ProfitTab = ({ ctx }) => {
                       <MonthYearFilter value={varMonthFilter} onChange={setVarMonthFilter} />
                       <span className="text-text-muted text-xs">{t('wh_in_total')}: <span className="font-bold text-accent-orange">{fmtUZS(varTotal)}</span></span>
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-4 sm:mb-6">
                       <p className="text-text-secondary text-sm font-medium mb-3">{t('rep_profit_cat_dist')}</p>
                       <div className="space-y-2">
                         {catData.map(([name, val], i) => {
@@ -761,7 +761,7 @@ const ProfitTab = ({ ctx }) => {
               {modal === 'profitDynamicsModal' && (
                 <Modal open title={t('rep_modal_profit_dyn_title')} subtitle={t('rep_modal_profit_dyn_sub')} size="xl" onClose={closeModal}>
                   {/* Yillik summary */}
-                  <div className="grid grid-cols-4 gap-3 mb-6">
+                  <div className="grid grid-cols-4 gap-3 mb-4 sm:mb-6">
                     <div className="bg-bg-tertiary rounded-xl p-4">
                       <p className="text-text-muted text-xs mb-1">{t('rep_profit_total_sales_label')}</p>
                       <p className="font-syne font-bold text-lg" style={{ color: C.blue }}>
@@ -796,7 +796,7 @@ const ProfitTab = ({ ctx }) => {
                     </div>
                   </div>
                   {/* Grafik */}
-                  <div className="h-[280px] w-full mb-6">
+                  <div className="h-[280px] w-full mb-4 sm:mb-6">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={combinedMonthlyChart}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
@@ -824,27 +824,27 @@ const ProfitTab = ({ ctx }) => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.blue }}>Yangi sotuv</th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: '#f59e0b' }}>B/U sotuv</th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">Jami sotuv</th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.red }}>{t('rep_chart_expense')}</th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.green }}>{t('rep_profit_gross_label')}</th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.teal }}>{t('col_net_profit')}</th>
-                          <th className="text-center px-4 py-3 font-medium text-text-secondary">{t('rep_profit_growth_col')}</th>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.blue }}>Yangi sotuv</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: '#f59e0b' }}>B/U sotuv</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">Jami sotuv</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.red }}>{t('rep_chart_expense')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.green }}>{t('rep_profit_gross_label')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.teal }}>{t('col_net_profit')}</th>
+                          <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_profit_growth_col')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
                         {sortMonths(combinedMonthlyChart).map(m => (
                           <tr key={m.month} className="hover:bg-bg-tertiary transition-colors">
-                            <td className="px-4 py-3 font-medium text-text-primary">{m.name}</td>
-                            <td className="px-4 py-3 text-right text-accent-blue">{fmtUZS(m.sotuv)}</td>
-                            <td className="px-4 py-3 text-right text-amber-400">{fmtUZS(m.sotuv_bu)}</td>
-                            <td className="px-4 py-3 text-right font-bold text-text-primary">{fmtUZS(m.sotuv_total)}</td>
-                            <td className="px-4 py-3 text-right text-accent-red">{fmtUZS(m.xarajat)}</td>
-                            <td className="px-4 py-3 text-right text-accent-green font-bold">{fmtUZS(m.foyda_total)}</td>
-                            <td className="px-4 py-3 text-right font-bold" style={{ color: m.sof_total>=0?C.teal:C.red }}>{fmtUZS(m.sof_total)}</td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{m.name}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-blue">{fmtUZS(m.sotuv)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-amber-400">{fmtUZS(m.sotuv_bu)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">{fmtUZS(m.sotuv_total)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-red">{fmtUZS(m.xarajat)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-accent-green font-bold">{fmtUZS(m.foyda_total)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold" style={{ color: m.sof_total>=0?C.teal:C.red }}>{fmtUZS(m.sof_total)}</td>
+                            <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                               {m.growthSof !== null
                                 ? <GrowthBadge current={m.sof} previous={m.sof/(1+m.growthSof/100)} />
                                 : <span className="text-text-muted text-xs">—</span>
@@ -877,7 +877,7 @@ const ProfitTab = ({ ctx }) => {
                       <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                       <span className="text-text-muted text-xs">{t('wh_in_total')}: <span className="font-bold text-accent-red">{fmtUZS(total)}</span></span>
                     </div>
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-3 mb-4 sm:mb-6">
                       {catData.map(([name, val], i) => {
                         const pct = total > 0 ? Math.round(val/total*100) : 0
                         return (
@@ -909,7 +909,7 @@ const ProfitTab = ({ ctx }) => {
               {/* === MODAL: Xarajat trendi === */}
               {modal === 'expTrendModal' && (
                 <Modal open title={t('rep_modal_exp_trend_title')} subtitle={t('rep_modal_exp_trend_sub')} size="xl" onClose={closeModal}>
-                  <div className="h-[280px] w-full mb-6">
+                  <div className="h-[280px] w-full mb-4 sm:mb-6">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={profitStats.expByMonth}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
@@ -933,12 +933,12 @@ const ProfitTab = ({ ctx }) => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-bg-tertiary border-b border-border">
-                          <th className="text-left px-4 py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.red }}>{t('rep_profit_fixed_short')}</th>
-                          <th className="text-right px-4 py-3 font-medium" style={{ color: C.orange }}>{t('rep_profit_var_short')}</th>
-                          <th className="text-right px-4 py-3 font-medium text-text-secondary">{t('wh_in_total')}</th>
-                          <th className="text-center px-4 py-3 font-medium text-text-secondary">{t('rep_profit_fixed_short')} %</th>
-                          <th className="text-center px-4 py-3 font-medium" style={{ color: C.orange }}>{t('rep_profit_var_short')} %</th>
+                          <th className="text-left px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary flex items-center gap-2">{t('rep_profit_month_col')} <MonthSortBtn /></th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.red }}>{t('rep_profit_fixed_short')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.orange }}>{t('rep_profit_var_short')}</th>
+                          <th className="text-right px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('wh_in_total')}</th>
+                          <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-secondary">{t('rep_profit_fixed_short')} %</th>
+                          <th className="text-center px-3 sm:px-4 py-2 sm:py-3 font-medium" style={{ color: C.orange }}>{t('rep_profit_var_short')} %</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
@@ -948,16 +948,16 @@ const ProfitTab = ({ ctx }) => {
                           const varPct = total > 0 ? 100 - fixedPct : 0
                           return (
                             <tr key={m.month} className="hover:bg-bg-tertiary transition-colors">
-                              <td className="px-4 py-3 font-medium text-text-primary">{m.name}</td>
-                              <td className="px-4 py-3 text-right" style={{ color: C.red }}>{fmtUZS(m.doimiy)}</td>
-                              <td className="px-4 py-3 text-right" style={{ color: C.orange }}>{fmtUZS(m.ozgaruvchan)}</td>
-                              <td className="px-4 py-3 text-right font-bold text-text-primary">{fmtUZS(total)}</td>
-                              <td className="px-4 py-3 text-center">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{m.name}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right" style={{ color: C.red }}>{fmtUZS(m.doimiy)}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right" style={{ color: C.orange }}>{fmtUZS(m.ozgaruvchan)}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">{fmtUZS(total)}</td>
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                                 <span className="font-bold text-sm" style={{ color: fixedPct>70?C.red:fixedPct>50?C.orange:C.green }}>
                                   {fixedPct}%
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-center">
+                              <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
                                 <span className="font-bold text-sm" style={{ color: varPct>70?C.orange:C.green }}>
                                   {varPct}%
                                 </span>

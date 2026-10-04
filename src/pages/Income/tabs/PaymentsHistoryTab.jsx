@@ -91,32 +91,32 @@ const PaymentsHistoryTab = ({ ctx }) => {
           <table className="w-full text-sm min-w-[820px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
               <tr>
-                <th className="px-4 py-3 text-left">{t('col_date')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_supplier')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_document')}</th>
-                <th className="px-4 py-3 text-left">{t('sup_description')}</th>
-                <th className="px-4 py-3 text-right">USD</th>
-                <th className="px-4 py-3 text-right">{t('col_rate')}</th>
-                <th className="px-4 py-3 text-right">UZS</th>
-                <th className="px-4 py-3 text-left">{t('inc_pay_method')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('col_date')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_supplier')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_document')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('sup_description')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">USD</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">{t('col_rate')}</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-right">UZS</th>
+                <th className="px-3 sm:px-4 py-2 sm:py-3 text-left">{t('inc_pay_method')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {paged.map(r => (
                 <tr key={r.key} className="hover:bg-bg-tertiary/40">
-                  <td className="px-4 py-3 text-text-muted whitespace-nowrap">{fmtDate(r.date)}</td>
-                  <td className="px-4 py-3 font-medium text-text-primary">{supName(r.supplierId)}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted whitespace-nowrap">{fmtDate(r.date)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 font-medium text-text-primary">{supName(r.supplierId)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                     <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${r.kind === 'order' ? 'bg-accent-blue/10 text-accent-blue' : 'bg-bg-tertiary text-text-secondary'}`}>{r.doc}</span>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary text-xs">{r.what}{r.note ? <span className="text-text-muted"> · {r.note}</span> : null}</td>
-                  <td className="px-4 py-3 text-right font-bold text-text-primary">{usd(r.amountUSD)}</td>
-                  <td className="px-4 py-3 text-right text-text-muted">{Number(r.usdRate).toLocaleString('uz-UZ')}</td>
-                  <td className="px-4 py-3 text-right">{Math.round(r.amountUZS).toLocaleString('uz-UZ')}</td>
-                  <td className="px-4 py-3 text-xs">{payTypeLabel(t, r.type)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-secondary text-xs">{r.what}{r.note ? <span className="text-text-muted"> · {r.note}</span> : null}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right font-bold text-text-primary">{usd(r.amountUSD)}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-muted">{Number(r.usdRate).toLocaleString('uz-UZ')}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">{Math.round(r.amountUZS).toLocaleString('uz-UZ')}</td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs">{payTypeLabel(t, r.type)}</td>
                 </tr>
               ))}
-              {paged.length === 0 && <tr><td colSpan="8" className="px-4 py-12 text-center text-text-muted"><History size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_entries')}</td></tr>}
+              {paged.length === 0 && <tr><td colSpan="8" className="px-3 sm:px-4 py-12 text-center text-text-muted"><History size={32} className="mx-auto mb-2 opacity-40" />{t('sup_no_entries')}</td></tr>}
             </tbody>
           </table>
         </div>

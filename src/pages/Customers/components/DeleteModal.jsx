@@ -48,13 +48,13 @@ const DeleteModal = ({ ctx }) => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-sm bg-bg-primary border border-border rounded-3xl p-8 shadow-2xl text-center"
+              className="relative w-full max-w-sm bg-bg-primary border border-border rounded-3xl p-5 sm:p-8 shadow-2xl text-center"
             >
               <div className="w-14 h-14 bg-accent-red/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <Trash2 size={28} className="text-accent-red" />
               </div>
               <h3 className="text-xl font-syne font-extrabold text-text-primary mb-2">Mijozni o'chirish</h3>
-              <p className="text-sm text-text-secondary mb-6">
+              <p className="text-sm text-text-secondary mb-4 sm:mb-6">
                 <span className="font-bold text-text-primary">{deleteTarget.name}</span> mijozi o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
               </p>
               <div className="flex gap-3">
