@@ -7,7 +7,8 @@ import {
   Package, Truck, AlertCircle, Edit3, Search, Plus,
   DollarSign, Clock, ChevronDown, ChevronUp, Check, X,
   Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet,
-  BarChart3, TrendingUp, ChevronLeft, ChevronRight
+  BarChart3, TrendingUp, ChevronLeft, ChevronRight,
+  ClipboardList, Scale, History, Undo2
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -24,6 +25,11 @@ import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPay
 import BatchesTab   from './tabs/BatchesTab'
 import SuppliersTab from './tabs/SuppliersTab'
 import DebtsTab     from './tabs/DebtsTab'
+import OrdersTab from './tabs/OrdersTab'
+import SettlementsTab from './tabs/SettlementsTab'
+import PaymentsHistoryTab from './tabs/PaymentsHistoryTab'
+import SupplierReturnsTab from './tabs/SupplierReturnsTab'
+import { getPurchaseOrders, getSupplierReturns } from '../../api/supplierOpsService'
 import UnitInput from '../../components/UnitInput'
 
 const Income = () => {
@@ -39,6 +45,8 @@ const Income = () => {
   const [MOCK_PRODUCTS, setMockProducts] = useState([])
   const [MOCK_ITEMS, setMockItems] = useState([])
   const [suppliers, setSuppliers] = useState([])
+  const [orders, setOrders] = useState([])
+  const [returns, setReturns] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('batches')
 
@@ -98,20 +106,34 @@ const Income = () => {
   const PAGE_SIZE = 15
   const [deletePaymentConfirm, setDeletePaymentConfirm] = useState(null)
 
+  const normalizeBatches = (b) => b.map(x => {
+    if ((x.debtUSD || 0) <= 0) return { ...x, paymentStatus: 'paid' }
+    if ((x.paidUSD || 0) > 0) return { ...x, paymentStatus: 'partial' }
+    const status = x.paymentStatus === 'credit' ? 'credit' : 'unpaid'
+    return { ...x, paymentStatus: status }
+  })
+
   useEffect(() => {
     Promise.all([getIncomeBatches(), getSuppliers(), getProducts(), getItems()]).then(([b, s, prods, items]) => {
       setMockProducts(prods)
       setMockItems(items)
-      const normalized = b.map(x => {
-        if ((x.debtUSD || 0) <= 0) return { ...x, paymentStatus: 'paid' }
-        if ((x.paidUSD || 0) > 0) return { ...x, paymentStatus: 'partial' }
-        const status = x.paymentStatus === 'credit' ? 'credit' : 'unpaid'
-        return { ...x, paymentStatus: status }
-      })
-      setBatches(normalized)
+      setBatches(normalizeBatches(b))
       setSuppliers(s)
     }).catch((e) => { console.error('Income load error:', e?.response?.data || e?.message || e) }).finally(() => setLoading(false))
+    Promise.all([getPurchaseOrders(), getSupplierReturns()])
+      .then(([o, r]) => { setOrders(o); setReturns(r) })
+      .catch((e) => { console.error('Supplier ops load error:', e?.response?.data || e?.message || e) })
   }, [])
+
+  const refreshAll = async () => {
+    try {
+      const [b, o, r] = await Promise.all([getIncomeBatches(), getPurchaseOrders(), getSupplierReturns()])
+      setBatches(normalizeBatches(b))
+      setOrders(o)
+      setReturns(r)
+    } catch (e) { console.error('Income refresh error:', e?.response?.data || e?.message || e) }
+    bump()
+  }
 
   const shopBatches = selectedShopId === 'all' ? batches : batches.filter(b => b.shopId === selectedShopId)
 
@@ -203,6 +225,10 @@ const Income = () => {
     { id: 'batches', label: t('inc_tab_batches'), icon: Package },
     { id: 'suppliers', label: t('suppliers'), icon: Truck },
     { id: 'debts', label: t('inc_tab_debts'), icon: AlertCircle },
+    { id: 'orders', label: t('sup_tab_orders'), icon: ClipboardList },
+    { id: 'settlements', label: t('sup_tab_settlements'), icon: Scale },
+    { id: 'payments', label: t('sup_tab_payments'), icon: History },
+    { id: 'returns', label: t('sup_tab_returns'), icon: Undo2 },
   ]
 
 
@@ -250,6 +276,7 @@ const Income = () => {
     getSupplierName,
     inventoryCheck, allMatch,
     MOCK_PRODUCTS,
+    orders, setOrders, returns, refreshAll,
   }
 
   return (
@@ -300,12 +327,12 @@ const Income = () => {
       </div>
 
       {/* TABS NAVIGATION */}
-      <div className="flex gap-2 p-1 bg-bg-secondary border border-border rounded-2xl w-fit">
+      <div className="flex gap-2 p-1 bg-bg-secondary border border-border rounded-2xl w-fit max-w-full overflow-x-auto no-scrollbar">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id
               ? 'bg-bg-tertiary text-text-primary shadow-sm'
               : 'text-text-muted hover:text-text-primary'
               }`}
@@ -321,6 +348,10 @@ const Income = () => {
         {activeTab === 'batches'   && <BatchesTab   ctx={ctx} />}
         {activeTab === 'suppliers' && <SuppliersTab ctx={ctx} />}
         {activeTab === 'debts'     && <DebtsTab     ctx={ctx} />}
+        {activeTab === 'orders'    && <OrdersTab    ctx={ctx} />}
+        {activeTab === 'settlements' && <SettlementsTab ctx={ctx} />}
+        {activeTab === 'payments'  && <PaymentsHistoryTab ctx={ctx} />}
+        {activeTab === 'returns'   && <SupplierReturnsTab ctx={ctx} />}
       {/* MODALS */}
       <AnimatePresence>
         {/* Payment Modal */}
@@ -518,6 +549,22 @@ const Income = () => {
                   />
                 </div>
                 <div>
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('sup_contact_person')}</label>
+                  <input
+                    defaultValue={editingSupplier?.contactPerson}
+                    id="supp_contact_person"
+                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('col_note')}</label>
+                  <input
+                    defaultValue={editingSupplier?.notes}
+                    id="supp_notes"
+                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-blue"
+                  />
+                </div>
+                <div>
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('inc_contract_amount')} ({som})</label>
                   <input
                     type="number"
@@ -606,6 +653,8 @@ const Income = () => {
                     inn: document.getElementById('supp_inn').value,
                     contractNumber: document.getElementById('supp_contract').value,
                     address: document.getElementById('supp_address').value,
+                    contactPerson: document.getElementById('supp_contact_person').value,
+                    notes: document.getElementById('supp_notes').value,
                     contractAmount: parseFloat(document.getElementById('supp_contract_amount')?.value) || 0,
                   }
 
@@ -1471,11 +1520,9 @@ const Income = () => {
                                       newContractAmount: null,
                                       newContractActivatedAt: null,
                                     }
-                                    const res = await updateSupplier(showSupplierDetail.id, updated)
-                                    if (res.success) {
-                                      setSuppliers(prev => prev.map(s => s.id === res.supplier.id ? res.supplier : s))
-                                      setShowSupplierDetail(res.supplier)
-                                    }
+                                    const saved = await updateSupplier(showSupplierDetail.id, updated)
+                                    setSuppliers(prev => prev.map(s => s.id === saved.id ? saved : s))
+                                    setShowSupplierDetail(saved)
                                   }}
                                   className="px-3 py-2 bg-accent-green/20 text-accent-green text-xs font-bold rounded-xl hover:bg-accent-green/30 transition-colors"
                                 >
@@ -1680,12 +1727,10 @@ const Income = () => {
                       newContractNumber: null,
                       newContractAmount: null,
                     }
-                    const res = await updateSupplier(contractDialog.supplier.id, data)
-                    if (res.success) {
-                      setSuppliers(prev => prev.map(s => s.id === res.supplier.id ? res.supplier : s))
-                      setContractDialog(null)
-                      setEditingSupplier(null)
-                    }
+                    const saved = await updateSupplier(contractDialog.supplier.id, data)
+                    setSuppliers(prev => prev.map(s => s.id === saved.id ? saved : s))
+                    setContractDialog(null)
+                    setEditingSupplier(null)
                   }}
                   className="py-3 bg-accent-red/10 border border-accent-red/30 text-accent-red rounded-2xl font-bold hover:bg-accent-red/20 transition-colors"
                 >
@@ -1704,12 +1749,10 @@ const Income = () => {
                       newContractAmount: contractDialog.newContractAmount,
                       newContractActivatedAt: activatedAt,
                     }
-                    const res = await updateSupplier(contractDialog.supplier.id, data)
-                    if (res.success) {
-                      setSuppliers(prev => prev.map(s => s.id === res.supplier.id ? res.supplier : s))
-                      setContractDialog(null)
-                      setEditingSupplier(null)
-                    }
+                    const saved = await updateSupplier(contractDialog.supplier.id, data)
+                    setSuppliers(prev => prev.map(s => s.id === saved.id ? saved : s))
+                    setContractDialog(null)
+                    setEditingSupplier(null)
                   }}
                   className="py-3 bg-accent-green/10 border border-accent-green/30 text-accent-green rounded-2xl font-bold hover:bg-accent-green/20 transition-colors"
                 >

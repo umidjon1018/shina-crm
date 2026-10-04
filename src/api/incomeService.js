@@ -23,6 +23,8 @@ const mapBatch = (b) => ({
   paymentStatus: b.payment_status || 'unpaid',
   paidUSD: Number(b.paid_usd) || 0,
   debtUSD: Number(b.debt_usd) || 0,
+  returnedUSD: Number(b.returned_usd) || 0,
+  orderId: b.order_id ? String(b.order_id) : null,
   dueDate: b.due_date || null,
   notes: b.notes || null,
   promoDiscount: b.promo_discount ? Number(b.promo_discount) : null,
@@ -43,6 +45,7 @@ const mapBatch = (b) => ({
     type: p.type || 'cash_uzs',
     note: p.note || '',
     noteRu: p.note_ru || '',
+    orderPaymentId: p.order_payment_id ? String(p.order_payment_id) : null,
   })),
 })
 
@@ -119,10 +122,15 @@ const mapSupplier = (s) => ({
   contractAmount: Number(s.contract_amount) || 0,
   isActive: s.is_active,
   createdAt: s.created_at || '',
+  ...(s.contract_meta || {}),
   // mock compat
   totalBatches: 0,
   totalDebtUSD: 0,
 })
+
+const CONTRACT_META_KEYS = ['contractStatus', 'contractActivatedAt', 'previousContracts', 'pendingRemaining',
+  'newContractNumber', 'newContractAmount', 'newContractActivatedAt']
+const pickContractMeta = (d) => Object.fromEntries(CONTRACT_META_KEYS.map(k => [k, d[k] ?? null]))
 
 export const getSuppliers = async () => {
   const { data } = await api.get('/api/suppliers')
@@ -153,6 +161,7 @@ export const updateSupplier = async (id, supplierData) => {
     inn: supplierData.inn,
     contract_number: supplierData.contractNumber,
     contract_amount: supplierData.contractAmount || null,
+    ...('contractStatus' in supplierData ? { contract_meta: pickContractMeta(supplierData) } : {}),
   })
   return mapSupplier(data)
 }

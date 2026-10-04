@@ -96,6 +96,12 @@ const SuppliersTab = ({ ctx }) => {
                         <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('inc_supplier_inn')}</p>
                         <p className="text-text-primary font-medium">{s.inn}</p>
                       </div>
+                      {s.contactPerson && (
+                        <div className="col-span-2 space-y-1">
+                          <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('sup_contact_person')}</p>
+                          <p className="text-text-primary font-medium">{s.contactPerson}</p>
+                        </div>
+                      )}
                       <div className="col-span-2 space-y-1">
                         <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('col_address')}</p>
                         <p className="text-text-primary font-medium">{s.address}</p>
