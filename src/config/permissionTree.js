@@ -33,6 +33,7 @@ export const PERMISSION_TREE = [
       },
       { id: 'sales.profit', label: 'Foyda', denyable: true },
       { id: 'sales.cash_expense', label: 'Kassadan xarajat' },
+      { id: 'sales.gift_cards', label: "Sovg'a sertifikati sotish" },
     ]
   },
   {
@@ -66,6 +67,16 @@ export const PERMISSION_TREE = [
   },
   { id: 'ai_agent', label: 'AI Agent' },
   { id: 'customers', label: 'Mijozlar' },
+  {
+    id: 'marketing', label: 'Marketing', children: [
+      { id: 'marketing.promotions', label: 'Aksiyalar' },
+      { id: 'marketing.codes', label: 'Promokodlar va vaucherlar' },
+      { id: 'marketing.gift_cards', label: "Sovg'a sertifikatlari" },
+      { id: 'marketing.sms', label: 'SMS xabarlar' },
+      { id: 'marketing.birthdays', label: "Tug'ilgan kunlar" },
+      { id: 'marketing.settings', label: 'SMS sozlamalari' },
+    ]
+  },
   {
     id: 'management', label: 'Boshqaruv', children: [
       { id: 'management.notifications', label: 'Ogohlantirishlar' },

@@ -21,7 +21,8 @@ import {
   BarChart2,
   Pencil,
   Eye,
-  EyeOff
+  EyeOff,
+  Megaphone
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -49,6 +50,7 @@ const PAGE_KEYS = {
   '/customers': 'customers',
   '/income': 'income',
   '/expenses': 'expenses',
+  '/marketing': 'marketing',
   '/reports': 'reports',
   '/ai-agent': 'ai_agent',
   '/management': 'management',
@@ -266,7 +268,8 @@ export const MainLayout = () => {
           {/* Trade */}
           {((hasPermission('warehouse') && !hidden.includes('warehouse')) ||
             (hasPermission('sales') && !hidden.includes('sales')) ||
-            (hasPermission('customers') && !hidden.includes('customers'))) && (
+            (hasPermission('customers') && !hidden.includes('customers')) ||
+            (hasPermission('marketing') && !hidden.includes('marketing'))) && (
             <SidebarSection label={t('nav_trade')}>
               {hasPermission('warehouse') && !hidden.includes('warehouse') && (
                 <SidebarItem to="/warehouse" icon={Package} label={getSlLabel('warehouse') || t('warehouse')} isActive={isActive('/warehouse')} onClick={closeSidebar} replace={isSidebarOpen} />
@@ -276,6 +279,9 @@ export const MainLayout = () => {
               )}
               {hasPermission('customers') && !hidden.includes('customers') && (
                 <SidebarItem to="/customers" icon={Users} label={getSlLabel('customers') || t('customers')} isActive={isActive('/customers')} onClick={closeSidebar} replace={isSidebarOpen} />
+              )}
+              {hasPermission('marketing') && !hidden.includes('marketing') && (
+                <SidebarItem to="/marketing" icon={Megaphone} label={getSlLabel('marketing') || t('mkt_page_title')} isActive={isActive('/marketing')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
             </SidebarSection>
           )}

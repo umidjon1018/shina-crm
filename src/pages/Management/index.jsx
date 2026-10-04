@@ -33,7 +33,6 @@ import NotificationsTab from './tabs/NotificationsTab'
 import ProductsTab      from './tabs/ProductsTab'
 import EmployeesTab     from './tabs/EmployeesTab'
 import DiscountsTab     from './tabs/DiscountsTab'
-import PromotionsTab    from './tabs/PromotionsTab'
 import SettingsTab      from './tabs/SettingsTab'
 import BundlesTab      from './tabs/BundlesTab'
 
@@ -51,7 +50,7 @@ export const Management = () => {
     // URL dan tab parametrini o'qish
     const params = new URLSearchParams(window.location.search)
     const tab = params.get('tab')
-    const validTabs = ['notifications','products','employees','discounts','promotions','bundles','settings']
+    const validTabs = ['notifications','products','employees','discounts','bundles','settings']
     return validTabs.includes(tab) ? tab : 'notifications'
   })
   const [filterType, setFilterType]   = useState('all')
@@ -570,7 +569,6 @@ export const Management = () => {
         {activeTab === 'products'      && <ProductsTab ctx={ctx} />}
         {activeTab === 'employees'     && <EmployeesTab ctx={ctx} />}
         {activeTab === 'discounts'     && <DiscountsTab ctx={ctx} />}
-        {activeTab === 'promotions'    && <PromotionsTab ctx={ctx} />}
         {activeTab === 'bundles'       && <BundlesTab ctx={ctx} />}
         {activeTab === 'settings'      && <SettingsTab ctx={ctx} />}
       </AnimatePresence>

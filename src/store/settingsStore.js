@@ -130,7 +130,7 @@ export const useSettingsStore = create(
       // Har bir rol uchun belgilangan (checked) node id'lar ro'yxati.
       // Agar parent id checked bo'lsa — uning barcha avlodlari ham ruxsat etilgan hisoblanadi.
       roleAccessTrees: {
-        manager:     ['dashboard','warehouse','sales','income','expenses','reports','ai_agent','customers','management'],
+        manager:     ['dashboard','warehouse','sales','income','expenses','reports','ai_agent','customers','management','marketing'],
         seller:      ['dashboard','warehouse','sales','ai_agent','customers'],
         storekeeper: ['dashboard','warehouse','ai_agent'],
         technician:  ['dashboard','warehouse','ai_agent'],

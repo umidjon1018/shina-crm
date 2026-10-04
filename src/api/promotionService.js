@@ -1,17 +1,39 @@
 import api from './client'
 
 const map = (r) => ({
+  ...r,
   id: String(r.id),
-  name: r.name,
-  type: r.type || 'category',
-  targetId: r.target_id ?? r.targetId ?? null,
-  discountPercent: Number(r.discount_percent ?? r.discountPercent) || 0,
-  minQty: Number(r.min_qty ?? r.minQty) || 1,
-  startDate: r.start_date ?? r.startDate ?? null,
-  endDate: r.end_date ?? r.endDate ?? null,
-  isActive: r.is_active ?? r.isActive ?? true,
-  shopId: r.shop_id ?? r.shopId ?? 'all',
-  createdAt: r.created_at ?? r.createdAt ?? '',
+  targetIds: (r.targetIds || []).map(String),
+  giftTargetIds: (r.giftTargetIds || []).map(String),
+  tiers: r.tiers || [],
+  conditions: r.conditions || {},
+  shopId: r.shopId ?? 'all',
+})
+
+const payload = (e) => ({
+  name: e.name,
+  description: e.description || '',
+  kind: e.kind || 'discount',
+  template: e.template || null,
+  target_type: e.targetType || 'all',
+  target_ids: e.targetIds || [],
+  discount_type: e.discountType || 'percent',
+  discount_value: e.discountValue ?? e.discountPercent ?? 0,
+  min_qty: e.minQty || 1,
+  buy_qty: e.buyQty || 0,
+  get_qty: e.getQty || 0,
+  get_discount: e.getDiscount ?? 100,
+  gift_target_type: e.giftTargetType || null,
+  gift_target_ids: e.giftTargetIds || [],
+  tiers: e.tiers || [],
+  min_total: e.minTotal || 0,
+  conditions: e.conditions || {},
+  stackable: !!e.stackable,
+  requires_code: !!e.requiresCode,
+  start_date: e.startDate || null,
+  end_date: e.endDate || null,
+  shop_id: e.shopId || 'all',
+  ...(e.isActive !== undefined ? { is_active: e.isActive } : {}),
 })
 
 export const getPromotions = async () => {
@@ -19,32 +41,18 @@ export const getPromotions = async () => {
   return data.map(map)
 }
 
+export const getPromotionStats = async () => {
+  const { data } = await api.get('/api/promotions/stats')
+  return data
+}
+
 export const createPromotion = async (entry) => {
-  const { data } = await api.post('/api/promotions', {
-    name: entry.name,
-    type: entry.type,
-    target_id: entry.targetId || null,
-    discount_percent: entry.discountPercent || 0,
-    min_qty: entry.minQty || 1,
-    start_date: entry.startDate || null,
-    end_date: entry.endDate || null,
-    shop_id: entry.shopId || 'all',
-  })
+  const { data } = await api.post('/api/promotions', payload(entry))
   return map(data)
 }
 
 export const updatePromotion = async (id, entry) => {
-  const { data } = await api.put(`/api/promotions/${id}`, {
-    name: entry.name,
-    type: entry.type,
-    target_id: entry.targetId ?? null,
-    discount_percent: entry.discountPercent,
-    min_qty: entry.minQty,
-    start_date: entry.startDate ?? null,
-    end_date: entry.endDate ?? null,
-    shop_id: entry.shopId,
-    is_active: entry.isActive,
-  })
+  const { data } = await api.put(`/api/promotions/${id}`, payload(entry))
   return map(data)
 }
 
@@ -54,6 +62,6 @@ export const togglePromotion = async (id) => {
 }
 
 export const deletePromotion = async (id) => {
-  await api.delete(`/api/promotions/${id}`)
-  return { success: true }
+  const { data } = await api.delete(`/api/promotions/${id}`)
+  return data
 }

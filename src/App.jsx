@@ -17,6 +17,7 @@ const Sales = lazy(() => import('./pages/Sales'))
 const Customers = lazy(() => import('./pages/Customers'))
 const Income = lazy(() => import('./pages/Income'))
 const Expenses = lazy(() => import('./pages/Expenses'))
+const Marketing = lazy(() => import('./pages/Marketing'))
 const Reports = lazy(() => import('./pages/Reports'))
 const AIAgent = lazy(() => import('./pages/AIAgent'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
@@ -77,6 +78,12 @@ function App() {
           <Route path="/expenses" element={
             <ProtectedRoute permission="expenses">
               <Expenses />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/marketing" element={
+            <ProtectedRoute permission="marketing">
+              <Marketing />
             </ProtectedRoute>
           } />
 

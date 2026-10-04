@@ -54,6 +54,9 @@ const map = (s) => ({
   installmentPaidAmount: Number(s.installment_paid_amount) || 0,
   installmentPayments: Array.isArray(s.installment_payments) ? s.installment_payments : [],
   bundleDiscountAmount: Number(s.bundle_discount_amount) || 0,
+  promoDiscountAmount: Number(s.promo_discount_amount) || 0,
+  promoDetails: Array.isArray(s.promo_details) ? s.promo_details : [],
+  giftCardUsed: Number(s.gift_card_used) || 0,
   isBundle: s.is_bundle || false,
   cardType: s.card_type || null,
   balanceUsed: Number(s.balance_used) || 0,
@@ -105,6 +108,11 @@ export const createSale = async (saleData) => {
     is_bundle: saleData.isBundle || false,
     card_type: saleData.cardType || null,
     balance_used: saleData.balanceUsed || 0,
+    promo_code: saleData.promoCode || null,
+    promo_details: saleData.promoDetails || null,
+    promo_discount_amount: saleData.promoDiscountAmount || 0,
+    gift_card_code: saleData.giftCardCode || null,
+    gift_card_used: saleData.giftCardUsed || 0,
   })
   return map(data)
 }

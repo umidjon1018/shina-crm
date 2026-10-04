@@ -25,7 +25,6 @@ const TABS = [
   { id: 'products',      labelKey: 'mgmt_tab_products',      icon: Package },
   { id: 'employees',     labelKey: 'mgmt_tab_employees',     icon: User },
   { id: 'discounts',     labelKey: 'mgmt_tab_discounts',     icon: Percent },
-  { id: 'promotions',    labelKey: 'mgmt_tab_promotions',    icon: Tag },
   { id: 'bundles',       labelKey: 'mgmt_tab_bundles',       icon: ShoppingBag },
   { id: 'settings',      labelKey: 'mgmt_tab_settings',      icon: Settings },
 ]

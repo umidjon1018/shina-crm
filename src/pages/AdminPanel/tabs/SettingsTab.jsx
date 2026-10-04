@@ -279,6 +279,7 @@ function SettingsTab() {
           {[
             { key:'dashboard', icon:'🏠', defaultLabel: t('dashboard') }, { key:'warehouse', icon:'📦', defaultLabel: t('warehouse') },
             { key:'sales', icon:'🛒', defaultLabel: t('sales') }, { key:'customers', icon:'👥', defaultLabel: t('customers') },
+            { key:'marketing', icon:'📣', defaultLabel: t('mkt_page_title') },
             { key:'income', icon:'📈', defaultLabel: t('income') }, { key:'expenses', icon:'💳', defaultLabel: t('fin_page_title') },
             { key:'reports', icon:'📊', defaultLabel: t('reports') }, { key:'aiAgent', icon:'🤖', defaultLabel: t('ai_agent') },
             { key:'management', icon:'⚡', defaultLabel: t('management') },

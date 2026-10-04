@@ -1,8 +1,8 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Minus, Plus, Search, ShoppingBag, ShoppingCart, Star, Trash2, UserPlus, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Gift, Minus, Plus, Search, ShoppingBag, ShoppingCart, Star, Tag, Ticket, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 import ProductSearch from '../../../components/sales/ProductSearch'
@@ -33,7 +33,21 @@ const NewSaleTab = ({ ctx }) => {
     addBundleToCart, removeBundleFromCart,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
     customerBalance, balanceUsed, payable, cashbackPreview,
+    promoResult, afterPromo, appliedCode, setAppliedCode, giftCard, setGiftCard, giftCardUsed,
+    codeError, setCodeError, codeChecking, applyCode, codeIgnored,
   } = ctx
+  const [codeInput, setCodeInput] = useState('')
+  const promoBlocks = promoResult?.blocksManualDiscount
+  const groupPromo = (items) => {
+    let amount = 0
+    const names = new Set()
+    items.forEach(c => {
+      const l = promoResult?.lines.get(c.item.id)
+      if (l?.reduction > 0) { amount += l.reduction; if (l.promo) names.add(l.promo.name) }
+    })
+    return { amount, names: [...names] }
+  }
+  const submitCode = async () => { if (await applyCode(codeInput)) setCodeInput('') }
 
   const sellBtnRef = useRef(null)
   const sellDisabled = isSubmitting || cartItems.length === 0 || (paymentType === 'installment' && !installmentOrgId)
@@ -237,6 +251,15 @@ const NewSaleTab = ({ ctx }) => {
                           <span className="text-[10px] text-text-secondary">{som}</span>
                           {count > 1 && <span className="text-[9px] text-text-secondary">({count} ta uchun)</span>}
                         </div>
+                        {(() => {
+                          const gp = groupPromo(items)
+                          if (!gp.amount) return null
+                          return (
+                            <p className="inline-flex items-center gap-1 text-[10px] font-bold text-accent-orange bg-accent-orange/10 px-1.5 py-0.5 rounded-md">
+                              <Tag size={10} /> {gp.names.join(', ')}: −{formatPrice(gp.amount, som)} = {formatPrice(groupPrice - gp.amount, som)}
+                            </p>
+                          )
+                        })()}
                         {hasGroupWarning && (
                           <p className="text-[9px] text-accent-red font-bold">Minimum narxdan past!</p>
                         )}
@@ -361,7 +384,10 @@ const NewSaleTab = ({ ctx }) => {
                 </button>
               )}
 
-              <div className={loyaltyActive ? 'opacity-40 pointer-events-none' : ''}>
+              {promoBlocks && (
+                <p className="text-[11px] text-accent-orange bg-accent-orange/10 rounded-xl px-3 py-2">{t('mkt_pos_no_extra_discount')}</p>
+              )}
+              <div className={loyaltyActive || promoBlocks ? 'opacity-40 pointer-events-none' : ''}>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('sl_ns_discount_label')}</label>
                   <span className="text-xs font-bold text-accent-red">{discountPercent}%</span>
@@ -384,6 +410,42 @@ const NewSaleTab = ({ ctx }) => {
                 </div>
               )}
             </>
+          )}
+
+          {cartItems.length > 0 && (
+            <div className="rounded-2xl border border-border bg-bg-tertiary p-3 space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <Ticket size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                  <input value={codeInput} onChange={e => { setCodeInput(e.target.value.toUpperCase()); setCodeError('') }}
+                    onKeyDown={e => { if (e.key === 'Enter') submitCode() }}
+                    placeholder={t('mkt_pos_code_ph')}
+                    className="w-full pl-9 pr-3 py-2 bg-bg-secondary border border-border rounded-xl text-sm text-text-primary uppercase focus:outline-none focus:border-accent-red" />
+                </div>
+                <button disabled={!codeInput.trim() || codeChecking} onClick={submitCode}
+                  className="px-3 py-2 rounded-xl bg-accent-red text-white text-xs font-bold disabled:opacity-40 shrink-0">
+                  {codeChecking ? '...' : t('mkt_pos_apply')}
+                </button>
+              </div>
+              {codeError && <p className="text-[11px] text-accent-red">{codeError}</p>}
+              {appliedCode && (
+                <div className="flex items-center justify-between gap-2 text-xs bg-accent-orange/10 text-accent-orange rounded-lg px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 font-bold min-w-0 truncate"><Tag size={12} /> {appliedCode.code}
+                    {codeIgnored && <span className="font-normal text-text-muted"> — {t('mkt_pos_code_not_applicable')}</span>}
+                  </span>
+                  <button onClick={() => setAppliedCode(null)}><X size={13} /></button>
+                </div>
+              )}
+              {giftCard && (
+                <div className="flex items-center justify-between gap-2 text-xs bg-accent-green/10 text-accent-green rounded-lg px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 font-bold min-w-0 truncate"><Gift size={12} /> {giftCard.code}
+                    <span className="font-normal text-text-muted">· {t('mkt_pos_gc_balance', { amount: formatPrice(giftCard.balance, som) })}</span>
+                  </span>
+                  <button onClick={() => setGiftCard(null)}><X size={13} /></button>
+                </div>
+              )}
+              {giftCard && paymentType === 'installment' && <p className="text-[11px] text-text-muted">{t('mkt_pos_gc_no_installment')}</p>}
+            </div>
           )}
 
           {customerBalance > 0 && paymentType !== 'installment' && cartItems.length > 0 && (
@@ -569,12 +631,12 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
               <span className="text-text-primary font-medium">{formatPrice(subtotal, som)}</span>
             </div>
-            {promoDiscount > 0 && !loyaltyActive && (
-              <div className="flex justify-between text-xs">
-                <span className="text-accent-orange font-bold">🏷️ Aksiya -{promoDiscount}%</span>
-                <span className="text-accent-orange font-medium">-{formatPrice(subtotal * promoDiscount / 100, som)}</span>
+            {(promoResult?.applied || []).map(a => (
+              <div key={a.promoId} className="flex justify-between gap-2 text-xs">
+                <span className="text-accent-orange font-bold flex items-center gap-1 min-w-0 truncate"><Tag size={11} className="shrink-0" /> {a.name}</span>
+                <span className="text-accent-orange font-medium whitespace-nowrap">-{formatPrice(a.amount, som)}</span>
               </div>
-            )}
+            ))}
             {effectiveDiscount > 0 && paymentType !== 'installment' && (
               <div className="flex justify-between text-xs">
                 <span className="text-accent-red">{loyaltyActive ? t('sl_ns_loyalty_discount_row', { n: effectiveDiscount }) : t('sl_ns_discount_row', { n: effectiveDiscount })}</span>
@@ -585,6 +647,18 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-base font-syne font-extrabold text-text-primary">{t('sl_ns_total_label')}</span>
               <span className="text-base font-syne font-extrabold text-accent-green">{formatPrice(total, som)}</span>
             </div>
+            {giftCardUsed > 0 && (
+              <div className="flex justify-between text-xs">
+                <span className="text-accent-green flex items-center gap-1"><Gift size={11} /> {t('mkt_pos_gc_row')}</span>
+                <span className="text-accent-green font-medium">-{formatPrice(giftCardUsed, som)}</span>
+              </div>
+            )}
+            {giftCardUsed > 0 && balanceUsed === 0 && (
+              <div className="flex justify-between">
+                <span className="text-sm font-syne font-extrabold text-text-primary">{t('sl_loy_payable')}</span>
+                <span className="text-sm font-syne font-extrabold text-accent-green">{formatPrice(payable, som)}</span>
+              </div>
+            )}
             {balanceUsed > 0 && (
               <>
                 <div className="flex justify-between text-xs">

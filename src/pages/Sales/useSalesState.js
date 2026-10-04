@@ -21,6 +21,8 @@ import {
 import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
+import { resolveCode } from '../../api/marketingService'
+import { evaluatePromotions } from '../../utils/promoEngine'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
 import { getReservedItemIds } from '../../api/reservationService'
@@ -106,14 +108,7 @@ export const useSalesState = () => {
   const [activePromos, setActivePromos] = useState([])
   const [batchPromos, setBatchPromos] = useState([]) // promoPassToCustomer = true bo'lgan batchlar
   useEffect(() => {
-    getPromotions().then(list => {
-      const today = new Date().toISOString().slice(0, 10)
-      setActivePromos(list.filter(p =>
-        p.isActive &&
-        (!p.startDate || p.startDate <= today) &&
-        (!p.endDate || p.endDate >= today)
-      ))
-    }).catch(() => {})
+    getPromotions().then(list => setActivePromos(list.filter(p => p.isActive))).catch(() => {})
     getIncomeBatches().then(list => {
       setBatchPromos(list.filter(b => b.promoPassToCustomer && b.promoDiscount > 0))
     }).catch(() => {})
@@ -278,34 +273,49 @@ export const useSalesState = () => {
 
   const maxDiscount = isPrivileged(user?.role) ? 30 : (discountMediumMax || 15)
 
-  // Savat bo'yicha eng yuqori aksiya chegirmasini topish
-  const promoDiscount = useMemo(() => {
-    if (!cartItems.length) return 0
-    const today = new Date().toISOString().slice(0, 10)
-    let best = 0
-    // Batch promos (yetkazib beruvchi chegirmasi mijozlarga uzatilgan)
-    for (const b of batchPromos) {
-      const matches = cartItems.some(c => String(c.product.id) === String(b.productId))
-      if (matches && b.promoDiscount > best) best = b.promoDiscount
+  const loyaltyInfoRef = useRef(null)
+  // Kassada kiritilgan promokod/vaucher va sovg'a sertifikati
+  const [appliedCode, setAppliedCode] = useState(null) // { code, promotionId }
+  const [giftCard, setGiftCard] = useState(null) // { code, balance }
+  const [codeError, setCodeError] = useState('')
+  const [codeChecking, setCodeChecking] = useState(false)
+  const applyCode = async (raw) => {
+    const code = String(raw || '').trim()
+    if (!code) return false
+    setCodeChecking(true); setCodeError('')
+    try {
+      const r = await resolveCode(code, selectedCustomer?.id)
+      if (r.type === 'gift_card') setGiftCard({ code: r.code, balance: r.balance })
+      else setAppliedCode({ code: r.code, promotionId: String(r.promotionId) })
+      return true
+    } catch (e) {
+      setCodeError(e?.response?.data?.error || "Kod topilmadi")
+      return false
+    } finally {
+      setCodeChecking(false)
     }
-    for (const p of activePromos) {
-      if (p.shopId !== 'all' && p.shopId !== selectedShopId) continue
-      if (p.type === 'product') {
-        const matches = cartItems.some(c => String(c.product.id) === String(p.targetId))
-        if (matches && p.discountPercent > best) best = p.discountPercent
-      } else if (p.type === 'category') {
-        const matches = cartItems.some(c => String(c.product.category) === String(p.targetId))
-        if (matches && p.discountPercent > best) best = p.discountPercent
-      } else if (p.type === 'qty') {
-        const totalQty = cartItems.reduce((s, c) => s + 1, 0)
-        if (totalQty >= (p.minQty || 1) && p.discountPercent > best) best = p.discountPercent
-      }
-    }
-    return best
-  }, [activePromos, batchPromos, cartItems, selectedShopId])
+  }
+  const clearMarketing = () => { setAppliedCode(null); setGiftCard(null); setCodeError('') }
+
+  // Avtomatik aksiyalar (yetkazib beruvchi chegirmasi mijozga uzatilgan partiyalar ham aksiya sifatida)
+  const promoResult = useMemo(() => {
+    const batchAsPromos = batchPromos.map(b => ({
+      id: `batch_${b.id}`, name: 'Aksiya', kind: 'discount', targetType: 'product', targetIds: [String(b.productId)],
+      discountType: 'percent', discountValue: b.promoDiscount, isActive: true, conditions: {}, shopId: 'all', stackable: false,
+    }))
+    return evaluatePromotions({
+      cart: cartItems,
+      promos: [...activePromos, ...batchAsPromos],
+      ctx: { shopId: selectedShopId, customer: selectedCustomer, paymentType, customerPurchases: loyaltyInfoRef.current?.totalPurchases || 0 },
+      codePromos: appliedCode ? { [appliedCode.promotionId]: appliedCode.code } : {},
+    })
+  }, [activePromos, batchPromos, cartItems, selectedShopId, selectedCustomer, paymentType, appliedCode])
+  const promoDiscount = promoResult.totalReduction
+  const codeIgnored = !!appliedCode && !promoResult.applied.some(a => a.code === appliedCode.code)
 
   // Sodiqlik (serverdan): jamg'arma chegirma darajasi, keshbek foizi, balans
   const [loyaltyInfo, setLoyaltyInfo] = useState(null)
+  loyaltyInfoRef.current = loyaltyInfo
   const [useBalance, setUseBalance] = useState(false)
   const [balanceInput, setBalanceInput] = useState('')
   useEffect(() => {
@@ -322,9 +332,8 @@ export const useSalesState = () => {
 
   const loyaltyTierPercent = loyaltyInfo?.discountPercent || 0
   const loyaltyActive = loyaltyDiscountApplied && loyaltyTierPercent > 0 && paymentType !== 'installment'
-  const effectiveDiscount = loyaltyActive
-    ? Math.max(loyaltyTierPercent, promoDiscount)
-    : Math.max(discountPercent, promoDiscount)
+  // Qo'shilmaydigan aksiya qo'llangan bo'lsa — qo'lda/sodiqlik chegirmasi berilmaydi
+  const effectiveDiscount = promoResult.blocksManualDiscount ? 0 : (loyaltyActive ? loyaltyTierPercent : discountPercent)
   const customerHasLoyalty = loyaltyTierPercent > 0
 
   // Calculations
@@ -335,13 +344,17 @@ export const useSalesState = () => {
     return acc + price
   }, 0)
 
-  const discountAmount = subtotal * effectiveDiscount / 100
-  const total = subtotal - discountAmount
+  const afterPromo = subtotal - promoDiscount
+  const discountAmount = afterPromo * effectiveDiscount / 100
+  const total = afterPromo - discountAmount
   const customerBalance = loyaltyInfo?.balance || 0
   const balanceUsed = (useBalance && paymentType !== 'installment' && customerBalance > 0)
     ? Math.max(0, Math.min(Math.round(Number(balanceInput) || 0), Math.floor(customerBalance), Math.round(total)))
     : 0
-  const payable = Math.max(0, Math.round(total) - balanceUsed)
+  const giftCardUsed = (giftCard && paymentType !== 'installment')
+    ? Math.max(0, Math.min(Math.floor(giftCard.balance), Math.round(total) - balanceUsed))
+    : 0
+  const payable = Math.max(0, Math.round(total) - balanceUsed - giftCardUsed)
   const cashbackPreview = (paymentType !== 'installment' && (loyaltyInfo?.cashbackPercent || 0) > 0 && payable > 0 && payable >= (loyaltyInfo?.cashbackMinSale || 0))
     ? Math.round(payable * loyaltyInfo.cashbackPercent / 100)
     : 0
@@ -486,7 +499,7 @@ export const useSalesState = () => {
         barcode:   c.item.barcode,
         productId: c.product.id,
         name:      c.product.name,
-        salePrice: c.salePrice ?? c.product.cashPrice,
+        salePrice: promoResult.lines.get(c.item.id)?.price ?? c.salePrice ?? c.product.cashPrice,
         cashPrice: c.product.cashPrice,
         purchasePrice: c.product.purchasePrice ?? 0,
         qty: 1,
@@ -520,6 +533,11 @@ export const useSalesState = () => {
       discount: effectiveDiscount,
       loyaltyDiscountApplied: loyaltyActive,
       balanceUsed,
+      promoCode: appliedCode && !codeIgnored ? appliedCode.code : null,
+      promoDetails: promoResult.applied.map(a => ({ promoId: String(a.promoId), name: a.name, kind: a.kind, amount: a.amount, code: a.code })),
+      promoDiscountAmount: promoDiscount,
+      giftCardCode: giftCardUsed > 0 ? giftCard.code : null,
+      giftCardUsed,
       bundleDiscountAmount,
       isBundle: cartIsBundleSale,
       subtotal,
@@ -551,6 +569,7 @@ export const useSalesState = () => {
         setSuccessSale(res)
         clearCart()
         resetForm()
+        clearMarketing()
         setContractFile(null)
         fetchData()
         bump()
@@ -1793,6 +1812,8 @@ export const useSalesState = () => {
     profitMonthFilter, setProfitMonthFilter, profitTypeFilter, setProfitTypeFilter, profitSearch, setProfitSearch, profitSortField, setProfitSortField, profitSortOrder, setProfitSortOrder,
     installmentMonthFilter, setInstallmentMonthFilter, installmentSortField, setInstallmentSortField, installmentSortOrder, setInstallmentSortOrder,
     maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
+    promoResult, afterPromo, appliedCode, setAppliedCode, giftCard, setGiftCard, giftCardUsed, codeError, setCodeError,
+    codeChecking, applyCode, clearMarketing, codeIgnored,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
     customerBalance, balanceUsed, payable, cashbackPreview,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,

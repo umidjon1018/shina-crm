@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import DateMaskInput from '../../components/DateMaskInput'
 import { Bookmark,
   Trash2, RotateCcw, History, ShoppingBag, Calendar,
-  TrendingUp, XCircle, X, Recycle, Banknote
+  TrendingUp, XCircle, X, Recycle, Banknote, Gift
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
@@ -12,6 +12,7 @@ import ShopRequiredGuard from '../../components/ShopRequiredGuard'
 import SuccessModal from '../../components/sales/SuccessModal'
 import DiscountRequestModal from '../../components/sales/DiscountRequestModal'
 import CashExpenseModal from '../../components/sales/CashExpenseModal'
+import GiftCardSellModal from '../../components/marketing/GiftCardSellModal'
 import { useAuthStore } from '../../store/authStore'
 import NewSaleTab from './tabs/NewSaleTab'
 import UsedSaleTab from './tabs/UsedSaleTab'
@@ -30,6 +31,7 @@ const Sales = () => {
   const state = useSalesState()
   const hasPermission = useAuthStore(s => s.hasPermission)
   const [cashShopId, setCashShopId] = useState(null)
+  const [giftShopId, setGiftShopId] = useState(null)
   const {
     user, bump, addCustomer,
     shopPickCallback, setShopPickCallback,
@@ -156,6 +158,12 @@ const Sales = () => {
             </button>
           )}
         </div>
+        {hasPermission('sales.gift_cards') && (
+          <button onClick={() => state.requireShop(id => setGiftShopId(id))}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-secondary text-sm font-semibold text-text-secondary hover:text-accent-red hover:border-accent-red/50 transition-colors shrink-0">
+            <Gift size={16} /> {t('mkt_gc_sell_short')}
+          </button>
+        )}
         {hasPermission('sales.cash_expense') && (
           <button onClick={() => state.requireShop(id => setCashShopId(id))}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-secondary text-sm font-semibold text-text-secondary hover:text-accent-orange hover:border-accent-orange/50 transition-colors shrink-0">
@@ -165,6 +173,7 @@ const Sales = () => {
       </div>
       <AnimatePresence>
         {cashShopId && <CashExpenseModal shopId={cashShopId} onClose={() => setCashShopId(null)} />}
+        {giftShopId && <GiftCardSellModal shopId={giftShopId} onClose={() => setGiftShopId(null)} />}
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
@@ -183,6 +192,9 @@ const Sales = () => {
           loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent,
           loyaltyDiscountApplied, setLoyaltyDiscountApplied, customerHasLoyalty,
           discountPercent, maxDiscount, effectiveDiscount, discountAmount, promoDiscount,
+          promoResult: state.promoResult, afterPromo: state.afterPromo, appliedCode: state.appliedCode, setAppliedCode: state.setAppliedCode,
+          giftCard: state.giftCard, setGiftCard: state.setGiftCard, giftCardUsed: state.giftCardUsed, codeError: state.codeError,
+          setCodeError: state.setCodeError, codeChecking: state.codeChecking, applyCode: state.applyCode, codeIgnored: state.codeIgnored,
           handleDiscountChange, pendingDiscountReqId, setPendingDiscountReqId,
           discountSmallMax, updateNotification,
           paymentType, setPaymentType, cardType, setCardType, installmentOrgId, setInstallmentOrgId,
