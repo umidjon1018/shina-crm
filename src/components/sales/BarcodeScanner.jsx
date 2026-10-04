@@ -118,8 +118,8 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[220px]">
           <Barcode size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             value={manualCode}
@@ -131,13 +131,13 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
         </div>
         <button
           onClick={handleManualScan}
-          className="px-4 py-3 bg-accent-red text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+          className="flex-1 sm:flex-none px-4 py-3 bg-accent-red text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           {t('sl_bc_submit')}
         </button>
         <button
           onClick={toggleCamera}
-          className={`px-4 py-3 rounded-xl border transition-all flex items-center gap-2 font-bold text-sm ${
+          className={`flex-1 sm:flex-none justify-center px-4 py-3 rounded-xl border transition-all flex items-center gap-2 font-bold text-sm ${
             isCameraActive
               ? 'bg-accent-red text-white border-accent-red'
               : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'

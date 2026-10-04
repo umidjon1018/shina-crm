@@ -2583,4 +2583,5 @@ export default {
   sl_resv_err_customer: "Введите имя или телефон клиента",
   sl_resv_err_unavailable: "Этого товара больше нет на складе",
   sl_resv_all_reserved: "Все свободные единицы \"{{name}}\" забронированы",
+  sl_mob_items: "товар(ов)",
 }

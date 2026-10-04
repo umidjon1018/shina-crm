@@ -2592,4 +2592,5 @@ export default {
   sl_resv_err_customer: "Mijoz ismi yoki telefonini kiriting",
   sl_resv_err_unavailable: "Bu tovar endi omborda yo'q",
   sl_resv_all_reserved: "\"{{name}}\" ning barcha bo'sh donalari bron qilingan",
+  sl_mob_items: "ta tovar",
 }

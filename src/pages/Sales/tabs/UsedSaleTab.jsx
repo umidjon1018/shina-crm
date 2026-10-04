@@ -1,6 +1,8 @@
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Banknote, Calendar, CheckCircle, CreditCard, Plus, Recycle, Search, ShoppingCart, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import MobileSellBar from '../../../components/sales/MobileSellBar'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
@@ -24,6 +26,9 @@ const UsedSaleTab = ({ ctx }) => {
     buContractNumber, setBuContractNumber, buSource, setBuSource, sources,
     buSubtotal, buDiscountAmount, buTotal, buIsSubmitting, buHandleSubmitSale,
   } = ctx
+  const buSellRef = useRef(null)
+  const buSellDisabled = buIsSubmitting || buCart.length === 0 || (buPaymentType === 'installment' && !buInstallmentOrgId)
+  const buPayLabel = { cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_hist_pay_bank') }[buPaymentType] || buPaymentType
 
   return (
     <motion.div
@@ -348,13 +353,15 @@ const UsedSaleTab = ({ ctx }) => {
               <span className="text-base font-syne font-extrabold text-accent-green">{formatPrice(buTotal, som)}</span>
             </div>
           </div>
-          <button onClick={buHandleSubmitSale}
-            disabled={buIsSubmitting || buCart.length === 0 || (buPaymentType === 'installment' && !buInstallmentOrgId)}
+          <button ref={buSellRef} onClick={buHandleSubmitSale}
+            disabled={buSellDisabled}
             className="w-full py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
             {buIsSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_us_sell_btn')} <ArrowRight size={18} /></>}
           </button>
         </div>
       </div>
+      <MobileSellBar targetRef={buSellRef} count={buCart.length} payLabel={buPayLabel} total={buTotal}
+        onSell={buHandleSubmitSale} disabled={buSellDisabled} submitting={buIsSubmitting} label={t('sl_us_sell_btn')} resetKey={buCart.length > 0} />
     </motion.div>
   )
 }

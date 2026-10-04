@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { motion } from 'framer-motion'
@@ -6,6 +6,7 @@ import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CreditCard, Minus
 import { useTranslation } from 'react-i18next'
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 import ProductSearch from '../../../components/sales/ProductSearch'
+import MobileSellBar from '../../../components/sales/MobileSellBar'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
@@ -31,6 +32,10 @@ const NewSaleTab = ({ ctx }) => {
     salesList, addNextItemOfProduct, updateGroupSalePrice,
     addBundleToCart, removeBundleFromCart,
   } = ctx
+
+  const sellBtnRef = useRef(null)
+  const sellDisabled = isSubmitting || cartItems.length === 0 || (paymentType === 'installment' && !installmentOrgId)
+  const payLabel = { cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_hist_pay_bank') }[paymentType] || paymentType
 
   // Savatni bundle va oddiy guruhlarga ajratish
   const { bundleGroups, singleGroups } = useMemo(() => {
@@ -169,7 +174,7 @@ const NewSaleTab = ({ ctx }) => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-text-primary truncate">{product.name}</p>
+                      <p className="text-xs font-bold text-text-primary line-clamp-2 [overflow-wrap:anywhere]">{product.name}</p>
                       {hasWarning && (
                         <span className="inline-flex items-center gap-1 text-[9px] bg-accent-orange/10 text-accent-orange px-1.5 py-0.5 rounded-md font-bold mt-0.5">
                           <AlertCircle size={9} /> Barkod chop etilmagan
@@ -558,13 +563,16 @@ const NewSaleTab = ({ ctx }) => {
               </>
             )}
           </div>
-          <button onClick={handleSubmitSale}
-            disabled={isSubmitting || cartItems.length === 0 || (paymentType === 'installment' && !installmentOrgId)}
+          <button ref={sellBtnRef} onClick={handleSubmitSale}
+            disabled={sellDisabled}
             className="w-full py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
             {isSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_ns_sell_btn')} <ArrowRight size={18} /></>}
           </button>
         </div>
       </div>
+
+      <MobileSellBar targetRef={sellBtnRef} count={cartItems.length} payLabel={payLabel} total={total}
+        onSell={handleSubmitSale} disabled={sellDisabled} submitting={isSubmitting} label={t('sl_ns_sell_btn')} resetKey={cartItems.length > 0} />
     </motion.div>
   )
 }
