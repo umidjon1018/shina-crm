@@ -85,8 +85,9 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
   const handleSubmit = async () => {
     if (!isNewProduct && !selectedProduct) { setError(t('wh_in_err_select')); return }
     if (isNewProduct && !form.newProductName.trim()) { setError(t('wh_in_err_name')); return }
+    if (isNewProduct && !newCategory) { setError(t('wh_in_err_category')); return }
     if (!form.quantity || +form.quantity <= 0) { setError(t('wh_in_err_qty')); return }
-    if (!form.unit?.trim()) { setError("O'lchov birligi majburiy"); return }
+    if (!form.unit?.trim()) { setError(t('wh_in_err_unit')); return }
     if (canFinance) {
       if (!form.purchasePriceUSD || +form.purchasePriceUSD <= 0) { setError(t('wh_in_err_price')); return }
       if (!form.entryUsdRate || +form.entryUsdRate <= 0) { setError(t('wh_in_err_rate')); return }

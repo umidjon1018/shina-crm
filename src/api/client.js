@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { cacheKey, putCached, getCached } from '../utils/httpCache'
+import i18n from '../i18n'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
@@ -13,6 +14,8 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Server xato matnlarini shu tilda qaytaradi
+  config.headers['x-lang'] = i18n.language === 'ru' ? 'ru' : 'uz'
   return config
 })
 
@@ -54,6 +57,12 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 403 && error.response?.data?.code === 'DEVICE_NOT_APPROVED') {
       clearAuthAndRedirect()
+    }
+    // axios ning inglizcha matnlari ("Network Error", "Request failed with status code 500") o'rniga
+    if (!error.response) {
+      error.message = i18n.t('err_network')
+    } else if (!error.response.data?.error) {
+      error.message = i18n.t('err_server')
     }
     return Promise.reject(error)
   }

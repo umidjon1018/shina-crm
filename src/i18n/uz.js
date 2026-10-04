@@ -2818,4 +2818,8 @@ export default {
   cust_tx_sale_refund: "Sotuv bekor/qaytarildi",
   cust_tx_cashback: "Keshbek",
   cust_tx_cashback_reversal: "Keshbek qaytarib olindi",
+  err_network: "Internet yoki server bilan aloqa yo'q. Ulanishni tekshirib, qayta urinib ko'ring.",
+  err_server: "Serverda xatolik yuz berdi. Birozdan keyin qayta urinib ko'ring.",
+  wh_in_err_category: "Kategoriyani tanlang (Shina, Disk yoki Aksessuar)",
+  wh_in_err_unit: "O'lchov birligini tanlang",
 }
