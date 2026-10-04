@@ -523,6 +523,8 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
 
 **Kassada tovar sotilishi uchun 3 shart:** barkod bor + kirim narxi kiritilgan (`has_missing_price=false`) + sotuv narxi > 0. Sotuvchi kirimda narx kiritolmaydi (admin/boshqaruvchi to'ldiradi).
 
+**Yangi UI yozishda (telefon):** katta bo'shliqlarga telefon qiymati qo'sh (`p-4 sm:p-6`, `gap-3 sm:gap-6`, `space-y-4 sm:space-y-6`, `text-2xl sm:text-3xl`, jadval kataklari `px-3 sm:px-4 py-2.5 sm:py-4`); tab paneli `overflow-x-auto no-scrollbar`, faol bo'lmagan tab nomi `hidden sm:inline`; sarlavha+tugmalar qatori `flex flex-wrap ... gap-2`. Yangi sahifa tablari ruxsat daraxtiga qo'shilsin va `hasPermission('<sahifa>.<tab>')` bilan filtrlansin (bo'limning qisman belgilangan tablari ham ishlaydi). Sahifa xatolari `PageErrorBoundary` (MainLayout) bilan ushlanadi.
+
 **Yangi kod yozishda:** yangi yozish route'iga `requirePerm('<daraxt id>')` qo'sh; yangi backend xato matnini `errorI18n.js` lug'atiga qo'sh (uz+ru); yangi jadval — controller boshida `CREATE TABLE IF NOT EXISTS`.
 
 ---
