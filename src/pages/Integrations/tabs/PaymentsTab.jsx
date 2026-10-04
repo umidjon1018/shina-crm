@@ -7,16 +7,16 @@ import { useShopStore } from '../../../store/shopStore'
 import OnlinePaymentModal from '../../../components/OnlinePaymentModal'
 import { Card, CopyField, Label, Msg, Spinner, Toggle, errText, inputCls } from '../components/ui'
 
-const NAMES = { payme: 'Payme', click: 'Click', apelsin: 'Apelsin' }
+const NAMES = { payme: 'Payme', click: 'Click', uzum: 'Uzum Bank' }
 const FIELDS = {
   payme: [['merchantId', 'Merchant ID'], ['key', 'Key (prod)', 'hasKey'], ['testKey', 'Test key', 'hasTestKey']],
   click: [['serviceId', 'Service ID'], ['merchantId', 'Merchant ID'], ['merchantUserId', 'Merchant user ID'], ['secretKey', 'Secret key', 'hasSecret']],
-  apelsin: [['cashId', 'Cash ID'], ['login', 'Login'], ['password', 'Password', 'hasPassword'], ['linkTemplate', 'Link template']],
+  uzum: [['serviceId', 'Service ID'], ['login', 'Login'], ['password', 'Password', 'hasPassword'], ['accountField', 'Params field'], ['linkTemplate', 'Link template']],
 }
 const HOOKS = {
   payme: [['Endpoint URL', '/api/payments/payme']],
   click: [['Prepare URL', '/api/payments/click/prepare'], ['Complete URL', '/api/payments/click/complete']],
-  apelsin: [['Webhook URL', '/api/payments/apelsin']],
+  uzum: ['check', 'create', 'confirm', 'reverse', 'status'].map(a => [`/${a}`, `/api/payments/uzum/${a}`]),
 }
 const STATUS_CLS = { pending: 'text-accent-orange bg-accent-orange/10', paid: 'text-accent-green bg-accent-green/10', cancelled: 'text-red-500 bg-red-500/10', refunded: 'text-red-500 bg-red-500/10' }
 const PS = 20
@@ -84,7 +84,7 @@ const PaymentsTab = () => {
               {HOOKS[p].map(([label, path]) => (
                 <div key={path}><Label>{label}</Label><CopyField value={API_BASE + path} /></div>
               ))}
-              {p === 'apelsin' && <p className="text-[11px] text-text-muted">{t('int_apelsin_hint')}</p>}
+              {p === 'uzum' && <p className="text-[11px] text-text-muted">{t('int_uzum_hint')}</p>}
               {p === 'payme' && <p className="text-[11px] text-text-muted">{t('int_payme_hint')}</p>}
               {p === 'click' && <p className="text-[11px] text-text-muted">{t('int_click_hint')}</p>}
             </div>

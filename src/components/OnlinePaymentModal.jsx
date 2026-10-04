@@ -5,8 +5,8 @@ import { AlertCircle, CheckCircle2, Copy, ExternalLink, Loader2, X } from 'lucid
 import { useTranslation } from 'react-i18next'
 import { createOnlinePayment, getOnlinePayment, cancelOnlinePayment, simulateOnlinePayment } from '../api/integrationService'
 
-const NAMES = { payme: 'Payme', click: 'Click', apelsin: 'Apelsin' }
-const COLORS = { payme: 'bg-[#00CCCC]/10 text-[#00A6A6] border-[#00CCCC]/40', click: 'bg-[#0073FF]/10 text-[#0073FF] border-[#0073FF]/40', apelsin: 'bg-orange-500/10 text-orange-500 border-orange-500/40' }
+const NAMES = { payme: 'Payme', click: 'Click', uzum: 'Uzum Bank' }
+const COLORS = { payme: 'bg-[#00CCCC]/10 text-[#00A6A6] border-[#00CCCC]/40', click: 'bg-[#0073FF]/10 text-[#0073FF] border-[#0073FF]/40', uzum: 'bg-[#7000FF]/10 text-[#7000FF] border-[#7000FF]/40' }
 const fmt = (v) => Math.round(Number(v) || 0).toLocaleString('uz-UZ')
 
 // purpose: 'sale' — kassadagi sotuv uchun, 'link' — alohida to'lov havolasi
