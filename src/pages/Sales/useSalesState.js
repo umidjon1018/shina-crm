@@ -23,6 +23,7 @@ import { enqueueAction } from '../../utils/offlineQueue'
 import { getPromotions } from '../../api/promotionService'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
+import { getReservedItemIds } from '../../api/reservationService'
 import { getBundles } from '../../api/bundleService'
 
 const hasPerm = (role, perm) => {
@@ -322,8 +323,8 @@ export const useSalesState = () => {
   // Savat: bir xil mahsulotning keyingi ombordan itemini qo'shish
   const addNextItemOfProduct = async (product) => {
     try {
-      const items = await getItems({ productId: product.id, status: 'in_stock' })
-      const available = items.filter(i => !cartItems.some(c => c.item.id === i.id))
+      const [items, reserved] = await Promise.all([getItems({ productId: product.id, status: 'in_stock' }), getReservedItemIds()])
+      const available = items.filter(i => !cartItems.some(c => c.item.id === i.id) && !reserved.has(String(i.id)))
       if (!available.length) {
         addNotification({
           type: 'OUT_OF_STOCK', severity: 'warning',

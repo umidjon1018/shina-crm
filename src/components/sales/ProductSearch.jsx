@@ -4,7 +4,7 @@ import { Search, AlertCircle, X, Plus, ShoppingBag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
-import { checkReservation } from '../../api/reservationService'
+import { getReservedItemIds } from '../../api/reservationService'
 import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -106,21 +106,17 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
       return
     }
 
-    const item = allowSold ? available[0] : available.find(i => !(cartItems || []).some(c => c.item.id === i.id))
-    if (!item) {
+    const notInCart = allowSold ? available : available.filter(i => !(cartItems || []).some(c => c.item.id === i.id))
+    if (!notInCart.length) {
       setWarning({ type: 'in_cart', message: t('sl_ps_msg_in_cart') })
       return
     }
-
-    // Bron tekshiruv
-    if (!allowSold) {
-      const resCheck = await checkReservation(item.id)
-      if (resCheck.reserved) {
-        const rv = resCheck.reservation
-        const until = new Date(rv.reserved_until).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
-        setWarning({ type: 'reserved', message: `Bu tovar ${rv.customer_name || 'mijoz'} tomonidan soat ${until} gacha bron qilingan` })
-        return
-      }
+    // Bron qilingan birliklar o'tkazib yuboriladi — boshqa bo'sh birlik tanlanadi
+    const reserved = allowSold ? new Set() : await getReservedItemIds()
+    const item = notInCart.find(i => !reserved.has(String(i.id)))
+    if (!item) {
+      setWarning({ type: 'reserved', message: t('sl_resv_all_reserved', { name: product.name }) })
+      return
     }
 
     if (!allowSold && item.barcodeStatus === 'active') {

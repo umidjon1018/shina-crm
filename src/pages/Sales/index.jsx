@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import DateMaskInput from '../../components/DateMaskInput'
-import {
+import { Bookmark,
   Trash2, RotateCcw, History, ShoppingBag, Calendar,
   TrendingUp, XCircle, X, Recycle
 } from 'lucide-react'
@@ -13,6 +13,7 @@ import DiscountRequestModal from '../../components/sales/DiscountRequestModal'
 import NewSaleTab from './tabs/NewSaleTab'
 import UsedSaleTab from './tabs/UsedSaleTab'
 import HistoryTab from './tabs/HistoryTab'
+import ReservationsTab from './tabs/ReservationsTab'
 import ReturnsTab from './tabs/ReturnsTab'
 import ReturnsHistoryTab from './tabs/ReturnsHistoryTab'
 import InstallmentTab from './tabs/InstallmentTab'
@@ -121,6 +122,7 @@ const Sales = () => {
           {[
             { id: 'new_sale', label: t('sl_tab_new_sale'), icon: ShoppingBag },
             { id: 'used_sale', label: t('sl_tab_used_sale'), icon: Recycle },
+            { id: 'reservations', label: t('sl_tab_reservations'), icon: Bookmark },
             { id: 'returns', label: t('sl_tab_returns'), icon: RotateCcw },
             { id: 'history', label: t('sl_tab_history'), icon: History },
             { id: 'returns_history', label: t('sl_tab_returns_history'), icon: XCircle },
@@ -159,6 +161,7 @@ const Sales = () => {
           barcodeSelectClass, getItemBarcode, formatMonthValue,
           salesList, allCustomers, selectedShopId,
           fetchData, bump, addCustomer,
+          requireShop: state.requireShop, setActiveTab,
           // new_sale
           addToCart, cartItems, clearCart, removeFromCart, updateSalePrice,
           selectedCustomer, setSelectedCustomer, customerSearch, setCustomerSearch,
@@ -234,6 +237,7 @@ const Sales = () => {
           <>
             {activeTab === 'new_sale' && <ShopRequiredGuard><NewSaleTab ctx={ctx} /></ShopRequiredGuard>}
             {activeTab === 'used_sale' && <ShopRequiredGuard><UsedSaleTab ctx={ctx} /></ShopRequiredGuard>}
+            {activeTab === 'reservations' && <ReservationsTab ctx={ctx} />}
             {activeTab === 'history' && <HistoryTab ctx={ctx} />}
             {activeTab === 'returns' && <ShopRequiredGuard><ReturnsTab ctx={ctx} /></ShopRequiredGuard>}
             {activeTab === 'returns_history' && <ReturnsHistoryTab ctx={ctx} />}
