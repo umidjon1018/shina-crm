@@ -11,6 +11,7 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { getCustomers, addCustomer, updateCustomer, deleteCustomer, mergeCustomers } from '../../api/customerService'
 import { getUsedSales, getUsedStock } from '../../api/usedService'
 import { getSales, makeInstallmentPayment } from '../../api/salesService'
+import { getProducts } from '../../api/productService'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useShopStore } from '../../store/shopStore'
@@ -23,6 +24,7 @@ import DeleteModal          from './components/DeleteModal'
 import MergeModal           from './components/MergeModal'
 
 const formatPriceRaw = (n) => n?.toLocaleString('uz-UZ')
+const EMPTY_CUST = { name: '', phone: '+998', birthDate: '', instagram: '', carModel: '', gender: '', address: '', email: '', group: '', tags: [] }
 
 const LOYALTY_CONFIG = {
   bronze: { label: 'Bronze', color: 'bg-orange-100 text-orange-700', next: 5, nextLabel: 'Silver' },
@@ -48,19 +50,22 @@ const Customers = () => {
   const [allSales, setAllSales] = useState([])
   const [MOCK_USED_SALES, setUsedSales] = useState([])
   const [MOCK_USED_STOCK, setUsedStock] = useState([])
+  const [products, setProducts] = useState([])
+  const [filterGroup, setFilterGroup] = useState('')
+  const [filterTag, setFilterTag] = useState('')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const [addError, setAddError] = useState('')
-  const [newCust, setNewCust] = useState({ name: '', phone: '+998', birthDate: '', instagram: '', carModel: '' })
+  const [newCust, setNewCust] = useState(EMPTY_CUST)
   const [modalTab, setModalTab] = useState('general')
   const [activeFilter, setActiveFilter] = useState(null)
 
   // Edit modal
   const [editCustomer, setEditCustomer] = useState(null)
-  const [editForm, setEditForm] = useState({ name: '', phone: '', birthDate: '', instagram: '', carModel: '' })
+  const [editForm, setEditForm] = useState({ name: '', phone: '', birthDate: '', instagram: '', carModel: '', gender: '', address: '', email: '', group: '', tags: [] })
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState(null)
   // Merge
@@ -104,13 +109,14 @@ const Customers = () => {
     setInstPaymentSaleId(null)
     setInstPaymentSuccess(true)
     setTimeout(() => setInstPaymentSuccess(false), 3000)
+    await reloadCustomerData()
+  }
+
+  const reloadCustomerData = async () => {
     const [custs, sales] = await Promise.all([getCustomers(), getSales()])
     setCustomers(custs)
     setAllSales(sales)
-    if (selectedCustomer) {
-      const updated = custs.find(c => c.id === selectedCustomer.id)
-      if (updated) setSelectedCustomer(updated)
-    }
+    setSelectedCustomer(prev => prev ? (custs.find(c => c.id === prev.id) || prev) : prev)
     bump()
   }
 
@@ -123,9 +129,12 @@ const Customers = () => {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [version])
 
+  useEffect(() => { getProducts().then(setProducts).catch(() => {}) }, [])
+
   const handleEditOpen = (c) => {
     setEditCustomer(c)
-    setEditForm({ name: c.name, phone: c.phone, phone2: c.phone2 || '', birthDate: c.birthDate || '', instagram: c.instagram || '', carModel: c.carModel || '' })
+    setEditForm({ name: c.name, phone: c.phone, phone2: c.phone2 || '', birthDate: c.birthDate || '', instagram: c.instagram || '', carModel: c.carModel || '',
+      gender: c.gender || '', address: c.address || '', email: c.email || '', group: c.group || '', tags: c.tags || [] })
   }
 
   const handleEditSave = async (e) => {
@@ -147,6 +156,11 @@ const Customers = () => {
       birthDate: editForm.birthDate || null,
       instagram: editForm.instagram || null,
       carModel: editForm.carModel || null,
+      gender: editForm.gender || '',
+      address: editForm.address || '',
+      email: editForm.email || '',
+      group: editForm.group || '',
+      tags: editForm.tags || [],
     })
     if (res.success) {
       setCustomers(prev => prev.map(c => c.id === editCustomer.id ? { ...c, ...editForm } : c))
@@ -170,7 +184,7 @@ const Customers = () => {
       setCustomers(updated)
       bump(); setMergeModal(null)
       setShowAddModal(false)
-      setNewCust({ name: '', phone: '+998', birthDate: '', instagram: '', carModel: '' })
+      setNewCust(EMPTY_CUST)
       return
     }
     const keepCar = pendingForm?.carModel || keep.carModel || ''
@@ -211,7 +225,7 @@ const Customers = () => {
         setCustomers(updated)
         bump(); setMergeModal(null)
         setShowAddModal(false)
-        setNewCust({ name: '', phone: '+998', birthDate: '', instagram: '', carModel: '' })
+        setNewCust(EMPTY_CUST)
       }
       return
     }
@@ -304,6 +318,17 @@ const Customers = () => {
     return 'bronze'
   }
 
+  const getLastVisit = (customer) => {
+    let last = ''
+    getCustomerAllSales(customer).forEach(s => { if (s.soldAt && s.soldAt > last) last = s.soldAt })
+    return last || null
+  }
+
+  const customerGroups = useMemo(() =>
+    [...new Set(customers.map(c => c.group).filter(Boolean))].sort((a, b) => a.localeCompare(b)), [customers])
+  const customerTags = useMemo(() =>
+    [...new Set(customers.flatMap(c => c.tags || []))].sort((a, b) => a.localeCompare(b)), [customers])
+
   // Bizdan B/U tovar olingan (trade-in) yozuvlar
   const getCustomerUsedStock = (customer) =>
     MOCK_USED_STOCK.filter(u => u.customerId === customer.id)
@@ -325,6 +350,8 @@ const Customers = () => {
           (shopCustomerIds && shopCustomerIds.has(String(c.id)))
         if (!inShop) return false
       }
+      if (filterGroup && c.group !== filterGroup) return false
+      if (filterTag && !(c.tags || []).includes(filterTag)) return false
       return c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.phone.includes(search) ||
         (c.phone2 || '').includes(search)
@@ -349,6 +376,9 @@ const Customers = () => {
     if (activeFilter === 'gold') {
       result = result.filter(c => getQualifiedVisits(c).length >= loyaltyVisitsRequired)
     }
+    if (activeFilter === 'balance') {
+      result = result.filter(c => Math.abs(c.balance || 0) > 0)
+    }
 
     const { key, dir } = custSort
     result.sort((a, b) => {
@@ -361,20 +391,24 @@ const Customers = () => {
         av = getTotalSpent(a)
         bv = getTotalSpent(b)
       }
+      if (key === 'lastVisit') {
+        av = getLastVisit(a) || ''
+        bv = getLastVisit(b) || ''
+      }
       const cmp = typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv))
       return dir === 'asc' ? cmp : -cmp
     })
     return result
-  }, [customers, search, activeFilter, loyaltyMinAmount, loyaltyVisitsRequired, custSort, selectedShopId, shopCustomerIds, shopSales, shopUsedSales, version])
+  }, [customers, search, activeFilter, loyaltyMinAmount, loyaltyVisitsRequired, custSort, selectedShopId, shopCustomerIds, shopSales, shopUsedSales, version, filterGroup, filterTag])
 
   // Pagination reset when filter/search/sort changes
-  useEffect(() => { setCustomersPage(1) }, [search, activeFilter, custSort])
+  useEffect(() => { setCustomersPage(1) }, [search, activeFilter, custSort, filterGroup, filterTag])
 
   // Stats
   const stats = useMemo(() => {
     const today = new Date()
     const visibleCustomers = selectedShopId === 'all' ? customers
-      : customers.filter(c => shopCustomerIds && shopCustomerIds.has(String(c.id)))
+      : customers.filter(c => c.shopId === selectedShopId || (shopCustomerIds && shopCustomerIds.has(String(c.id))))
     const total = visibleCustomers.length
 
     const activeInstallments = visibleCustomers.filter(c =>
@@ -393,7 +427,9 @@ const Customers = () => {
 
     const goldCount = visibleCustomers.filter(c => getQualifiedVisits(c).length >= loyaltyVisitsRequired).length
 
-    return { total, activeInstallments, latePayments, goldCount }
+    const balanceCount = visibleCustomers.filter(c => Math.abs(c.balance || 0) > 0).length
+
+    return { total, activeInstallments, latePayments, goldCount, balanceCount }
   }, [customers, selectedShopId, shopCustomerIds, shopSales, loyaltyMinAmount, loyaltyVisitsRequired, version])
 
   const handleAddCustomer = async (e) => {
@@ -423,7 +459,7 @@ const Customers = () => {
         setCustomers(prev => [...prev, result.customer])
         bump()
         setShowAddModal(false)
-        setNewCust({ name: '', phone: '+998', birthDate: '', instagram: '', carModel: '' })
+        setNewCust(EMPTY_CUST)
       }
     } catch (err) {
       setAddError(err?.response?.data?.error || err?.message || 'Xatolik yuz berdi')
@@ -464,6 +500,7 @@ const Customers = () => {
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     CustSortIcon,
     allSales: shopSales, MOCK_USED_SALES: shopUsedSales, MOCK_USED_STOCK,
+    customerGroups, customerTags, products, getLastVisit, reloadCustomerData,
   }
 
   if (loading) return (
@@ -485,8 +522,8 @@ const Customers = () => {
           <h1 className="text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('cust_title')}</h1>
           <p className="text-text-secondary text-sm">{t('cust_subtitle')}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 md:flex-none min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
             <input 
               type="text" 
@@ -496,6 +533,20 @@ const Customers = () => {
               className="pl-10 pr-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red w-full md:w-64 transition-all"
             />
           </div>
+          {customerGroups.length > 0 && (
+            <select value={filterGroup} onChange={e => setFilterGroup(e.target.value)}
+              className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[150px]">
+              <option value="">{t('cust_all_groups')}</option>
+              {customerGroups.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+          )}
+          {customerTags.length > 0 && (
+            <select value={filterTag} onChange={e => setFilterTag(e.target.value)}
+              className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[150px]">
+              <option value="">{t('cust_all_tags')}</option>
+              {customerTags.map(g => <option key={g} value={g}>#{g}</option>)}
+            </select>
+          )}
           <button 
             onClick={() => requireShop(() => setShowAddModal(true))}
             className="flex items-center gap-2 px-6 py-2.5 bg-accent-red text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-glow-red shrink-0"
@@ -506,12 +557,13 @@ const Customers = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { id: 'all',         label: t('cust_stat_total'), value: stats.total, icon: Users, color: 'text-accent-blue bg-accent-blue/10' },
           { id: 'installment', label: t('cust_stat_installment'), value: stats.activeInstallments, icon: Calendar, color: 'text-accent-green bg-accent-green/10' },
           { id: 'overdue',     label: t('cust_stat_overdue'), value: stats.latePayments, icon: AlertCircle, color: 'text-accent-red bg-accent-red/10' },
           { id: 'gold',        label: t('cust_stat_gold'), value: stats.goldCount, icon: Star, color: 'text-yellow-500 bg-yellow-500/10' },
+          { id: 'balance',     label: t('cust_stat_balance'), value: stats.balanceCount, icon: CreditCard, color: 'text-accent-orange bg-accent-orange/10' },
         ].map((s, i) => (
           <div 
             key={i} 
@@ -539,7 +591,7 @@ const Customers = () => {
       {/* Customers Table */}
       <div className="bg-bg-secondary border border-border rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm" style={{minWidth:'1340px'}}>
+          <table className="w-full text-left text-sm" style={{minWidth:'1590px'}}>
             <colgroup>
               <col style={{width:'50px'}} />
               <col style={{width:'200px'}} />
@@ -551,6 +603,8 @@ const Customers = () => {
               <col style={{width:'90px'}} />
               <col style={{width:'160px'}} />
               <col style={{width:'150px'}} />
+              <col style={{width:'130px'}} />
+              <col style={{width:'120px'}} />
               <col style={{width:'110px'}} />
               <col style={{width:'10px'}} />
             </colgroup>
@@ -566,6 +620,8 @@ const Customers = () => {
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_used_items')}</th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('totalSpent')}>{t('cust_th_total')} <CustSortIcon col="totalSpent" /></th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('col_debt')}</th>
+                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('cust_th_balance')}</th>
+                <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('lastVisit')}>{t('cust_th_last_visit')} <CustSortIcon col="lastVisit" /></th>
                 <th className="px-6 py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('loyaltyLevel')}>{t('col_tier')} <CustSortIcon col="loyaltyLevel" /></th>
                 <th className="px-6 py-4"></th>
               </tr>
@@ -577,6 +633,12 @@ const Customers = () => {
                   <td className="px-6 py-4">
                     <p className="font-bold text-text-primary">{c.name}</p>
                     <p className="text-[10px] text-text-muted font-mono">{c.id}</p>
+                    {(c.group || c.tags?.length > 0) && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {c.group && <span className="px-1.5 py-0.5 rounded bg-accent-orange/10 text-accent-orange text-[10px] font-bold">{c.group}</span>}
+                        {(c.tags || []).slice(0, 3).map(tg => <span key={tg} className="px-1.5 py-0.5 rounded bg-accent-blue/10 text-accent-blue text-[10px] font-bold">#{tg}</span>)}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-text-secondary">
                     <div>{c.phone}</div>
@@ -614,6 +676,17 @@ const Customers = () => {
                       return debt > 0
                         ? <span className="font-bold text-accent-red">{formatPrice(debt)}</span>
                         : <span className="text-text-muted">—</span>
+                    })()}
+                  </td>
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                    {c.balance ? <span className={`font-bold ${c.balance > 0 ? 'text-accent-green' : 'text-accent-red'}`}>{formatPrice(c.balance)}</span> : <span className="text-text-muted">—</span>}
+                  </td>
+                  <td className="px-6 py-4 text-text-secondary text-xs whitespace-nowrap">
+                    {(() => {
+                      const lv = getLastVisit(c)
+                      if (!lv) return <span className="text-text-muted">—</span>
+                      const days = Math.floor((Date.now() - new Date(lv)) / 86400000)
+                      return <>{new Date(lv).toLocaleDateString('uz-UZ')}<p className="text-[10px] text-text-muted">{days <= 0 ? t('cust_today') : t('cust_days_ago', { n: days })}</p></>
                     })()}
                   </td>
                   <td className="px-6 py-4">
@@ -666,7 +739,7 @@ const Customers = () => {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="px-6 py-20 text-center">
+                  <td colSpan={14} className="px-6 py-20 text-center">
                     <Users size={40} className="mx-auto text-text-muted mb-4 opacity-20" />
                     <p className="text-text-muted">{t('cust_not_found')}</p>
                   </td>

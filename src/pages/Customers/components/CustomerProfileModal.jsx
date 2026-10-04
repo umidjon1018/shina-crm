@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArrowDownToLine, ArrowUpFromLine, Calendar, Check, CheckCircle, CreditCard, DollarSign, History, Info, Link2, Package, Pencil, Phone, Recycle, Star, Trash2, TrendingUp, User, Users, X } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
+import { Heart, MessageSquare, Wallet, Mail, MapPin, Tag, Clock } from 'lucide-react'
+import { PreferencesTab, NotesTab, BalanceTab, DebtPayPanel } from './ProfileExtraTabs'
 const CustomerProfileModal = ({ ctx }) => {
   const { t } = useTranslation()
   const {
@@ -35,6 +37,7 @@ const CustomerProfileModal = ({ ctx }) => {
     LOYALTY_CONFIG, formatPrice,
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
     CustSortIcon, allSales, MOCK_USED_SALES, MOCK_USED_STOCK,
+    products, getLastVisit, reloadCustomerData,
   } = ctx
   const MOCK_SALES = allSales || []
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
@@ -62,6 +65,10 @@ const CustomerProfileModal = ({ ctx }) => {
     getCustomerUsedSales(customer).reduce((sum, s) => sum + (s.items?.length || 0), 0)
   const getCustomerUsedStock = (customer) =>
     (MOCK_USED_STOCK || []).filter(u => u.customerId === customer.id)
+  const getCustomerDebt = (customer) => MOCK_SALES
+    .filter(s => s.customerId === customer.id && s.paymentType === 'installment' && s.status !== 'cancelled')
+    .reduce((sum, s) => sum + Math.max(0, s.installmentDebt ?? s.total ?? 0), 0)
+  const daysAgo = (d) => d ? Math.floor((Date.now() - new Date(d)) / 86400000) : null
 
   return (
     <>
@@ -109,17 +116,20 @@ const CustomerProfileModal = ({ ctx }) => {
               </div>
 
               {/* Tabs */}
-              <div className="flex border-b border-border bg-bg-secondary px-8">
+              <div className="flex border-b border-border bg-bg-secondary px-4 sm:px-8 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'general', label: t('cust_tab_general'), icon: Users },
                   { id: 'history', label: t('cust_tab_history'), icon: History },
                   { id: 'installments', label: t('cust_tab_installments'), icon: Calendar },
                   { id: 'used', label: t('cust_tab_used'), icon: Recycle },
+                  { id: 'preferences', label: t('cust_tab_preferences'), icon: Heart },
+                  { id: 'notes', label: t('cust_tab_notes'), icon: MessageSquare },
+                  { id: 'balance', label: t('cust_tab_balance'), icon: Wallet },
                 ].map(t => (
                   <button
                     key={t.id}
                     onClick={() => setModalTab(t.id)}
-                    className={`flex items-center gap-2 px-6 py-4 text-sm font-bold transition-all relative ${
+                    className={`flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative ${
                       modalTab === t.id ? 'text-accent-red' : 'text-text-muted hover:text-text-primary'
                     }`}
                   >
@@ -164,6 +174,59 @@ const CustomerProfileModal = ({ ctx }) => {
                         </div>
                       ))}
                     </div>
+
+                    {(() => {
+                      const all = getCustomerAllSales(selectedCustomer)
+                      const spent = getTotalSpent(selectedCustomer)
+                      const avg = all.length ? Math.round(spent / all.length) : 0
+                      const debt = getCustomerDebt(selectedCustomer)
+                      const bal = selectedCustomer.balance || 0
+                      const last = getLastVisit(selectedCustomer)
+                      const lastDays = daysAgo(last)
+                      const firstSale = all.reduce((m, s) => (!m || s.soldAt < m) ? s.soldAt : m, '')
+                      const regDate = selectedCustomer.createdAt || firstSale
+                      return (
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                          {[
+                            { label: t('cust_stat_avg_check'), value: formatPrice(avg), icon: TrendingUp },
+                            { label: t('cust_balance'), value: formatPrice(bal), icon: Wallet, color: bal > 0 ? 'text-accent-green' : bal < 0 ? 'text-accent-red' : null, tab: 'balance' },
+                            { label: t('col_debt'), value: formatPrice(debt), icon: CreditCard, color: debt > 0 ? 'text-accent-red' : null, tab: 'installments' },
+                            { label: t('cust_registered'), value: regDate ? new Date(regDate).toLocaleDateString('uz-UZ') : '—', icon: User },
+                            { label: t('cust_last_visit'), value: last ? new Date(last).toLocaleDateString('uz-UZ') : '—', sub: lastDays === null ? null : lastDays <= 0 ? t('cust_today') : t('cust_days_ago', { n: lastDays }), icon: Clock },
+                          ].map((s, i) => (
+                            <div key={i} onClick={s.tab ? () => setModalTab(s.tab) : undefined}
+                              className={`bg-bg-secondary border border-border rounded-2xl p-4 space-y-2 ${s.tab ? 'cursor-pointer hover:border-text-muted' : ''}`}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{s.label}</span>
+                                <s.icon size={14} className={s.color || 'text-text-muted'} />
+                              </div>
+                              <p className={`text-lg font-syne font-extrabold ${s.color || 'text-text-primary'}`}>{s.value}</p>
+                              {s.sub && <p className="text-[10px] text-text-muted -mt-1">{s.sub}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
+
+                    {(selectedCustomer.group || selectedCustomer.tags?.length > 0 || selectedCustomer.gender || selectedCustomer.address || selectedCustomer.email) && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCustomer.group && (
+                          <span className="flex items-center gap-1.5 text-sm bg-accent-orange/10 text-accent-orange rounded-xl px-3 py-2 font-bold"><Users size={14} />{selectedCustomer.group}</span>
+                        )}
+                        {(selectedCustomer.tags || []).map(tg => (
+                          <span key={tg} className="flex items-center gap-1 text-sm bg-accent-blue/10 text-accent-blue rounded-xl px-3 py-2 font-bold"><Tag size={13} />{tg}</span>
+                        ))}
+                        {selectedCustomer.gender && (
+                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><User size={14} className="text-text-muted" />{selectedCustomer.gender === 'female' ? t('cust_gender_female') : t('cust_gender_male')}</span>
+                        )}
+                        {selectedCustomer.address && (
+                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><MapPin size={14} className="text-text-muted" />{selectedCustomer.address}</span>
+                        )}
+                        {selectedCustomer.email && (
+                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><Mail size={14} className="text-text-muted" />{selectedCustomer.email}</span>
+                        )}
+                      </div>
+                    )}
 
                     {(selectedCustomer.birthDate || selectedCustomer.instagram || selectedCustomer.carModel) && (
                       <div className="flex flex-wrap gap-4">
@@ -251,19 +314,19 @@ const CustomerProfileModal = ({ ctx }) => {
                         })
                         return (
                           <div key={sale.id} className={`border rounded-2xl overflow-hidden transition-all ${
-                            isCancelled ? 'border-accent-red/20 opacity-70' :
+                            isCancelled ? 'border-accent-red/20 bg-accent-red/5' :
                             isQualified ? 'border-border bg-bg-secondary/30' : 'border-accent-orange/20 bg-accent-orange/5'
                           }`}>
                             <div className="p-4 bg-bg-secondary border-b border-border space-y-3">
                               <div className="flex items-center gap-3 flex-wrap">
                                 <span className="text-xs font-mono text-text-muted">[{sale.id}]</span>
-                                <span className={`text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{saleDate}</span>
+                                <span className={`text-sm font-bold text-text-primary`}>{saleDate}</span>
                                 {sale.soldByName && (
                                   <span className="flex items-center gap-1 text-xs text-text-muted">
                                     <User size={12} /> {sale.soldByName}
                                   </span>
                                 )}
-                                <span className={`ml-auto text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
+                                <span className={`ml-auto text-sm font-bold text-text-primary`}>
                                   {formatPrice(sale.total)}
                                 </span>
                               </div>
@@ -301,9 +364,9 @@ const CustomerProfileModal = ({ ctx }) => {
                                   <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-border/50 last:border-0">
                                     <div className="flex items-center gap-3">
                                       <span className={`text-[10px] font-mono text-text-muted ${barcodeSelectClass}`}>{item.barcode}</span>
-                                      <span className={`font-medium ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{item.name}</span>
+                                      <span className={`font-medium text-text-primary`}>{item.name}</span>
                                     </div>
-                                    <span className={`font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{formatPrice(item.salePrice)}</span>
+                                    <span className={`font-bold text-text-primary`}>{formatPrice(item.salePrice)}</span>
                                   </div>
                                 ))}
                               </div>
@@ -324,6 +387,7 @@ const CustomerProfileModal = ({ ctx }) => {
                   ).sort((a, b) => new Date(b.soldAt) - new Date(a.soldAt))
                   return (
                     <div className="space-y-4">
+                      <DebtPayPanel customer={selectedCustomer} totalDebt={getCustomerDebt(selectedCustomer)} selectedShopId={selectedShopId} onPaid={reloadCustomerData} />
                       {instPaymentSuccess && (
                         <motion.div
                           initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
@@ -465,6 +529,14 @@ const CustomerProfileModal = ({ ctx }) => {
                   )
                 })()}
 
+                {modalTab === 'preferences' && (
+                  <PreferencesTab sales={getCustomerAllSales(selectedCustomer)} products={products} />
+                )}
+                {modalTab === 'notes' && <NotesTab customer={selectedCustomer} user={user} />}
+                {modalTab === 'balance' && (
+                  <BalanceTab customer={selectedCustomer} user={user} selectedShopId={selectedShopId} onChanged={reloadCustomerData} />
+                )}
+
                 {modalTab === 'used' && (() => {
                   const acquiredItems = getCustomerUsedStock(selectedCustomer)
                     .slice()
@@ -564,14 +636,14 @@ const CustomerProfileModal = ({ ctx }) => {
                               })
                               return (
                                 <div key={sale.id} className={`border rounded-2xl overflow-hidden transition-all ${
-                                  isCancelled ? 'border-accent-red/20 opacity-70' :
+                                  isCancelled ? 'border-accent-red/20 bg-accent-red/5' :
                                   isQualified ? 'border-border bg-bg-secondary/30' : 'border-accent-orange/20 bg-accent-orange/5'
                                 }`}>
                                   <div className="p-4 bg-bg-secondary border-b border-border space-y-3">
                                     <div className="flex items-center gap-3 flex-wrap">
                                       <span className="text-xs font-mono text-text-muted">[{sale.id}]</span>
-                                      <span className={`text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{saleDate}</span>
-                                      <span className={`ml-auto text-sm font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>
+                                      <span className={`text-sm font-bold text-text-primary`}>{saleDate}</span>
+                                      <span className={`ml-auto text-sm font-bold text-text-primary`}>
                                         {formatPrice(sale.total)}
                                       </span>
                                     </div>
@@ -607,8 +679,8 @@ const CustomerProfileModal = ({ ctx }) => {
                                     <div className="space-y-2">
                                       {(sale.items || []).map((item, idx) => (
                                         <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-border/50 last:border-0">
-                                          <span className={`font-medium ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{item.name}</span>
-                                          <span className={`font-bold ${isCancelled ? 'line-through text-text-muted' : 'text-text-primary'}`}>{formatPrice(item.salePrice)}</span>
+                                          <span className={`font-medium text-text-primary`}>{item.name}</span>
+                                          <span className={`font-bold text-text-primary`}>{formatPrice(item.salePrice)}</span>
                                         </div>
                                       ))}
                                     </div>

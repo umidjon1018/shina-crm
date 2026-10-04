@@ -6,6 +6,7 @@ import { UserPlus, X, Phone, User, Calendar, Star } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useShopStore } from '../../../store/shopStore'
 import { ShopPickerModal } from '../../../components/ShopPickerModal'
+import CustomerExtraFields from './CustomerExtraFields'
 
 const AddCustomerModal = ({ ctx }) => {
   const { t } = useTranslation()
@@ -34,7 +35,7 @@ const AddCustomerModal = ({ ctx }) => {
     stats, filtered,
     LOYALTY_CONFIG, formatPrice,
     loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent, silverVisits,
-    CustSortIcon,
+    CustSortIcon, customerGroups, customerTags,
   } = ctx
   return (
     <>
@@ -60,7 +61,7 @@ const AddCustomerModal = ({ ctx }) => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-bg-primary border border-border rounded-3xl p-8 shadow-2xl"
+              className="relative w-full max-w-md bg-bg-primary border border-border rounded-3xl p-8 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-syne font-extrabold text-text-primary">{t('cust_new')}</h3>
@@ -119,6 +120,7 @@ const AddCustomerModal = ({ ctx }) => {
                     className="w-full px-4 py-3 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red"
                   />
                 </div>
+                <CustomerExtraFields form={newCust} setForm={setNewCust} groups={customerGroups} allTags={customerTags} />
                 {addError && (
                   <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-4 py-2">{addError}</div>
                 )}
