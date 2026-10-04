@@ -2550,4 +2550,6 @@ export default {
   offline_queue: 'ta amal navbatda',
   syncing: 'Sinxronlanmoqda...',
   sync_done: 'Sinxronlash tugadi',
+  prod_img_upload_err: "Rasmni o'qib bo'lmadi",
+  prod_img_save_err: "Rasmlarni saqlab bo'lmadi",
 }

@@ -17,8 +17,7 @@
       "runtimeArgs": [
         "--prefix",
         "../shina_crm_backend",
-        "run",
-        "dev"
+        "start"
       ],
       "port": 3000
     },

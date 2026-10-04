@@ -2541,4 +2541,6 @@ export default {
   offline_queue: 'действий в очереди',
   syncing: 'Синхронизация...',
   sync_done: 'Синхронизация завершена',
+  prod_img_upload_err: "Не удалось прочитать изображение",
+  prod_img_save_err: "Не удалось сохранить изображения",
 }

@@ -8,6 +8,7 @@ import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
 import { renameAttributeKey } from '../../../api/itemService'
 import { bulkUpdatePrices } from '../../../api/productService'
+import { compressImage } from '../../../api/productImageService'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -104,9 +105,9 @@ const ProductsTab = ({ ctx }) => {
   const handleModalImageUpload = (e) => {
     const files = Array.from(e.target.files || [])
     files.forEach(file => {
-      const reader = new FileReader()
-      reader.onload = ev => setModalImages(prev => [...prev, ev.target.result])
-      reader.readAsDataURL(file)
+      compressImage(file)
+        .then(dataUrl => setModalImages(prev => [...prev, dataUrl]))
+        .catch(() => alert(t('prod_img_upload_err')))
     })
     e.target.value = ''
   }
@@ -1800,7 +1801,8 @@ const ProductsTab = ({ ctx }) => {
                                 installmentMonths,
                               })
                               if (created?.id && modalImages.length > 0) {
-                                setProductImages(created.id, modalImages)
+                                try { await setProductImages(created.id, modalImages) }
+                                catch (e) { alert(e?.response?.data?.error || t('prod_img_save_err')) }
                               }
                             } else {
                               await apiUpdateProduct(editingProduct.id, {
@@ -1811,7 +1813,8 @@ const ProductsTab = ({ ctx }) => {
                                 attribute, carCategory, notes,
                                 installmentMonths,
                               })
-                              setProductImages(editingProduct.id, modalImages)
+                              try { await setProductImages(editingProduct.id, modalImages) }
+                              catch (e) { alert(e?.response?.data?.error || t('prod_img_save_err')) }
                             }
                             await refreshProducts()
                             bump()

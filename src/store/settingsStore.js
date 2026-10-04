@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getEmployees, createEmployee, updateEmployee as apiUpdateEmp, deactivateEmployee, activateEmployee, deleteEmployee } from '../api/employeeService'
+import { getProductImageMap, saveProductImages } from '../api/productImageService'
 import { getCategories, createCategory, updateCategory as apiUpdateCat, toggleCategory as apiToggleCat, deleteCategory as apiDeleteCat } from '../api/categoryService'
 
 export const useSettingsStore = create(
@@ -15,11 +16,15 @@ export const useSettingsStore = create(
       sidebarLogoSize: 'medium',   // 'small'|'medium'|'large'
 
 
-      // Tovar rasmlari: { [productId]: base64[] }
+      // Tovar rasmlari: { [productId]: url[] } — serverda saqlanadi, bu yerda kesh
       productImages: {},
-      setProductImages: (productId, images) => set(s => ({
-        productImages: { ...s.productImages, [String(productId)]: images }
-      })),
+      loadProductImages: async () => {
+        try { set({ productImages: await getProductImageMap() }) } catch {}
+      },
+      setProductImages: async (productId, images) => {
+        const urls = await saveProductImages(productId, images)
+        set(s => ({ productImages: { ...s.productImages, [String(productId)]: urls } }))
+      },
 
       // Narxnoma dizayn sozlamalari
       priceListSettings: {
