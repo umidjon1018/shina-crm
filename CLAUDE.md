@@ -475,7 +475,7 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-04 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-05 (16-deploy)** — backend `1417095`, frontend `6f505bff`. Navbat bo'sh.
+**Oxirgi deploy: 2026-10-05 (17-deploy)** — backend `19dc412`, frontend `4fea9dba`. Navbat bo'sh.
 Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
 
 ### Xavfsiz deploy tartibi (har safar)
