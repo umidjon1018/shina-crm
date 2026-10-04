@@ -5,7 +5,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { fmtNum } from '../aiHelpers'
-import { getSaleProfit } from '../../../utils/profitHelpers'
+import { getNetSaleProfit, getUsedSaleProfit, isExchangeCancel } from '../../../utils/profitHelpers'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
@@ -65,7 +65,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
       const name = s.soldByName || s.cashierName || 'Noma\'lum'
       const e = ensureEntry(id, name)
 
-      if (s.status === 'cancelled' && !s._isExchange) {
+      if (s.status === 'cancelled' && !isExchangeCancel(s)) {
         e.cancelled++
         return
       }
@@ -73,7 +73,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
 
       e.sales++
       e.revenue += s.total || 0
-      e.profit  += getSaleProfit(s)
+      e.profit  += getNetSaleProfit(s)
 
       if (s.soldAt?.startsWith(thisMonth)) {
         e.thisMonthSales++
@@ -115,7 +115,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
       const e = ensureEntry(id, name)
       e.usedSales++
       e.revenue += s.total || 0
-      e.profit  += getSaleProfit(s)
+      e.profit  += getUsedSaleProfit(s) - (s.paymentType === 'installment' ? (s.installmentCommissionAmount ?? 0) : 0)
       if (s.soldAt?.startsWith(thisMonth)) {
         e.thisMonthSales++
         e.thisMonthRevenue += s.total || 0

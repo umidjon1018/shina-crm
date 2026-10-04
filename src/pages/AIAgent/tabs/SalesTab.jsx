@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
-import { getSaleProfit } from '../../../utils/profitHelpers'
+import { getNetSaleProfit, getUsedSaleProfit, isExchangeCancel } from '../../../utils/profitHelpers'
 import { fmtNum } from '../aiHelpers'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
@@ -36,8 +36,8 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
 
   const completedSales    = MOCK_SALES.filter(s => s.status !== 'cancelled')
   const cancelledSales    = MOCK_SALES.filter(s => s.status === 'cancelled')
-  const realCancelled     = cancelledSales.filter(s => !s._isExchange)
-  const exchanged         = cancelledSales.filter(s => s._isExchange)
+  const realCancelled     = cancelledSales.filter(s => !isExchangeCancel(s))
+  const exchanged         = cancelledSales.filter(s => isExchangeCancel(s))
   const usedCompleted     = MOCK_USED_SALES.filter(s => s.status !== 'cancelled')
 
   // ---- SOTUV ----
@@ -45,8 +45,9 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
   const usedRevenue = usedCompleted.reduce((s, x) => s + (x.total || 0), 0)
   const totalRevenue = newRevenue + usedRevenue
 
-  const newProfit  = completedSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
-  const usedProfit = usedCompleted.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+  const newProfit  = completedSales.reduce((s, x) => s + getNetSaleProfit(x), 0)
+  // B/U tannarxi = acquiredPrice (Hisobotlar bilan bir xil formula)
+  const usedProfit = usedCompleted.reduce((s, x) => s + getUsedSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
   const totalProfit = newProfit + usedProfit
 
   const avgMargin   = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0
@@ -122,7 +123,7 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
       if (!m[sid]) m[sid] = { sid, name: sname, sales: 0, revenue: 0, profit: 0 }
       m[sid].sales++
       m[sid].revenue += s.total || 0
-      m[sid].profit  += getSaleProfit(s)
+      m[sid].profit  += s.isUsedSale ? getUsedSaleProfit(s) - (s.paymentType === 'installment' ? (s.installmentCommissionAmount ?? 0) : 0) : getNetSaleProfit(s)
     })
     return Object.values(m).sort((a, b) => b.revenue - a.revenue)
   }, [_allSales, _allUsedSales, selectedShopId])

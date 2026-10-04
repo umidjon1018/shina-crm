@@ -10,6 +10,7 @@ const IgIcon = ({ size = 16, className = '' }) => (
   </svg>
 )
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
+import { isExchangeCancel } from '../../../utils/profitHelpers'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
@@ -142,7 +143,7 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
 function CustomerProfileModal({ customer, sales, reservations, onClose, onReserve }) {
   const badge = LOYALTY_BADGE[customer.loyaltyLevel || 'none'] || LOYALTY_BADGE.none
   const customerSales = sales.filter(s => s.customerId === customer.id && s.status !== 'cancelled')
-  const cancelledSales = sales.filter(s => s.customerId === customer.id && s.status === 'cancelled' && !s._isExchange)
+  const cancelledSales = sales.filter(s => s.customerId === customer.id && s.status === 'cancelled' && !isExchangeCancel(s))
   const customerReservations = reservations.filter(r => r.customer_phone === customer.phone || r.customer_name === customer.name)
   const totalSpend = customerSales.reduce((s, x) => s + (x.total || 0), 0)
   const daysUntilBd = getDaysUntilBirthday(customer.birthDate)
@@ -311,7 +312,7 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
   const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(s => String(s.shopId) === String(selectedShopId))
   const shopCustomers = selectedShopId === 'all' ? MOCK_CUSTOMERS : MOCK_CUSTOMERS.filter(c => !c.shopId || String(c.shopId) === String(selectedShopId))
   const completedSales = filterShop(_allSales).filter(s => s.status !== 'cancelled')
-  const cancelledSales = filterShop(_allSales).filter(s => s.status === 'cancelled' && !s._isExchange)
+  const cancelledSales = filterShop(_allSales).filter(s => s.status === 'cancelled' && !isExchangeCancel(s))
   const exchangedSales = filterShop(_allSales).filter(s => s._isExchange)
 
   useEffect(() => {
