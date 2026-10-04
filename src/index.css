@@ -117,3 +117,20 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border, #2a2a3e) var(--bg-tertiary, #1a1a2e);
 }
+
+/* iPhone notch / status bar (viewport-fit=cover + black-translucent) */
+.safe-header {
+  padding-top: calc(0.75rem + env(safe-area-inset-top));
+  padding-left: calc(1rem + env(safe-area-inset-left));
+  padding-right: calc(1rem + env(safe-area-inset-right));
+}
+.safe-sidebar {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-bottom {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .safe-bottom { padding-bottom: 1.5rem; }
+}

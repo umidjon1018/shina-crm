@@ -124,7 +124,7 @@ export const MainLayout = () => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <div className="flex h-screen bg-bg-primary text-text-primary overflow-hidden">
+    <div className="flex h-[100dvh] bg-bg-primary text-text-primary overflow-hidden">
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
@@ -135,7 +135,7 @@ export const MainLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-64 bg-sidebar border-r border-border/30 z-50
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-64 safe-sidebar bg-sidebar border-r border-border/30 z-50
         transition-transform duration-300 transform flex flex-col flex-shrink-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
@@ -335,7 +335,7 @@ export const MainLayout = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary">
+        <header className="lg:hidden flex items-center justify-between safe-header pb-3 border-b border-border bg-bg-secondary">
           <button onClick={() => setIsSidebarOpen(true)} className="p-1.5 text-text-secondary">
             <Menu size={22} />
           </button>
@@ -344,7 +344,7 @@ export const MainLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 safe-bottom no-scrollbar">
           <Outlet />
         </div>
       </main>
