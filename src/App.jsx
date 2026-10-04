@@ -2,7 +2,7 @@ import { useEffect, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useThemeStore } from './store/themeStore'
 import { useLangStore } from './store/langStore'
-import { ProtectedRoute } from './ProtectedRoute'
+import { ProtectedRoute, DashboardGate } from './ProtectedRoute'
 
 // Layouts
 import { AuthLayout } from './layouts/AuthLayout'
@@ -48,7 +48,7 @@ function App() {
 
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardGate><Dashboard /></DashboardGate>
             </ProtectedRoute>
           } />
 

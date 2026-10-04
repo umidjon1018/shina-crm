@@ -42,17 +42,19 @@ export const Management = () => {
   const formatDate = (d) => formatDateWithMonths(d, MONTHS)
   const som = t('unit_som')
   const pcs = t('unit_pcs')
-  const { user } = useAuthStore()
+  const { user, hasPermission } = useAuthStore()
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
   const { notifications, addNotification, markRead, markAllRead, getUnreadCount, removeNotification, removeAllNotifications, updateNotification } = useNotificationStore()
   const { bump } = useDataStore()
-  const [activeTab, setActiveTab]     = useState(() => {
+  const [pickedTab, setActiveTab]     = useState(() => {
     // URL dan tab parametrini o'qish
     const params = new URLSearchParams(window.location.search)
     const tab = params.get('tab')
     const validTabs = ['notifications','products','employees','discounts','bundles','settings']
     return validTabs.includes(tab) ? tab : 'notifications'
   })
+  const MG_TABS = TABS.filter(tab => hasPermission('management.' + tab.id))
+  const activeTab = MG_TABS.some(tab => tab.id === pickedTab) ? pickedTab : MG_TABS[0]?.id
   const [filterType, setFilterType]   = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [editingProduct, setEditingProduct] = useState(null)
@@ -546,7 +548,7 @@ export const Management = () => {
 
       {/* Tabs */}
       <div className="flex flex-wrap items-center gap-2 p-1.5 bg-bg-secondary border border-border rounded-2xl w-fit">
-        {TABS.map(tab => (
+        {MG_TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}

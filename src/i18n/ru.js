@@ -3550,4 +3550,12 @@ export default {
   int_pos_qr_btn: "Оплата по QR ({{list}})",
   int_pos_paid: "Оплачено через {{provider}}",
   int_pos_finish: "Завершить продажу",
+  perm_warehouse_stocktake: "Инвентаризация",
+  perm_warehouse_writeoff: "Списание",
+  perm_sales_reservations: "Брони",
+  perm_income_orders: "Заказы",
+  perm_income_settlements: "Взаиморасчёты",
+  perm_income_payments: "История платежей",
+  perm_income_returns: "Возвраты",
+  perm_management_bundles: "Комплекты",
 }

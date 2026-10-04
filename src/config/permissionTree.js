@@ -16,12 +16,15 @@ export const PERMISSION_TREE = [
         ]
       },
       { id: 'warehouse.barcode', label: 'Barkod' },
+      { id: 'warehouse.stocktake', label: 'Inventarizatsiya' },
+      { id: 'warehouse.writeoff', label: 'Hisobdan chiqarish' },
     ]
   },
   {
     id: 'sales', label: 'Sotuv', children: [
       { id: 'sales.new_sale', label: 'Yangi sotuv' },
       { id: 'sales.used_sale', label: "B/U Sotuv" },
+      { id: 'sales.reservations', label: 'Bronlar' },
       { id: 'sales.returns', label: 'Bekor qilish' },
       { id: 'sales.history', label: 'Sotuv tarixi' },
       { id: 'sales.returns_history', label: 'Bekor tarixi' },
@@ -41,6 +44,10 @@ export const PERMISSION_TREE = [
       { id: 'income.batches', label: 'Kirimlar' },
       { id: 'income.suppliers', label: 'Yetkazib beruvchilar' },
       { id: 'income.debts', label: 'Qarzlar' },
+      { id: 'income.orders', label: 'Buyurtmalar' },
+      { id: 'income.settlements', label: 'Hisob-kitob' },
+      { id: 'income.payments', label: "To'lovlar tarixi" },
+      { id: 'income.returns', label: 'Qaytarish' },
     ]
   },
   {
@@ -95,6 +102,7 @@ export const PERMISSION_TREE = [
       { id: 'management.products', label: 'Tovarlar' },
       { id: 'management.employees', label: 'Xodimlar' },
       { id: 'management.discounts', label: 'Chegirmalar' },
+      { id: 'management.bundles', label: 'Komplektlar' },
       { id: 'management.shops', label: "Do'konlar" },
       { id: 'management.settings', label: 'Sozlamalar' },
     ]

@@ -20,12 +20,14 @@ import WriteoffTab from './tabs/WriteoffTab'
 
 const Warehouse = () => {
   const { t } = useTranslation()
-  const { user } = useAuthStore()
+  const { user, hasPermission } = useAuthStore()
   const { productCategories, downloadEnabled, notificationSettings } = useSettingsStore()
   const { addNotification } = useNotificationStore()
   const { version, bump } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const [activeTab, setActiveTab] = useState('stock')
+  const [pickedTab, setActiveTab] = useState('stock')
+  const WH_TABS = TABS.filter(id => hasPermission('warehouse.' + id))
+  const activeTab = WH_TABS.includes(pickedTab) ? pickedTab : WH_TABS[0]
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
   const [items, setItems] = useState([])
@@ -79,7 +81,7 @@ const Warehouse = () => {
       </div>
 
       <div className="flex gap-2 bg-bg-secondary border border-border rounded-2xl p-1.5 w-fit max-w-full overflow-x-auto no-scrollbar">
-        {TABS.map(tab => (
+        {WH_TABS.map(tab => (
           <TabBtn key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
             {t('wh_tab_' + tab)}
           </TabBtn>

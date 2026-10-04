@@ -35,7 +35,7 @@ const Sales = () => {
   const {
     user, bump, addCustomer,
     shopPickCallback, setShopPickCallback,
-    activeTab, setActiveTab,
+    activeTab: pickedTab, setActiveTab,
     cartItems, clearCart,
     selectedCustomer, setSelectedCustomer,
     customerSearch, setCustomerSearch,
@@ -114,6 +114,9 @@ const Sales = () => {
     profitSearch, setProfitSearch, profitPage, setProfitPage,
     profitSortField, profitSortOrder, handleProfitSort,
   } = state
+  const SALES_TABS = ['new_sale', 'used_sale', 'reservations', 'returns', 'history', 'returns_history', 'installment', 'profit']
+    .filter(id => hasPermission('sales.' + id))
+  const activeTab = SALES_TABS.includes(pickedTab) ? pickedTab : SALES_TABS[0]
 
   return (
     <div className="min-h-[calc(100vh-120px)] space-y-6">
@@ -135,7 +138,7 @@ const Sales = () => {
             { id: 'returns_history', label: t('sl_tab_returns_history'), icon: XCircle },
             { id: 'installment', label: t('sl_tab_installment'), icon: Calendar },
             { id: 'profit', label: t('sl_tab_profit'), icon: TrendingUp },
-          ].map(tab => (
+          ].filter(tab => SALES_TABS.includes(tab.id)).map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}

@@ -377,7 +377,8 @@ export const useAuthStore = create(
         for (let i = parts.length; i > 0; i--) {
           if (tree.includes(parts.slice(0, i).join('.'))) return true
         }
-        return false
+        // Bo'limning faqat ayrim tablari belgilangan bo'lsa ham bo'limning o'ziga kirish bor
+        return tree.some(id => id.startsWith(permission + '.'))
       },
     }),
     {

@@ -3554,4 +3554,12 @@ export default {
   int_pos_qr_btn: "QR orqali to'lash ({{list}})",
   int_pos_paid: "{{provider}} orqali to'langan",
   int_pos_finish: "Sotuvni yakunlash",
+  perm_warehouse_stocktake: "Inventarizatsiya",
+  perm_warehouse_writeoff: "Hisobdan chiqarish",
+  perm_sales_reservations: "Bronlar",
+  perm_income_orders: "Buyurtmalar",
+  perm_income_settlements: "Hisob-kitob",
+  perm_income_payments: "To'lovlar tarixi",
+  perm_income_returns: "Qaytarish",
+  perm_management_bundles: "Komplektlar",
 }

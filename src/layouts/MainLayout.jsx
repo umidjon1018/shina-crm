@@ -260,7 +260,7 @@ export const MainLayout = () => {
         <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-3">
 
           {/* Main */}
-          {!hidden.includes('dashboard') && (
+          {hasPermission('dashboard') && !hidden.includes('dashboard') && (
             <SidebarSection label={t('nav_main')}>
               <SidebarItem to="/dashboard" icon={LayoutDashboard} label={getSlLabel('dashboard') || t('dashboard')} isActive={isActive('/dashboard')} onClick={closeSidebar} replace={isSidebarOpen} />
             </SidebarSection>

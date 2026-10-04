@@ -1,3 +1,4 @@
+import { useAuthStore } from '../../../store/authStore'
 import { motion } from 'framer-motion'
 import { Calendar, TrendingUp, Search, X, CheckCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +9,9 @@ const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + 
 const InstallmentTab = ({ ctx }) => {
   const { t } = useTranslation()
   const som = t('unit_som')
+  const hasPermission = useAuthStore(st => st.hasPermission)
+  const canPercent = hasPermission('sales.installment.percent_columns')
+  const canOrgComm = hasPermission('sales.installment.org_commission')
   const {
     installmentMonthFilter, setInstallmentMonthFilter, installmentMonthOptions, formatMonthValue,
     installmentSearch, setInstallmentSearch, installmentTypeFilter, setInstallmentTypeFilter,
@@ -82,7 +86,7 @@ const InstallmentTab = ({ ctx }) => {
                   ['category', t('col_category')], ['soldByName', t('col_employee')], ['customerName', t('col_customer')],
                   ['qty', t('sl_inst_th_qty')], ['total', t('col_total_sum')], ['installmentOrgName', t('sl_inst_th_org')],
                   ['installmentTermMonths', t('sl_inst_th_term')], ['installmentStatus', t('col_status')],
-                  ['installmentCommissionPercent', t('sl_inst_th_percent')], ['installmentCommissionAmount', t('sl_inst_th_commission')],
+                  ...(canPercent ? [['installmentCommissionPercent', t('sl_inst_th_percent')], ['installmentCommissionAmount', t('sl_inst_th_commission')]] : []),
                 ].map(([key, label]) => (
                   <th key={key} onClick={() => handleInstallmentSort(key)}
                     className="px-4 py-3 font-bold uppercase cursor-pointer hover:text-text-primary select-none transition-colors">
@@ -140,8 +144,8 @@ const InstallmentTab = ({ ctx }) => {
                         {s.installmentStatus}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-text-secondary">{s.installmentCommissionPercent ?? installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0}%</td>
-                    <td className={`px-4 py-3.5 text-text-muted font-mono ${barcodeSelectClass}`}>{formatPrice(s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0) / 100)), som)}</td>
+                    {canPercent && <td className="px-4 py-3.5 text-text-secondary">{s.installmentCommissionPercent ?? installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0}%</td>}
+                    {canPercent && <td className={`px-4 py-3.5 text-text-muted font-mono ${barcodeSelectClass}`}>{formatPrice(s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0) / 100)), som)}</td>}
                     <td className="px-4 py-3.5 text-center">
                       {!isFullyPaid ? (
                         <button onClick={() => { setCustomerPayModal({ customerId: s.customerId, customerName: s.customerName }); setCustomerPaySaleId(null); setCustomerPayAmount('') }}
@@ -180,7 +184,7 @@ const InstallmentTab = ({ ctx }) => {
             <thead className="bg-bg-tertiary text-text-muted">
               <tr>
                 {[t('sl_inst_org_th_name'), t('sl_inst_org_th_percent'), t('sl_inst_org_th_total_sales'), t('sl_inst_org_th_month_sales'), t('sl_inst_org_th_total_paid'), t('sl_inst_org_th_month_paid'), t('sl_inst_org_th_total_comm'), t('sl_inst_org_th_month_comm'), t('sl_inst_org_th_debt'), t('sl_inst_org_detail_btn')].map((label, i) => (
-                  <th key={i} className={`px-4 py-3 font-bold uppercase ${[2,3].includes(i) ? 'text-center' : ''}`}>{label}</th>
+                  (canOrgComm || ![1, 6, 7].includes(i)) && <th key={i} className={`px-4 py-3 font-bold uppercase ${[2,3].includes(i) ? 'text-center' : ''}`}>{label}</th>
                 ))}
               </tr>
             </thead>
@@ -197,13 +201,13 @@ const InstallmentTab = ({ ctx }) => {
                 return (
                   <tr key={org.id} className="hover:bg-bg-tertiary/20 transition-colors">
                     <td className="px-4 py-3.5 font-bold">{org.name}</td>
-                    <td className="px-4 py-3.5 text-text-secondary">{org.commissionPercent}%</td>
+                    {canOrgComm && <td className="px-4 py-3.5 text-text-secondary">{org.commissionPercent}%</td>}
                     <td className="px-4 py-3.5 text-center text-text-secondary">{t('sl_inst_org_count', { n: orgSales.length })}</td>
                     <td className="px-4 py-3.5 text-center text-accent-blue">{t('sl_inst_org_count', { n: thisMonthSales.length })}</td>
                     <td className="px-4 py-3.5 text-accent-green">{formatPrice(totalPaid, som)}</td>
                     <td className="px-4 py-3.5 text-text-secondary">{formatPrice(thisMonthPaid, som)}</td>
-                    <td className="px-4 py-3.5 text-text-muted">{formatPrice(totalComm, som)}</td>
-                    <td className="px-4 py-3.5 text-text-muted">{formatPrice(thisMonthComm, som)}</td>
+                    {canOrgComm && <td className="px-4 py-3.5 text-text-muted">{formatPrice(totalComm, som)}</td>}
+                    {canOrgComm && <td className="px-4 py-3.5 text-text-muted">{formatPrice(thisMonthComm, som)}</td>}
                     <td className="px-4 py-3.5 font-bold text-accent-red">{formatPrice(totalDebt, som)}</td>
                     <td className="px-4 py-3.5 text-center">
                       <button onClick={() => { setDetailedOrg(org); setOrgMonthFilter('all') }}

@@ -35,7 +35,7 @@ import UnitInput from '../../components/UnitInput'
 const Income = () => {
   const { t } = useTranslation()
   const som = t('unit_som')
-  const { user } = useAuthStore()
+  const { user, hasPermission } = useAuthStore()
   const { productCategories, usdRate, productAttributeDefs, productImages } = useSettingsStore()
   const { bump } = useDataStore()
   const { selectedShopId, shops } = useShopStore()
@@ -48,7 +48,9 @@ const Income = () => {
   const [orders, setOrders] = useState([])
   const [returns, setReturns] = useState([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('batches')
+  const [pickedTab, setActiveTab] = useState('batches')
+  const INC_TABS = ['batches', 'suppliers', 'debts', 'orders', 'settlements', 'payments', 'returns'].filter(id => hasPermission('income.' + id))
+  const activeTab = INC_TABS.includes(pickedTab) ? pickedTab : INC_TABS[0]
 
   // Modals
   const [showSupplierModal, setShowSupplierModal] = useState(false)
@@ -229,7 +231,7 @@ const Income = () => {
     { id: 'settlements', label: t('sup_tab_settlements'), icon: Scale },
     { id: 'payments', label: t('sup_tab_payments'), icon: History },
     { id: 'returns', label: t('sup_tab_returns'), icon: Undo2 },
-  ]
+  ].filter(tab => INC_TABS.includes(tab.id))
 
 
   const onDeleteSupplier = (s) => setDeleteSupplierConfirm(s)
