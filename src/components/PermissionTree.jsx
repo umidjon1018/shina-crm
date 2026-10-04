@@ -67,7 +67,7 @@ function TreeNode({ node, checked, onChange, denied, onDeniedChange, ceiling, de
           <span className={`font-semibold ${depth === 0 ? 'text-text-primary' : 'text-text-secondary'}`}>
             {depth === 0 && sidebarLabels?.[SIDEBAR_KEY_MAP[node.id] || node.id]
               ? sidebarLabels[SIDEBAR_KEY_MAP[node.id] || node.id]
-              : t('perm_' + node.id.replace(/\./g, '_'))}
+              : t('perm_' + node.id.replace(/\./g, '_'), { defaultValue: node.label })}
           </span>
         </label>
       </div>
