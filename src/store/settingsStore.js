@@ -233,16 +233,25 @@ export const useSettingsStore = create(
       loadBranding: async (isAdmin = false) => {
         try {
           const b = await getBranding()
+          const cur = get()
+          // Admin qurilmasida logotip (yoki uning asl nusxasi) bor, serverda yo'q — bu o'chirish emas
+          // (o'chirishda asl nusxa ham o'chadi), demak serverga qayta yuboriladi
+          const localLogo = cur.companyLogo || cur.companyLogoOriginal || null
+          if (isAdmin && !b.companyLogo && localLogo) {
+            await saveBranding({ companyLogo: localLogo })
+            b.companyLogo = localLogo
+          }
           const has = BRANDING_KEYS.some(k => b[k] !== undefined)
           if (has) {
             const next = {}
             BRANDING_KEYS.forEach(k => { if (b[k] !== undefined) next[k] = b[k] })
             set(next)
           } else if (isAdmin) {
-            const cur = get()
+            // Birinchi ko'chirish: faqat haqiqatda o'rnatilgan (bo'sh/standart bo'lmagan) qiymatlar
+            const defaults = { companyName: 'Shina CRM', companyLogo: null, loginIconMode: 'animation', loginPageTitle: '', sidebarLogoSize: 'medium' }
             const local = {}
-            BRANDING_KEYS.forEach(k => { local[k] = cur[k] ?? null })
-            await saveBranding(local)
+            BRANDING_KEYS.forEach(k => { if (cur[k] != null && cur[k] !== '' && cur[k] !== defaults[k]) local[k] = cur[k] })
+            if (Object.keys(local).length) await saveBranding(local)
           }
         } catch { /* oflayn — mahalliy qiymatlar qoladi */ }
       },
