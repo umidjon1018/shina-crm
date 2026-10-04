@@ -5,7 +5,7 @@ import { AlertCircle, ArrowDownToLine, ArrowUpFromLine, Calendar, Check, CheckCi
 import { useSettingsStore } from '../../../store/settingsStore'
 import { Heart, MessageSquare, Wallet, Mail, MapPin, Tag, Clock } from 'lucide-react'
 import { PreferencesTab, NotesTab, BalanceTab, DebtPayPanel } from './ProfileExtraTabs'
-import CustomerSmsTab from './CustomerSmsTab'
+import CustomerTelegramTab from './CustomerTelegramTab'
 import { useAuthStore } from '../../../store/authStore'
 const CustomerProfileModal = ({ ctx }) => {
   const { t } = useTranslation()
@@ -128,7 +128,7 @@ const CustomerProfileModal = ({ ctx }) => {
                   { id: 'preferences', label: t('cust_tab_preferences'), icon: Heart },
                   { id: 'notes', label: t('cust_tab_notes'), icon: MessageSquare },
                   { id: 'balance', label: t('cust_tab_balance'), icon: Wallet },
-                  ...(canSms ? [{ id: 'sms', label: 'SMS', icon: MessageSquare }] : []),
+                  ...(canSms ? [{ id: 'telegram', label: 'Telegram', icon: MessageSquare }] : []),
                 ].map(t => (
                   <button
                     key={t.id}
@@ -536,7 +536,7 @@ const CustomerProfileModal = ({ ctx }) => {
                   <PreferencesTab sales={getCustomerAllSales(selectedCustomer)} products={products} />
                 )}
                 {modalTab === 'notes' && <NotesTab customer={selectedCustomer} user={user} />}
-                {modalTab === 'sms' && <CustomerSmsTab customer={selectedCustomer} />}
+                {modalTab === 'telegram' && <CustomerTelegramTab customer={selectedCustomer} />}
                 {modalTab === 'balance' && (
                   <BalanceTab customer={selectedCustomer} user={user} selectedShopId={selectedShopId} onChanged={reloadCustomerData} />
                 )}

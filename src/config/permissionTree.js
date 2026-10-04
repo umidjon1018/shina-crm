@@ -72,9 +72,9 @@ export const PERMISSION_TREE = [
       { id: 'marketing.promotions', label: 'Aksiyalar' },
       { id: 'marketing.codes', label: 'Promokodlar va vaucherlar' },
       { id: 'marketing.gift_cards', label: "Sovg'a sertifikatlari" },
-      { id: 'marketing.sms', label: 'SMS xabarlar' },
+      { id: 'marketing.messages', label: 'Telegram xabarlar' },
       { id: 'marketing.birthdays', label: "Tug'ilgan kunlar" },
-      { id: 'marketing.settings', label: 'SMS sozlamalari' },
+      { id: 'marketing.settings', label: 'Telegram bot sozlamalari' },
     ]
   },
   {

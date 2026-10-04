@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Cake, CheckCircle2, Send, Settings2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { getBirthdays, greetBirthday, getSmsSettings } from '../../../api/marketingService'
+import { getBirthdays, greetBirthday, getTgSettings } from '../../../api/marketingService'
 import { fmtD, fmtDT } from '../components/mkHelpers'
 
 const BirthdaysTab = ({ goSettings }) => {
@@ -15,7 +15,7 @@ const BirthdaysTab = ({ goSettings }) => {
 
   const load = () => { setLoading(true); getBirthdays(days).then(setList).catch(() => setList([])).finally(() => setLoading(false)) }
   useEffect(load, [days])
-  useEffect(() => { getSmsSettings().then(setCfg).catch(() => {}) }, [])
+  useEffect(() => { getTgSettings().then(setCfg).catch(() => {}) }, [])
 
   const greet = async (c) => {
     setBusy(c.id); setMsg('')
@@ -66,12 +66,14 @@ const BirthdaysTab = ({ goSettings }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-text-primary text-sm truncate">{c.name}</p>
-                <p className="text-xs text-text-muted">{c.phone || '—'} · {fmtD(c.birthDate)} · {c.inDays === 0 ? t('mkt_bd_today') : t('mkt_bd_in_days', { n: c.inDays })}</p>
+                <p className="text-xs text-text-muted">{c.phone || '—'} · {fmtD(c.birthDate)} · {c.inDays === 0 ? t('mkt_bd_today') : t('mkt_bd_in_days', { n: c.inDays })}
+                  {' · '}<span className={c.linked ? 'text-accent-blue' : ''}>{c.linked ? t('mkt_bd_linked') : t('mkt_bd_not_linked')}</span>
+                </p>
               </div>
               {c.greetedAt ? (
                 <span className="flex items-center gap-1 text-xs text-accent-green font-semibold" title={fmtDT(c.greetedAt)}><CheckCircle2 size={14} /> {t('mkt_bd_greeted')}</span>
               ) : (
-                <button onClick={() => greet(c)} disabled={!c.phone || busy === c.id}
+                <button onClick={() => greet(c)} disabled={busy === c.id || (cfg?.mode === 'live' && !c.linked)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-500 text-xs font-bold disabled:opacity-40">
                   <Send size={12} /> {busy === c.id ? '...' : t('mkt_bd_greet')}
                 </button>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertCircle, Cake, Gift, MessageSquare, Settings2, Tag, Ticket } from 'lucide-react'
+import { AlertCircle, Cake, Gift, Send, Settings2, Tag, Ticket } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import PromotionsTab from './tabs/PromotionsTab'
 import CodesTab from './tabs/CodesTab'
 import GiftCardsTab from './tabs/GiftCardsTab'
-import SmsTab from './tabs/SmsTab'
+import MessagesTab from './tabs/MessagesTab'
 import BirthdaysTab from './tabs/BirthdaysTab'
 import SettingsTab from './tabs/SettingsTab'
 
@@ -18,7 +18,7 @@ const Marketing = () => {
     { id: 'promotions', perm: 'marketing.promotions', icon: Tag },
     { id: 'codes', perm: 'marketing.codes', icon: Ticket },
     { id: 'gift_cards', perm: 'marketing.gift_cards', icon: Gift },
-    { id: 'sms', perm: 'marketing.sms', icon: MessageSquare },
+    { id: 'messages', perm: 'marketing.messages', icon: Send },
     { id: 'birthdays', perm: 'marketing.birthdays', icon: Cake },
     { id: 'settings', perm: 'marketing.settings', icon: Settings2 },
   ].filter(tab => hasPermission(tab.perm))
@@ -62,7 +62,7 @@ const Marketing = () => {
           {activeTab === 'promotions' && <PromotionsTab />}
           {activeTab === 'codes' && <CodesTab />}
           {activeTab === 'gift_cards' && <GiftCardsTab />}
-          {activeTab === 'sms' && <SmsTab goSettings={goSettings} />}
+          {activeTab === 'messages' && <MessagesTab goSettings={goSettings} />}
           {activeTab === 'birthdays' && <BirthdaysTab goSettings={goSettings} />}
           {activeTab === 'settings' && <SettingsTab />}
         </motion.div>
