@@ -519,16 +519,16 @@ const Customers = () => {
               if (s.id === 'overdue') { setShowOverdueModal(true); return }
               setActiveFilter(activeFilter === s.id ? null : s.id)
             }}
-            className={`bg-bg-secondary border rounded-2xl p-5 flex items-center gap-4 cursor-pointer transition-all ${
+            className={`bg-bg-secondary border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0 cursor-pointer transition-all ${
               (activeFilter === s.id || (s.id === 'all' && activeFilter === null))
                 ? 'border-accent-red ring-2 ring-accent-red/20 shadow-glow-red/10' 
                 : 'border-border hover:border-text-muted'
             }`}
           >
-            <div className={`w-12 h-12 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-              <s.icon size={24} />
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+              <s.icon size={22} />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
               <p className="text-xs text-text-muted font-medium">{s.label}</p>
             </div>

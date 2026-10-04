@@ -1736,12 +1736,12 @@ export const Reports = () => {
   ]
 
   const StatCard = ({ icon: Icon, label, value, sub, color = "bg-accent-red/10 text-accent-red", trend }) => (
-    <div className="h-full bg-bg-secondary border border-border rounded-2xl p-5 relative overflow-hidden group hover:border-accent-red/50 transition-colors">
+    <div className="h-full min-w-0 bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-accent-red/50 transition-colors">
       <div className={`absolute top-4 right-4 w-10 h-10 rounded-xl ${color} flex items-center justify-center`}>
         <Icon size={20} />
       </div>
-      <p className="text-text-secondary text-sm font-medium mb-1">{label}</p>
-      <h3 className="text-2xl font-syne font-bold text-text-primary mb-1">{value}</h3>
+      <p className="text-text-secondary text-sm font-medium mb-1 pr-12">{label}</p>
+      <h3 className="text-xl sm:text-2xl font-syne font-bold text-text-primary mb-1 leading-tight [overflow-wrap:anywhere]">{value}</h3>
       <div className="flex items-center gap-1.5">
         {trend !== null && trend !== undefined && (
           <span className={`flex items-center text-xs font-bold ${trend > 0 ? 'text-accent-green' : 'text-accent-red'}`}>

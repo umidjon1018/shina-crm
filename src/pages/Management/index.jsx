@@ -533,11 +533,11 @@ export const Management = () => {
           { label: t('mgmt_stat_employees'),   value: employees.filter(e => e.isActive).length, color: 'accent-orange', icon: User },
           { label: t('mgmt_tab_products'),    value: apiProducts.filter(p => p.totalStock > 0).length, color: 'accent-green', icon: Package },
         ].map((s, i) => (
-          <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-4 flex items-center gap-4">
-            <div className={`w-12 h-12 bg-${s.color}/10 text-${s.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+          <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${s.color}/10 text-${s.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
               <s.icon size={22} />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
               <p className="text-xs text-text-muted">{s.label}</p>
             </div>

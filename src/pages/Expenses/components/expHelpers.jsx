@@ -32,13 +32,13 @@ const monthLabel = (m, t) => {
 
 // ─── STAT CARD ────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, sub, color }) => (
-  <div className="bg-bg-secondary border border-border rounded-2xl p-5 flex items-start gap-4">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+  <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-4 min-w-0">
+    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
       <Icon size={22} />
     </div>
     <div className="min-w-0">
       <p className="text-text-secondary text-sm">{label}</p>
-      <p className="text-text-primary font-bold text-lg leading-tight truncate">{value}</p>
+      <p className="text-text-primary font-bold text-lg leading-tight [overflow-wrap:anywhere]">{value}</p>
       {sub && <p className="text-text-secondary text-xs mt-0.5">{sub}</p>}
     </div>
   </div>

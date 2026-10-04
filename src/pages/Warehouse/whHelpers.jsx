@@ -41,10 +41,10 @@ const Badge = ({ cls, children }) => (
   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${cls}`}>{children}</span>
 )
 const StatCard = ({ label, value, icon: Icon, cls }) => (
-  <div className="bg-bg-secondary border border-border rounded-2xl p-5 flex items-center gap-4">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${cls}`}><Icon size={22} /></div>
-    <div>
-      <p className="text-xl font-syne font-bold text-text-primary">{value}</p>
+  <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${cls}`}><Icon size={20} /></div>
+    <div className="min-w-0">
+      <p className="text-lg sm:text-xl font-syne font-bold text-text-primary leading-tight [overflow-wrap:anywhere]">{value}</p>
       <p className="text-sm text-text-secondary">{label}</p>
     </div>
   </div>

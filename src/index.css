@@ -134,3 +134,11 @@
 @media (min-width: 1024px) {
   .safe-bottom { padding-bottom: 1.5rem; }
 }
+
+/* Telefonda karta ichidagi uzun raqamlar (uz-UZ nbsp bilan) kartadan chiqib ketmasin */
+@media (max-width: 639px) {
+  .grid > * { min-width: 0; }
+  .grid > * :where(p, h2, h3, h4, span) { overflow-wrap: anywhere; }
+  .grid > * .text-3xl { font-size: 1.5rem; line-height: 2rem; }
+  .grid > * .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+}

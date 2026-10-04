@@ -20,13 +20,13 @@ import { useShopStore } from '../store/shopStore'
 const fmt = (n) => new Intl.NumberFormat('uz-UZ').format(Math.round(n))
 
 const KpiCard = ({ icon: Icon, label, value, sub, color }) => (
-  <div className="bg-bg-secondary border border-border rounded-2xl p-5 flex flex-col gap-3">
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+  <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-3 min-w-0">
+    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
       <Icon size={20} />
     </div>
-    <div>
+    <div className="min-w-0">
       <p className="text-text-secondary text-sm">{label}</p>
-      <p className="text-2xl font-syne font-bold mt-0.5">{value}</p>
+      <p className="text-xl sm:text-2xl font-syne font-bold mt-0.5 leading-tight [overflow-wrap:anywhere]">{value}</p>
       {sub && <p className="text-text-muted text-xs mt-1">{sub}</p>}
     </div>
   </div>
