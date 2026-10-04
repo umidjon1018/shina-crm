@@ -12,6 +12,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
 
   const [mode, setMode] = useState('idle') // idle | camera | preview | upload_preview
   const [capturedImage, setCapturedImage] = useState(null)
+  const [fromCamera, setFromCamera] = useState(false)
   const [cameraError, setCameraError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -59,6 +60,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
     ctx.drawImage(video, 0, 0)
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
     setCapturedImage(dataUrl)
+    setFromCamera(true)
     stopCamera()
     setMode('preview')
   }
@@ -69,6 +71,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
     const reader = new FileReader()
     reader.onload = (ev) => {
       setCapturedImage(ev.target.result)
+      setFromCamera(false)
       setMode('preview')
     }
     reader.readAsDataURL(file)
@@ -121,7 +124,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
           autoPlay
           playsInline
           muted
-          className={`absolute inset-0 w-full h-full object-cover ${mode === 'camera' ? 'block' : 'hidden'}`}
+          className={`absolute inset-0 w-full h-full object-cover -scale-x-100 ${mode === 'camera' ? 'block' : 'hidden'}`}
         />
 
         {/* Captured image preview */}
@@ -129,7 +132,7 @@ export const SelfieCapture = ({ onCapture, onCancel, allowUpload = false, disabl
           <img
             src={capturedImage}
             alt="selfie"
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`absolute inset-0 w-full h-full object-cover ${fromCamera ? '-scale-x-100' : ''}`}
           />
         )}
 
