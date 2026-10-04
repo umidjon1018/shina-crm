@@ -86,7 +86,7 @@ export const MainLayout = () => {
   const { areaRef, contentRef, zoom, resetZoom } = usePinchZoom()
   const { getUnreadCount } = useNotificationStore()
   const unreadCount = getUnreadCount()
-  const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages } = useSettingsStore()
+  const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages, loadBranding } = useSettingsStore()
   const { shops, selectedShopId, setSelectedShop, loadShops } = useShopStore()
   const activeShops = shops.filter(s => s.isActive)
 
@@ -95,6 +95,7 @@ export const MainLayout = () => {
     loadEmployees()
     loadProductCategories()
     loadProductImages()
+    loadBranding(user?.role === 'admin')
   }, [])
   const { addLog } = useAuditStore()
   const sl = sidebarLabels || {}

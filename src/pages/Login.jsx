@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -26,7 +26,9 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const { checkCredentials, submitSelfie, submitFaceReview, user } = useAuthStore()
   const { lang, setLang } = useLangStore()
-  const { companyName, companyLogo, loginIconMode, loginPageTitle } = useSettingsStore()
+  const { companyName, companyLogo, loginIconMode, loginPageTitle, loadBranding } = useSettingsStore()
+  // Yangi qurilmada ham kompaniya nomi/logotipi serverdan
+  useEffect(() => { loadBranding() }, [])
 
   // loginPageTitle bo'sh bo'lsa companyName ishlatiladi
   const displayTitle = loginPageTitle?.trim() || companyName || 'CRM'

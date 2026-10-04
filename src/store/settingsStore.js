@@ -2,6 +2,21 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getEmployees, createEmployee, updateEmployee as apiUpdateEmp, deactivateEmployee, activateEmployee, deleteEmployee } from '../api/employeeService'
 import { getProductImageMap, saveProductImages } from '../api/productImageService'
+import { getBranding, saveBranding } from '../api/settingsService'
+
+// Brend sozlamalari serverga yoziladi (admin yozishni to'xtatgach 600ms dan keyin, bitta so'rov)
+const BRANDING_KEYS = ['companyName', 'companyLogo', 'loginIconMode', 'loginPageTitle', 'sidebarLogoSize']
+let brandingTimer = null
+let brandingPatch = {}
+const queueBrandingSave = (patch) => {
+  brandingPatch = { ...brandingPatch, ...patch }
+  clearTimeout(brandingTimer)
+  brandingTimer = setTimeout(() => {
+    const p = brandingPatch
+    brandingPatch = {}
+    saveBranding(p).catch(() => {})
+  }, 600)
+}
 import { getCategories, createCategory, updateCategory as apiUpdateCat, toggleCategory as apiToggleCat, deleteCategory as apiDeleteCat } from '../api/categoryService'
 
 export const useSettingsStore = create(
@@ -208,12 +223,29 @@ export const useSettingsStore = create(
       updateSettings: (newSettings) => set((state) => ({ ...state, ...newSettings })),
 
       // USD kursi
-      setCompanyName: (name) => set({ companyName: name }),
-      setCompanyLogo: (logo) => set({ companyLogo: logo }),
+      setCompanyName: (name) => { set({ companyName: name }); queueBrandingSave({ companyName: name }) },
+      setCompanyLogo: (logo) => { set({ companyLogo: logo }); queueBrandingSave({ companyLogo: logo }) },
       setCompanyLogoOriginal: (logo) => set({ companyLogoOriginal: logo }),
-      setLoginIconMode: (mode) => set({ loginIconMode: mode }),
-      setLoginPageTitle: (title) => set({ loginPageTitle: title }),
-      setSidebarLogoSize: (size) => set({ sidebarLogoSize: size }),
+      setLoginIconMode: (mode) => { set({ loginIconMode: mode }); queueBrandingSave({ loginIconMode: mode }) },
+      setLoginPageTitle: (title) => { set({ loginPageTitle: title }); queueBrandingSave({ loginPageTitle: title }) },
+      setSidebarLogoSize: (size) => { set({ sidebarLogoSize: size }); queueBrandingSave({ sidebarLogoSize: size }) },
+      // Serverdagi brendni olish. Server bo'sh bo'lsa va admin bo'lsa — shu qurilmadagi qiymatlar bir marta yuklanadi
+      loadBranding: async (isAdmin = false) => {
+        try {
+          const b = await getBranding()
+          const has = BRANDING_KEYS.some(k => b[k] !== undefined)
+          if (has) {
+            const next = {}
+            BRANDING_KEYS.forEach(k => { if (b[k] !== undefined) next[k] = b[k] })
+            set(next)
+          } else if (isAdmin) {
+            const cur = get()
+            const local = {}
+            BRANDING_KEYS.forEach(k => { local[k] = cur[k] ?? null })
+            await saveBranding(local)
+          }
+        } catch { /* oflayn — mahalliy qiymatlar qoladi */ }
+      },
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
       // Sidebar konfiguratsiyasi
