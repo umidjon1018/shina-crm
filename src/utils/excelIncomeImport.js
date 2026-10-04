@@ -1,4 +1,6 @@
-import * as XLSX from 'xlsx'
+// xlsx og'ir (~1MB) — faqat import/eksport bosilganda yuklanadi
+let XLSX = null
+const loadXLSX = async () => (XLSX ??= await import('xlsx'))
 
 // Kategoriya mapping: foydalanuvchi yozgani → backend qiymati
 const CAT_MAP = {
@@ -126,6 +128,7 @@ export function rowToBatchData(row, productId, supplierId, shopId, currentUsdRat
 
 // Excel faylni parse qilish
 export async function parseExcelFile(file) {
+  await loadXLSX()
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -178,7 +181,8 @@ function formatDateDMY(val) {
 const CAT_REVERSE = { tire: 'shina', wheel: 'disk', accessory: 'aksessuar' }
 
 // Batchlar ro'yxatini import shablon formatida Excel ga eksport qilish
-export function exportBatchesToExcel(batches, filename = 'qoldiq_eksport.xlsx') {
+export async function exportBatchesToExcel(batches, filename = 'qoldiq_eksport.xlsx') {
+  await loadXLSX()
   const headers = TEMPLATE_COLS.map(c => c.label)
   const rows = batches.map(b => [
     formatDateDMY(b.receivedAt),
@@ -207,7 +211,8 @@ export function exportBatchesToExcel(batches, filename = 'qoldiq_eksport.xlsx') 
 }
 
 // Excel shablon fayli generatsiya qilish
-export function generateTemplate() {
+export async function generateTemplate() {
+  await loadXLSX()
   const headers = TEMPLATE_COLS.map(c => c.label)
   const example = [
     '15.08.2026', 'Michelin 195/65R15', 'shina', 'AutoPlus Toshkent',

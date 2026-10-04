@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, ChevronDown, CircleX, Eye } from 'lucide-react'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import * as XLSX from 'xlsx'
 
 // === SHARED KOMPONENTLAR ===
 const InstagramDM = ({ instagram, phone, name, isBirthdayMonth, birthDate }) => {
@@ -495,7 +494,8 @@ const exportCSV = (filename, rows) => {
   URL.revokeObjectURL(url)
 }
 
-const exportXLSX = (filename, sheets) => {
+const exportXLSX = async (filename, sheets) => {
+  const XLSX = await import('xlsx')
   // sheets: [{ name, rows }]
   const wb = XLSX.utils.book_new()
   sheets.forEach(({ name, rows }) => {

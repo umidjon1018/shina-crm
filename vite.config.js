@@ -11,6 +11,20 @@ export default defineConfig({
       '/api': 'http://localhost:3000',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Kutubxonalar alohida — yangi deployda ilova kodi o'zgarsa ham telefon keshidan olinadi
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (/node_modules[\/](react|react-dom|react-router|react-router-dom|scheduler)[\/]/.test(id)) return 'vendor-react'
+          if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) return 'vendor-motion'
+          if (id.includes('i18next')) return 'vendor-i18n'
+          if (id.includes('lucide-react')) return 'vendor-icons'
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

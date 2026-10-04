@@ -15,7 +15,6 @@ import {
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { getCategoryColor, CATEGORY_COLOR_PALETTE } from '../../utils/categoryColors'
-import * as XLSX from 'xlsx'
 import { getReturns } from '../../api/returnService'
 import { getSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
 import { getUsedSales, getUsedStock } from '../../api/usedService'

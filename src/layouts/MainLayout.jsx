@@ -23,7 +23,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import PageLoader from '../components/PageLoader'
 import { useShopStore } from '../store/shopStore'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
@@ -348,7 +349,9 @@ export const MainLayout = () => {
         {/* Page Content */}
         <div ref={areaRef} className="flex-1 overflow-y-auto p-4 lg:p-6 safe-bottom no-scrollbar">
           <div ref={contentRef}>
-            <Outlet />
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
           </div>
         </div>
         {zoom !== 1 && (

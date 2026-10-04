@@ -84,8 +84,8 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
   }
 
   // ---- Shablon yuklab olish ----
-  const downloadTemplate = () => {
-    const blob = generateTemplate()
+  const downloadTemplate = async () => {
+    const blob = await generateTemplate()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = 'kirim_shablon.xlsx'; a.click()
     URL.revokeObjectURL(url)

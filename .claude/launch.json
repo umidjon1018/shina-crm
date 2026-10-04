@@ -4,15 +4,37 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 5173,
       "autoPort": true
     },
     {
       "name": "backend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "../shina_crm_backend", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "../shina_crm_backend",
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4173",
+        "--outDir",
+        "dist-local"
+      ],
+      "port": 4173
     }
   ]
 }

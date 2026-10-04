@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Barcode, Camera, X, AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { BrowserMultiFormatReader } from '@zxing/library'
 import { findItemByBarcode } from '../../api/itemService'
 import { checkReservation } from '../../api/reservationService'
 
@@ -12,7 +11,8 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
   const [manualCode, setManualCode] = useState('')
   const [error, setError] = useState(null)
   const videoRef = useRef(null)
-  const codeReaderRef = useRef(new BrowserMultiFormatReader())
+  // @zxing og'ir — faqat kamera yoqilganda yuklanadi
+  const codeReaderRef = useRef(null)
 
   const processScan = async (barcode) => {
     if (!barcode?.trim()) return
@@ -95,20 +95,25 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
 
   const toggleCamera = () => {
     setIsCameraActive(prev => !prev)
-    if (isCameraActive) codeReaderRef.current.reset()
+    if (isCameraActive) codeReaderRef.current?.reset()
   }
 
   useEffect(() => {
+    let cancelled = false
     if (isCameraActive && videoRef.current) {
-      codeReaderRef.current.decodeFromVideoDevice(null, videoRef.current, (result) => {
-        if (result) {
-          processScan(result.getText())
-          setIsCameraActive(false)
-          codeReaderRef.current.reset()
-        }
+      import('@zxing/library').then(({ BrowserMultiFormatReader }) => {
+        if (cancelled || !videoRef.current) return
+        codeReaderRef.current ??= new BrowserMultiFormatReader()
+        codeReaderRef.current.decodeFromVideoDevice(null, videoRef.current, (result) => {
+          if (result) {
+            processScan(result.getText())
+            setIsCameraActive(false)
+            codeReaderRef.current?.reset()
+          }
+        })
       })
     }
-    return () => codeReaderRef.current.reset()
+    return () => { cancelled = true; codeReaderRef.current?.reset() }
   }, [isCameraActive])
 
   return (

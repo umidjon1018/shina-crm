@@ -1,6 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { Navigate } from 'react-router-dom'
+import { Suspense } from 'react'
+import PageLoader from '../components/PageLoader'
 
 export const AuthLayout = () => {
   const { isAuthenticated, deviceStatus } = useAuthStore()
@@ -13,7 +15,9 @@ export const AuthLayout = () => {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary transition-colors duration-300">
-      <Outlet />
+      <Suspense fallback={<PageLoader />}>
+        <Outlet />
+      </Suspense>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useThemeStore } from './store/themeStore'
 import { useLangStore } from './store/langStore'
@@ -8,19 +8,19 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { AuthLayout } from './layouts/AuthLayout'
 import { MainLayout } from './layouts/MainLayout'
 
-// Pages
-import Login from './pages/Login'
-import PendingApproval from './pages/PendingApproval'
-import Dashboard from './pages/Dashboard'
-import Warehouse from './pages/Warehouse'
-import Sales from './pages/Sales'
-import Customers from './pages/Customers'
-import Income from './pages/Income'
-import Expenses from './pages/Expenses'
-import Reports from './pages/Reports'
-import AIAgent from './pages/AIAgent'
-import AdminPanel from './pages/AdminPanel'
-import Management from './pages/Management'
+// Pages — har biri alohida faylga bo'linadi (faqat ochilganda yuklanadi)
+const Login = lazy(() => import('./pages/Login'))
+const PendingApproval = lazy(() => import('./pages/PendingApproval'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Warehouse = lazy(() => import('./pages/Warehouse'))
+const Sales = lazy(() => import('./pages/Sales'))
+const Customers = lazy(() => import('./pages/Customers'))
+const Income = lazy(() => import('./pages/Income'))
+const Expenses = lazy(() => import('./pages/Expenses'))
+const Reports = lazy(() => import('./pages/Reports'))
+const AIAgent = lazy(() => import('./pages/AIAgent'))
+const AdminPanel = lazy(() => import('./pages/AdminPanel'))
+const Management = lazy(() => import('./pages/Management'))
 
 function App() {
   const { initTheme } = useThemeStore()
