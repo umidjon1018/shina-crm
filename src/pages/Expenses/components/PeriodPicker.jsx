@@ -49,8 +49,8 @@ const PeriodPicker = ({ preset, range, onChange, presets = PRESETS }) => {
   const { t } = useTranslation()
   const inputCls = 'w-32 bg-bg-secondary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red'
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
+    <div className="flex items-center gap-2 flex-wrap min-w-0 max-w-full">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full min-w-0">
         {presets.map(p => (
           <button key={p} onClick={() => onChange(p, presetRange(p))}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap

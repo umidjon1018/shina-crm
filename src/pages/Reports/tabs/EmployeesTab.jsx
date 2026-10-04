@@ -107,12 +107,12 @@ const EmployeesTab = ({ ctx }) => {
             </div>
 
             <div className="bg-bg-secondary border border-border rounded-2xl p-6 mt-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                   <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_performance_title')}</h4>
                   <p className="text-text-secondary text-sm">{t('rep_emp_comparative_analysis')}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {[
                     { key:'total',  label:t('col_amount') },
                     { key:'count',  label:t('rep_emp_metric_count') },

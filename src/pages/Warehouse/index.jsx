@@ -78,7 +78,7 @@ const Warehouse = () => {
         <p className="text-text-secondary text-sm">{t('wh_subtitle')}</p>
       </div>
 
-      <div className="flex gap-2 bg-bg-secondary border border-border rounded-2xl p-1.5 w-fit">
+      <div className="flex gap-2 bg-bg-secondary border border-border rounded-2xl p-1.5 w-fit max-w-full overflow-x-auto no-scrollbar">
         {TABS.map(tab => (
           <TabBtn key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
             {t('wh_tab_' + tab)}
