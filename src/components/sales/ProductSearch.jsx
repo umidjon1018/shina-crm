@@ -61,7 +61,8 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
     const q = query.toLowerCase()
     const found = MOCK_PRODUCTS.filter(p => {
       const stock = MOCK_ITEMS.filter(i =>
-        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i) && !i.hasMissingPrice
+        i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && itemMatchesAttrs(i) &&
+        (allowSold ? (i.barcode !== null && !i.hasMissingPrice) : true)
       ).length
       return stock > 0 && (
         p.name?.toLowerCase().includes(q) ||
@@ -90,8 +91,26 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
     setResults(found)
   }, [query, allowSold, salesItems, MOCK_PRODUCTS, MOCK_ITEMS, attrFilters])
 
+  // Kassada sotib bo'lmaslik sababi (null — sotsa bo'ladi)
+  const blockReason = (p) => {
+    if (allowSold) return null
+    const inStock = MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && itemMatchesAttrs(i))
+    if (inStock.length === 0) return null
+    const withBarcode = inStock.filter(i => i.barcode !== null)
+    const reasons = []
+    if (withBarcode.length === 0) reasons.push(t('sl_ps_block_barcode'))
+    else if (withBarcode.every(i => i.hasMissingPrice)) reasons.push(t('sl_ps_block_cost'))
+    if (!(Number(p.cashPrice) > 0)) reasons.push(t('sl_ps_block_price'))
+    return reasons.length ? reasons.join(' · ') : null
+  }
+
   const handleAdd = async (product) => {
     setWarning(null)
+    const reason = blockReason(product)
+    if (reason) {
+      setWarning({ type: 'blocked', message: t('sl_ps_blocked_msg', { name: product.name, reason }) })
+      return
+    }
 
     const allItems = MOCK_ITEMS.filter(i => i.productId === product.id)
     const withBarcode = allItems.filter(i => i.barcode !== null)
@@ -189,7 +208,8 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
             <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-bold text-xs">
-                {warning.type === 'no_barcode' ? t('sl_ps_warn_no_barcode') :
+                {warning.type === 'blocked' ? t('sl_ps_warn_blocked') :
+                 warning.type === 'no_barcode' ? t('sl_ps_warn_no_barcode') :
                  warning.type === 'sold_out' ? (allowSold ? t('sl_ps_warn_not_sold') : t('sl_ps_warn_sold_out')) : t('sl_ps_warn_in_cart')}
               </p>
               <p className="text-xs mt-0.5 opacity-80">{warning.message}</p>
@@ -221,10 +241,13 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
               <tbody className="divide-y divide-border">
                 {results.map(p => {
                   const available = MOCK_ITEMS.filter(i =>
-                    i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i)
+                    i.productId === p.id && i.status === (allowSold ? 'sold' : 'in_stock') && i.barcode !== null && itemMatchesAttrs(i) &&
+                    (allowSold || !i.hasMissingPrice)
                   )
+                  const reason = blockReason(p)
+                  const inStockAll = allowSold ? available.length : MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && itemMatchesAttrs(i)).length
                   const inCartCount = allowSold ? 0 : (cartItems || []).filter(c => c.item.productId === p.id).length
-                  const canAdd = allowSold ? available.length > 0 : available.length > inCartCount
+                  const canAdd = !reason && (allowSold ? available.length > 0 : available.length > inCartCount)
                   const hasActive = !allowSold && available.some(i => i.barcodeStatus === 'active')
 
                   return (
@@ -235,17 +258,20 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
                         {hasActive && canAdd && (
                           <span className="text-[10px] text-accent-orange font-medium">{t('sl_ps_badge_no_barcode')}</span>
                         )}
+                        {reason && (
+                          <span className="block text-[11px] text-accent-red font-semibold">{reason}</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-text-primary whitespace-nowrap">
                         {formatPrice(p.cashPrice)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${
-                          available.length === 0 ? 'bg-accent-red/10 text-accent-red' :
+                          (reason || available.length === 0) ? 'bg-accent-red/10 text-accent-red' :
                           !allowSold && available.length <= (p.lowStockThreshold || 3) ? 'bg-accent-orange/10 text-accent-orange' :
                           'bg-accent-green/10 text-accent-green'
                         }`}>
-                          {allowSold ? available.length : available.length - inCartCount} {available[0]?.unit || 'dona'}
+                          {allowSold ? available.length : (reason ? inStockAll : available.length - inCartCount)} {available[0]?.unit || 'dona'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">

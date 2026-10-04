@@ -2826,4 +2826,9 @@ export default {
   perm_reports: "Отчёты",
   perm_management_products: "Товары",
   perm_management_settings: "Настройки",
+  sl_ps_block_barcode: "Нет штрихкода",
+  sl_ps_block_cost: "Не указана цена прихода",
+  sl_ps_block_price: "Нет цены продажи",
+  sl_ps_blocked_msg: "«{{name}}» пока нельзя продать: {{reason}}. Должен заполнить администратор или управляющий.",
+  sl_ps_warn_blocked: "Не готов к продаже",
 }

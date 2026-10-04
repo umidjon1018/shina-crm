@@ -2835,4 +2835,9 @@ export default {
   perm_reports: "Hisobotlar",
   perm_management_products: "Tovarlar",
   perm_management_settings: "Sozlamalar",
+  sl_ps_block_barcode: "Barkod berilmagan",
+  sl_ps_block_cost: "Kirim narxi kiritilmagan",
+  sl_ps_block_price: "Sotuv narxi yo'q",
+  sl_ps_blocked_msg: "«{{name}}» hozircha sotib bo'lmaydi: {{reason}}. Admin yoki boshqaruvchi to'ldirishi kerak.",
+  sl_ps_warn_blocked: "Sotuvga tayyor emas",
 }
