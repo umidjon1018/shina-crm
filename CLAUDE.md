@@ -349,8 +349,9 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 
 **Texnik eslatma:** `cancelModal` da backend barcha return larni `cancelled` qilib qo'yadi → MOCK_RETURNS.refundAmount ni original sale bilan join qilib haqiqiy summa ko'rsatiladi.
 
-### Keyingi session
-Warehouse kengaytma ishlari — #5 Excel orqali tovar import (memory: project_warehouse_tasks).
+### Keyingi session (2026-10-04 dan keyin)
+BILLZ paritet ishlari davom etadi: foydalanuvchi keyingi BILLZ bo'limi ro'yxatini beradi → har bandni kodda tekshir (bor/qisman/yo'q jadval) → yo'q va kamchiliklarni HAMMASINI qil → lokal test → commit → deploy faqat "deploy" deyilganda. Batafsil: memory `project_next_billz_plan.md`.
+Ochiq vazifalar: AI kredit xatosi tekshiruvi (`project_ai_credit_issue_todo.md`, foydalanuvchi "AI'ni tekshir" desa), Telegram bot (token kutilmoqda, `project_telegram_auth_todo.md`).
 
 ### O'lchov birligi tizimi (2026-08-14 da qo'shildi)
 
@@ -472,43 +473,53 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ---
 
-## ⚠️ SERVER DEPLOY QUEUE — HETZNER GA KO'CHIRILMAGAN
+## SERVER DEPLOY (holat: 2026-10-04 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-08-09. Quyidagilar lokal ishlaydi, lekin serverda YO'Q.**
-To'liq deploy ko'rsatmasi: memory `project_server_deploy_queue.md` da.
+**Oxirgi deploy: 2026-10-04 (12-deploy)** — backend `790f858`, frontend `a36633ec`. Navbat bo'sh.
+Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
 
-### Pending DB migrations (server PostgreSQL da bajarish kerak)
-```sql
--- items.attributes (batch attribute tizimi, 2026-08-13)
-ALTER TABLE items ADD COLUMN IF NOT EXISTS attributes JSONB DEFAULT '{}';
-
--- batches.unit (o'lchov birligi, 2026-08-14)
-ALTER TABLE batches ADD COLUMN IF NOT EXISTS unit VARCHAR(20) DEFAULT 'dona';
-```
-
-### Pending backend kod o'zgarishlari
-- `batchesController.js` — unit INSERT, items attributes endpoint
-- `itemsController.js` — COALESCE(b.unit) SELECT, PATCH attributes route
-- Batch attribute tizimi — routes/controllers
-
-### Pending frontend
-- Barcha 2026-08-09 dan keyingi o'zgarishlar (attribute tizimi, unit, ProductSearch, B/U tab, ...)
-
-### Deploy tartibi
+### Xavfsiz deploy tartibi (har safar)
 ```bash
-# 1. Backend — lokal → server
-git push origin main  # shina_crm_backend papkasida
-ssh -i ~/.ssh/crm_bot root@167.233.169.118 "cd /root/shina_crm_backend && git pull && pm2 restart shina-backend"
-
-# 2. DB migrations — server psql da yuqoridagi SQL lar
-
-# 3. Frontend — lokal build → SCP
-npm run build  # shina_crm papkasida
-scp -i ~/.ssh/crm_bot -r dist/* root@167.233.169.118:/var/www/shina-crm/
-ssh -i ~/.ssh/crm_bot root@167.233.169.118 "chmod -R 755 /var/www/shina-crm/"
+# 0. Zaxira (D = /root/backups/<sana><harf>)
+ssh -i ~/.ssh/crm_bot root@167.233.169.118 'D=/root/backups/X; mkdir -p $D; sudo -u postgres pg_dump -Fc shina_crm > $D/shina_crm.dump; tar --exclude=node_modules -czf $D/backend.tgz -C /root shina_crm_backend; cp -a /var/www/shina-crm $D/frontend'
+# 1. Backend: lokal push → serverda pull + restart (DB migratsiyalar controller boshida avtomatik, faqat ADD/CREATE IF NOT EXISTS)
+git push origin master   # shina_crm_backend
+ssh -i ~/.ssh/crm_bot root@167.233.169.118 'cd /root/shina_crm_backend && git pull --ff-only && pm2 restart shina-backend'
+# 2. Frontend: build (.env.production → https://sicrm.uz) → tar|ssh → /var/www/shina-crm-new → eski assets cp -an → mv almashtirish
+npm run build && git push origin main
+tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/www/shina-crm-new; mkdir -p /var/www/shina-crm-new; tar -xzf - -C /var/www/shina-crm-new; cp -an /var/www/shina-crm/assets/. /var/www/shina-crm-new/assets/; cp -a /var/www/shina-crm/models /var/www/shina-crm-new/ 2>/dev/null; chmod -R 755 /var/www/shina-crm-new; rm -rf /var/www/shina-crm-old; mv /var/www/shina-crm /var/www/shina-crm-old; mv /var/www/shina-crm-new /var/www/shina-crm'
+# 3. Tekshir: serverdagi index.html dagi assets/index-*.js lokal dist bilan bir xilmi; curl https://gt.sicrm.uz/ → 200; pm2 logs
 ```
+- Login/qurilma qismi (`.env JWT_SECRET`, authController, middleware/auth.js, login_attempts) buzilmasa — xodimlar chiqib ketmaydi.
+- Serverda qo'lda kod o'zgartirma. Server DB tuzilmasini o'zgartirish (DROP/ALTER constraint) — faqat foydalanuvchi aniq ruxsati bilan.
 
-> **ESLATMA:** Har sessiyada yangi o'zgarish qo'shilsa — shu bo'limni yangilash kerak!
+### Server DB bo'yicha o'rganilgan saboqlar (2026-10-04)
+- Server bazasi lokaldan orqada qolishi mumkin — **deploydan oldin/muammoda ustun + cheklov + egalik diffini qil**:
+  - ustunlar: `information_schema.columns` (lokal vs server)
+  - cheklov/indeks: `pg_constraint` (u,c,x) + `pg_indexes` unique
+  - egalik: `pg_class` owner ≠ `shina_user` (jadval/sequence) → `permission denied`
+- Topilgan va tuzatilganlar: products 9 ustun yo'q edi (tovar qo'shib bo'lmasdi); `transfers` va `group_barcode_seq` postgres egaligida edi; `items_barcode_key` UNIQUE umumiy barkodni to'sardi (olib tashlandi, oddiy `idx_items_barcode`).
+- `ALTER DEFAULT PRIVILEGES FOR ROLE postgres ... TO shina_user` qo'yilgan — qo'lda yaratilgan obyektlar ham ishlaydi.
+- Lokal brauzer sinovi: `npx vite build --mode development --outDir dist-local` + launch.json `preview` (4173, CORS ruxsat). Oddiy `npm run build` .env.production (server API) ishlatadi — lokal sinovda ISHLATMA. Lokal admin token: backend `.env` JWT_SECRET bilan `jwt.sign` (scratchpad faylga, chatga chiqarma).
+
+---
+
+## Sessiya 2026-10-04 — BILLZ bo'limlari va yangi arxitektura
+
+| Bo'lim | Qayerda | Muhim |
+|---|---|---|
+| Yetkazib beruvchilar | Kirim sahifasi: Buyurtmalar / Hisob-kitob (akt sverka) / To'lovlar tarixi / Qaytarish tablari | backend `supplierOpsController.js`, `/api/supplier-ops`; `utils/batchCore.js` (recalcBatch: qarz = jami − qaytarilgan − to'langan) |
+| Mijozlar | profil: jins/manzil/email, guruh+teglar, Izohlar, Balans, Afzalliklar tablari; umumiy qarzni FIFO to'lash | `customerExtrasController.js`, `customer_notes`, `customer_balance_tx` (balans = SUM(amount)) |
+| Sodiqlik | Boshqaruv→Chegirmalar: jamg'arma chegirma darajalari (kassada avtomatik), keshbek (qayd/xaridga qarab) | `utils/loyalty.js`, app_settings `loyalty`; sotuvda `balance_used`, `cashback_amount`; bekor/qaytarishda `reverseLoyalty` |
+| Rollar | Rollar va ruxsat daraxti SERVERDA (app_settings `roles`), xodimga individual ruxsat (`employees.access`) | frontend `utils/rolesSync.js` (MainLayout'da sync, ilovaga qaytganda); `authStore.hasPermission` individualni hisobga oladi |
+| Server ruxsat tekshiruvi | yozish amallari `requirePerm(...)`; ruxsatsizga kirim narxi/tannarx `null` qaytadi | `middleware/perm.js`; roles config serverda bo'lmasa — cheklovsiz (legacy); xodim role/access har so'rovda DB dan (`auth.js`) |
+| Xato tili | xato matni ilova tilida (uz/ru), SQL xatosi yashirin | backend `middleware/errorI18n.js` (lug'at + regex), frontend `client.js` `x-lang` header; `DEBUG_ERRORS=1` faqat lokal |
+| Kassa | sotuvga tayyor bo'lmagan tovar qidiruvda sababi bilan (barkod/kirim narxi/sotuv narxi); telefonda ixcham; menyu "orqaga" bilan yopiladi | `ProductSearch.jsx`, `NewSaleTab/UsedSaleTab/ReturnsTab`, `MainLayout.jsx` |
+| Tovar narxi USD | tovar oynasida so'm/USD almashtirgich, saqlash so'mda | `Management/components/DualPriceInput.jsx` |
+
+**Kassada tovar sotilishi uchun 3 shart:** barkod bor + kirim narxi kiritilgan (`has_missing_price=false`) + sotuv narxi > 0. Sotuvchi kirimda narx kiritolmaydi (admin/boshqaruvchi to'ldiradi).
+
+**Yangi kod yozishda:** yangi yozish route'iga `requirePerm('<daraxt id>')` qo'sh; yangi backend xato matnini `errorI18n.js` lug'atiga qo'sh (uz+ru); yangi jadval — controller boshida `CREATE TABLE IF NOT EXISTS`.
 
 ---
 
