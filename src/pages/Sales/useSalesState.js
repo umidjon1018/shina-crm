@@ -1686,7 +1686,7 @@ export const useSalesState = () => {
   };
 
   return {
-    user, barcodeSelectClass, addNotification, notifications, updateNotification, bump,
+    user, barcodeSelectClass, addNotification, notifications, updateNotification, bump, fetchData,
     getItemBarcode, sources, productCategories, installmentOrganizations,
     loyaltyMinAmount, loyaltyVisitsRequired, notificationSettings,
     discountSmallMax, loyaltyDiscountPercent, companyName,

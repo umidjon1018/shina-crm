@@ -24,7 +24,19 @@ const mapReturn = (r) => ({
   exchangeSaleId: r.exchangeSaleId ?? r.exchange_sale_id ?? null,
   _isExchange: r._isExchange ?? r.is_exchange ?? false,
   notes: r.notes ?? null,
+  editCount: Number(r.editCount ?? r.edit_count) || 0,
 })
+
+// Admin/boshqaruvchi: sabab, izoh; pul qaytarishda qaytarish usuli
+export const updateReturn = async (id, data) => {
+  const { data: res } = await api.patch(`/api/returns/${id}`, data)
+  return res
+}
+
+export const getReturnEdits = async (id) => {
+  const { data } = await api.get(`/api/returns/${id}/edits`)
+  return data
+}
 
 export const getReturns = async () => {
   try {

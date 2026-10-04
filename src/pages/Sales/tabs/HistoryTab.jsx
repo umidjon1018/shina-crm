@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, Pencil } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useSettingsStore } from '../../../store/settingsStore'
+import EditSaleModal from '../../../components/sales/EditSaleModal'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
@@ -12,13 +13,16 @@ const HistoryTab = ({ ctx }) => {
   const som = t('unit_som')
   const { productImages } = useSettingsStore()
   const [peekProduct, setPeekProduct] = useState(null) // { id, name }
+  const [editingSale, setEditingSale] = useState(null)
   const {
     historyMonthFilter, setHistoryMonthFilter, historyMonthOptions, formatMonthValue,
     filteredSalesForHistory, sortedSalesForHistory, historyPage, setHistoryPage,
     historySortField, historySortOrder, handleHistorySort,
     exchangePairColors, barcodeSelectClass, getItemBarcode,
     productCategories, sources, usedSalesList,
+    user, allCustomers, bump, fetchData,
   } = ctx
+  const canEdit = user?.role === 'admin' || user?.role === 'manager'
 
   return (
     <motion.div
@@ -193,7 +197,18 @@ const HistoryTab = ({ ctx }) => {
                         else if (s.status === 'completed' && s._isExchange) { cls = 'bg-accent-blue/10 text-accent-blue'; label = t('col_done') }
                         else if (s.status === 'pending' || s.status === 'active') { cls = 'bg-accent-orange/10 text-accent-orange'; label = t('pay_installment') }
                         else { cls = 'bg-accent-red/10 text-accent-red'; label = t('sl_hist_status_cancelled') }
-                        return <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${cls}`}>{s.statusLabel || label}</span>
+                        return (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {s.editCount > 0 && <span className="text-[9px] text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
+                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${cls}`}>{s.statusLabel || label}</span>
+                            {canEdit && s.status !== 'cancelled' && (
+                              <button onClick={() => setEditingSale(s)} title={t('sl_edit_title')}
+                                className="p-1 rounded-md text-text-muted hover:text-accent-blue hover:bg-bg-tertiary transition-colors">
+                                <Pencil size={12} />
+                              </button>
+                            )}
+                          </div>
+                        )
                       })()}
                     </td>
                   </tr>
@@ -215,6 +230,10 @@ const HistoryTab = ({ ctx }) => {
           </div>
         )}
       </div>
+
+      {editingSale && (
+        <EditSaleModal sale={editingSale} customers={allCustomers} onClose={() => setEditingSale(null)} onSaved={() => { fetchData(); bump() }} />
+      )}
 
       {/* B/U sotuvlar tarixi */}
       <div className="bg-bg-secondary border border-border rounded-3xl p-6 shadow-sm overflow-hidden">

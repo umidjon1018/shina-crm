@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Pencil } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../../store/settingsStore'
+import EditReturnModal from '../../../components/sales/EditReturnModal'
 
 const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
 
@@ -16,7 +17,10 @@ const ReturnsHistoryTab = ({ ctx }) => {
     filteredCancelledReturns, sortedReturnsHistory,
     returnsHistoryPage, setReturnsHistoryPage,
     barcodeSelectClass,
+    user, bump, fetchData,
   } = ctx
+  const canEdit = user?.role === 'admin' || user?.role === 'manager'
+  const [editingReturn, setEditingReturn] = useState(null)
 
   return (
     <motion.div
@@ -138,7 +142,18 @@ const ReturnsHistoryTab = ({ ctx }) => {
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-text-muted"><span className="block truncate" title={r.reasonLabel || '—'}>{r.reasonLabel || '—'}</span></td>
+                    <td className="px-3 py-3 text-text-muted">
+                      <div className="flex items-center gap-1.5">
+                        <span className="block truncate flex-1" title={r.reasonLabel || '—'}>{r.reasonLabel || '—'}</span>
+                        {r.editCount > 0 && <span className="text-[9px] text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
+                        {canEdit && (
+                          <button onClick={() => setEditingReturn(r)} title={t('sl_edit_return_title')}
+                            className="p-1 rounded-md text-text-muted hover:text-accent-blue hover:bg-bg-tertiary transition-colors flex-shrink-0">
+                            <Pencil size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 )
               })}
@@ -175,6 +190,9 @@ const ReturnsHistoryTab = ({ ctx }) => {
             </div>
           </div>
         </div>
+      )}
+      {editingReturn && (
+        <EditReturnModal ret={editingReturn} onClose={() => setEditingReturn(null)} onSaved={() => { fetchData(); bump() }} />
       )}
     </motion.div>
   )

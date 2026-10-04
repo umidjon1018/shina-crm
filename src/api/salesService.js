@@ -55,6 +55,7 @@ const map = (s) => ({
   bundleDiscountAmount: Number(s.bundle_discount_amount) || 0,
   isBundle: s.is_bundle || false,
   cardType: s.card_type || null,
+  editCount: Number(s.edit_count) || 0,
   soldAt: s.created_at || '',
   createdAt: s.created_at || '',
   items: (s.items || []).map(mapItem),
@@ -102,6 +103,17 @@ export const createSale = async (saleData) => {
     card_type: saleData.cardType || null,
   })
   return map(data)
+}
+
+// Admin/boshqaruvchi: to'lov turi, karta turi, mijoz, sana (yyyy-mm-dd), izoh
+export const updateSale = async (id, data) => {
+  const { data: res } = await api.patch(`/api/sales/${id}`, data)
+  return res
+}
+
+export const getSaleEdits = async (id) => {
+  const { data } = await api.get(`/api/sales/${id}/edits`)
+  return data
 }
 
 export const cancelSale = async (id, cancelReason) => {
