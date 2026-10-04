@@ -55,9 +55,10 @@ const PAGE_KEYS = {
   '/admin': 'admin',
 }
 
-const SidebarItem = ({ to, icon: Icon, label, isActive, onClick }) => (
+const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => (
   <Link
     to={to}
+    replace={replace}
     onClick={onClick}
     className={`
       flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
@@ -85,6 +86,22 @@ export const MainLayout = () => {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  // Telefonda menyu ochilganda tarixga belgi qo'yiladi — "orqaga" tugmasi avval menyuni yopadi
+  useEffect(() => {
+    if (!isSidebarOpen) return
+    const onPop = () => setIsSidebarOpen(false)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [isSidebarOpen])
+  const openSidebar = () => {
+    window.history.pushState({ ...(window.history.state || {}), sidebar: true }, '')
+    setIsSidebarOpen(true)
+  }
+  // Fon yoki yopish tugmasi — tarixdagi belgi ham olib tashlanadi (popstate menyuni yopadi)
+  const closeSidebarBack = () => {
+    if (window.history.state?.sidebar) window.history.back()
+    else setIsSidebarOpen(false)
+  }
   const [showProfile, setShowProfile] = useState(false)
   const { addNotification } = useNotificationStore()
   const { bump } = useDataStore()
@@ -160,7 +177,7 @@ export const MainLayout = () => {
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={closeSidebar}
+          onClick={closeSidebarBack}
         />
       )}
 
@@ -242,7 +259,7 @@ export const MainLayout = () => {
           {/* Main */}
           {!hidden.includes('dashboard') && (
             <SidebarSection label={t('nav_main')}>
-              <SidebarItem to="/dashboard" icon={LayoutDashboard} label={getSlLabel('dashboard') || t('dashboard')} isActive={isActive('/dashboard')} onClick={closeSidebar} />
+              <SidebarItem to="/dashboard" icon={LayoutDashboard} label={getSlLabel('dashboard') || t('dashboard')} isActive={isActive('/dashboard')} onClick={closeSidebar} replace={isSidebarOpen} />
             </SidebarSection>
           )}
 
@@ -252,13 +269,13 @@ export const MainLayout = () => {
             (hasPermission('customers') && !hidden.includes('customers'))) && (
             <SidebarSection label={t('nav_trade')}>
               {hasPermission('warehouse') && !hidden.includes('warehouse') && (
-                <SidebarItem to="/warehouse" icon={Package} label={getSlLabel('warehouse') || t('warehouse')} isActive={isActive('/warehouse')} onClick={closeSidebar} />
+                <SidebarItem to="/warehouse" icon={Package} label={getSlLabel('warehouse') || t('warehouse')} isActive={isActive('/warehouse')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('sales') && !hidden.includes('sales') && (
-                <SidebarItem to="/sales" icon={ShoppingCart} label={getSlLabel('sales') || t('sales')} isActive={isActive('/sales')} onClick={closeSidebar} />
+                <SidebarItem to="/sales" icon={ShoppingCart} label={getSlLabel('sales') || t('sales')} isActive={isActive('/sales')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('customers') && !hidden.includes('customers') && (
-                <SidebarItem to="/customers" icon={Users} label={getSlLabel('customers') || t('customers')} isActive={isActive('/customers')} onClick={closeSidebar} />
+                <SidebarItem to="/customers" icon={Users} label={getSlLabel('customers') || t('customers')} isActive={isActive('/customers')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
             </SidebarSection>
           )}
@@ -269,13 +286,13 @@ export const MainLayout = () => {
             (hasPermission('reports') && !hidden.includes('reports'))) && (
             <SidebarSection label={t('nav_finance')}>
               {hasPermission('income') && !hidden.includes('income') && (
-                <SidebarItem to="/income" icon={TrendingUp} label={getSlLabel('income') || t('income')} isActive={isActive('/income')} onClick={closeSidebar} />
+                <SidebarItem to="/income" icon={TrendingUp} label={getSlLabel('income') || t('income')} isActive={isActive('/income')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('expenses') && !hidden.includes('expenses') && (
-                <SidebarItem to="/expenses" icon={Wallet} label={getSlLabel('expenses') || t('expenses')} isActive={isActive('/expenses')} onClick={closeSidebar} />
+                <SidebarItem to="/expenses" icon={Wallet} label={getSlLabel('expenses') || t('expenses')} isActive={isActive('/expenses')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('reports') && !hidden.includes('reports') && (
-                <SidebarItem to="/reports" icon={BarChart3} label={getSlLabel('reports') || t('reports')} isActive={isActive('/reports')} onClick={closeSidebar} />
+                <SidebarItem to="/reports" icon={BarChart3} label={getSlLabel('reports') || t('reports')} isActive={isActive('/reports')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
             </SidebarSection>
           )}
@@ -283,10 +300,10 @@ export const MainLayout = () => {
           {/* Other */}
           <SidebarSection label={t('nav_other')}>
             {hasPermission('ai_agent') && !hidden.includes('aiAgent') && (
-              <SidebarItem to="/ai-agent" icon={Bot} label={getSlLabel('aiAgent') || t('ai_agent')} isActive={isActive('/ai-agent')} onClick={closeSidebar} />
+              <SidebarItem to="/ai-agent" icon={Bot} label={getSlLabel('aiAgent') || t('ai_agent')} isActive={isActive('/ai-agent')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}
             {isPrivileged(user?.role) && !hidden.includes('management') && (
-              <NavLink to="/management" onClick={closeSidebar} className={({ isActive }) =>
+              <NavLink to="/management" onClick={closeSidebar} replace={isSidebarOpen} className={({ isActive }) =>
                 `flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
                   isActive ? 'bg-accent-red text-white shadow-glow-red' : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
                 }`
@@ -303,7 +320,7 @@ export const MainLayout = () => {
               </NavLink>
             )}
             {user?.role === 'admin' && (
-              <SidebarItem to="/admin" icon={Settings} label={t('admin')} isActive={isActive('/admin')} onClick={closeSidebar} />
+              <SidebarItem to="/admin" icon={Settings} label={t('admin')} isActive={isActive('/admin')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}
           </SidebarSection>
 
@@ -367,7 +384,7 @@ export const MainLayout = () => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden flex items-center justify-between safe-header pb-3 border-b border-border bg-bg-secondary">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-1.5 text-text-secondary">
+          <button onClick={openSidebar} className="p-1.5 text-text-secondary">
             <Menu size={22} />
           </button>
           <span className="font-syne font-bold text-sm">{companyName}</span>
