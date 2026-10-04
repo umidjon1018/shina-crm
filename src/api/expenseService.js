@@ -14,6 +14,8 @@ const map = (e) => ({
   note: e.note || '',
   responsibleName: e.responsible_name || '',
   employeeId: e.employee_id ? String(e.employee_id) : '',
+  paymentMethod: e.payment_method || 'cash',
+  source: e.source || 'office',
   createdAt: e.created_at || '',
 })
 
@@ -37,6 +39,7 @@ export const addExpense = async (expenseData) => {
     note: expenseData.note,
     responsible_name: expenseData.responsibleName,
     employee_id: expenseData.employeeId || null,
+    payment_method: expenseData.paymentMethod || 'cash',
   })
   return { success: true, expense: map(data) }
 }
@@ -54,6 +57,7 @@ export const updateExpense = async (id, expenseData) => {
     note: expenseData.note,
     responsible_name: expenseData.responsibleName,
     employee_id: expenseData.employeeId || null,
+    payment_method: expenseData.paymentMethod || 'cash',
   })
   return { success: true, expense: map(data) }
 }

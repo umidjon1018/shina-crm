@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DateMaskInput from '../../components/DateMaskInput'
 import { Bookmark,
   Trash2, RotateCcw, History, ShoppingBag, Calendar,
-  TrendingUp, XCircle, X, Recycle
+  TrendingUp, XCircle, X, Recycle, Banknote
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
@@ -10,6 +11,8 @@ import { ShopPickerModal } from '../../components/ShopPickerModal'
 import ShopRequiredGuard from '../../components/ShopRequiredGuard'
 import SuccessModal from '../../components/sales/SuccessModal'
 import DiscountRequestModal from '../../components/sales/DiscountRequestModal'
+import CashExpenseModal from '../../components/sales/CashExpenseModal'
+import { useAuthStore } from '../../store/authStore'
 import NewSaleTab from './tabs/NewSaleTab'
 import UsedSaleTab from './tabs/UsedSaleTab'
 import HistoryTab from './tabs/HistoryTab'
@@ -25,6 +28,8 @@ const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' +
 const Sales = () => {
   const { t } = useTranslation()
   const state = useSalesState()
+  const hasPermission = useAuthStore(s => s.hasPermission)
+  const [cashShopId, setCashShopId] = useState(null)
   const {
     user, bump, addCustomer,
     shopPickCallback, setShopPickCallback,
@@ -151,7 +156,16 @@ const Sales = () => {
             </button>
           )}
         </div>
+        {hasPermission('sales.cash_expense') && (
+          <button onClick={() => state.requireShop(id => setCashShopId(id))}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-secondary text-sm font-semibold text-text-secondary hover:text-accent-orange hover:border-accent-orange/50 transition-colors shrink-0">
+            <Banknote size={16} /> {t('fin_cash_btn')}
+          </button>
+        )}
       </div>
+      <AnimatePresence>
+        {cashShopId && <CashExpenseModal shopId={cashShopId} onClose={() => setCashShopId(null)} />}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
       {(() => {

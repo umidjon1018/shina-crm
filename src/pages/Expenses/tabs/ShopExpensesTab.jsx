@@ -6,9 +6,9 @@ import { useAuthStore } from '../../../store/authStore'
 import { useShopStore } from '../../../store/shopStore'
 import { ShopPickerModal } from '../../../components/ShopPickerModal'
 import ShopRequiredGuard from '../../../components/ShopRequiredGuard'
-import { EXPENSE_CATEGORIES as MOCK_EXPENSE_CATEGORIES } from '../../../constants/expenseCategories'
+import { useFinanceCategories } from '../components/useFinanceCategories'
 import { getExpenses, deleteExpense } from '../../../api/expenseService'
-import { fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, sortedCategories, getCatLabel, PAGE_SIZE, StatCard, MonthFilterBar, Pagination, ICON_MAP, monthLabel } from '../components/expHelpers'
+import { fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, sortedCategories, getCatLabel, PAGE_SIZE, StatCard, MonthFilterBar, Pagination, ICON_MAP, monthLabel, colorCls, pmLabel } from '../components/expHelpers'
 import ExpenseFormModal from '../components/ExpenseFormModal'
 import DeleteModal from '../components/DeleteModal'
 
@@ -31,6 +31,7 @@ const ShopExpensesTab = ({ currentUser }) => {
   const [filterMonth, setFilterMonth] = useState(CURRENT_MONTH)
   const [page, setPage] = useState(1)
   const resetPage = () => setPage(1)
+  const { categories: MOCK_EXPENSE_CATEGORIES, activeCategories } = useFinanceCategories('expense')
 
   useEffect(() => {
     getExpenses().then(d => { setExpenses(d); setLoading(false) })
@@ -59,7 +60,7 @@ const ShopExpensesTab = ({ currentUser }) => {
     let top = null, topVal = 0
     Object.entries(categoryTotals).forEach(([id, val]) => { if (val > topVal) { topVal = val; top = id } })
     return top ? MOCK_EXPENSE_CATEGORIES.find(c => c.id === top) : null
-  }, [categoryTotals])
+  }, [categoryTotals, MOCK_EXPENSE_CATEGORIES])
 
   const filtered = useMemo(() => {
     let list = [...expenses]
@@ -72,11 +73,11 @@ const ShopExpensesTab = ({ currentUser }) => {
       list = list.filter(e =>
         e.note?.toLowerCase().includes(q) ||
         e.responsibleName?.toLowerCase().includes(q) ||
-        MOCK_EXPENSE_CATEGORIES.find(c => c.id === e.categoryId)?.label.toLowerCase().includes(q)
+        getCatLabel(MOCK_EXPENSE_CATEGORIES.find(c => c.id === e.categoryId), t).toLowerCase().includes(q)
       )
     }
     return list.sort((a, b) => new Date(b.date) - new Date(a.date))
-  }, [expenses, selectedShopId, filterMonth, filterCategory, filterCurrency, search])
+  }, [expenses, selectedShopId, filterMonth, filterCategory, filterCurrency, search, MOCK_EXPENSE_CATEGORIES])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -115,7 +116,7 @@ const ShopExpensesTab = ({ currentUser }) => {
         <div className="bg-bg-secondary border border-border rounded-2xl p-5">
           <h3 className="font-syne font-bold text-text-primary mb-4 text-sm">{t('exp_category_breakdown')}</h3>
           <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
-            {sortedCategories(MOCK_EXPENSE_CATEGORIES).map(cat => {
+            {sortedCategories(MOCK_EXPENSE_CATEGORIES.filter(c => c.isActive || categoryTotals[c.id])).map(cat => {
               const Icon = ICON_MAP[cat.icon] || MoreHorizontal
               const total = categoryTotals[cat.id] || 0
               const pct = monthTotal > 0 ? Math.round((total / monthTotal) * 100) : 0
@@ -124,7 +125,7 @@ const ShopExpensesTab = ({ currentUser }) => {
                   onClick={() => { setFilterCategory(cat.id === filterCategory ? 'all' : cat.id); resetPage() }}
                   className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all
                     ${filterCategory === cat.id ? 'border-accent-red bg-accent-red/10' : 'border-border bg-bg-tertiary hover:border-accent-red/40'}`}>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cat.color}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorCls(cat.color)}`}>
                     <Icon size={14} />
                   </div>
                   <span className="text-text-primary text-xs font-semibold text-center leading-tight">{getCatLabel(cat, t)}</span>
@@ -198,7 +199,7 @@ const ShopExpensesTab = ({ currentUser }) => {
                       </td>
                       <td className="px-4 py-3">
                         {cat && (
-                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${cat.color}`}>
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colorCls(cat.color)}`}>
                             <Icon size={12} /> {getCatLabel(cat, t)}
                           </div>
                         )}
@@ -217,7 +218,13 @@ const ShopExpensesTab = ({ currentUser }) => {
                         {exp.currency === 'USD' ? `$${fmtNum(exp.amount)}` : fmtUZS(exp.amount)}
                         {exp.currency === 'USD' && <span className="text-text-secondary text-xs ml-1">@ {fmtNum(exp.usdRate)}</span>}
                       </td>
-                      <td className="px-4 py-3 text-right text-text-secondary whitespace-nowrap">{fmtUZS(exp.amountUZS)}</td>
+                      <td className="px-4 py-3 text-right text-text-secondary whitespace-nowrap">
+                        {fmtUZS(exp.amountUZS)}
+                        <div className="flex items-center justify-end gap-1 mt-0.5">
+                          {exp.source === 'cashbox' && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-accent-orange/10 text-accent-orange">{t('fin_cashbox_badge')}</span>}
+                          <span className="text-[10px] text-text-muted">{pmLabel(exp.paymentMethod, t)}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">
                           <button onClick={() => { setEditTarget(exp); setShowForm(true) }}
@@ -245,7 +252,7 @@ const ShopExpensesTab = ({ currentUser }) => {
           <ExpenseFormModal
             onClose={() => { setShowForm(false); setEditTarget(null) }}
             onSave={handleSave}
-            categories={MOCK_EXPENSE_CATEGORIES}
+            categories={MOCK_EXPENSE_CATEGORIES.filter(c => c.isActive || c.id === editTarget?.categoryId)}
             currentUser={currentUser}
             editData={editTarget}
             shops={shops}

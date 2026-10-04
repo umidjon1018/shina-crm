@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useShopStore } from '../../../store/shopStore'
 import { addCapital, updateCapital } from '../../../api/capitalService'
-import { today, fmtUZS, fmtNum } from './expHelpers'
+import { today, fmtUZS, fmtNum, PaymentMethodPicker } from './expHelpers'
 
 // ─── CAPITAL FORM MODAL (qo'shish + tahrirlash) ──────────
 const CapitalFormModal = ({ onClose, onSave, editData }) => {
@@ -23,6 +23,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
     date: editData.date,
     source: editData.source || '',
     note: editData.note || '',
+    paymentMethod: editData.paymentMethod || 'cash',
   } : {
     type: 'inject',
     amount: '',
@@ -31,6 +32,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
     date: today(),
     source: '',
     note: '',
+    paymentMethod: 'cash',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -58,6 +60,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
       date: form.date,
       source: form.source.trim(),
       note: form.note.trim(),
+      paymentMethod: form.paymentMethod,
     }
     let res
     if (isEdit) res = await updateCapital(editData.id, payload)
@@ -71,7 +74,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-        className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10">
+        className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h3 className="font-syne font-bold text-lg text-text-primary">
             {isEdit ? t('exp_cap_form_edit_title') : t('exp_tab_capital')}
@@ -103,6 +106,11 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
             <input type="text" value={form.source} onChange={e => set('source', e.target.value)}
               placeholder={t('exp_cap_form_source_placeholder')}
               className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red" />
+          </div>
+          {/* To'lov usuli */}
+          <div>
+            <label className="text-text-secondary text-sm mb-1.5 block">{t('fin_payment_method')}</label>
+            <PaymentMethodPicker value={form.paymentMethod} onChange={v => set('paymentMethod', v)} />
           </div>
           {/* Summa */}
           <div>

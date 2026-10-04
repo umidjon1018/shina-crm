@@ -7,7 +7,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { useShopStore } from '../../../store/shopStore'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { addExpense, updateExpense } from '../../../api/expenseService'
-import { ICON_MAP, fmtUZS, today, sortedCategories, getCatLabel } from './expHelpers'
+import { ICON_MAP, fmtUZS, today, sortedCategories, getCatLabel, PaymentMethodPicker } from './expHelpers'
 
 // ─── EXPENSE FORM MODAL (qo'shish + tahrirlash) ──────────
 const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, shops, defaultShopId }) => {
@@ -26,6 +26,7 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
     shopId: editData.shopId || 'shop1',
     expenseType: editData.expenseType || 'fixed',
     employeeId: editData.employeeId || '',
+    paymentMethod: editData.paymentMethod || 'cash',
   } : {
     categoryId: categories[0]?.id || '',
     amount: '',
@@ -36,8 +37,9 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
     responsibleName: currentUser.fullName || currentUser.username || '',
     note: '',
     shopId: defaultShopId || shops[0]?.id || 'shop1',
-    expenseType: 'fixed',
+    expenseType: categories[0]?.isFixed === false ? 'variable' : 'fixed',
     employeeId: '',
+    paymentMethod: 'cash',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -82,6 +84,7 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
       shopId: form.shopId,
       expenseType: form.expenseType,
       employeeId: isSalaryCategory ? (form.employeeId || null) : null,
+      paymentMethod: form.paymentMethod,
     }
     let res
     if (isEdit) res = await updateExpense(editData.id, payload)
@@ -113,7 +116,7 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
                 const Icon = ICON_MAP[cat.icon] || MoreHorizontal
                 const active = form.categoryId === cat.id
                 return (
-                  <button key={cat.id} onClick={() => set('categoryId', cat.id)}
+                  <button key={cat.id} onClick={() => setForm(f => ({ ...f, categoryId: cat.id, expenseType: isEdit ? f.expenseType : (cat.isFixed ? 'fixed' : 'variable') }))}
                     className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-xs font-medium text-left
                       ${active ? 'border-accent-red bg-accent-red/10 text-accent-red' : 'border-border bg-bg-tertiary text-text-secondary hover:border-accent-red/50'}`}>
                     <Icon size={14} className="shrink-0" />
@@ -184,6 +187,11 @@ const ExpenseFormModal = ({ onClose, onSave, categories, currentUser, editData, 
               {amountUZS > 0 && <p className="text-text-secondary text-xs mt-1">≈ {fmtUZS(amountUZS)}</p>}
             </div>
           )}
+          {/* To'lov usuli */}
+          <div>
+            <label className="text-text-secondary text-sm mb-1.5 block">{t('fin_payment_method')}</label>
+            <PaymentMethodPicker value={form.paymentMethod} onChange={v => set('paymentMethod', v)} />
+          </div>
           {/* Sana */}
           <div>
             <label className="text-text-secondary text-sm mb-1.5 block">{t('exp_form_pay_date')}</label>

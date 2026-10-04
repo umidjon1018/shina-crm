@@ -11,6 +11,7 @@ const map = (c) => ({
   date: c.date || '',
   source: c.source || '',
   note: c.note || '',
+  paymentMethod: c.payment_method || 'cash',
   createdAt: c.created_at || '',
 })
 
@@ -31,6 +32,7 @@ export const addCapital = async (d) => {
     date: d.date,
     source: d.source,
     note: d.note,
+    payment_method: d.paymentMethod || 'cash',
   })
   return { success: true, entry: map(data) }
 }
@@ -45,6 +47,7 @@ export const updateCapital = async (id, d) => {
     date: d.date,
     source: d.source,
     note: d.note,
+    payment_method: d.paymentMethod || 'cash',
   })
   return { success: true, entry: map(data) }
 }

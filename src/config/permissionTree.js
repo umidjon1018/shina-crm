@@ -32,6 +32,7 @@ export const PERMISSION_TREE = [
         ]
       },
       { id: 'sales.profit', label: 'Foyda', denyable: true },
+      { id: 'sales.cash_expense', label: 'Kassadan xarajat' },
     ]
   },
   {
@@ -42,10 +43,14 @@ export const PERMISSION_TREE = [
     ]
   },
   {
-    id: 'expenses', label: 'Xarajatlar', children: [
+    id: 'expenses', label: 'Moliya', children: [
       { id: 'expenses.shop', label: "Do'kon xarajatlari" },
+      { id: 'expenses.income', label: 'Daromadlar' },
+      { id: 'expenses.cashflow', label: 'Pul harakati' },
+      { id: 'expenses.pnl', label: 'Foyda va zarar' },
       { id: 'expenses.supplier', label: 'Yetkazib beruvchi to\'lovlari' },
       { id: 'expenses.capital', label: 'Kapital harakati' },
+      { id: 'expenses.categories', label: 'Kategoriyalar' },
     ]
   },
   {

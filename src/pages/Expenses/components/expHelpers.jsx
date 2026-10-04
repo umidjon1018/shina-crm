@@ -1,12 +1,52 @@
 import React from 'react'
-import { ChevronLeft, ChevronRight, Building2, Zap, Users, Truck, Wrench, Megaphone, MoreHorizontal, Sparkles, Monitor } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Building2, Zap, Users, Truck, Wrench, Megaphone, MoreHorizontal, Sparkles, Monitor, Banknote, CreditCard, Landmark, Home, Fuel, Phone, ShieldCheck, Receipt, Coffee, Package, Briefcase, Gift, Percent, Car } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../../i18n'
 
 // ─── ICON MAP ────────────────────────────────────────────
 const ICON_MAP = {
   Building2, Zap, Users, Truck, Wrench, Megaphone, MoreHorizontal,
-  Sparkles, Monitor
+  Sparkles, Monitor, Home, Fuel, Phone, ShieldCheck, Receipt, Coffee, Package, Briefcase, Gift, Percent, Car, Landmark
+}
+
+const COLOR_CLS = {
+  blue: 'bg-blue-500/10 text-blue-500',
+  yellow: 'bg-yellow-500/10 text-yellow-500',
+  green: 'bg-green-500/10 text-green-500',
+  purple: 'bg-purple-500/10 text-purple-500',
+  orange: 'bg-orange-500/10 text-orange-500',
+  pink: 'bg-pink-500/10 text-pink-500',
+  gray: 'bg-gray-500/10 text-gray-500',
+  teal: 'bg-teal-500/10 text-teal-500',
+  cyan: 'bg-cyan-500/10 text-cyan-500',
+  red: 'bg-red-500/10 text-red-500',
+}
+const colorCls = (c) => COLOR_CLS[c] || (c && c.includes('/') ? c : COLOR_CLS.gray)
+
+const PAYMENT_METHODS = [
+  { id: 'cash', icon: Banknote, labelKey: 'fin_pm_cash' },
+  { id: 'card', icon: CreditCard, labelKey: 'fin_pm_card' },
+  { id: 'transfer', icon: Landmark, labelKey: 'fin_pm_transfer' },
+]
+const pmLabel = (m, t) => t(PAYMENT_METHODS.find(x => x.id === m)?.labelKey || 'fin_pm_cash')
+
+const PaymentMethodPicker = ({ value, onChange }) => {
+  const { t } = useTranslation()
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {PAYMENT_METHODS.map(m => {
+        const Icon = m.icon
+        const active = value === m.id
+        return (
+          <button key={m.id} type="button" onClick={() => onChange(m.id)}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl border text-xs font-semibold transition-all
+              ${active ? 'border-accent-red bg-accent-red/10 text-accent-red' : 'border-border bg-bg-tertiary text-text-secondary hover:border-accent-red/50'}`}>
+            <Icon size={14} className="shrink-0" /> <span className="truncate">{t(m.labelKey)}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 // ─── HELPERS ─────────────────────────────────────────────
@@ -21,7 +61,12 @@ const sortedCategories = (cats) => {
   return [...rest, ...others]
 }
 const isPrivileged = (role) => role === 'admin' || role === 'manager'
-const getCatLabel = (cat, t) => t('exp_cat_' + cat.key, cat.label)
+const DEFAULT_CAT_KEYS = ['rent', 'utilities', 'salary', 'transport', 'repair', 'marketing', 'other', 'service', 'technology']
+const getCatLabel = (cat, t) => {
+  if (!cat) return '—'
+  if (DEFAULT_CAT_KEYS.includes(cat.key) && cat.label === t('exp_cat_' + cat.key, { lng: 'uz' })) return t('exp_cat_' + cat.key)
+  return i18n.language === 'ru' ? (cat.labelRu || cat.label) : cat.label
+}
 const PAGE_SIZE = 15
 
 const monthLabel = (m, t) => {
@@ -105,4 +150,4 @@ const Pagination = ({ page, totalPages, total, setPage }) => {
 }
 
 
-export { ICON_MAP, fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, sortedCategories, isPrivileged, getCatLabel, PAGE_SIZE, monthLabel, StatCard, MonthFilterBar, Pagination }
+export { ICON_MAP, COLOR_CLS, colorCls, PAYMENT_METHODS, pmLabel, PaymentMethodPicker, fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, sortedCategories, isPrivileged, getCatLabel, PAGE_SIZE, monthLabel, StatCard, MonthFilterBar, Pagination }

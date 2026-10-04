@@ -289,7 +289,7 @@ export const MainLayout = () => {
                 <SidebarItem to="/income" icon={TrendingUp} label={getSlLabel('income') || t('income')} isActive={isActive('/income')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('expenses') && !hidden.includes('expenses') && (
-                <SidebarItem to="/expenses" icon={Wallet} label={getSlLabel('expenses') || t('expenses')} isActive={isActive('/expenses')} onClick={closeSidebar} replace={isSidebarOpen} />
+                <SidebarItem to="/expenses" icon={Wallet} label={getSlLabel('expenses') || t('fin_page_title')} isActive={isActive('/expenses')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('reports') && !hidden.includes('reports') && (
                 <SidebarItem to="/reports" icon={BarChart3} label={getSlLabel('reports') || t('reports')} isActive={isActive('/reports')} onClick={closeSidebar} replace={isSidebarOpen} />
