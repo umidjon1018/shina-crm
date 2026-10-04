@@ -38,7 +38,7 @@ const Income = () => {
   const { user } = useAuthStore()
   const { productCategories, usdRate, productAttributeDefs, productImages } = useSettingsStore()
   const { bump } = useDataStore()
-  const { selectedShopId } = useShopStore()
+  const { selectedShopId, shops } = useShopStore()
   const isPrivileged = user?.role === 'admin' || user?.role === 'manager'
 
   const [batches, setBatches] = useState([])

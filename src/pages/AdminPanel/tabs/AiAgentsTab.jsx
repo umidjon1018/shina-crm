@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Bot, TrendingUp, Package, Megaphone, MessageSquare, MessageCircle, UserCheck, Globe, Send, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
 import { useSettingsStore } from '../../../store/settingsStore'
-import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
+import { clearAnalysisCache, clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 
 const AGENT_ICONS = {
   'sales-agent':        { Icon: TrendingUp,    color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-border' },
@@ -40,7 +40,6 @@ const TOOL_LABELS = {
   get_inactive_customers:      'Uzoqlashayotgan mijozlar (qayta jalb)',
   get_customer_segments:       'Segmentatsiya (yangi/sodiq/xavf ostida/uyqudagi)',
   get_customer_debts:          'Nasiyadorlar (qarz holati)',
-  get_recent_returns:          'Qaytarilgan sotuvlar',
   search_products:             'Tovar qidirish (savollarga javob)',
   create_reservation:          'Tovar bron qilish',
   // Instagram agenti

@@ -1796,7 +1796,7 @@ export const useSalesState = () => {
     installmentTermMonths, setInstallmentTermMonths,
     allCustomers, setAllCustomers, salesList, setSalesList,
     returnsList, setReturnsList,
-    fetchData, isSubmitting, setIsSubmitting, successSale, setSuccessSale,
+    isSubmitting, setIsSubmitting, successSale, setSuccessSale,
     customerSearch, setCustomerSearch, showNewCustomerModal, setShowNewCustomerModal,
     newCustomer, setNewCustomer, priceWarnings, setPriceWarnings,
     pinModal, setPinModal, pendingDiscountReqId, setPendingDiscountReqId,

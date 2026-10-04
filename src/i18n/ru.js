@@ -1552,7 +1552,6 @@ export default {
   ai_staff_desc: 'Эффективность сотрудников и анализ продаж',
   ai_instagram_desc: 'Бот авто-ответов на комментарии Instagram',
   ai_staff_activity: 'Активность сотрудников',
-  ai_inventory_status: 'Состояние склада',
   ai_sales_count: 'продаж',
   ai_low_stock_items: 'Товаров с низким остатком',
   ai_planned_posts: 'Запланированных постов',

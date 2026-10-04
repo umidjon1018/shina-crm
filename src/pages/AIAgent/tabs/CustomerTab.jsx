@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Users, AlertTriangle, Clock, Phone, Calendar, Package, X, Check, MessageCircle, MapPin, Info, Link2 } from 'lucide-react'
+import { Users, AlertTriangle, Clock, Phone, Calendar, Package, X, Check, MessageCircle, MapPin, Info, Link2, Star } from 'lucide-react'
 
 const IgIcon = ({ size = 16, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

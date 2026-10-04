@@ -62,7 +62,6 @@ const map = (s) => ({
   balanceUsed: Number(s.balance_used) || 0,
   cashbackAmount: Number(s.cashback_amount) || 0,
   editCount: Number(s.edit_count) || 0,
-  soldAt: s.created_at || '',
   createdAt: s.created_at || '',
   items: (s.items || []).map(mapItem),
 })
