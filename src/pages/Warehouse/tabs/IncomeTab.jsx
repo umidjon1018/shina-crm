@@ -18,7 +18,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
   const { t } = useTranslation()
   const { user, hasPermission } = useAuthStore()
   const { usdRate, productAttributeDefs } = useSettingsStore()
-  const canFinance = hasPermission('warehouse.income.financial')
+  const canFinance = ['admin', 'manager'].includes(user?.role) && hasPermission('warehouse.income.financial')
   const [shopPickCallback, setShopPickCallback] = useState(null)
   const requireShop = (cb) => {
     if (selectedShopId !== 'all') { cb(selectedShopId) }
