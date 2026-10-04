@@ -516,6 +516,7 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
 | Xato tili | xato matni ilova tilida (uz/ru), SQL xatosi yashirin | backend `middleware/errorI18n.js` (lug'at + regex), frontend `client.js` `x-lang` header; `DEBUG_ERRORS=1` faqat lokal |
 | Kassa | sotuvga tayyor bo'lmagan tovar qidiruvda sababi bilan (barkod/kirim narxi/sotuv narxi); telefonda ixcham; menyu "orqaga" bilan yopiladi | `ProductSearch.jsx`, `NewSaleTab/UsedSaleTab/ReturnsTab`, `MainLayout.jsx` |
 | Tovar narxi USD | tovar oynasida so'm/USD almashtirgich, saqlash so'mda | `Management/components/DualPriceInput.jsx` |
+| Moliya | `/expenses` sahifasi "Moliya": Xarajatlar, Daromadlar, Pul harakati, Foyda va zarar, Yetkazib beruvchi to'lovlari, Kapital, Kategoriyalar; Sotuvda "Kassa xarajati" | backend `financeController.js`, `/api/finance`; `finance_categories` (xarajat kategoriyalari endi serverda, `cat1..cat9` id saqlangan), `finance_incomes`; `expenses.payment_method/source('cashbox')`; pul harakati SQL UNION (sotuv, nasiya to'lovlari, B/U, qaytarish, balans, xarajat, daromad, supplier to'lov, kapital; spisaniya kirmaydi) |
 
 **Kassada tovar sotilishi uchun 3 shart:** barkod bor + kirim narxi kiritilgan (`has_missing_price=false`) + sotuv narxi > 0. Sotuvchi kirimda narx kiritolmaydi (admin/boshqaruvchi to'ldiradi).
 
