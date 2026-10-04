@@ -29,6 +29,7 @@ import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
 import { useLangStore } from '../store/langStore'
 import { useOfflineSync } from '../hooks/useOfflineSync'
+import { usePinchZoom } from '../hooks/usePinchZoom'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useTranslation } from 'react-i18next'
 import { useNotificationStore } from '../store/notificationStore'
@@ -81,6 +82,7 @@ export const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const { isOnline, pendingCount, isSyncing } = useOfflineSync()
+  const { areaRef, contentRef, zoom, resetZoom } = usePinchZoom()
   const { getUnreadCount } = useNotificationStore()
   const unreadCount = getUnreadCount()
   const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories } = useSettingsStore()
@@ -344,9 +346,20 @@ export const MainLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 safe-bottom no-scrollbar">
-          <Outlet />
+        <div ref={areaRef} className="flex-1 overflow-y-auto p-4 lg:p-6 safe-bottom no-scrollbar">
+          <div ref={contentRef}>
+            <Outlet />
+          </div>
         </div>
+        {zoom !== 1 && (
+          <button
+            onClick={resetZoom}
+            className="fixed z-40 right-4 flex items-center gap-1 px-3 py-1.5 rounded-full bg-text-primary/80 text-bg-primary text-xs font-bold shadow-lg"
+            style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+          >
+            {Math.round(zoom * 100)}% <X size={12} />
+          </button>
+        )}
       </main>
 
       <AnimatePresence>
