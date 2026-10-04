@@ -31,6 +31,8 @@ const NewSaleTab = ({ ctx }) => {
     handleSubmitSale, isSubmitting,
     salesList, addNextItemOfProduct, updateGroupSalePrice,
     addBundleToCart, removeBundleFromCart,
+    loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
+    customerBalance, balanceUsed, payable, cashbackPreview,
   } = ctx
 
   const sellBtnRef = useRef(null)
@@ -308,6 +310,14 @@ const NewSaleTab = ({ ctx }) => {
                     </div>
                   )
                 })()}
+                {loyaltyInfo && (loyaltyInfo.discountPercent > 0 || loyaltyInfo.cashbackPercent > 0 || loyaltyInfo.balance !== 0 || loyaltyInfo.nextDiscount) && (
+                  <div className="px-3 py-2 border-t border-border flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                    {loyaltyInfo.discountPercent > 0 && <span className="text-accent-green font-bold">{t('sl_loy_discount', { n: loyaltyInfo.discountPercent })}</span>}
+                    {loyaltyInfo.cashbackPercent > 0 && <span className="text-accent-blue font-bold">{t('sl_loy_cashback', { n: loyaltyInfo.cashbackPercent })}</span>}
+                    {loyaltyInfo.balance !== 0 && <span className={`font-bold ${loyaltyInfo.balance > 0 ? 'text-accent-orange' : 'text-accent-red'}`}>{t('sl_loy_balance', { n: formatPrice(loyaltyInfo.balance, som) })}</span>}
+                    {loyaltyInfo.nextDiscount && <span className="text-text-muted">{t('sl_loy_next', { n: loyaltyInfo.nextDiscount.percent, left: formatPrice(loyaltyInfo.nextDiscount.left, som) })}</span>}
+                  </div>
+                )}
               </motion.div>
             ) : (
               <div className="space-y-3">
@@ -341,17 +351,17 @@ const NewSaleTab = ({ ctx }) => {
                 <button onClick={() => { setLoyaltyDiscountApplied(!loyaltyDiscountApplied) }}
                   className={`w-full py-2.5 px-4 rounded-2xl border text-sm font-bold transition-all flex items-center justify-between ${loyaltyDiscountApplied ? 'bg-accent-green/10 border-accent-green text-accent-green' : 'bg-bg-tertiary border-border text-text-secondary hover:border-accent-green hover:text-accent-green'}`}>
                   <span className="flex items-center gap-2"><Star size={14} />{t('sl_ns_loyalty_btn')}</span>
-                  <span>{loyaltyDiscountPercent || 25}%{loyaltyDiscountApplied ? ` ${t('sl_ns_loyalty_active')}` : ` ${t('sl_ns_loyalty_use')}`}</span>
+                  <span>{loyaltyTierPercent}%{loyaltyDiscountApplied ? ` ${t('sl_ns_loyalty_active')}` : ` ${t('sl_ns_loyalty_use')}`}</span>
                 </button>
               )}
 
-              <div className={loyaltyDiscountApplied ? 'opacity-40 pointer-events-none' : ''}>
+              <div className={loyaltyActive ? 'opacity-40 pointer-events-none' : ''}>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('sl_ns_discount_label')}</label>
                   <span className="text-xs font-bold text-accent-red">{discountPercent}%</span>
                 </div>
                 <input type="range" min="0" max={maxDiscount} value={discountPercent}
-                  disabled={loyaltyDiscountApplied || !!pendingDiscountReqId}
+                  disabled={loyaltyActive || !!pendingDiscountReqId}
                   onChange={(e) => handleDiscountChange(Number(e.target.value))}
                   className="w-full h-1.5 bg-bg-tertiary rounded-lg appearance-none cursor-pointer accent-accent-red disabled:cursor-not-allowed" />
               </div>
@@ -368,6 +378,25 @@ const NewSaleTab = ({ ctx }) => {
                 </div>
               )}
             </>
+          )}
+
+          {customerBalance > 0 && paymentType !== 'installment' && cartItems.length > 0 && (
+            <div className={`rounded-2xl border p-3 space-y-2 ${useBalance ? 'border-accent-orange bg-accent-orange/5' : 'border-border bg-bg-tertiary'}`}>
+              <label className="flex items-center justify-between gap-2 cursor-pointer">
+                <span className="flex items-center gap-2 text-sm font-bold text-text-primary">
+                  <input type="checkbox" checked={useBalance} onChange={e => {
+                    setUseBalance(e.target.checked)
+                    if (e.target.checked) setBalanceInput(String(Math.min(Math.floor(customerBalance), Math.round(total))))
+                  }} />
+                  {t('sl_loy_pay_from_balance')}
+                </span>
+                <span className="text-xs text-accent-orange font-bold">{formatPrice(customerBalance, som)}</span>
+              </label>
+              {useBalance && (
+                <input type="number" min="0" value={balanceInput} onChange={e => setBalanceInput(e.target.value)}
+                  className="w-full px-3 py-2 bg-bg-secondary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-orange" />
+              )}
+            </div>
           )}
 
           {/* Payment Methods */}
@@ -534,7 +563,7 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
               <span className="text-text-primary font-medium">{formatPrice(subtotal, som)}</span>
             </div>
-            {promoDiscount > 0 && !loyaltyDiscountApplied && (
+            {promoDiscount > 0 && !loyaltyActive && (
               <div className="flex justify-between text-xs">
                 <span className="text-accent-orange font-bold">🏷️ Aksiya -{promoDiscount}%</span>
                 <span className="text-accent-orange font-medium">-{formatPrice(subtotal * promoDiscount / 100, som)}</span>
@@ -542,7 +571,7 @@ const NewSaleTab = ({ ctx }) => {
             )}
             {effectiveDiscount > 0 && paymentType !== 'installment' && (
               <div className="flex justify-between text-xs">
-                <span className="text-accent-red">{loyaltyDiscountApplied ? t('sl_ns_loyalty_discount_row', { n: effectiveDiscount }) : t('sl_ns_discount_row', { n: effectiveDiscount })}</span>
+                <span className="text-accent-red">{loyaltyActive ? t('sl_ns_loyalty_discount_row', { n: effectiveDiscount }) : t('sl_ns_discount_row', { n: effectiveDiscount })}</span>
                 <span className="text-accent-red font-medium">-{formatPrice(discountAmount, som)}</span>
               </div>
             )}
@@ -550,6 +579,24 @@ const NewSaleTab = ({ ctx }) => {
               <span className="text-base font-syne font-extrabold text-text-primary">{t('sl_ns_total_label')}</span>
               <span className="text-base font-syne font-extrabold text-accent-green">{formatPrice(total, som)}</span>
             </div>
+            {balanceUsed > 0 && (
+              <>
+                <div className="flex justify-between text-xs">
+                  <span className="text-accent-orange">{t('sl_loy_balance_row')}</span>
+                  <span className="text-accent-orange font-medium">-{formatPrice(balanceUsed, som)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-syne font-extrabold text-text-primary">{t('sl_loy_payable')}</span>
+                  <span className="text-sm font-syne font-extrabold text-accent-green">{formatPrice(payable, som)}</span>
+                </div>
+              </>
+            )}
+            {cashbackPreview > 0 && (
+              <div className="flex justify-between text-xs">
+                <span className="text-accent-blue">{t('sl_loy_cashback_row', { n: loyaltyInfo?.cashbackPercent })}</span>
+                <span className="text-accent-blue font-medium">+{formatPrice(cashbackPreview, som)}</span>
+              </div>
+            )}
             {tradeInTotal > 0 && (
               <>
                 <div className="flex justify-between text-xs">
@@ -558,7 +605,7 @@ const NewSaleTab = ({ ctx }) => {
                 </div>
                 <div className="flex justify-between pt-2 border-t border-border/50">
                   <span className="text-sm font-syne font-extrabold text-text-primary">{t('sl_ns_cash_needed')}</span>
-                  <span className="text-sm font-syne font-extrabold text-accent-green">{formatPrice(Math.max(0, total - tradeInTotal), som)}</span>
+                  <span className="text-sm font-syne font-extrabold text-accent-green">{formatPrice(Math.max(0, payable - tradeInTotal), som)}</span>
                 </div>
               </>
             )}
@@ -571,7 +618,7 @@ const NewSaleTab = ({ ctx }) => {
         </div>
       </div>
 
-      <MobileSellBar targetRef={sellBtnRef} count={cartItems.length} payLabel={payLabel} total={total}
+      <MobileSellBar targetRef={sellBtnRef} count={cartItems.length} payLabel={payLabel} total={payable}
         onSell={handleSubmitSale} disabled={sellDisabled} submitting={isSubmitting} label={t('sl_ns_sell_btn')} resetKey={cartItems.length > 0} />
     </motion.div>
   )

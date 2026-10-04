@@ -153,7 +153,6 @@ const CustomerProfileModal = ({ ctx }) => {
                         </div>
                         <div>
                           <p className="font-syne font-extrabold text-lg">{t('cust_vip')}</p>
-                          <p className="text-sm">{t('cust_vip_desc', { percent: loyaltyDiscountPercent })}</p>
                         </div>
                       </motion.div>
                     )}

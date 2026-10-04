@@ -94,7 +94,10 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
         <div class="row bold" style="font-size:14px;">
           <span>JAMI:</span><span>${sale.total.toLocaleString('uz-UZ')} ${som}</span>
         </div>
+        ${sale.balanceUsed > 0 ? `<div class="row"><span>Balansdan:</span><span>-${sale.balanceUsed.toLocaleString('uz-UZ')} ${som}</span></div>
+        <div class="row bold"><span>To'landi:</span><span>${Math.max(0, sale.total - sale.balanceUsed).toLocaleString('uz-UZ')} ${som}</span></div>` : ''}
         <div class="row" style="margin-top:4px;"><span>To'lov:</span><span>${paymentLabel}</span></div>
+        ${sale.cashbackAmount > 0 ? `<div class="row"><span>Keshbek (balansga):</span><span>+${sale.cashbackAmount.toLocaleString('uz-UZ')} ${som}</span></div>` : ''}
         <div class="divider"></div>
         <div class="center small" style="margin-top:8px;">Xarid uchun rahmat!</div>
         <div class="center small">${companyName} — Ishonchli tanlov</div>
@@ -127,6 +130,18 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
             <span className="text-text-muted">{t('sl_success_total')}</span>
             <span className="text-text-primary font-bold">{formatPrice(sale.total)}</span>
           </div>
+          {sale.balanceUsed > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-text-muted">{t('sl_loy_balance_row')}</span>
+              <span className="text-accent-orange font-bold">-{formatPrice(sale.balanceUsed)}</span>
+            </div>
+          )}
+          {sale.cashbackAmount > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-text-muted">{t('cust_tx_cashback')}</span>
+              <span className="text-accent-blue font-bold">+{formatPrice(sale.cashbackAmount)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm">
             <span className="text-text-muted">{t('sl_success_payment')}</span>
             <span className="text-text-primary font-medium">

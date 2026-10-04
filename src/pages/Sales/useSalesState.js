@@ -9,7 +9,7 @@ import { useDataStore } from '../../store/dataStore'
 import { useShopStore } from '../../store/shopStore'
 import { useSaleFormStore } from '../../store/saleFormStore'
 import { getReturns, addReturn } from '../../api/returnService'
-import { getCustomers, addCustomer } from '../../api/customerService'
+import { getCustomers, addCustomer, getCustomerLoyalty } from '../../api/customerService'
 import { findItemByBarcode as findItemByBarcodeAPI, getItems } from '../../api/itemService'
 import {
   getUsedStock, getUsedSales, createUsedSale, cancelUsedSale, addUsedStockFromTradeIn
@@ -304,10 +304,28 @@ export const useSalesState = () => {
     return best
   }, [activePromos, batchPromos, cartItems, selectedShopId])
 
-  const effectiveDiscount = loyaltyDiscountApplied
-    ? (loyaltyDiscountPercent || 25)
+  // Sodiqlik (serverdan): jamg'arma chegirma darajasi, keshbek foizi, balans
+  const [loyaltyInfo, setLoyaltyInfo] = useState(null)
+  const [useBalance, setUseBalance] = useState(false)
+  const [balanceInput, setBalanceInput] = useState('')
+  useEffect(() => {
+    setLoyaltyInfo(null); setUseBalance(false); setBalanceInput('')
+    if (!selectedCustomer?.id) return
+    let alive = true
+    getCustomerLoyalty(selectedCustomer.id).then(info => {
+      if (!alive) return
+      setLoyaltyInfo(info)
+      setLoyaltyDiscountApplied(info.discountPercent > 0)
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [selectedCustomer?.id])
+
+  const loyaltyTierPercent = loyaltyInfo?.discountPercent || 0
+  const loyaltyActive = loyaltyDiscountApplied && loyaltyTierPercent > 0 && paymentType !== 'installment'
+  const effectiveDiscount = loyaltyActive
+    ? Math.max(loyaltyTierPercent, promoDiscount)
     : Math.max(discountPercent, promoDiscount)
-  const customerHasLoyalty = selectedCustomer?.loyaltyLevel === 'gold' && (loyaltyDiscountPercent || 0) > 0
+  const customerHasLoyalty = loyaltyTierPercent > 0
 
   // Calculations
   const subtotal = cartItems.reduce((acc, c) => {
@@ -319,6 +337,14 @@ export const useSalesState = () => {
 
   const discountAmount = subtotal * effectiveDiscount / 100
   const total = subtotal - discountAmount
+  const customerBalance = loyaltyInfo?.balance || 0
+  const balanceUsed = (useBalance && paymentType !== 'installment' && customerBalance > 0)
+    ? Math.max(0, Math.min(Math.round(Number(balanceInput) || 0), Math.floor(customerBalance), Math.round(total)))
+    : 0
+  const payable = Math.max(0, Math.round(total) - balanceUsed)
+  const cashbackPreview = (paymentType !== 'installment' && (loyaltyInfo?.cashbackPercent || 0) > 0 && payable > 0 && payable >= (loyaltyInfo?.cashbackMinSale || 0))
+    ? Math.round(payable * loyaltyInfo.cashbackPercent / 100)
+    : 0
 
   // Savat: bir xil mahsulotning keyingi ombordan itemini qo'shish
   const addNextItemOfProduct = async (product) => {
@@ -492,7 +518,8 @@ export const useSalesState = () => {
         return d.toISOString().split('T')[0]
       })(),
       discount: effectiveDiscount,
-      loyaltyDiscountApplied,
+      loyaltyDiscountApplied: loyaltyActive,
+      balanceUsed,
       bundleDiscountAmount,
       isBundle: cartIsBundleSale,
       subtotal,
@@ -808,7 +835,11 @@ export const useSalesState = () => {
       return
     }
 
-    const refundVal = Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100))
+    const refundGross = Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100))
+    // Sotuvning balansdan to'langan ulushi naqd emas, mijoz balansiga qaytadi (backend yozadi)
+    const toBalance = returnSale.balanceUsed > 0 && returnSale.total > 0
+      ? Math.min(returnSale.balanceUsed, Math.round(returnSale.balanceUsed * refundGross / returnSale.total)) : 0
+    const refundVal = refundGross - toBalance
     const exchangeVal = returnMode === 'exchange' && exchangeItems.length > 0
       ? exchangeItems.reduce((sum, e) => sum + e.product.cashPrice, 0)
       : 0
@@ -977,7 +1008,7 @@ export const useSalesState = () => {
   }, [salesList, selectedShopId])
   const shopCustomers = selectedShopId === 'all'
     ? allCustomers
-    : allCustomers.filter(c => shopCustomerIds && shopCustomerIds.has(String(c.id)))
+    : allCustomers.filter(c => String(c.shopId) === String(selectedShopId) || (shopCustomerIds && shopCustomerIds.has(String(c.id))))
 
   const filteredCustomers = shopCustomers.filter(c =>
     c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
@@ -1762,6 +1793,8 @@ export const useSalesState = () => {
     profitMonthFilter, setProfitMonthFilter, profitTypeFilter, setProfitTypeFilter, profitSearch, setProfitSearch, profitSortField, setProfitSortField, profitSortOrder, setProfitSortOrder,
     installmentMonthFilter, setInstallmentMonthFilter, installmentSortField, setInstallmentSortField, installmentSortOrder, setInstallmentSortOrder,
     maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
+    loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
+    customerBalance, balanceUsed, payable, cashbackPreview,
     addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     addNextItemOfProduct, updateGroupSalePrice,
     addBundleToCart, removeBundleFromCart,

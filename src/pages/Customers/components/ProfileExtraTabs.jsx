@@ -139,7 +139,8 @@ export const NotesTab = ({ customer, user }) => {
 }
 
 // ===================== BALANS =====================
-const TX_LABEL = { deposit: 'cust_tx_deposit', withdraw: 'cust_tx_withdraw', adjust: 'cust_tx_adjust', debt_payment: 'cust_tx_debt_payment' }
+const TX_LABEL = { deposit: 'cust_tx_deposit', withdraw: 'cust_tx_withdraw', adjust: 'cust_tx_adjust', debt_payment: 'cust_tx_debt_payment',
+  sale_payment: 'cust_tx_sale_payment', sale_refund: 'cust_tx_sale_refund', cashback: 'cust_tx_cashback', cashback_reversal: 'cust_tx_cashback_reversal' }
 const METHOD_LABEL = { cash: 'pay_cash', card: 'pay_card', transfer: 'pay_transfer' }
 
 export const BalanceTab = ({ customer, user, selectedShopId, onChanged }) => {

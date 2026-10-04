@@ -56,6 +56,8 @@ const map = (s) => ({
   bundleDiscountAmount: Number(s.bundle_discount_amount) || 0,
   isBundle: s.is_bundle || false,
   cardType: s.card_type || null,
+  balanceUsed: Number(s.balance_used) || 0,
+  cashbackAmount: Number(s.cashback_amount) || 0,
   editCount: Number(s.edit_count) || 0,
   soldAt: s.created_at || '',
   createdAt: s.created_at || '',
@@ -102,6 +104,7 @@ export const createSale = async (saleData) => {
     bundle_discount_amount: saleData.bundleDiscountAmount || 0,
     is_bundle: saleData.isBundle || false,
     card_type: saleData.cardType || null,
+    balance_used: saleData.balanceUsed || 0,
   })
   return map(data)
 }

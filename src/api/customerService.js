@@ -116,3 +116,15 @@ export const payCustomerDebt = async (id, { amount, source, note, shopId }) => {
   })
   return data
 }
+
+export const getCustomerLoyalty = async (id) => {
+  const { data } = await api.get(`/api/customers/${id}/loyalty`)
+  return {
+    totalPurchases: Number(data.totalPurchases) || 0,
+    balance: Number(data.balance) || 0,
+    discountPercent: Number(data.discountPercent) || 0,
+    nextDiscount: data.nextDiscount || null,
+    cashbackPercent: Number(data.cashbackPercent) || 0,
+    cashbackMinSale: Number(data.cashbackMinSale) || 0,
+  }
+}

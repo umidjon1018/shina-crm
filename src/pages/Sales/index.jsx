@@ -178,6 +178,9 @@ const Sales = () => {
           subtotal, total, priceWarnings, setPriceWarnings,
           handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice,
           addBundleToCart, removeBundleFromCart,
+          loyaltyInfo: state.loyaltyInfo, loyaltyTierPercent: state.loyaltyTierPercent, loyaltyActive: state.loyaltyActive,
+          useBalance: state.useBalance, setUseBalance: state.setUseBalance, balanceInput: state.balanceInput, setBalanceInput: state.setBalanceInput,
+          customerBalance: state.customerBalance, balanceUsed: state.balanceUsed, payable: state.payable, cashbackPreview: state.cashbackPreview,
           // used_sale
           buScrapMode, setBuScrapMode, buScrapSelected, setBuScrapSelected,
           buScrapCategory, setBuScrapCategory, buScrapCategories, buScrapGroups,

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { AlertCircle, CheckCircle, DollarSign, Percent, Star, Tag, TrendingUp } from 'lucide-react'
 import { formatPrice } from '../components/mgmtHelpers'
+import LoyaltyProgramCard from '../components/LoyaltyProgramCard'
 
 const DiscountsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -83,8 +84,10 @@ const DiscountsTab = ({ ctx }) => {
 
   return (
           <motion.div key="discounts" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-8 max-w-2xl">
-            {/* Blok 1 — Sodiqlik dasturi */}
-            <div className="space-y-6">
+            <LoyaltyProgramCard canEdit={['admin', 'manager'].includes(user?.role)} />
+
+            {/* Blok 1 — Sodiqlik dasturi (kelishlar soni — mijoz darajasi ko'rsatkichi) */}
+            <div className="space-y-6 pt-6 border-t border-border">
               <div>
                 <h3 className="text-xl font-syne font-bold text-text-primary">{t('mgmt_loyalty_title')}</h3>
                 <p className="text-sm text-text-secondary">{t('mgmt_loyalty_subtitle')}</p>
@@ -116,18 +119,6 @@ const DiscountsTab = ({ ctx }) => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-text-primary">{t('mgmt_loyalty_discount')}</label>
-                  <p className="text-[10px] text-text-muted">{t('mgmt_loyalty_discount_hint')}</p>
-                  <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={loyaltyForm.loyaltyDiscountPercent}
-                    onChange={e => setLoyaltyForm({ ...loyaltyForm, loyaltyDiscountPercent: Number(e.target.value) })}
-                    className="w-full px-4 py-2 bg-bg-secondary border border-border rounded-xl focus:outline-none focus:border-accent-red text-sm font-semibold"
-                  />
-                </div>
               </div>
             </div>
 

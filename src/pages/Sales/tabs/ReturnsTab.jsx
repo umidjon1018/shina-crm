@@ -326,10 +326,17 @@ const ReturnsTab = ({ ctx }) => {
                 <p className="text-[10px] text-text-muted mt-1.5">{t('sl_ret_refund_only_original')}</p>
               </div>
               <div className="bg-bg-tertiary p-5 rounded-2xl border border-border text-center">
-                <p className="text-xs text-text-secondary font-bold">{t('sl_ret_refund_total')}</p>
-                <h3 className="text-3xl font-syne font-extrabold text-accent-red mt-2">
-                  {formatPrice(returnSale ? Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100)) : 0, som)}
-                </h3>
+                {(() => {
+                  const refundVal = returnSale ? Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100)) : 0
+                  const toBalance = ((v) => (returnSale?.balanceUsed > 0 && returnSale.total > 0 ? Math.min(returnSale.balanceUsed, Math.round(returnSale.balanceUsed * v / returnSale.total)) : 0))(refundVal)
+                  return (
+                    <>
+                      <p className="text-xs text-text-secondary font-bold">{t('sl_ret_refund_total')}</p>
+                      <h3 className="text-3xl font-syne font-extrabold text-accent-red mt-2">{formatPrice(refundVal - toBalance, som)}</h3>
+                      {toBalance > 0 && <p className="text-xs text-accent-orange font-bold mt-2">{t('sl_loy_ret_to_balance', { n: formatPrice(toBalance, som) })}</p>}
+                    </>
+                  )
+                })()}
               </div>
             </div>
           )}
@@ -370,7 +377,8 @@ const ReturnsTab = ({ ctx }) => {
               {returnSale && returnItems.length > 0 && (
                 <div className="bg-bg-tertiary p-5 rounded-2xl border border-border text-center space-y-2">
                   {(() => {
-                    const refundVal = Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100))
+                    const refundGross = Math.round(returnItems.reduce((sum, item) => sum + (item.salePrice || 0) * (returnQtyMap[item.barcode] || 1), 0) * (1 - (returnSale.discount || 0) / 100))
+                    const refundVal = refundGross - ((v) => (returnSale?.balanceUsed > 0 && returnSale.total > 0 ? Math.min(returnSale.balanceUsed, Math.round(returnSale.balanceUsed * v / returnSale.total)) : 0))(refundGross)
                     const exchangeVal = exchangeItems.reduce((sum, e) => sum + e.product.cashPrice, 0)
                     const diff = exchangeVal - refundVal
                     return (
