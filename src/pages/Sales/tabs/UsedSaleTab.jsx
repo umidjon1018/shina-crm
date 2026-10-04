@@ -36,11 +36,11 @@ const UsedSaleTab = ({ ctx }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="flex flex-col lg:flex-row gap-6"
+      className="flex flex-col lg:flex-row gap-3 sm:gap-6"
     >
       {/* LEFT PANEL */}
-      <div className="flex flex-col gap-6 lg:w-[45%]">
-        <div className="bg-bg-primary border border-border rounded-3xl p-6 space-y-6 shadow-sm">
+      <div className="flex flex-col gap-3 sm:gap-6 lg:w-[45%]">
+        <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-sm">
           {buScrapMode ? (
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -142,7 +142,7 @@ const UsedSaleTab = ({ ctx }) => {
         </div>
 
         {buCart.length > 0 && (
-          <div className="bg-bg-primary border border-border rounded-3xl p-6 space-y-4">
+          <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                 <ShoppingCart size={18} className="text-accent-red" />
@@ -177,7 +177,7 @@ const UsedSaleTab = ({ ctx }) => {
 
       {/* RIGHT PANEL */}
       <div className="flex flex-col lg:w-[55%] bg-bg-secondary border border-border rounded-3xl overflow-hidden shadow-sm">
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto no-scrollbar">
+        <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto no-scrollbar">
           {buSuccessSale && (
             <div className="flex items-center justify-between gap-2 p-3 bg-accent-green/10 border border-accent-green/30 rounded-xl">
               <div className="flex items-center gap-2 text-accent-green text-xs font-bold">
@@ -189,7 +189,7 @@ const UsedSaleTab = ({ ctx }) => {
 
           {/* Customer */}
           <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-3 block">{t('col_customer')}</label>
+            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 sm:mb-3 block">{t('col_customer')}</label>
             {buSelectedCustomer ? (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="bg-bg-tertiary border border-border rounded-2xl overflow-hidden p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -246,7 +246,7 @@ const UsedSaleTab = ({ ctx }) => {
           {/* Payment */}
           <div className="space-y-3">
             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_payment_label')}</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-2 gap-1.5 sm:gap-2">
               {[
                 { id: 'cash', icon: Banknote, label: t('pay_cash') },
                 { id: 'card', icon: CreditCard, label: t('pay_card') },
@@ -254,8 +254,8 @@ const UsedSaleTab = ({ ctx }) => {
                 { id: 'transfer', icon: ArrowRight, label: t('sl_ns_pay_transfer') },
               ].map(pm => (
                 <button key={pm.id} onClick={() => { setBuPaymentType(pm.id); setBuCardType(null); if (pm.id !== 'installment') setBuInstallmentOrgId('') }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-left ${buPaymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
-                  <pm.icon size={18} className="flex-shrink-0" /><span className="text-xs font-bold">{pm.label}</span>
+                  className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-1 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border transition-all text-center sm:text-left ${buPaymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                  <pm.icon size={18} className="flex-shrink-0" /><span className="text-[10px] sm:text-xs font-bold leading-tight">{pm.label}</span>
                 </button>
               ))}
             </div>
@@ -324,10 +324,10 @@ const UsedSaleTab = ({ ctx }) => {
           {/* Source */}
           <div className={`space-y-3 ${buScrapMode ? 'opacity-40 pointer-events-none' : ''}`}>
             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_source_label')}</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex sm:grid sm:grid-cols-3 gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
               {sources.filter(s => s.isActive !== false).map(s => (
                 <button key={s.id} type="button" disabled={buScrapMode} onClick={() => setBuSource(s.id)}
-                  className={`px-3 py-2 rounded-xl border transition-all text-center text-xs font-bold ${buSource === s.id ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                  className={`shrink-0 whitespace-nowrap sm:whitespace-normal px-3 py-1.5 sm:py-2 rounded-xl border transition-all text-center text-[11px] sm:text-xs font-bold ${buSource === s.id ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
                   {t('source_' + s.id, { defaultValue: s.label })}
                 </button>
               ))}
@@ -336,7 +336,7 @@ const UsedSaleTab = ({ ctx }) => {
         </div>
 
         {/* Total & Checkout */}
-        <div className="p-6 bg-bg-tertiary border-t border-border space-y-4">
+        <div className="p-4 sm:p-6 bg-bg-tertiary border-t border-border space-y-3 sm:space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
@@ -355,7 +355,7 @@ const UsedSaleTab = ({ ctx }) => {
           </div>
           <button ref={buSellRef} onClick={buHandleSubmitSale}
             disabled={buSellDisabled}
-            className="w-full py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
+            className="w-full py-3 sm:py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
             {buIsSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_us_sell_btn')} <ArrowRight size={18} /></>}
           </button>
         </div>

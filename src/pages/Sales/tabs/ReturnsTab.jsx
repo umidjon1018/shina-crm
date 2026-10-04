@@ -36,19 +36,19 @@ const ReturnsTab = ({ ctx }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="flex flex-col lg:flex-row gap-6"
+      className="flex flex-col lg:flex-row gap-3 sm:gap-6"
     >
       {/* CHAP USTUN */}
-      <div className="flex flex-col gap-6 lg:w-[50%] bg-bg-primary border border-border rounded-3xl p-6 shadow-sm">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:w-[50%] bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 shadow-sm">
         <h3 className="font-syne font-bold text-text-primary text-base border-b border-border/50 pb-2">{t('sl_ret_left_title')}</h3>
 
         <div className="space-y-4">
-          <div className="space-y-4 bg-bg-secondary p-4 border border-border rounded-2xl">
+          <div className="space-y-3 sm:space-y-4 bg-bg-secondary p-3 sm:p-4 border border-border rounded-2xl">
             <div>
               <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('sl_ret_barcode_label')}</label>
               <BarcodeScanner allowSold={true} onScan={handleLeftItemFound} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
             </div>
-            <div className="pt-4 border-t border-border/40">
+            <div className="pt-3 sm:pt-4 border-t border-border/40">
               <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('sl_ret_search_label')}</label>
               <SaleItemSearch
                 salesList={selectedShopId === 'all' ? salesList : salesList.filter(s => s.shopId === selectedShopId)}
@@ -287,14 +287,14 @@ const ReturnsTab = ({ ctx }) => {
       </div>
 
       {/* O'NG USTUN */}
-      <div className="flex flex-col gap-6 lg:w-[50%] bg-bg-primary border border-border rounded-3xl p-6 shadow-sm justify-between">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:w-[50%] bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 shadow-sm justify-between">
         <div>
           <h3 className="font-syne font-bold text-text-primary text-base border-b border-border/50 pb-2 mb-4">{t('sl_ret_right_title')}</h3>
 
-          <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="grid grid-cols-2 gap-2 mb-4 sm:mb-6">
             {['refund', 'exchange'].map(mode => (
               <button key={mode} disabled={returnSale?.paymentType === 'installment'} onClick={() => setReturnMode(mode)}
-                className={`py-3 rounded-2xl border text-xs font-bold transition-all ${returnMode === mode ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'} disabled:opacity-40 disabled:cursor-not-allowed`}>
+                className={`py-2.5 sm:py-3 rounded-2xl border text-xs font-bold transition-all ${returnMode === mode ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'} disabled:opacity-40 disabled:cursor-not-allowed`}>
                 {mode === 'refund' ? t('sl_ret_refund_btn') : t('col_exchange')}
               </button>
             ))}
@@ -343,12 +343,12 @@ const ReturnsTab = ({ ctx }) => {
 
           {returnMode === 'exchange' && (
             <div className="space-y-4">
-              <div className="space-y-4 bg-bg-secondary p-4 border border-border rounded-2xl">
+              <div className="space-y-3 sm:space-y-4 bg-bg-secondary p-3 sm:p-4 border border-border rounded-2xl">
                 <div>
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('sl_ret_exchange_barcode_label')}</label>
                   <BarcodeScanner allowSold={false} onScan={handleRightScanOrSearch} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
                 </div>
-                <div className="pt-4 border-t border-border/40">
+                <div className="pt-3 sm:pt-4 border-t border-border/40">
                   <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('sl_ret_exchange_search_label')}</label>
                   <ProductSearch allowSold={false} onAdd={handleRightScanOrSearch} cartItems={exchangeItems.map(e => ({ item: e.item, product: e.product }))} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
                 </div>
@@ -436,7 +436,7 @@ const ReturnsTab = ({ ctx }) => {
         )}
         <button onClick={handleReturnSubmit}
           disabled={!returnSale || returnSale.paymentType === 'installment' || returnItems.length === 0 || (returnMode === 'exchange' && exchangeItems.length === 0)}
-          className="w-full mt-3 py-4 bg-accent-red text-white font-syne font-extrabold text-sm rounded-xl disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-wider shadow-glow-red hover:opacity-90 transition-opacity">
+          className="w-full mt-3 py-3 sm:py-4 bg-accent-red text-white font-syne font-extrabold text-sm rounded-xl disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-wider shadow-glow-red hover:opacity-90 transition-opacity">
           {returnMode === 'refund' ? t('sl_ret_confirm_refund') : t('sl_ret_confirm_exchange')}
         </button>
       </div>

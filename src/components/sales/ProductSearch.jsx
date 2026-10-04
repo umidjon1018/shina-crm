@@ -296,7 +296,7 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
         )}
       </AnimatePresence>
       {/* Komplektlar */}
-      <div className="border border-border rounded-2xl overflow-hidden">
+      <div className={`border border-border rounded-2xl overflow-hidden ${activeBundles.length === 0 ? 'hidden sm:block' : ''}`}>
         <div className="flex items-center gap-2 px-4 py-2 bg-bg-secondary border-b border-border">
           <ShoppingBag size={13} className="text-accent-red" />
           <span className="text-xs font-bold text-text-primary">Komplektlar ({activeBundles.length})</span>

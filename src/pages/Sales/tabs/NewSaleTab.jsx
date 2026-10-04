@@ -79,19 +79,19 @@ const NewSaleTab = ({ ctx }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="flex flex-col lg:flex-row gap-6"
+      className="flex flex-col lg:flex-row gap-3 sm:gap-6"
     >
       {/* LEFT PANEL */}
-      <div className="flex flex-col gap-6 lg:w-[45%]">
-        <div className="bg-bg-primary border border-border rounded-3xl p-6 space-y-6 shadow-sm">
+      <div className="flex flex-col gap-3 sm:gap-6 lg:w-[45%]">
+        <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-sm">
           <div>
-            <h4 className="text-text-primary font-syne font-bold mb-4 flex items-center gap-2">
+            <h4 className="text-text-primary font-syne font-bold mb-2 sm:mb-4 flex items-center gap-2">
               <Barcode className="text-accent-red" size={20} /> {t('sl_ns_barcode_title')}
             </h4>
             <BarcodeScanner onScan={addToCart} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
           </div>
-          <div className="pt-6 border-t border-border/50">
-            <h4 className="text-text-primary font-syne font-bold mb-4 flex items-center gap-2">
+          <div className="pt-4 sm:pt-6 border-t border-border/50">
+            <h4 className="text-text-primary font-syne font-bold mb-2 sm:mb-4 flex items-center gap-2">
               <Search className="text-accent-blue" size={20} /> {t('sl_ns_search_title')}
             </h4>
             <ProductSearch onAdd={addToCart} onBundleAdd={addBundleToCart} cartItems={cartItems} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
@@ -100,7 +100,7 @@ const NewSaleTab = ({ ctx }) => {
 
         {/* SAVAT — bundle + oddiy */}
         {(bundleGroups.length > 0 || cartGroups.length > 0) && (
-          <div className="bg-bg-primary border border-border rounded-3xl p-6 space-y-4">
+          <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                 <ShoppingCart size={18} className="text-accent-red" />
@@ -277,10 +277,10 @@ const NewSaleTab = ({ ctx }) => {
 
       {/* RIGHT PANEL */}
       <div className="flex flex-col lg:w-[55%] bg-bg-secondary border border-border rounded-3xl overflow-hidden shadow-sm">
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto no-scrollbar">
+        <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto no-scrollbar">
           {/* Customer */}
           <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-3 block">{t('col_customer')}</label>
+            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 sm:mb-3 block">{t('col_customer')}</label>
             {selectedCustomer ? (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="bg-bg-tertiary border border-border rounded-2xl overflow-hidden">
                 <div className="p-4 flex items-center justify-between bg-bg-secondary border-b border-border">
@@ -320,11 +320,17 @@ const NewSaleTab = ({ ctx }) => {
                 )}
               </motion.div>
             ) : (
-              <div className="space-y-3">
-                <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                  <input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t('sl_ns_search_customer')}
-                    className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-xs text-text-primary focus:outline-none focus:border-accent-blue" />
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                    <input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t('sl_ns_search_customer')}
+                      className="w-full pl-9 pr-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-xs text-text-primary focus:outline-none focus:border-accent-blue" />
+                  </div>
+                  <button onClick={() => setShowNewCustomerModal(true)} title={t('sl_ns_add_customer')}
+                    className="sm:hidden shrink-0 w-10 border border-dashed border-border rounded-xl text-text-muted hover:text-accent-blue hover:border-accent-blue flex items-center justify-center">
+                    <UserPlus size={16} />
+                  </button>
                 </div>
                 {customerSearch && filteredCustomers.length > 0 && (
                   <div className="bg-bg-tertiary border border-border rounded-xl max-h-32 overflow-y-auto no-scrollbar">
@@ -337,7 +343,7 @@ const NewSaleTab = ({ ctx }) => {
                   </div>
                 )}
                 <button onClick={() => setShowNewCustomerModal(true)}
-                  className="w-full py-2.5 border border-dashed border-border rounded-xl text-xs text-text-muted hover:text-accent-blue hover:border-accent-blue transition-all flex items-center justify-center gap-2">
+                  className="hidden sm:flex w-full py-2.5 border border-dashed border-border rounded-xl text-xs text-text-muted hover:text-accent-blue hover:border-accent-blue transition-all items-center justify-center gap-2">
                   <UserPlus size={14} /> {t('sl_ns_add_customer')}
                 </button>
               </div>
@@ -400,9 +406,9 @@ const NewSaleTab = ({ ctx }) => {
           )}
 
           {/* Payment Methods */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_payment_label')}</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-2 gap-1.5 sm:gap-2">
               {[
                 { id: 'cash', icon: Banknote, label: t('pay_cash') },
                 { id: 'card', icon: CreditCard, label: t('pay_card') },
@@ -410,8 +416,8 @@ const NewSaleTab = ({ ctx }) => {
                 { id: 'transfer', icon: ArrowRight, label: t('sl_ns_pay_transfer') },
               ].map(pm => (
                 <button key={pm.id} onClick={() => { setPaymentType(pm.id); if (pm.id !== 'installment') setInstallmentOrgId('') }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-left ${paymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
-                  <pm.icon size={18} className="flex-shrink-0" /><span className="text-xs font-bold">{pm.label}</span>
+                  className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-1 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border transition-all text-center sm:text-left ${paymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                  <pm.icon size={18} className="flex-shrink-0" /><span className="text-[10px] sm:text-xs font-bold leading-tight">{pm.label}</span>
                 </button>
               ))}
             </div>
@@ -496,12 +502,12 @@ const NewSaleTab = ({ ctx }) => {
           </div>
 
           {/* Source */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_source_label')}</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex sm:grid sm:grid-cols-3 gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
               {sources.filter(s => s.isActive !== false).map(s => (
                 <button key={s.id} type="button" onClick={() => setSource(s.id)}
-                  className={`px-3 py-2 rounded-xl border transition-all text-center text-xs font-bold ${source === s.id ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
+                  className={`shrink-0 whitespace-nowrap sm:whitespace-normal px-3 py-1.5 sm:py-2 rounded-xl border transition-all text-center text-[11px] sm:text-xs font-bold ${source === s.id ? 'bg-accent-red text-white border-accent-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
                   {t('source_' + s.id, { defaultValue: s.label })}
                 </button>
               ))}
@@ -509,7 +515,7 @@ const NewSaleTab = ({ ctx }) => {
           </div>
 
           {/* Trade-in */}
-          <div className="space-y-3 pt-4 border-t border-border/50">
+          <div className="space-y-3 pt-3 sm:pt-4 border-t border-border/50">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_tradein_label')}</label>
               <button type="button" onClick={addTradeInRow} className="text-[10px] font-bold text-accent-blue hover:underline flex items-center gap-1">
@@ -557,7 +563,7 @@ const NewSaleTab = ({ ctx }) => {
         </div>
 
         {/* Total & Checkout */}
-        <div className="p-6 bg-bg-tertiary border-t border-border space-y-4">
+        <div className="p-4 sm:p-6 bg-bg-tertiary border-t border-border space-y-3 sm:space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
@@ -612,7 +618,7 @@ const NewSaleTab = ({ ctx }) => {
           </div>
           <button ref={sellBtnRef} onClick={handleSubmitSale}
             disabled={sellDisabled}
-            className="w-full py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
+            className="w-full py-3 sm:py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
             {isSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_ns_sell_btn')} <ArrowRight size={18} /></>}
           </button>
         </div>
