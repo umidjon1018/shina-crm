@@ -362,7 +362,7 @@ const FinanceTab = ({ ctx }) => {
                       <p className="text-text-muted text-xs font-bold mb-2">{m.name}</p>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-text-muted text-xs">{t('rep_fin_flow_sales_margin')}</span>
-                        <span className="font-bold text-accent-green text-xs">+{fmtUZS(m.margin)}</span>
+                        <span className="font-bold text-accent-green text-xs">+{fmtUZS(m.cashIn)}</span>
                       </div>
                       {m.qarz > 0 && (
                         <div className="flex items-center justify-between mb-1">
@@ -867,7 +867,7 @@ const FinanceTab = ({ ctx }) => {
                   : { color: '#F4A261', icon: '⚠', title: t('rep_fin_verdict_bad_title'), desc: t('rep_fin_verdict_bad_desc') }
                 const filteredRows = financeStats.monthlyCashFlow.filter(m => modalFilter === 'all' || m.month === modalFilter)
                 const totRev = filteredRows.reduce((s,m)=>s+m.revenue,0)
-                const totMar = filteredRows.reduce((s,m)=>s+m.margin,0)
+                const totMar = filteredRows.reduce((s,m)=>s+m.cashIn,0)
                 const totQar = filteredRows.reduce((s,m)=>s+m.qarz,0)
                 const totInv = filteredRows.reduce((s,m)=>s+m.invPayment,0)
                 const totExp = filteredRows.reduce((s,m)=>s+m.shopExp,0)
@@ -961,7 +961,7 @@ const FinanceTab = ({ ctx }) => {
                         {sortMonths(filteredRows).map(m => (
                           <tr key={m.month} className="hover:bg-bg-tertiary transition-colors text-[11px]">
                             <td className="px-3 py-2.5 font-semibold text-text-primary whitespace-nowrap">{m.name}</td>
-                            <td className="px-2 py-2.5 text-right text-accent-green font-semibold whitespace-nowrap">{m.margin > 0 ? '+'+fmtUZS(m.margin) : '—'}</td>
+                            <td className="px-2 py-2.5 text-right text-accent-green font-semibold whitespace-nowrap">{m.cashIn > 0 ? '+'+fmtUZS(m.cashIn) : '—'}</td>
                             <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.qarz > 0 ? '−'+fmtUZS(m.qarz) : '—'}</td>
                             <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.invPayment > 0 ? '−'+fmtUZS(m.invPayment) : '—'}</td>
                             <td className="px-2 py-2.5 text-right text-accent-red whitespace-nowrap">{m.shopExp > 0 ? '−'+fmtUZS(m.shopExp) : '—'}</td>

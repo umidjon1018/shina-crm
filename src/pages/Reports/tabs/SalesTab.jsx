@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -140,7 +141,7 @@ const SalesTab = ({ ctx }) => {
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_daily_dynamics')}</h4>
                     <p className="text-text-secondary text-sm">
-                      {getMonthLabel(period === 'all' ? new Date().toISOString().slice(0,7) : period)} — {t('rep_daily_results')}
+                      {getMonthLabel(period === 'all' ? localMonth() : period)} — {t('rep_daily_results')}
                     </p>
                   </div>
                   <DetailButton onClick={() => openModal('dailyChartModal')} />
@@ -148,7 +149,7 @@ const SalesTab = ({ ctx }) => {
                 <div className="h-[220px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={(() => {
-                      const curMonth = period === 'all' ? new Date().toISOString().slice(0,7) : period
+                      const curMonth = period === 'all' ? localMonth() : period
                       const dailyMap = {}
                       const daysInMonth = new Date(parseInt(curMonth.split('-')[0]), parseInt(curMonth.split('-')[1]), 0).getDate()
                       for (let d = 1; d <= daysInMonth; d++) {
@@ -830,7 +831,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Kunlik sotuv tarixi === */}
       {modal === 'dailyChartModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const mNamesArr = t('exp_month_names', { returnObjects: true })
@@ -912,7 +913,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: To'lov turlari tarixi === */}
       {modal === 'payTypeModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const monthNamesArr = t('exp_month_names', { returnObjects: true })
@@ -1016,7 +1017,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Eng ko'p sotilgan tovarlar tarixi === */}
       {modal === 'topProductsModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const allMonths = Array.from(monthsSet).sort().reverse()
@@ -1206,7 +1207,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Yangi vs Qaytuvchi === */}
       {modal === 'newReturnModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const allMonths = Array.from(monthsSet).sort().reverse()
@@ -1303,7 +1304,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Sotuv vaqt tahlili === */}
       {modal === 'hourModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const MONTHS_LIST = Array.from(monthsSet).sort().reverse()
@@ -1618,7 +1619,7 @@ const SalesTab = ({ ctx }) => {
       {/* === MODAL: Mijoz manbalari tarixi === */}
       {modal === 'sourceModal' && (() => {
         const monthsSet = new Set()
-        const currentMonth = new Date().toISOString().slice(0, 7)
+        const currentMonth = localMonth()
         monthsSet.add(currentMonth)
         MOCK_SALES.forEach(s => { if (s.soldAt) monthsSet.add(s.soldAt.slice(0, 7)) })
         const mNamesArr = t('exp_month_names', { returnObjects: true })

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -6,7 +7,7 @@ import {
 } from 'recharts'
 import { ShoppingCart, Award, TrendingUp, Target, Recycle, ArrowDownRight, X } from 'lucide-react'
 import { C, DetailButton, GrowthBadge, Modal, ModalTable, MonthYearFilter, MonthlyDynamicsChart, fmtItems, fmtNum, fmtSoldAt, fmtUZS } from '../components/shared'
-import { getSaleProfit, getUsedSaleProfit } from '../../../utils/profitHelpers'
+import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit } from '../../../utils/profitHelpers'
 
 const ProfitTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -71,6 +72,8 @@ const ProfitTab = ({ ctx }) => {
     return { ...s, isBundle: true, bundleDiscountAmount: discAmt, bundleDiscountPercent: matched?.discount || 0 }
   }
 
+  const grossProfitAll = profitStats.totalProfit + usedData.totalProfit
+
   // Oylik yangi+B/U birlashgan chart ma'lumoti
   const combinedMonthlyChart = React.useMemo(() => {
     const usedAll = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled')
@@ -111,12 +114,12 @@ const ProfitTab = ({ ctx }) => {
                   <p className="text-text-secondary text-sm font-medium mb-1">{t('rep_profit_breakeven')}</p>
                   <h3 className="text-xl font-syne font-bold text-text-primary mb-2">{fmtUZS(profitStats.breakEven)}</h3>
                   <div className="w-full bg-bg-tertiary rounded-full h-2 mb-2">
-                    <div className="h-2 rounded-full bg-accent-blue transition-all" style={{ width: `${Math.min(100, (profitStats.totalSalesAmt / (profitStats.breakEven || 1)) * 100)}%` }} />
+                    <div className="h-2 rounded-full bg-accent-blue transition-all" style={{ width: `${Math.min(100, (grossProfitAll / (profitStats.breakEven || 1)) * 100)}%` }} />
                   </div>
-                  {profitStats.totalSalesAmt >= profitStats.breakEven ? (
+                  {grossProfitAll >= profitStats.breakEven ? (
                     <p className="text-xs font-bold text-accent-green">{t('rep_profit_covered')}</p>
                   ) : (
-                    <p className="text-xs font-bold text-accent-red">X {t('rep_profit_short', { value: fmtUZS(profitStats.breakEven - profitStats.totalSalesAmt) })}</p>
+                    <p className="text-xs font-bold text-accent-red">X {t('rep_profit_short', { value: fmtUZS(profitStats.breakEven - grossProfitAll) })}</p>
                   )}
                 </div>
                 <div className="bg-bg-secondary border border-border rounded-2xl p-5 cursor-pointer hover:border-accent-red/40 transition-colors" onClick={() => openModal('fixedExpModal')}>
@@ -551,7 +554,7 @@ const ProfitTab = ({ ctx }) => {
 
               {modal === 'breakEvenModal' && (() => {
                 const _beMonthsSet = new Set()
-                _beMonthsSet.add(new Date().toISOString().slice(0, 7))
+                _beMonthsSet.add(localMonth())
                 MOCK_SALES.forEach(s => { if (s.soldAt) _beMonthsSet.add(s.soldAt.slice(0, 7)) })
                 MOCK_EXPENSES.forEach(e => { if (e.date) _beMonthsSet.add(e.date.slice(0, 7)) })
                 const MONTHS_BE = Array.from(_beMonthsSet).sort().reverse()
@@ -570,7 +573,9 @@ const ProfitTab = ({ ctx }) => {
                 const filtExp = modalFilter === 'all'
                   ? MOCK_EXPENSES
                   : MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(modalFilter))
-                const filtSalesAmt = filtSales.reduce((s,x) => s+x.total, 0) + filtUsed.reduce((s,x) => s+(x.total||0), 0)
+                // Zararsizlik: yalpi foyda (sotuv − tannarx − komissiya, yangi + B/U) xarajatni qoplaydimi
+                const filtSalesAmt = filtSales.reduce((s,x) => s+getNetSaleProfit(x), 0)
+                  + filtUsed.reduce((s,x) => s+getUsedSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0)
                 const filtBreakEven = filtExp.reduce((s,x) => s+x.amountUZS, 0)
                 const filtPct = filtBreakEven > 0 ? Math.min(100, Math.round(filtSalesAmt/filtBreakEven*100)) : 0
 
@@ -590,7 +595,7 @@ const ProfitTab = ({ ctx }) => {
                       <p className="text-text-muted text-xs mt-1">{t('rep_profit_total_expenses_hint')}</p>
                     </div>
                     <div className="bg-bg-tertiary rounded-xl p-5">
-                      <p className="text-text-muted text-xs mb-1">{t('rep_profit_current_sales')}</p>
+                      <p className="text-text-muted text-xs mb-1">{t('rep_profit_combined_label')}</p>
                       <p className="font-syne font-bold text-text-primary text-2xl">{fmtUZS(filtSalesAmt)}</p>
                       <p className={`text-xs mt-1 font-bold ${filtSalesAmt >= filtBreakEven ? 'text-accent-green' : 'text-accent-red'}`}>
                         {filtSalesAmt >= filtBreakEven
@@ -637,10 +642,10 @@ const ProfitTab = ({ ctx }) => {
                                 {fmtUZS(mData.sotuv_total)}
                                 {mData.sotuv_bu > 0 && <span className="block text-[10px] text-amber-400 font-normal">+{fmtUZS(mData.sotuv_bu)} B/U</span>}
                               </td>
-                              <td className="px-4 py-3 text-right font-bold text-accent-green">{fmtUZS(mData.foyda || 0)}</td>
+                              <td className="px-4 py-3 text-right font-bold text-accent-green">{fmtUZS(mData.foyda_total || 0)}</td>
                               <td className="px-4 py-3 text-center">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${mData.sotuv_total >= mData.xarajat ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
-                                  {mData.sotuv_total >= mData.xarajat ? t('rep_profit_status_ok') : t('rep_profit_status_fail')}
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${mData.foyda_total >= mData.xarajat ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
+                                  {mData.foyda_total >= mData.xarajat ? t('rep_profit_status_ok') : t('rep_profit_status_fail')}
                                 </span>
                               </td>
                             </tr>

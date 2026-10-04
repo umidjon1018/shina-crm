@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, ChevronDown, CircleX, Eye } from 'lucide-react'
@@ -161,7 +162,7 @@ const MonthYearFilter = ({ value, onChange, includeAll = true }) => {
   const { t } = useTranslation()
   const getMonthsList = () => {
     const monthsSet = new Set()
-    const currentMonth = new Date().toISOString().slice(0, 7)
+    const currentMonth = localMonth()
     monthsSet.add(currentMonth)
 
     for (let i = 0; i < 24; i++) {
@@ -451,7 +452,7 @@ const getCancelReasonLabel = (reason) => {
 const fmtUZS = (n) => new Intl.NumberFormat('uz-UZ').format(Math.round(n)) + ' UZS'
 const fmtUSD = (n) => '$' + new Intl.NumberFormat('en-US').format(Math.round(n))
 const fmtNum = (n) => new Intl.NumberFormat('uz-UZ').format(n)
-const TODAY = new Date().toISOString().slice(0, 10)
+const TODAY = localToday()
 
 // UTC → O'zbekiston vaqti (+5) formatlovchi helper
 const fmtSoldAt = (soldAt) => {

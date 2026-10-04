@@ -17,6 +17,7 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { getCategoryColor, CATEGORY_COLOR_PALETTE } from '../../utils/categoryColors'
 import { getReturns } from '../../api/returnService'
 import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
+import { localizeDates, localToday, localMonth } from '../../utils/tz'
 import { getUsedSales, getUsedStock } from '../../api/usedService'
 import { getSales } from '../../api/salesService'
 import { getCustomers } from '../../api/customerService'
@@ -124,17 +125,18 @@ export const Reports = () => {
       getUsedStock(),
       getReturns(),
     ]).then(([sales, customers, products, items, batches, expenses, capital, suppliers, usedSales, usedStock, returns]) => {
-      setAllSales(sales)
-      setCustomers(customers)
+      // Barcha vaqtlar Toshkent vaqtiga (kun/oy chegaralari mahalliy bo'lishi uchun)
+      setAllSales(localizeDates(sales, ['soldAt', 'createdAt', 'cancelledAt']))
+      setCustomers(localizeDates(customers, ['createdAt', 'birthDate']))
       setProducts(products)
-      setItems(items)
-      setAllBatches(batches)
-      setAllExpenses(expenses)
-      setCapital(capital)
+      setItems(localizeDates(items, ['soldAt', 'createdAt']))
+      setAllBatches(localizeDates(batches, ['receivedAt', 'dueDate']).map(b => ({ ...b, payments: localizeDates(b.payments, ['date']) })))
+      setAllExpenses(localizeDates(expenses, ['date']))
+      setCapital(localizeDates(capital, ['date']))
       setSuppliers(suppliers)
-      setUsedSales(usedSales)
-      setUsedStock(usedStock)
-      setReturns(returns)
+      setUsedSales(localizeDates(usedSales, ['soldAt', 'createdAt']))
+      setUsedStock(localizeDates(usedStock, ['acquiredAt', 'soldAt', 'scrapAt', 'createdAt']))
+      setReturns(localizeDates(returns, ['returnedAt', 'soldAt']))
     }).catch(() => {})
   }, [version])
 
@@ -278,7 +280,7 @@ export const Reports = () => {
 
   const periodOptions = (() => {
     const months = new Set()
-    const currentMonth = new Date().toISOString().slice(0, 7)
+    const currentMonth = localMonth()
     months.add(currentMonth)
 
     MOCK_SALES.forEach(s => { if (s.soldAt) months.add(s.soldAt.slice(0,7)) })
@@ -318,7 +320,7 @@ export const Reports = () => {
 
     const installmentTotal = completed.filter(s => s.paymentType === 'installment').reduce((s, x) => s + (x.installmentDebt ?? Math.max(0, x.total - (x.installmentPaidAmount || 0))), 0)
 
-    const curMonth = period === 'all' ? (new Date().toISOString().slice(0,7)) : period
+    const curMonth = period === 'all' ? (localMonth()) : period
     const targetMonthSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(curMonth)).reduce((sum, x) => sum + x.total, 0)
     const prevMonth = (() => {
       if (!curMonth) return null
@@ -394,7 +396,7 @@ export const Reports = () => {
     const newRevenue    = completed.filter(s => s.isNewCustomer).reduce((s,x) => s+x.total, 0)
     const returnRevenue = completed.filter(s => !s.isNewCustomer).reduce((s,x) => s+x.total, 0)
 
-    const today = new Date().toISOString().slice(0, 10)
+    const today = localToday()
     const todaySales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(today))
     const hourMap = {}
     todaySales.forEach(s => {
@@ -646,7 +648,7 @@ export const Reports = () => {
 
     // Oylik kapital harakati (MOCK_INCOME_BATCHES dan)
     const _capMonthsSet = new Set()
-    _capMonthsSet.add(new Date().toISOString().slice(0, 7))
+    _capMonthsSet.add(localMonth())
     MOCK_INCOME_BATCHES.forEach(b => { if (b.receivedAt) _capMonthsSet.add(b.receivedAt.slice(0, 7)) })
     MOCK_SALES.forEach(s => { if (s.soldAt) _capMonthsSet.add(s.soldAt.slice(0, 7)) })
     const _capMNamesArr = t('exp_month_names', { returnObjects: true })
@@ -730,7 +732,7 @@ export const Reports = () => {
     const varExpenses   = filteredExpenses.filter(e => e.expenseType === 'variable').reduce((s,x) => s+x.amountUZS, 0)
 
     const _monthsSet = new Set()
-    const _currentMonth = new Date().toISOString().slice(0, 7)
+    const _currentMonth = localMonth()
     _monthsSet.add(_currentMonth)
     MOCK_SALES.forEach(s => { if (s.soldAt) _monthsSet.add(s.soldAt.slice(0, 7)) })
     MOCK_EXPENSES.forEach(e => { if (e.date) _monthsSet.add(e.date.slice(0, 7)) })
@@ -1012,7 +1014,7 @@ export const Reports = () => {
     const birthdayList = ltvList.filter(c => c.isBirthdayMonth)
 
     const _retMonthsSet = new Set()
-    _retMonthsSet.add(new Date().toISOString().slice(0, 7))
+    _retMonthsSet.add(localMonth())
     MOCK_SALES.forEach(s => { if (s.soldAt) _retMonthsSet.add(s.soldAt.slice(0, 7)) })
     const MONTHS = Array.from(_retMonthsSet).sort().reverse()
     const monthNames = {}
@@ -1041,7 +1043,7 @@ export const Reports = () => {
   // Oylik sotuv dinamikasi hisoblash (universal)
   const getMonthsList = () => {
     const months = new Set()
-    const currentMonth = new Date().toISOString().slice(0, 7)
+    const currentMonth = localMonth()
     months.add(currentMonth)
     MOCK_SALES.forEach(s => { if (s.soldAt) months.add(s.soldAt.slice(0,7)) })
     MOCK_EXPENSES.forEach(e => { if (e.date) months.add(e.date.slice(0,7)) })
@@ -1133,7 +1135,7 @@ export const Reports = () => {
     const allSales   = filterByPeriod(MOCK_SALES, 'soldAt')
 
     const _empMonthsSet = new Set()
-    _empMonthsSet.add(new Date().toISOString().slice(0, 7))
+    _empMonthsSet.add(localMonth())
     MOCK_SALES.forEach(s => { if (s.soldAt) _empMonthsSet.add(s.soldAt.slice(0, 7)) })
     const MONTHS = Array.from(_empMonthsSet).sort().reverse()
     const EMP_MONTHS_ASC_BASE = Array.from(_empMonthsSet).sort()
@@ -1221,7 +1223,7 @@ export const Reports = () => {
       })
 
       // KPI hisoblash
-      const curMonth = new Date().toISOString().slice(0, 7)
+      const curMonth = localMonth()
       const curTarget = EMPLOYEE_TARGETS[emp.id]?.[curMonth] || 0
       const curSales  = MOCK_SALES.filter(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(curMonth))
       const curTotal  = curSales.reduce((s,x)=>s+x.total,0)
@@ -1301,7 +1303,7 @@ export const Reports = () => {
   // --- TAB 6: FINANCE ---
   const financeStats = useMemo(() => {
     const _finSet = new Set()
-    _finSet.add(new Date().toISOString().slice(0, 7))
+    _finSet.add(localMonth())
     MOCK_SALES.forEach(s => { if (s.soldAt) _finSet.add(s.soldAt.slice(0, 7)) })
     MOCK_EXPENSES.forEach(e => { if (e.date) _finSet.add(e.date.slice(0, 7)) })
     MOCK_CAPITAL.forEach(c => { if (c.date) _finSet.add(c.date.slice(0, 7)) })
@@ -1379,7 +1381,10 @@ export const Reports = () => {
       .filter(s => s.paymentType === 'installment')
       .reduce((s,x) => s + (x.installmentDebt || 0), 0)
     // Naqd qo'lda: sotuv + jalb − qaytarish − xarajat − supplier to'lov − nasiya qoldig'i
-    const cashBalance     = allSalesRevenue + periodJalb - periodCapRet - allExpenses - periodInvPay - periodInstDebt
+    const periodCommission = periodSales
+      .filter(s => s.paymentType === 'installment')
+      .reduce((s,x) => s + (x.installmentCommissionAmount ?? 0), 0)
+    const cashBalance     = allSalesRevenue + periodJalb - periodCapRet - allExpenses - periodInvPay - periodInstDebt - periodCommission
 
     // Keyingi oy uchun doimiy xarajatlar (expenseType === 'fixed')
     const lastMonth = MONTHS.find(m => MOCK_EXPENSES.some(e => e.date && e.date.startsWith(m) && e.expenseType === 'fixed')) || MONTHS[0]
@@ -1409,8 +1414,10 @@ export const Reports = () => {
 
       const mSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m))
       const revenue = mSales.reduce((s,x) => s + x.total, 0)
-      // Sotuv marjasi: sotuv − tannarx − nasiya komissiyasi (Excel bilan mos)
+      // Sotuv marjasi (ma'lumot uchun): sotuv − tannarx − nasiya komissiyasi
       const margin  = mSales.reduce((s,x) => s + getNetSaleProfit(x), 0)
+      // Kassa usuli: sotuvdan haqiqatda tushgan pul (to'lanmagan nasiya va komissiya ayirilgan)
+      const cashIn  = mSales.reduce((s,x) => s + x.total - (x.paymentType === 'installment' ? (x.installmentDebt || 0) + (x.installmentCommissionAmount ?? 0) : 0), 0)
 
       // Yangi tovar qiymati (Qarz): shu oyda kelgan partiyalar jami UZS qiymati
       const qarz = MOCK_INCOME_BATCHES
@@ -1427,14 +1434,15 @@ export const Reports = () => {
       const jalb      = MOCK_CAPITAL.filter(c => c.type === 'inject' && c.date && c.date.startsWith(m)).reduce((s,c) => s + c.amountUZS, 0)
       const capReturn = MOCK_CAPITAL.filter(c => c.type === 'return' && c.date && c.date.startsWith(m)).reduce((s,c) => s + c.amountUZS, 0)
 
-      // Operatsion: sotuv foydasi − supplier to'lov − do'kon xarajatlari
-      const operatsion = margin - invPayment - shopExp
+      // Operatsion (kassa usuli): tushgan pul − supplier to'lov − do'kon xarajatlari.
+      // Tannarx alohida ayirilmaydi — tovar puli yetkazuvchiga to'lov sifatida chiqadi
+      const operatsion = cashIn - invPayment - shopExp
       const moliyaviy  = jalb - capReturn
       const net        = operatsion + moliyaviy
 
       const calcNet = (mo) => {
         const ms = MOCK_SALES.filter(s=>s.status!=='cancelled'&&s.soldAt&&s.soldAt.startsWith(mo))
-        const mg = ms.reduce((s,x)=>s+getNetSaleProfit(x),0)
+        const mg = ms.reduce((s,x)=>s+x.total-(x.paymentType==='installment'?(x.installmentDebt||0)+(x.installmentCommissionAmount??0):0),0)
         const ip = MOCK_INCOME_BATCHES.flatMap(b=>(b.payments||[])).filter(p=>p.date&&p.date.startsWith(mo)).reduce((s,p)=>s+(p.amountUZS||0),0)
         const e  = MOCK_EXPENSES.filter(x=>x.date&&x.date.startsWith(mo)).reduce((s,x)=>s+x.amountUZS,0)
         const j  = MOCK_CAPITAL.filter(c=>c.type==='inject'&&c.date&&c.date.startsWith(mo)).reduce((s,c)=>s+c.amountUZS,0)
@@ -1448,7 +1456,7 @@ export const Reports = () => {
 
       return {
         name: monthNames[m], month: m,
-        revenue, margin, qarz, invPayment, shopExp, jalb, capReturn,
+        revenue, margin, cashIn, qarz, invPayment, shopExp, jalb, capReturn,
         operatsion, moliyaviy, net, chiqim, prevNet,
         growth: prevNet !== null && prevNet !== 0 ? Math.round(((net - prevNet) / Math.abs(prevNet)) * 100) : null
       }
@@ -1462,6 +1470,7 @@ export const Reports = () => {
     const cfAcc = monthlyCashFlow.reduce((acc, m) => ({
       revenue:    acc.revenue    + m.revenue,
       margin:     acc.margin     + m.margin,
+      cashIn:     acc.cashIn     + m.cashIn,
       qarz:       acc.qarz       + m.qarz,
       invPayment: acc.invPayment + m.invPayment,
       shopExp:    acc.shopExp    + m.shopExp,
@@ -1470,7 +1479,7 @@ export const Reports = () => {
       operatsion: acc.operatsion + m.operatsion,
       moliyaviy:  acc.moliyaviy  + m.moliyaviy,
       net:        acc.net        + m.net,
-    }), { revenue:0, margin:0, qarz:0, invPayment:0, shopExp:0, jalb:0, capReturn:0, operatsion:0, moliyaviy:0, net:0 })
+    }), { revenue:0, margin:0, cashIn:0, qarz:0, invPayment:0, shopExp:0, jalb:0, capReturn:0, operatsion:0, moliyaviy:0, net:0 })
 
     // Real balans = operatsion + moliyaviy
     // Operatsion = sotuv marjasi + to'lovlar − yangi qarz − xarajat
@@ -1598,7 +1607,7 @@ export const Reports = () => {
   const getExportData = (format) => {
     setShowExportMenu(false)
     const periodLabel = period === 'all' ? 'Barchasi' : period
-    const date = new Date().toISOString().slice(0, 10)
+    const date = localToday()
 
     if (activeTab === 'sales') {
       const rows = salesData.completed.map(s => ({

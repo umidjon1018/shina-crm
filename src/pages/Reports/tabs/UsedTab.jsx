@@ -1,4 +1,5 @@
 import React from 'react'
+import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
@@ -337,7 +338,7 @@ const UsedTab = ({ ctx }) => {
                       { key: 'installmentDebt',     label: t('rep_fin_col_debt_rem'), align: 'right', render: r => <span className={`font-bold ${(r.installmentDebt||0) > 0 ? 'text-accent-orange' : 'text-accent-green'}`}>{fmtUZS(r.installmentDebt || 0)}</span> },
                       { key: 'installmentDueDate',  label: t('rep_fin_col_next_pay'), align: 'center', render: r => {
                         const due = r.installmentDueDate
-                        const today = new Date().toISOString().slice(0,10)
+                        const today = localToday()
                         return <span className={`text-xs ${due && due < today ? 'text-accent-red font-bold' : 'text-text-secondary'}`}>{due || '—'}</span>
                       }},
                       { key: 'installmentOrgName',  label: t('rep_fin_col_installment'), render: r => { const orgName = r.installmentOrgName || (storeInstallmentOrgs || []).find(o => o.id === r.installmentOrgId)?.name || null; return <span className="text-text-secondary text-xs">{orgName || '—'}</span> } },

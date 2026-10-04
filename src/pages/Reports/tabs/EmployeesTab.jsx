@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line,
@@ -904,7 +905,7 @@ const EmployeesTab = ({ ctx }) => {
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
                   {hourTab === 'daily' && (() => {
-                    const selMonth = modalFilter === 'all' ? new Date().toISOString().slice(0, 7) : modalFilter
+                    const selMonth = modalFilter === 'all' ? localMonth() : modalFilter
                     const selMonthName = wrkMonthNames[selMonth] || selMonth
                     const [yr, mo] = selMonth.split('-').map(Number)
                     const daysInMonth = new Date(yr, mo, 0).getDate()
