@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { pushRolesToServer, hasSyncedRoles } from '../../../utils/rolesSync'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, ChevronRight, ChevronDown, Shield } from 'lucide-react'
 import PermissionTree from '../../../components/PermissionTree'
@@ -20,6 +21,17 @@ function RoleAccessSection() {
   const [selectedRole, setSelectedRole] = useState('manager')
   const [newRoleName, setNewRoleName] = useState('')
   const [roleError, setRoleError] = useState('')
+  const [syncState, setSyncState] = useState('')
+  // Har o'zgarish serverga yoziladi — xodim qurilmalari ilovaga qaytganda oladi
+  useEffect(() => {
+    if (me?.role !== 'admin' || !hasSyncedRoles()) return
+    const tm = setTimeout(() => {
+      pushRolesToServer()
+        .then(changed => { if (changed) setSyncState('ok') })
+        .catch(() => setSyncState('err'))
+    }, 700)
+    return () => clearTimeout(tm)
+  }, [roleAccessTrees, roleDeniedNodes, customRoles])
   const ROLE_LABELS = Object.fromEntries(Object.entries(ROLE_LABELS_KEYS).map(([k, v]) => [k, t(v)]))
   const roleLabels = { ...ROLE_LABELS, ...Object.fromEntries((customRoles||[]).map(r => [r.id, r.label])) }
   const TREE_ROLES = Object.entries(roleLabels).filter(([k]) => k !== 'admin')
@@ -75,6 +87,8 @@ function RoleAccessSection() {
             </button>
           </div>
           {roleError && <p className="text-xs text-accent-red">{roleError}</p>}
+          {syncState === 'ok' && <p className="text-[11px] text-accent-green">{t('adm_roles_synced')}</p>}
+          {syncState === 'err' && <p className="text-[11px] text-accent-red">{t('adm_roles_sync_err')}</p>}
           {selectedRole !== 'manager' && (
             <p className="text-xs text-text-muted">{t('adm_role_ceiling_note')}</p>
           )}

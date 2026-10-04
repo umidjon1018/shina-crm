@@ -24,6 +24,7 @@ import {
   EyeOff
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
+import { syncRolesFromServer } from '../utils/rolesSync'
 import { createSale } from '../api/salesService'
 import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
@@ -116,6 +117,11 @@ export const MainLayout = () => {
     loadProductCategories()
     loadProductImages()
     loadBranding(user?.role === 'admin')
+    syncRolesFromServer().catch(() => {})
+    // Ilovaga qaytganda ruxsatlar yangilanadi (admin o'zgartirgan bo'lsa)
+    const onVisible = () => { if (document.visibilityState === 'visible') syncRolesFromServer().catch(() => {}) }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
   const { addLog } = useAuditStore()
   const sl = sidebarLabels || {}

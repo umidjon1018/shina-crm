@@ -8,6 +8,8 @@ import { useAuditStore } from '../../../store/auditStore'
 import { useShopStore } from '../../../store/shopStore'
 import { MONTHS_UZ, MONTHS_RU, formatDateWithMonths, formatDateTimeWithMonths, ROLE_LABELS_KEYS, ALL_PERMISSION_KEYS, ROLE_PERMISSIONS, Badge, ModalWrap } from '../apHelpers.jsx'
 import RoleAccessSection from '../components/RoleAccessSection'
+import PermissionTree from '../../../components/PermissionTree'
+import { PERMISSION_TREE } from '../../../config/permissionTree'
 
 function EmployeesTab() {
   const { t, i18n } = useTranslation()
@@ -21,7 +23,7 @@ function EmployeesTab() {
     employeeEditLocked, toggleEmployeeEditLocked,
     employeeEditHistory, undoEmployeeEdit,
     approveEmployeeDeletion, cancelEmployeeDeletion,
-    customRoles,
+    customRoles, roleAccessTrees, roleDeniedNodes,
   } = useSettingsStore()
   const ROLE_LABELS = Object.fromEntries(Object.entries(ROLE_LABELS_KEYS).map(([k, v]) => [k, t(v)]))
   const roleLabels = { ...ROLE_LABELS, ...Object.fromEntries((customRoles||[]).map(r => [r.id, r.label])) }
@@ -33,7 +35,7 @@ function EmployeesTab() {
   const [showPass, setShowPass] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [hardDeleteTarget, setHardDeleteTarget] = useState(null)
-  const [form, setForm] = useState({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'] })
+  const [form, setForm] = useState({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'], access: null })
   const [hiredAtDisplay, setHiredAtDisplay] = useState('')
   const [saveError, setSaveError] = useState('')
 
@@ -88,7 +90,7 @@ function EmployeesTab() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'], shopId: '' })
+    setForm({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'], shopId: '', access: null })
     setHiredAtDisplay('')
     setSaveError('')
     setShowPass(false)
@@ -96,7 +98,7 @@ function EmployeesTab() {
   }
   const openEdit = (emp) => {
     setEditing(emp)
-    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: emp.password||'', permissions: emp.permissions||[], shopId: emp.shopId||'' })
+    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: emp.password||'', permissions: emp.permissions||[], shopId: emp.shopId||'', access: emp.access || null })
     setHiredAtDisplay(isoToDisplay(emp.hiredAt||''))
     setSaveError('')
     setShowPass(false)
@@ -439,22 +441,32 @@ function EmployeesTab() {
                 </div>
               </div>
               {editing?.role !== 'admin' && (
-                <div>
-                  <label className="text-xs text-text-muted mb-2 block font-semibold">{t('adm_field_permissions')}</label>
+                <div className="space-y-2">
+                  <label className="text-xs text-text-muted block font-semibold">{t('adm_field_permissions')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {ALL_PERMISSIONS.map(p => {
-                      const checked = (form.permissions||[]).includes(p.key)
-                      return (
-                        <label key={p.key} className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition-all ${checked ? 'bg-accent-blue/10 border-accent-blue/30 text-text-primary' : 'bg-bg-tertiary border-border text-text-muted'}`}>
-                          <input type="checkbox" checked={checked} onChange={() => setForm(f=>({
-                            ...f,
-                            permissions: checked ? f.permissions.filter(x=>x!==p.key) : [...(f.permissions||[]),p.key]
-                          }))} className="accent-accent-red" />
-                          <span className="text-xs font-semibold">{p.label}</span>
-                        </label>
-                      )
-                    })}
+                    {[[false, t('adm_access_by_role')], [true, t('adm_access_individual')]].map(([ind, label]) => (
+                      <button type="button" key={String(ind)}
+                        onClick={() => setForm(f => ({ ...f, access: ind
+                          ? (f.access || { checked: [...(roleAccessTrees?.[f.role] || [])], denied: [...(roleDeniedNodes?.[f.role] || [])] })
+                          : null }))}
+                        className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all ${!!form.access === ind ? 'bg-accent-blue/10 border-accent-blue/40 text-accent-blue' : 'bg-bg-tertiary border-border text-text-muted'}`}>
+                        {label}
+                      </button>
+                    ))}
                   </div>
+                  <p className="text-[11px] text-text-muted">{form.access ? t('adm_access_individual_hint') : t('adm_access_by_role_hint', { role: roleLabels[form.role] || form.role })}</p>
+                  {form.access && (
+                    <div className="bg-bg-tertiary border border-border rounded-xl p-3 max-h-72 overflow-y-auto no-scrollbar">
+                      <PermissionTree
+                        tree={PERMISSION_TREE}
+                        checked={form.access.checked || []}
+                        onChange={(ids) => setForm(f => ({ ...f, access: { ...f.access, checked: ids } }))}
+                        denied={form.access.denied || []}
+                        onDeniedChange={(ids) => setForm(f => ({ ...f, access: { ...f.access, denied: ids } }))}
+                        ceiling={null}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

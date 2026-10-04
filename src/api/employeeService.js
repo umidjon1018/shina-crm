@@ -9,6 +9,7 @@ const map = (e) => ({
   phone: e.phone || '',
   shopId: e.shopId ?? e.shop_id ?? '',
   permissions: e.permissions || [],
+  access: e.access || null,
   salary: e.salary ?? 0,
   hiredAt: e.hiredAt ?? e.hired_at ?? '',
   isActive: e.isActive ?? e.is_active ?? true,
@@ -35,6 +36,7 @@ export const createEmployee = async (emp) => {
     permissions: emp.permissions || [],
     salary: emp.salary || 0,
     hired_at: emp.hiredAt || null,
+    access: emp.access || null,
   })
   return map(data)
 }
@@ -54,6 +56,7 @@ export const updateEmployee = async (id, emp) => {
     pending_delete: emp.pendingDelete ?? false,
     pending_delete_at: emp.pendingDeleteAt || null,
     last_edited_by: emp.lastEditedBy || null,
+    ...(emp.access !== undefined ? { access: emp.access } : {}),
   })
   return map(data)
 }

@@ -91,6 +91,7 @@ export const useAuthStore = create(
             permissions: (Array.isArray(backendUser.permissions) && backendUser.permissions.length > 0)
               ? backendUser.permissions
               : (rolePermissions[backendUser.role] || ['sales']),
+            access: backendUser.access || null,
           }
           const restrictedRoles = ['seller', 'storekeeper', 'technician']
           if (restrictedRoles.includes(user.role) && user.shop_id) {
@@ -367,9 +368,11 @@ export const useAuthStore = create(
         if (!user) return false
         if (user.permissions.includes('all')) return true
         const settings = useSettingsStore.getState()
-        const denied = settings.roleDeniedNodes?.[user.role] || []
+        // Xodimga individual ruxsat berilgan bo'lsa — lavozim o'rniga shu ishlatiladi
+        const own = user.access && Array.isArray(user.access.checked) ? user.access : null
+        const denied = own ? (own.denied || []) : (settings.roleDeniedNodes?.[user.role] || [])
         if (denied.includes(permission)) return false
-        const tree = settings.roleAccessTrees?.[user.role] || []
+        const tree = own ? own.checked : (settings.roleAccessTrees?.[user.role] || [])
         const parts = permission.split('.')
         for (let i = parts.length; i > 0; i--) {
           if (tree.includes(parts.slice(0, i).join('.'))) return true
