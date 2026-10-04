@@ -2840,4 +2840,6 @@ export default {
   sl_ps_block_price: "Sotuv narxi yo'q",
   sl_ps_blocked_msg: "«{{name}}» hozircha sotib bo'lmaydi: {{reason}}. Admin yoki boshqaruvchi to'ldirishi kerak.",
   sl_ps_warn_blocked: "Sotuvga tayyor emas",
+  mgmt_price_rate: "Kurs",
+  mgmt_price_rate_required: "USD kursini kiriting",
 }

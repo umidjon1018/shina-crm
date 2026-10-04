@@ -9,6 +9,7 @@ import { getItemStatus } from '../../../utils/itemStatus'
 import { renameAttributeKey } from '../../../api/itemService'
 import { bulkUpdatePrices } from '../../../api/productService'
 import { compressImage } from '../../../api/productImageService'
+import DualPriceInput from '../components/DualPriceInput'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -95,6 +96,9 @@ const ProductsTab = ({ ctx }) => {
 
   const { productImages, setProductImages, updateProductAttributeDef } = useSettingsStore()
   const [modalImages, setModalImages] = useState([])
+  // Tovar oynasida narxlar qaysi valyutada kiritiladi (saqlanishi doim so'mda)
+  const [priceCur, setPriceCur] = useState('uzs')
+  const [priceRate, setPriceRate] = useState(usdRate || '')
 
   useEffect(() => {
     if (editingProduct?.isModal) {
@@ -1689,38 +1693,41 @@ const ProductsTab = ({ ctx }) => {
                           </div>
 
                           {/* SECTION 2: Narxlar */}
-                          <p className="col-span-2 text-[10px] font-extrabold uppercase tracking-widest text-text-muted border-b border-border pb-2 mb-1 mt-2">
-                            {t('mgmt_section_prices')}
-                          </p>
+                          <div className="col-span-2 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2 mb-1 mt-2">
+                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('mgmt_section_prices')}</p>
+                            <div className="flex items-center gap-2">
+                              {priceCur === 'usd' && (
+                                <label className="flex items-center gap-1.5 text-[10px] text-text-muted">
+                                  {t('mgmt_price_rate')}
+                                  <input type="number" min="0" value={priceRate || usdRate || ''} onChange={e => setPriceRate(e.target.value)}
+                                    className="w-24 bg-bg-tertiary border border-border rounded-lg px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-accent-blue" />
+                                </label>
+                              )}
+                              <div className="flex bg-bg-tertiary border border-border rounded-lg p-0.5">
+                                {[['uzs', som], ['usd', 'USD']].map(([c, l]) => (
+                                  <button type="button" key={c} onClick={() => setPriceCur(c)}
+                                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold ${priceCur === c ? 'bg-accent-blue text-white' : 'text-text-muted'}`}>{l}</button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
 
                           <div>
                             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('mgmt_field_cash_price')}</label>
-                            <input
-                              type="number"
-                              id="p_modal_cash"
-                              defaultValue={editingProduct.cashPrice || ''}
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                            />
+                            <DualPriceInput key={"p_modal_cash-" + (editingProduct.id || "new")} id="p_modal_cash" defaultUzs={editingProduct.cashPrice} cur={priceCur} rate={Number(priceRate) || Number(usdRate) || 0} som={som}
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue" />
                           </div>
 
                           <div>
                             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('mgmt_field_min_price')}</label>
-                            <input
-                              type="number"
-                              id="p_modal_min"
-                              defaultValue={editingProduct.minSalePrice || ''}
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-accent-red focus:outline-none focus:border-accent-blue"
-                            />
+                            <DualPriceInput key={"p_modal_min-" + (editingProduct.id || "new")} id="p_modal_min" defaultUzs={editingProduct.minSalePrice} cur={priceCur} rate={Number(priceRate) || Number(usdRate) || 0} som={som}
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-accent-red focus:outline-none focus:border-accent-blue" />
                           </div>
 
                           <div className="col-span-2">
                             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('mgmt_field_inst_base')}</label>
-                            <input
-                              type="number"
-                              id="p_modal_inst_base"
-                              defaultValue={editingProduct.installmentBasePrice || ''}
-                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue"
-                            />
+                            <DualPriceInput key={"p_modal_inst_base-" + (editingProduct.id || "new")} id="p_modal_inst_base" defaultUzs={editingProduct.installmentBasePrice} cur={priceCur} rate={Number(priceRate) || Number(usdRate) || 0} som={som}
+                              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue" />
                           </div>
 
                           {/* SECTION 3: Muddatli to'lov */}
@@ -1781,6 +1788,7 @@ const ProductsTab = ({ ctx }) => {
                             const attribute = document.getElementById('p_attribute').value
                             const carCategory = document.getElementById('p_car_category').value
                             const notes = document.getElementById('p_notes').value
+                            if (priceCur === 'usd' && !(Number(priceRate || usdRate) > 0)) { alert(t('mgmt_price_rate_required')); return }
                             const cashPrice = parseFloat(document.getElementById('p_modal_cash').value) || 0
                             const minSalePrice = parseFloat(document.getElementById('p_modal_min').value) || 0
                             const installmentBasePrice = parseFloat(document.getElementById('p_modal_inst_base').value) || 0

@@ -2831,4 +2831,6 @@ export default {
   sl_ps_block_price: "Нет цены продажи",
   sl_ps_blocked_msg: "«{{name}}» пока нельзя продать: {{reason}}. Должен заполнить администратор или управляющий.",
   sl_ps_warn_blocked: "Не готов к продаже",
+  mgmt_price_rate: "Курс",
+  mgmt_price_rate_required: "Введите курс USD",
 }
