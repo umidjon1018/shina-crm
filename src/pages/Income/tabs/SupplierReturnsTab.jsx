@@ -178,7 +178,7 @@ const SupplierReturnsTab = ({ ctx }) => {
                   <td className="px-4 py-3 text-right font-bold text-accent-orange">{usd(r.amountUSD)}</td>
                   <td className="px-4 py-3 text-xs text-text-secondary max-w-[220px]">{r.reason}</td>
                   <td className="px-4 py-3 text-right">
-                    {r.status === 'active' && user?.role === 'admin' && (confirmId === r.id
+                    {r.status === 'active' && ['admin', 'manager'].includes(user?.role) && (confirmId === r.id
                       ? <button onClick={() => cancel(r.id)} className="px-2.5 py-1.5 rounded-lg bg-accent-red text-white text-xs font-bold whitespace-nowrap">{t('sup_confirm_undo')}</button>
                       : <button onClick={() => setConfirmId(r.id)} title={t('sup_undo_return')} className="p-1.5 text-text-muted hover:text-accent-red"><RotateCcw size={16} /></button>)}
                   </td>
