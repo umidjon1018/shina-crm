@@ -838,7 +838,7 @@ const EmployeesTab = ({ ctx }) => {
               const discountSales = baseSales
                 .map(s => enrichSale(s))
                 .filter(s => s.discount > 0 || (s.isBundle && s.bundleDiscountAmount > 0))
-              const getLost = r => r.discount > 0 ? (r.subtotal - r.total) : (r.bundleDiscountAmount || 0)
+              const getLost = r => r.discount > 0 ? ((r.subtotal ?? r.total) - r.total) : (r.bundleDiscountAmount || 0)
               return (
                 <Modal open title={t('rep_emp_modal_discount_title')} subtitle={t('rep_emp_modal_discount_sub')} size="2xl" onClose={closeModal}>
                   <div className="flex items-center justify-between mb-5">

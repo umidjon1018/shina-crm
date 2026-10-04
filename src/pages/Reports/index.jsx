@@ -16,7 +16,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { getCategoryColor, CATEGORY_COLOR_PALETTE } from '../../utils/categoryColors'
 import { getReturns } from '../../api/returnService'
-import { getSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
+import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
 import { getUsedSales, getUsedStock } from '../../api/usedService'
 import { getSales } from '../../api/salesService'
 import { getCustomers } from '../../api/customerService'
@@ -106,8 +106,8 @@ export const Reports = () => {
   const [_allExpenses, setAllExpenses] = useState([])
   const [MOCK_CAPITAL, setCapital] = useState([])
   const [MOCK_SUPPLIERS, setSuppliers] = useState([])
-  const [MOCK_USED_SALES, setUsedSales] = useState([])
-  const [MOCK_USED_STOCK, setUsedStock] = useState([])
+  const [_allUsedSales, setUsedSales] = useState([])
+  const [_allUsedStock, setUsedStock] = useState([])
   const [MOCK_RETURNS, setReturns] = useState([])
 
   useEffect(() => {
@@ -139,6 +139,8 @@ export const Reports = () => {
   }, [version])
 
   const MOCK_SALES = useMemo(() => selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId), [_allSales, selectedShopId])
+  const MOCK_USED_SALES = useMemo(() => selectedShopId === 'all' ? _allUsedSales : _allUsedSales.filter(s => String(s.shopId) === String(selectedShopId)), [_allUsedSales, selectedShopId])
+  const MOCK_USED_STOCK = useMemo(() => selectedShopId === 'all' ? _allUsedStock : _allUsedStock.filter(u => String(u.shopId) === String(selectedShopId)), [_allUsedStock, selectedShopId])
   const MOCK_EXPENSES = useMemo(() => selectedShopId === 'all' ? _allExpenses : _allExpenses.filter(e => e.shopId === selectedShopId), [_allExpenses, selectedShopId])
   const MOCK_INCOME_BATCHES = useMemo(() => selectedShopId === 'all' ? _allBatches : _allBatches.filter(b => b.shopId === selectedShopId), [_allBatches, selectedShopId])
   const MOCK_BATCHES = MOCK_INCOME_BATCHES
@@ -333,7 +335,7 @@ export const Reports = () => {
 
     const MONTHLY_TARGETS_LIVE = (storeMonthlyTargets && Object.keys(storeMonthlyTargets).length > 0)
       ? storeMonthlyTargets
-      : { '2026-03': 12000000, '2026-04': 14000000, '2026-05': 16000000, '2026-06': 18000000 }
+      : {}
     const monthExpenses = MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(curMonth)).reduce((sum, e) => sum + (e.amountUZS || 0), 0)
     const target = MONTHLY_TARGETS_LIVE[curMonth] || monthExpenses || 0
     const targetPct = target > 0 ? Math.min(100, Math.round((targetMonthSales / target) * 100)) : 0
@@ -740,7 +742,7 @@ export const Reports = () => {
 
     const MONTHLY_TARGETS_LIVE = (storeMonthlyTargets && Object.keys(storeMonthlyTargets).length > 0)
       ? storeMonthlyTargets
-      : { '2026-03': 12000000, '2026-04': 14000000, '2026-05': 16000000, '2026-06': 18000000 }
+      : {}
 
     const monthlyChart = MONTHS_CHART.map((m, i) => {
       const prevIdx = MONTHS_ASC.indexOf(m) - 1
@@ -825,11 +827,12 @@ export const Reports = () => {
         id: e.id, date: e.date, name: e.note || e.categoryLabel || 'Xarajat',
         type: 'Operatsion xarajat', amount: e.amountUZS, currency: 'UZS'
       })),
-      ...MOCK_INCOME_BATCHES.filter(x => x.paidUSD > 0).map(x => ({
-        id: x.id, date: x.receivedAt?.slice(0,10) || x.dueDate || TODAY,
+      // Yetkazib beruvchiga haqiqiy to'lovlar — to'lov kunidagi so'm summasi (Moliya tabi bilan bir xil)
+      ...MOCK_INCOME_BATCHES.flatMap(x => (x.payments || []).map((p, i) => ({
+        id: `${x.id}-p${p.id ?? i}`, date: (p.date || x.receivedAt || TODAY).slice(0,10),
         name: x.productName,
-        type: 'Tovar xaridi', amount: Math.round(x.paidUSD * USD_RATE), currency: 'UZS'
-      })),
+        type: 'Tovar xaridi', amount: Math.round(p.amountUZS || 0), currency: 'UZS'
+      }))),
       ...MOCK_CAPITAL.filter(c => c.type === 'return').map(c => ({
         id: c.id, date: c.date, name: c.source || 'Kapital',
         type: 'Kapital qaytarish', amount: c.amountUZS, currency: 'UZS'
@@ -838,12 +841,13 @@ export const Reports = () => {
 
     // Tovar xaridlari oylik
     const inventoryByMonth = {}
-    MOCK_INCOME_BATCHES.filter(x => x.paidUSD > 0).forEach(x => {
-      const m = (x.receivedAt || x.dueDate || TODAY).slice(0,7)
+    MOCK_INCOME_BATCHES.forEach(x => (x.payments || []).forEach(p => {
+      const date = (p.date || x.receivedAt || TODAY).slice(0,10)
+      const m = date.slice(0,7)
       if (!inventoryByMonth[m]) inventoryByMonth[m] = { total: 0, items: [] }
-      inventoryByMonth[m].total += Math.round(x.paidUSD * USD_RATE)
-      inventoryByMonth[m].items.push({ name: x.productName, paidUSD: x.paidUSD, paidUZS: Math.round(x.paidUSD * USD_RATE), date: x.receivedAt?.slice(0,10) || TODAY, usdRate: x.entryUsdRate || USD_RATE })
-    })
+      inventoryByMonth[m].total += Math.round(p.amountUZS || 0)
+      inventoryByMonth[m].items.push({ name: x.productName, paidUSD: p.amountUSD || 0, paidUZS: Math.round(p.amountUZS || 0), date, usdRate: p.usdRate || x.entryUsdRate || USD_RATE })
+    }))
     const inventoryTotal = Object.values(inventoryByMonth).reduce((s,m) => s+m.total, 0)
 
     // Kapital qaytarish oylik
@@ -1061,7 +1065,7 @@ export const Reports = () => {
     const prevCount  = prv.length
     const MONTHLY_TARGETS_LIVE = (storeMonthlyTargets && Object.keys(storeMonthlyTargets).length > 0)
       ? storeMonthlyTargets
-      : { '2026-03': 12000000, '2026-04': 14000000, '2026-05': 16000000, '2026-06': 18000000 }
+      : {}
     const monthExpenses = MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(m)).reduce((sum, e) => sum + (e.amountUZS || 0), 0)
     const target  = MONTHLY_TARGETS_LIVE[m] || monthExpenses || 0
     const targetPct = target > 0 ? Math.round((total / target) * 100) : null
@@ -1093,7 +1097,7 @@ export const Reports = () => {
       : baseList.filter(e => e.name && salesNames.includes(e.name.trim().toLowerCase()))
     const EMPLOYEE_TARGETS = (storeEmployeeTargets && Object.keys(storeEmployeeTargets).length > 0)
       ? storeEmployeeTargets
-      : { 1:{'2026-03':5000000,'2026-04':6000000,'2026-05':7000000}, 2:{'2026-03':4000000,'2026-04':5000000,'2026-05':6000000}, 3:{'2026-03':3000000,'2026-04':3500000,'2026-05':4000000} }
+      : {}
 
     if (!EMPLOYEES_DATA || !Array.isArray(EMPLOYEES_DATA) || EMPLOYEES_DATA.length === 0) {
       return { empStats:[], activeCount:0, topSeller:null, monthlyActivity:[], cancelByEmp:[], totalCancelled:0 }
@@ -1157,7 +1161,7 @@ export const Reports = () => {
       const empAll       = allSales.filter(s => matchSale(s, emp))
 
       const totalSales   = empCompleted.reduce((s,x) => s+x.total, 0)
-      const totalProfit  = empCompleted.reduce((s,x) => s+getSaleProfit(x), 0)
+      const totalProfit  = empCompleted.reduce((s,x) => s+getNetSaleProfit(x), 0)
       const salesCount   = empCompleted.length
       const isExchange   = s => s.cancelReason === 'almashtirish' || s.cancelReason === 'exchange' || s._isExchange
       const cancelCount  = empCancelled.filter(s => !isExchange(s)).length
@@ -1174,7 +1178,7 @@ export const Reports = () => {
         ? Math.round(discountSales.reduce((s,x) => s + _getDiscPct(x), 0) / discountSales.length) : 0
       const maxDiscount  = discountSales.length > 0 ? Math.max(...discountSales.map(s => _getDiscPct(s))) : 0
       const lostRevenue  = empCompleted.reduce((s,x) => {
-        const reg = x.subtotal - x.total
+        const reg = (x.subtotal ?? x.total) - x.total
         const bInfo = x.discount === 0 ? _getBundleInfo(x) : null
         return s + reg + (bInfo ? bInfo.amt : 0)
       }, 0)
@@ -1191,7 +1195,7 @@ export const Reports = () => {
         const prev      = prevIdx >= 0 ? EMP_MONTHS_ASC[prevIdx] : null
         const mSales    = MOCK_SALES.filter(s => matchSale(s, emp) && s.status!=='cancelled' && s.soldAt && s.soldAt.startsWith(m))
         const mTotal    = mSales.reduce((s,x) => s+x.total, 0)
-        const mProfit   = mSales.reduce((s,x) => s+getSaleProfit(x), 0)
+        const mProfit   = mSales.reduce((s,x) => s+getNetSaleProfit(x), 0)
         const mCount    = mSales.length
         const mTarget   = EMPLOYEE_TARGETS[emp.id]?.[m] || 0
         const mTargetPct = mTarget > 0 ? Math.round(mTotal/mTarget*100) : null
@@ -1406,7 +1410,7 @@ export const Reports = () => {
       const mSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m))
       const revenue = mSales.reduce((s,x) => s + x.total, 0)
       // Sotuv marjasi: sotuv − tannarx − nasiya komissiyasi (Excel bilan mos)
-      const margin  = mSales.reduce((s,x) => s + getSaleProfit(x) - (x.installmentCommissionAmount || 0), 0)
+      const margin  = mSales.reduce((s,x) => s + getNetSaleProfit(x), 0)
 
       // Yangi tovar qiymati (Qarz): shu oyda kelgan partiyalar jami UZS qiymati
       const qarz = MOCK_INCOME_BATCHES
@@ -1430,7 +1434,7 @@ export const Reports = () => {
 
       const calcNet = (mo) => {
         const ms = MOCK_SALES.filter(s=>s.status!=='cancelled'&&s.soldAt&&s.soldAt.startsWith(mo))
-        const mg = ms.reduce((s,x)=>s+getSaleProfit(x)-(x.installmentCommissionAmount||0),0)
+        const mg = ms.reduce((s,x)=>s+getNetSaleProfit(x),0)
         const ip = MOCK_INCOME_BATCHES.flatMap(b=>(b.payments||[])).filter(p=>p.date&&p.date.startsWith(mo)).reduce((s,p)=>s+(p.amountUZS||0),0)
         const e  = MOCK_EXPENSES.filter(x=>x.date&&x.date.startsWith(mo)).reduce((s,x)=>s+x.amountUZS,0)
         const j  = MOCK_CAPITAL.filter(c=>c.type==='inject'&&c.date&&c.date.startsWith(mo)).reduce((s,c)=>s+c.amountUZS,0)
@@ -1481,7 +1485,7 @@ export const Reports = () => {
 
     // Sof foyda: sotuv foydasi (COGS allaqachon ayirilgan) − do'kon xarajatlari
     // Yetkazuvchi to'lovlari ayirilmaydi — getSaleProfit() da COGS sifatida hisobga olingan
-    const totalSalesProfit      = MOCK_SALES.filter(s => s.status !== 'cancelled').reduce((s, x) => s + getSaleProfit(x) - (x.installmentCommissionAmount || 0), 0)
+    const totalSalesProfit      = MOCK_SALES.filter(s => s.status !== 'cancelled').reduce((s, x) => s + getNetSaleProfit(x), 0)
     const totalShopExpenses     = MOCK_EXPENSES.reduce((s, e) => s + (e.amountUZS || 0), 0)
     const totalSupplierPayments = MOCK_INCOME_BATCHES.reduce((s, b) => s + (b.payments || []).reduce((ps, p) => ps + (p.amountUZS || 0), 0), 0)
     const netProfit = totalSalesProfit - totalShopExpenses
