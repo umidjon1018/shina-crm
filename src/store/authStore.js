@@ -5,8 +5,7 @@ import api from '../api/client'
 import { useSettingsStore } from './settingsStore'
 import { useShopStore } from './shopStore'
 import { useNotificationStore } from './notificationStore'
-import { useFaceStore } from './faceStore'
-import { compareFaces } from '../utils/faceRecognition'
+import { setSession, clearSession, revokeSessionOnServer } from '../api/session'
 import { useAuditStore } from './auditStore'
 
 const SESSION_ACTION_KEYS = {
@@ -80,7 +79,8 @@ export const useAuthStore = create(
       checkCredentials: async (credentials) => {
         try {
           const deviceId = getOrCreateDeviceId()
-          const res = await api.post('/api/auth/login', { ...credentials, deviceId })
+          // flow 2: server faqat vaqtinchalik token beradi, to'liq sessiya yuz tasdiqlangandan keyin
+          const res = await api.post('/api/auth/login', { ...credentials, deviceId, flow: 2 })
           const { token, user: backendUser } = res.data
           const user = {
             ...backendUser,
@@ -97,6 +97,7 @@ export const useAuthStore = create(
           if (restrictedRoles.includes(user.role) && user.shop_id) {
             useShopStore.getState().setSelectedShop(user.shop_id)
           }
+          clearSession()
           localStorage.setItem('shina_token', token)
           set({ user, token })
           return { success: true }
@@ -109,72 +110,23 @@ export const useAuthStore = create(
       // Step 2: submit selfie + device info
       submitSelfie: async (selfieBase64, descriptor) => {
         const { deviceId, user } = get()
-        const isAdmin = user?.role === 'admin'
-
-        // Yuz solishtirish uchun reference descriptor olish
-        const faceStore = useFaceStore.getState()
-        let refDescriptor = faceStore.descriptors[user?.id]
-
-        // Local yo'q bo'lsa — backenddan yuklab olish va cache qilish
-        if (!refDescriptor && descriptor && !isAdmin) {
-          try {
-            const res = await api.get('/api/auth/descriptor')
-            if (res.data?.descriptor) {
-              // Float32Array emas, Array saqlanadi — JSON serialize muammosini oldini oladi
-              refDescriptor = Array.from(new Float32Array(Object.values(res.data.descriptor)))
-              faceStore.setDescriptor(user.id, refDescriptor)
-            }
-          } catch {}
+        let data
+        try {
+          const res = await api.post('/api/auth/verify-face', {
+            descriptor: descriptor ? Array.from(descriptor) : null,
+            selfie: selfieBase64,
+          })
+          data = res.data
+        } catch (err) {
+          return { status: 'error', message: err.response?.data?.error || err.message }
         }
-
-        let faceMatch = null
-        if (descriptor) {
-          if (!refDescriptor) {
-            if (isAdmin) {
-              // Admin bootstrap: birinchi kirish — descriptor saqlanadi
-              faceStore.setDescriptor(user.id, descriptor)
-              faceMatch = true
-            } else {
-              // Xodim: hali descriptor yo'q — admin vizual tasdiqlashi kerak
-              faceMatch = null
-            }
-          } else {
-            faceMatch = compareFaces(refDescriptor, descriptor).match
-          }
-        }
-
-        const isTrustedNow = isAdmin || isTrustedDevice(deviceId)
-
-        // Faqat yangi qurilma yoki yuz mos kelmaganda backendga saqlash kerak.
-        // Ishonchli qurilma qayta kirayotganda DB ga keraksiz 'pending' row qo'shilmaydi.
-        if (!isTrustedNow || faceMatch === false) {
-          try {
-            await api.post('/api/auth/attempts', {
-              deviceId,
-              selfie: selfieBase64,
-              faceMatch,
-              descriptor: descriptor ? Array.from(descriptor) : null,
-            })
-          } catch {}
-        }
-
-        if (faceMatch === false) {
-          return { status: 'face_mismatch' }
-        }
-
-        const isTrusted = isTrustedDevice(deviceId)
-
-        if (isAdmin || isTrusted) {
-          // Admin: har doim kirish
-          // Xodim/Manager: descriptor tekshirilgan va mos bo'lishi shart (null = yo'q = bloklash)
-          if (isAdmin || faceMatch === true) {
-            saveTrustedDevice(deviceId, user?.id)
-            set({ isAuthenticated: true, deviceStatus: 'approved' })
-            logSession(user, 'Tizimga kirdi (online)')
-            return { status: 'approved' }
-          }
-          // faceMatch === null: descriptor yuklab olinmadi — xavfsizlik uchun bloklash
-          return { status: 'face_mismatch' }
+        if (data.status === 'face_mismatch') return { status: 'face_mismatch' }
+        if (data.status === 'approved') {
+          setSession(data)
+          saveTrustedDevice(deviceId, user?.id)
+          set({ token: data.token, isAuthenticated: true, deviceStatus: 'approved' })
+          logSession(user, 'Tizimga kirdi (online)')
+          return { status: 'approved' }
         }
 
         // Yangi qurilma: yuz mos bo'lsa ham admin/manager tasdiqlashi kerak
@@ -278,7 +230,7 @@ export const useAuthStore = create(
       rejectDevice: async (deviceId) => {
         const { deviceId: currentDeviceId } = get()
         if (deviceId === currentDeviceId) {
-          localStorage.removeItem('shina_token')
+          clearSession()
           set({ deviceStatus: 'rejected', user: null, token: null })
         }
         try {
@@ -293,18 +245,17 @@ export const useAuthStore = create(
         try {
           // Har qanday xodim o'z qurilmasi holatini ko'ra oladi
           const res = await api.get(`/api/auth/attempts/my-status?deviceId=${deviceId}`)
-          const { status, descriptor } = res.data
+          const { status } = res.data
           if (status === 'approved') {
-            if (descriptor) {
-              // Array sifatida saqlash — Float32Array JSON serialize bo'lmaydi
-              const desc = Array.from(new Float32Array(Object.values(descriptor)))
-              useFaceStore.getState().setDescriptor(user?.id, desc)
-            }
+            // Vaqtinchalik token to'liq sessiyaga almashtiriladi (server tasdiq shu login davomida bo'lganini tekshiradi)
+            const ses = await api.post('/api/auth/session')
+            setSession(ses.data)
+            set({ token: ses.data.token })
             saveTrustedDevice(deviceId, user?.id)
             set({ isAuthenticated: true, deviceStatus: 'approved' })
             logSession(user, 'Tizimga kirdi (online)')
           } else if (status === 'rejected') {
-            localStorage.removeItem('shina_token')
+            clearSession()
             set({ deviceStatus: 'rejected', user: null, token: null })
           }
         } catch {}
@@ -358,7 +309,8 @@ export const useAuthStore = create(
       logout: () => {
         const { user, isAuthenticated } = get()
         if (isAuthenticated) logSession(user, 'Tizimdan chiqdi (offline)')
-        localStorage.removeItem('shina_token')
+        revokeSessionOnServer()
+        clearSession()
         clearHttpCache()
         set({ user: null, token: null, isAuthenticated: false, deviceStatus: 'idle' })
       },

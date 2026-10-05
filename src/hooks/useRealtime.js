@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { getFreshToken, refreshSession } from '../api/session'
 
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
 
@@ -26,7 +27,7 @@ export function useRealtime(handlers, { enabled = true, onAuthFail } = {}) {
 
     const connect = async () => {
       if (stopped) return
-      const token = localStorage.getItem('shina_token')
+      const token = await getFreshToken()
       if (!token) return
       ctrl = new AbortController()
       try {
@@ -38,6 +39,12 @@ export function useRealtime(handlers, { enabled = true, onAuthFail } = {}) {
         if (res.status === 401 || res.status === 403) {
           let body = null
           try { body = await res.json() } catch {}
+          // Muddati tugagan token — yangilab qayta ulanamiz
+          if (res.status === 401 && !stopped) {
+            let ok = false
+            try { ok = await refreshSession() } catch { ok = null }
+            if (ok !== false) { timer = setTimeout(connect, ok ? 100 : retry); return }
+          }
           ref.current.onAuthFail?.(res.status, body)
           return
         }

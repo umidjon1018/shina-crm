@@ -143,6 +143,8 @@ Bu bo'lim foydalanuvchi bilan PWA/SaaS strategiyasi haqida bo'lib o'tgan suhbat 
 
 **Bosqich 3.5 — Backend xavfsizlik yaxshilanishlari (SaaS DAN OLDIN bajarilishi kerak)**
 
+**✅ 1–3 BAJARILDI (2026-10-05):** login (`flow: 2`) faqat vaqtinchalik `pre` token beradi (12 soat; oddiy API → 403 `FACE_REQUIRED`); `POST /api/auth/verify-face` yuzni serverda saqlangan shablon bilan solishtiradi (`utils/faceCrypto.js`, Evklid < 0.5) → to'liq sessiya yoki admin tasdig'i; `POST /api/auth/session` (kutish sahifasi) faqat shu login davomida admin tasdiqlagan bo'lsa; `access` token 15 daqiqa (`TOKEN_EXPIRED` → frontend `src/api/session.js` jimgina yangilaydi), `refresh` 7 kun — `refresh_tokens` jadvalida hash, har yangilashda almashadi, qayta ishlatilsa shu qurilma sessiyalari bekor; qurilma bekor/xodim o'chirilsa/parol o'zgarsa refresh bekor. Selfie va descriptorlar AES-256-GCM (`.env FACE_ENC_KEY`, 64 hex — YO'QOTMA, aks holda selfie/shablonlar o'qilmaydi) bilan shifrlanadi. Eski ilova (flow yo'q) va eski 7 kunlik tokenlar o'tish davrida ishlaydi. 4-band (multi-device) qurilma tasdiqlash + real vaqt bilan qoplangan.
+
 Quyidagilar hozirgi backend (Node.js + PostgreSQL) da qilinishi kerak, lekin SaaS arxitekturasi bilan bog'liq emas:
 
 1. **`selfie` va `descriptor` ni bazada shifrlash** — biometrik ma'lumotlar hozir ochiq JSONB sifatida saqlanadi. PostgreSQL `pgcrypto` yoki application-level AES-256 shifrlash qo'shilishi kerak. `descriptor` — 128-float vector; `selfie` — base64 rasm. Ikkalasi `LOGIN_ATTEMPTS` jadvalida.

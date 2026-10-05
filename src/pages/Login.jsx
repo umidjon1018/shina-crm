@@ -98,6 +98,8 @@ const LoginPage = () => {
       }
     } else if (result.status === 'multi_device_blocked') {
       setSelfieError(t('multi_device_blocked_error'))
+    } else if (result.status === 'error') {
+      setSelfieError(result.message || t('err_network'))
     }
   }
 
