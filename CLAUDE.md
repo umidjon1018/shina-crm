@@ -164,6 +164,8 @@ Quyidagilar hozirgi backend (Node.js + PostgreSQL) da qilinishi kerak, lekin Saa
 - Oylik infratuzilma narxi (server+baza+email+backup) — kichik miqyosda taxminan $15-60/oy atrofida.
 - **Bu bosqichga hozir o'tish tavsiya etilmaydi** — sabab: frontend hali tugamagan, talab hali sinalmagan, va frontend tugagach SaaS arxitekturasi ancha aniqroq rejalashtiriladi (kod zoye ketmaydi — React qism deyarli o'zgarishsiz qoladi).
 
+**✅ BAJARILDI (2026-10-05) — SSE orqali real vaqt.** Backend `src/realtime.js` (`GET /api/realtime/stream`, authMiddlewareNoDeviceCheck; `toUser/toDevice/toAdmins/toAll/toNonAdmins`), frontend `src/hooks/useRealtime.js` (fetch oqimi, token sarlavhada, avtomatik qayta ulanish) — MainLayout va PendingApproval'da. Hodisalar: `perm_changed` (xodim yangilandi / rollar daraxti saqlandi → syncRolesFromServer), `device_revoked` (bekor qilindi yoki boshqa qurilma tasdiqlandi → logout + Login'da sabab), `account_disabled`, `device_status` (kutish sahifasi darhol), `login_attempt`/`attempts_changed` (admin bildirishnoma + Qurilmalar tabi yangilanadi). WebSocket emas — nginx Upgrade sozlamasi shart emas. Yangi xavfsizlik hodisasi qo'shilsa shu `rt.*` funksiyalaridan foydalan. Quyidagi matn — tarixiy reja.
+
 **MUHIM — WebSocket/SSE: eng muhim arxitektura vazifasi (backend ishga tushgach birinchi navbatda)**
 
 Bu vazifa **frontend yoki SaaS dan oldin** bajarilishi kerak. Sababi:

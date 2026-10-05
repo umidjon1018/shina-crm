@@ -42,7 +42,14 @@ const LoginPage = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() => {
+    // Real vaqtda chiqarib yuborilganda sababi ko'rsatiladi (bir marta)
+    try {
+      const r = sessionStorage.getItem('shina_logout_reason')
+      if (r) { sessionStorage.removeItem('shina_logout_reason'); return r }
+    } catch {}
+    return ''
+  })
   const [selfieError, setSelfieError] = useState('')
   const [faceAttempts, setFaceAttempts] = useState(0)
   const MAX_FACE_ATTEMPTS = 5

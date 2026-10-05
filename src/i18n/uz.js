@@ -3565,4 +3565,12 @@ export default {
   page_error_title: "Bu bo'limda xatolik yuz berdi",
   page_error_desc: "Boshqa bo'limlar ishlayapti. Sahifani yangilab ko'ring; takrorlansa — administratorga xabar bering.",
   page_error_reload: "Yangilash",
+  rt_kick_revoked: "Qurilmangiz administrator tomonidan bekor qilindi. Qayta kirish uchun tasdiqlash kerak.",
+  rt_kick_other_device: "Hisobingizga boshqa qurilmadan kirish tasdiqlandi — bu qurilmadan chiqdingiz.",
+  rt_kick_disabled: "Hisobingiz faolsizlantirildi. Administratorga murojaat qiling.",
+  rt_kick_session: "Sessiya muddati tugadi. Qayta kiring.",
+  rt_attempt_title: "Yangi kirish urinishi",
+  rt_attempt_msg: "{{name}} ({{device}}) tasdiqlashni kutmoqda — Admin panel → Qurilmalar",
+  rt_device_mobile: "telefon",
+  rt_device_desktop: "kompyuter",
 }

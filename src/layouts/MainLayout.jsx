@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom'
 import PageErrorBoundary from '../components/PageErrorBoundary'
+import { useRealtime } from '../hooks/useRealtime'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -144,6 +145,28 @@ export const MainLayout = () => {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
+
+  // Real vaqt: ruxsat o'zgarsa — darhol qo'llanadi; qurilma bekor qilinsa/xodim o'chirilsa — darhol chiqariladi
+  const kick = (reasonKey) => {
+    try { sessionStorage.setItem('shina_logout_reason', t(reasonKey)) } catch {}
+    logout()
+  }
+  useRealtime({
+    perm_changed: () => { syncRolesFromServer().catch(() => {}); loadEmployees() },
+    device_revoked: (d) => { if (user?.role !== 'admin') kick(d.reason === 'other_device' ? 'rt_kick_other_device' : 'rt_kick_revoked') },
+    account_disabled: () => kick('rt_kick_disabled'),
+    login_attempt: (d) => {
+      if (useSettingsStore.getState().notificationSettings?.NEW_LOGIN_ATTEMPT !== false) {
+        addNotification({
+          type: 'NEW_LOGIN_ATTEMPT', severity: 'warning',
+          title: t('rt_attempt_title'),
+          message: t('rt_attempt_msg', { name: d.fullName || '—', device: d.deviceType === 'mobile' ? t('rt_device_mobile') : t('rt_device_desktop') }),
+        })
+      }
+      window.dispatchEvent(new Event('shina:attempts-changed'))
+    },
+    attempts_changed: () => window.dispatchEvent(new Event('shina:attempts-changed')),
+  }, { enabled: isAuthenticated, onAuthFail: (status) => { if (status === 401) kick('rt_kick_session') } })
   const { addLog } = useAuditStore()
   const sl = sidebarLabels || {}
   const hidden = hiddenPages || []

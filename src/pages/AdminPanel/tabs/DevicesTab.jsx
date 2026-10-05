@@ -51,6 +51,12 @@ function DevicesTab() {
     } catch { setTrusted([]) }
   }
   useEffect(() => { load() }, [])
+  // Yangi kirish urinishi yoki holat o'zgarishi — ro'yxat darhol yangilanadi
+  useEffect(() => {
+    const onChange = () => load()
+    window.addEventListener('shina:attempts-changed', onChange)
+    return () => window.removeEventListener('shina:attempts-changed', onChange)
+  }, [])
 
   const clearAttempts = async () => {
     try { await api.delete('/api/auth/attempts') } catch {}

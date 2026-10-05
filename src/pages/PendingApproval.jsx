@@ -3,17 +3,19 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Clock, Shield, LogOut } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
+import { useRealtime } from '../hooks/useRealtime'
 
 export default function PendingApproval() {
   const { t } = useTranslation()
   const { logout, checkApprovalStatus } = useAuthStore()
 
-  // Admin tasdiqlasa — shu yerda avtomatik aniqlanadi (bir xil brauzer/localStorage doirasida)
+  // Admin tasdiqlasa/rad etsa — server darhol xabar beradi; so'rov (polling) faqat zaxira sifatida
+  useRealtime({ device_status: () => checkApprovalStatus() })
   useEffect(() => {
     let timer
     const poll = async () => {
       await checkApprovalStatus()
-      timer = setTimeout(poll, 3000)
+      timer = setTimeout(poll, 15000)
     }
     timer = setTimeout(poll, 3000)
     return () => clearTimeout(timer)
