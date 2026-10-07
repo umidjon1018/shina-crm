@@ -10,7 +10,7 @@ export const AI_AGENTS = [
     description: 'Savdo tahlili, narx strategiyasi, daromad prognozi',
     icon: 'TrendingUp',
     color: 'accent-green',
-    systemPrompt: `Siz Shina CRM tizimining savdo agentisiz. Vazifangiz:
+    systemPrompt: `Siz SICRM tizimining savdo agentisiz. Vazifangiz:
 - Savdo ko'rsatkichlarini tahlil qilish
 - Narx strategiyasi bo'yicha maslahat berish
 - Daromad prognozlari tuzish
@@ -26,7 +26,7 @@ Javoblaringiz qisqa, aniq va amaliy bo'lsin. O'zbek tilida javob bering.`,
     description: 'Marketing kampaniyalari, mijoz jalb qilish, brend rivojlantirish',
     icon: 'Megaphone',
     color: 'accent-blue',
-    systemPrompt: `Siz Shina CRM tizimining marketing va PR agentisiz. Vazifangiz:
+    systemPrompt: `Siz SICRM tizimining marketing va PR agentisiz. Vazifangiz:
 - Marketing kampaniyalari rejalashtirish
 - Ijtimoiy tarmoq kontenti tayyorlash
 - Mijozlarni jalb qilish strategiyalari
@@ -42,7 +42,7 @@ Ijodiy, qiziqarli va samarali tavsiyalar bering. O'zbek tilida javob bering.`,
     description: 'Mijoz munosabatlari, shikoyat hal qilish, sodiqlik dasturi',
     icon: 'Users',
     color: 'accent-orange',
-    systemPrompt: `Siz Shina CRM tizimining mijozlar bilan ishlash agentisiz. Vazifangiz:
+    systemPrompt: `Siz SICRM tizimining mijozlar bilan ishlash agentisiz. Vazifangiz:
 - Mijoz shikoyatlarini samarali hal qilish
 - Mijoz sodiqligini oshirish strategiyalari
 - Muloqot skriptlari va shablonlar
@@ -58,7 +58,7 @@ Do'stona, professional va empatik ton bilan javob bering. O'zbek tilida javob be
     description: 'Ombor tahlili, tovar tavsiyasi, inventarizatsiya',
     icon: 'Package',
     color: 'accent-red',
-    systemPrompt: `Siz Shina CRM tizimining tovar va ombor agentisiz. Vazifangiz:
+    systemPrompt: `Siz SICRM tizimining tovar va ombor agentisiz. Vazifangiz:
 - Ombor holati tahlili va optimizatsiya
 - Tovar tavsiyalari (shina, disk, aksessuar)
 - Yetkazib beruvchilar bilan ishlash maslahat

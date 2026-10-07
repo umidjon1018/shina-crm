@@ -23,7 +23,7 @@ export const useSettingsStore = create(
   persist(
     (set, get) => ({
       // Kompaniya ma'lumotlari
-      companyName: 'Shina CRM',
+      companyName: 'SICRM',
       companyLogo: null,
       companyLogoOriginal: null,
       loginIconMode: 'animation',  // 'animation' | 'logo'
@@ -248,9 +248,10 @@ export const useSettingsStore = create(
             set(next)
           } else if (isAdmin) {
             // Birinchi ko'chirish: faqat haqiqatda o'rnatilgan (bo'sh/standart bo'lmagan) qiymatlar
-            const defaults = { companyName: 'Shina CRM', companyLogo: null, loginIconMode: 'animation', loginPageTitle: '', sidebarLogoSize: 'medium' }
+            const defaults = { companyName: 'SICRM', companyLogo: null, loginIconMode: 'animation', loginPageTitle: '', sidebarLogoSize: 'medium' }
             const local = {}
-            BRANDING_KEYS.forEach(k => { if (cur[k] != null && cur[k] !== '' && cur[k] !== defaults[k]) local[k] = cur[k] })
+            // 'Shina CRM' — platformaning eski standart nomi, o'rnatilgan brend hisoblanmaydi
+            BRANDING_KEYS.forEach(k => { if (cur[k] != null && cur[k] !== '' && cur[k] !== defaults[k] && !(k === 'companyName' && cur[k] === 'Shina CRM')) local[k] = cur[k] })
             if (Object.keys(local).length) await saveBranding(local)
           }
         } catch { /* oflayn — mahalliy qiymatlar qoladi */ }
