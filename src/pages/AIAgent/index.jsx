@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck, Globe } from 'lucide-react'
+import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck, Globe, BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TAB_COLORS, TAB_AGENT_KEYS, TAB_DESC_KEYS } from './aiHelpers'
 import { getAiAgents } from '../../api/aiAgentsService'
@@ -20,6 +20,7 @@ import MarketingTab from './tabs/MarketingTab'
 import CustomerTab from './tabs/CustomerTab'
 import StaffTab from './tabs/StaffTab'
 import InstagramTab from './tabs/InstagramTab'
+import StatsTab from './tabs/StatsTab'
 
 export const AIAgent = () => {
   const { t } = useTranslation()
@@ -45,6 +46,7 @@ export const AIAgent = () => {
 
   const TABS = [
     { id: 'overview',  label: t('ai_tab_overview'), Icon: Activity,   color: TAB_COLORS.overview },
+    { id: 'stats',     label: t('ais_tab'),         Icon: BarChart3,  color: TAB_COLORS.stats },
     { id: 'sales',     label: t('ai_tab_sales'),    Icon: TrendingUp, color: TAB_COLORS.sales },
     { id: 'inventory', label: t('ai_tab_inventory'),  Icon: Package,    color: TAB_COLORS.inventory },
     { id: 'marketing', label: t('ai_tab_marketing'),Icon: Megaphone,  color: TAB_COLORS.marketing },
@@ -101,6 +103,7 @@ export const AIAgent = () => {
             transition={{ duration: 0.15 }}
           >
             {activeTab === 'overview'  && <OverviewTab onTabChange={setActiveTab} aiData={aiData} />}
+            {activeTab === 'stats'     && <StatsTab />}
             {activeTab === 'sales'     && <SalesTab     aiData={aiData} agentConfig={agentConfigs['sales-agent']} />}
             {activeTab === 'inventory' && <InventoryTab aiData={aiData} agentConfig={agentConfigs['product-agent']} />}
             {activeTab === 'marketing' && <MarketingTab aiData={aiData} agentConfig={agentConfigs['pr-agent']} />}

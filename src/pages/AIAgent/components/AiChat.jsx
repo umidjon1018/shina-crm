@@ -47,7 +47,7 @@ const renderMarkdown = (text) => {
   return result
 }
 
-const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt }) => {
+const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt, suggestions }) => {
   const { chats, createChat, addMessage, updateLastMessage, deleteChat } = useAiStore()
   const [chatId, setChatId] = useState(null)
   const [input, setInput] = useState('')
@@ -162,6 +162,16 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
           <p className="text-xs text-text-muted text-center py-10">
             Savol bering — AI agent javob beradi
           </p>
+        )}
+        {messages.length === 0 && suggestions?.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2">
+            {suggestions.map(q => (
+              <button key={q} onClick={() => sendText(q)} disabled={streaming}
+                className={`text-xs px-3 py-1.5 rounded-full border border-border ${c.user} text-text-primary hover:opacity-80 disabled:opacity-40`}>
+                {q}
+              </button>
+            ))}
+          </div>
         )}
         {messages.map((m) => (
           <div key={m.id} className={`flex gap-2 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>

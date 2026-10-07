@@ -166,6 +166,11 @@ export const MainLayout = () => {
       window.dispatchEvent(new Event('shina:attempts-changed'))
     },
     attempts_changed: () => window.dispatchEvent(new Event('shina:attempts-changed')),
+    weekly_report: (d) => addNotification({
+      type: 'WEEKLY_REPORT', severity: 'info',
+      title: t('ais_notif_title'),
+      message: t('ais_notif_msg', { week: (d.weekStart || '').split('-').reverse().join('.') }),
+    }),
   }, { enabled: isAuthenticated, onAuthFail: (status) => { if (status === 401) kick('rt_kick_session') } })
   const { addLog } = useAuditStore()
   const sl = sidebarLabels || {}

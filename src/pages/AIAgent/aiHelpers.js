@@ -2,6 +2,7 @@
 
 export const TAB_COLORS = {
   overview:  { bg: 'bg-purple-500/10',  text: 'text-purple-400',  border: 'border-purple-500/30',  dot: 'bg-purple-400' },
+  stats:     { bg: 'bg-[#3b82f6]/10',   text: 'text-[#3b82f6]',   border: 'border-[#3b82f6]/30',   dot: 'bg-[#3b82f6]' },
   sales:     { bg: 'bg-[#22c55e]/10',   text: 'text-[#22c55e]',   border: 'border-[#22c55e]/30',   dot: 'bg-[#22c55e]' },
   inventory: { bg: 'bg-[#E63946]/10',   text: 'text-[#E63946]',   border: 'border-[#E63946]/30',   dot: 'bg-[#E63946]' },
   marketing: { bg: 'bg-[#f97316]/10',   text: 'text-[#f97316]',   border: 'border-[#f97316]/30',   dot: 'bg-[#f97316]' },
@@ -29,6 +30,7 @@ export const AGENT_LABEL_KEYS = {
 
 export const TAB_AGENT_KEYS = {
   overview: 'ai_agent_overview',
+  stats: 'ais_agent',
   sales: 'ai_agent_sales',
   inventory: 'ai_agent_inventory',
   marketing: 'ai_agent_marketing',
@@ -39,6 +41,7 @@ export const TAB_AGENT_KEYS = {
 
 export const TAB_DESC_KEYS = {
   overview: 'ai_overview_desc',
+  stats: 'ais_desc',
   sales: 'ai_sales_desc',
   inventory: 'ai_inventory_desc',
   marketing: 'ai_marketing_desc',
