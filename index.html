@@ -21,7 +21,15 @@
       #boot { position: fixed; inset: 0; background: #0B0B0F; display: flex; flex-direction: column;
         align-items: center; justify-content: center; gap: 28px; z-index: 9999; }
       #boot .mark { display: flex; flex-direction: column; align-items: center; gap: 16px; animation: boot-in .7s cubic-bezier(.2,.8,.2,1) both; }
-      #boot .mark img { display: block; width: 200px; height: auto; }
+      #boot .logo { position: relative; width: 200px; line-height: 0; }
+      #boot .logo img { display: block; width: 200px; height: auto; }
+      /* Blik: yozuv shaklidagi niqob ichida oq yorug'lik chizig'i chapdan o'ngga o'tadi */
+      #boot .logo::after { content: ''; position: absolute; inset: 0;
+        background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.35) 46%, #fff 50%, rgba(255,255,255,.35) 54%, transparent 58%) no-repeat;
+        background-size: 260% 100%; background-position: 160% 0;
+        -webkit-mask: url(/icons/wordmark.png) center / 100% 100% no-repeat;
+        mask: url(/icons/wordmark.png) center / 100% 100% no-repeat;
+        animation: boot-shine 2.4s ease-in-out .9s infinite; }
       #boot .bar { display: block; width: 200px; height: 7px; border-radius: 4px; background: #E63946; transform-origin: left center; animation: boot-draw .9s cubic-bezier(.6,0,.2,1) .25s both; }
       #boot .track { width: 120px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden;
         animation: boot-fade .4s ease .8s both; }
@@ -30,6 +38,7 @@
       @keyframes boot-in { from { opacity: 0; transform: scale(.82) } to { opacity: 1; transform: scale(1) } }
       @keyframes boot-draw { from { transform: scaleX(0) } to { transform: scaleX(1) } }
       @keyframes boot-fade { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes boot-shine { 0% { background-position: 160% 0 } 55%, 100% { background-position: -60% 0 } }
       @keyframes boot-run { 0% { transform: translateX(-100%) } 100% { transform: translateX(250%) } }
       @media (prefers-reduced-motion: reduce) { #boot * { animation: none !important } }
     </style>
@@ -38,7 +47,7 @@
     <div id="root">
       <div id="boot" role="status" aria-label="SICRM yuklanmoqda">
         <div class="mark">
-          <img src="/icons/wordmark.png" alt="SICRM" width="200" />
+          <div class="logo"><img src="/icons/wordmark.png" alt="SICRM" width="200" /></div>
           <span class="bar"></span>
         </div>
         <div class="track"><i></i></div>
