@@ -353,7 +353,10 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 
 **Texnik eslatma:** `cancelModal` da backend barcha return larni `cancelled` qilib qo'yadi → MOCK_RETURNS.refundAmount ni original sale bilan join qilib haqiqiy summa ko'rsatiladi.
 
-### Keyingi session (2026-10-04 dan keyin)
+### Keyingi session (2026-10-08 dan keyin) — AVVAL O'QI
+BILLZ bo'limlarining hammasi tugadi va serverda. Holat va qolgan ishlar tartibi: memory `project_session_handoff_2026_10_08.md` (AI statistika → Telegram bot (token kutilmoqda) → ~21-oktabrda eski login yo'lini yopish → multi-tenant). Instagram bot ataylab o'chirilgan — qolgan ishlarga qo'shma.
+
+### Keyingi session (2026-10-04 dan keyin) — TARIXIY
 BILLZ paritet ishlari davom etadi: foydalanuvchi keyingi BILLZ bo'limi ro'yxatini beradi → har bandni kodda tekshir (bor/qisman/yo'q jadval) → yo'q va kamchiliklarni HAMMASINI qil → lokal test → commit → deploy faqat "deploy" deyilganda. Batafsil: memory `project_next_billz_plan.md`.
 Ochiq vazifalar: AI kredit xatosi tekshiruvi (`project_ai_credit_issue_todo.md`, foydalanuvchi "AI'ni tekshir" desa), Telegram bot (token kutilmoqda, `project_telegram_auth_todo.md`).
 
