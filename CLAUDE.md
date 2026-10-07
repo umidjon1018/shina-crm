@@ -533,7 +533,12 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
 
 ---
 
-## Domen faollashtirish buyruqlari (crmsi.uz tayyor bo'lgach)
+## Domen (holat 2026-10-07)
+
+**Asosiy domen — `sicrm.uz`** (ishlaydi, SSL bor): `sicrm.uz` = backend API, `gt.sicrm.uz` = GoodTires ilovasi. `crmsi.uz` domeni muammo tufayli ISHLATILMAYDI — nomi `sicrm.uz` ga o'zgartirilgan; serverdagi `/etc/nginx/sites-available/crmsi.uz` eskirgan (yoqilmagan).
+Yangi mijoz (tenant) kerak bo'lganda: DNS `*.sicrm.uz` A → 167.233.169.118, wildcard SSL (`certbot certonly --manual --preferred-challenges dns -d "*.sicrm.uz" -d sicrm.uz`), nginx wildcard server_name `~^(?<tenant>[^.]+)\.sicrm\.uz$`, ALLOWED_ORIGINS ga qo'shish, tenant middleware'da `getPool`. Quyidagi crmsi.uz buyruqlari — tarixiy (domen nomini sicrm.uz ga almashtirib ishlat).
+
+### Eski reja: crmsi.uz buyruqlari (TARIXIY)
 
 Nginx config va tenant middleware tayyor — `/etc/nginx/sites-available/crmsi.uz` yozilgan. Domen DNS ga ulanib propagatsiya bo'lgach quyidagilarni bajarish kerak:
 
