@@ -276,7 +276,15 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 ### Bosqich 2 — boshlandi (2026-10-08)
 - **UI to'plami** (`src/components/ui/`): `Modal` (ichma-ich, telefonda pastdan chiqadi, "orqaga"/Esc faqat yuqoridagisini yopadi), `DataTable` (saralash, sahifalash, telefonda karta, qator bosish), `Kit.jsx` (PageHeader, KpiCard, KpiStrip — telefonda gorizontal, Segmented, DetailGrid, Badge), `Toast`, `utils/format.js`.
 - **Mijozlar — namuna sahifa** ✅: ro'yxat 14 ustun → 5 (mijoz, jami summa+xaridlar soni, qarz, daraja, oxirgi tashrif); qator bosilsa profil; birlashtirish rejimi banneri. Profil modali: yuqorida asosiy ko'rsatkichlar (xaridlar, summa, qarz, balans) va tezkor tugmalar (tahrirlash, birlashtirish, o'chirish); 5 tab — Umumiy, Xaridlar [Yangi|B/U], Moliya [Nasiya|Balans], Izohlar, Telegram; xarid bosilsa chek oynasi ichma-ich ochiladi. Commit 432bf775.
-- **Kutilmoqda:** foydalanuvchi namuna uslubini tasdiqlashi → keyin Sotuv, Ombor, Kirim, Moliya (yangi Foyda, Qarzlar), Marketing, Hisobotlar shu uslubga.
+- ~~Kutilmoqda: foydalanuvchi namuna uslubini tasdiqlashi~~ → foydalanuvchi fikri (16-bo'lim) asosida 2A bajarildi.
+
+### Bosqich 2A ✅ (2026-10-08) — dizayn tizimi va hub tuzilmasi
+- **Dizayn tizimi:** to'q ko'k palitra (yorug' va brend mavzular ham), gradient klasslar (`g-violet/g-cyan/g-brand/...`), `.panel`; yozuv o'lchamlari xs 13px / sm 15px, 8–11px yozuvlar kattalashtirildi; Syne → DM Sans; touch CSS (manipulation, telefonda 16px input, barmoq uchun kamida 36px tugma). Sidebar yangi uslubda (faol band gradient, yirik yozuv).
+- **Diagrammalar to'plami** `components/charts/Charts.jsx`: HeroStat, MiniStat (invert), ChartCard, TrendArea, GradientBars (gorizontal ham), DonutChart, Legend, PALETTE, shortNum.
+- **SectionHub** `components/ui/SectionHub.jsx`: bo'limlar kartochka (guruhlar bilan) yoki gorizontal tugmalar; bosilsa xl modalda (telefonda to'liq ekran); `?section=` havola; boshqariladigan rejim.
+- **Sahifalar:** Bosh sahifa (yangi diagrammalar — backend `reports/dashboard` kengaytirildi: kunlik foyda, kategoriyalar B/U bilan, hafta kunlari, soatlar, kam qolganlar, oxirgi sotuvlar, yetkazib beruvchi qarzi); Sotuv (Kassa asosiy, Yangi|B/U, qolganlar modalda); Ombor (Qoldiq + kartalar + kategoriya donut); Kirim (shu oy kirim, qarz, muddat, 6 oylik diagramma + Partiyalar); Moliya (sof foyda, pul qoldig'i, xarajatlar tarkibi, tushumdan foydagacha + bo'limlar kartochkada); Marketing (aksiyalar natijasi + Aksiyalar asosiy); Hisobotlar (guruhlangan katalog, har hisobot o'z davr/eksporti bilan modalda); AI (Kunlik tahlil asosiy); Mijozlar (umumiy uslub, yangi mijozlar diagrammasi); Sozlamalar (guruhlangan kartochkalar).
+- **Eski modallar** (`fixed inset-0 z-50…z-[200]`) z-[300…360] ga ko'tarildi — bo'lim modali ichidan ochilganda ustida chiqadi.
+- **Tekshiruv:** admin/sotuvchi bilan barcha sahifalar ochildi, 375px da gorizontal toshish yo'q, konsolda xato yo'q. Commitlar e698b1da … 87c3a4b9.
 
 ---
 
@@ -305,7 +313,7 @@ Namunadan keyin fikr: eski ko'rinish deyarli saqlangan; rasm (CRM dashboard) usl
 | Marketing | KPI + aksiyalar natijasi | Aksiyalar, Kodlar, Sertifikatlar, Xabarlar, Tug'ilgan kunlar, Sodiqlik, Sozlamalar |
 | Hisobotlar | Umumiy diagrammalar | Har hisobot — modal |
 | AI | Kunlik tahlil | Yordamchi, Statistika, Mijozlar boti |
-| Sozlamalar | Chapda bo'limlar (o'zgarmaydi) | — |
+| Sozlamalar | Guruhlangan kartochkalar (Biznes / Savdo / Tizim) | Har bo'lim |
 
 ### 16.2 Touch ekran (7-band)
 - Barcha tugma/maydon kamida 44px balandlik, hover'ga bog'liq amal yo'q
@@ -354,7 +362,7 @@ Misollar: kafel kleyi (qum, sement, qo'shimchalar tonnalab → qop-qop klei), sh
 ### 16.6 Bosqichlar (yangilangan)
 | Bosqich | Nima |
 |---|---|
-| 2A | Dizayn tizimi + diagramma to'plami + hub tuzilmasi; Bosh sahifa diagrammalari; barcha sahifalar hub ko'rinishiga |
+| 2A ✅ | Dizayn tizimi + diagramma to'plami + hub tuzilmasi; Bosh sahifa diagrammalari; barcha sahifalar hub ko'rinishiga |
 | 2B | Bo'limlar ichini yangi komponentlarga (DataTable, Modal, yirik yozuv) — sahifama-sahifa |
 | 2C | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
 | 3 | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi + Moliya → Qarzlar |
