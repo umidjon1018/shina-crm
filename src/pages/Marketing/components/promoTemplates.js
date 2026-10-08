@@ -3,7 +3,7 @@ const base = {
   kind: 'discount', targetType: 'all', targetIds: [], discountType: 'percent', discountValue: 10, minQty: 1,
   buyQty: 2, getQty: 1, getDiscount: 100, giftTargetType: null, giftTargetIds: [],
   tiers: [{ qty: 1, percent: 10 }, { qty: 2, percent: 15 }, { qty: 3, percent: 20 }],
-  minTotal: 0, stackable: false, requiresCode: false, startDate: '', endDate: '', shopId: 'all',
+  minTotal: 0, bundleItems: [], stackable: false, requiresCode: false, startDate: '', endDate: '', shopId: 'all',
   conditions: { weekdays: [], timeFrom: '', timeTo: '', customer: 'any', groups: [], birthdayDays: 3, excludeInstallment: false },
 }
 
@@ -17,6 +17,7 @@ export const SIMPLE_TEMPLATES = [
 ]
 
 export const ADVANCED_TEMPLATES = [
+  { id: 'bundle', icon: 'Package', patch: { kind: 'bundle', discountType: 'percent', discountValue: 10, bundleItems: [] } },
   { id: 'gift_2_1', icon: 'Gift', patch: { kind: 'gift', targetType: 'category', buyQty: 2, getQty: 1, getDiscount: 100 } },
   { id: 'gift_3_1', icon: 'Gift', patch: { kind: 'gift', targetType: 'category', buyQty: 3, getQty: 1, getDiscount: 100 } },
   { id: 'second_half', icon: 'Copy', patch: { kind: 'gift', targetType: 'product', buyQty: 1, getQty: 1, getDiscount: 50 } },

@@ -6,6 +6,7 @@ const map = (r) => ({
   targetIds: (r.targetIds || []).map(String),
   giftTargetIds: (r.giftTargetIds || []).map(String),
   tiers: r.tiers || [],
+  bundleItems: (r.bundleItems || []).map(x => ({ productId: String(x.productId), qty: Number(x.qty) || 1 })),
   conditions: r.conditions || {},
   shopId: r.shopId ?? 'all',
 })
@@ -27,6 +28,7 @@ const payload = (e) => ({
   gift_target_ids: e.giftTargetIds || [],
   tiers: e.tiers || [],
   min_total: e.minTotal || 0,
+  bundle_items: e.bundleItems || [],
   conditions: e.conditions || {},
   stackable: !!e.stackable,
   requires_code: !!e.requiresCode,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Percent, BadgeMinus, Tag, Layers, Store, Receipt, Gift, Copy, PackagePlus, Repeat, Cake, Clock, CalendarDays, UserPlus, Users, Ticket, Plus, Pencil, Trash2, Power, X, Search, Sparkles, Wand2 } from 'lucide-react'
+import { Percent, BadgeMinus, Tag, Layers, Store, Receipt, Gift, Copy, Package, PackagePlus, Repeat, Cake, Clock, CalendarDays, UserPlus, Users, Ticket, Plus, Pencil, Trash2, Power, X, Search, Sparkles, Wand2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useDataStore } from '../../../store/dataStore'
 import { getPromotions, getPromotionStats, togglePromotion, deletePromotion } from '../../../api/promotionService'
@@ -11,7 +11,7 @@ import PromoFormModal from '../components/PromoFormModal'
 import { SIMPLE_TEMPLATES, ADVANCED_TEMPLATES, fromTemplate, emptyPromo } from '../components/promoTemplates'
 import { promoSummary, promoStatus, STATUS_CLS, fmtMoney, fmtD } from '../components/mkHelpers'
 
-const TPL_ICONS = { Percent, BadgeMinus, Tag, Layers, Store, Receipt, Gift, Copy, PackagePlus, Repeat, Cake, Clock, CalendarDays, UserPlus, Users, Ticket }
+const TPL_ICONS = { Percent, BadgeMinus, Tag, Layers, Store, Receipt, Gift, Copy, Package, PackagePlus, Repeat, Cake, Clock, CalendarDays, UserPlus, Users, Ticket }
 
 const TemplatePicker = ({ onPick, onClose }) => {
   const { t } = useTranslation()

@@ -92,7 +92,10 @@ export const createSale = async (saleData) => {
     items: (saleData.items || []).map(i => ({
       item_id: Number(i.itemId || i.id),
       price: i.price ?? i.salePrice,
+      base_price: i.basePrice ?? null,
     })),
+    loyalty_applied: !!saleData.loyaltyDiscountApplied,
+    discount_request_id: saleData.discountRequestId || null,
     notes: saleData.notes,
     source: saleData.source || 'walk_in',
     installment_months: saleData.installmentMonths || saleData.installmentTermMonths,

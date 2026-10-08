@@ -43,6 +43,13 @@ export const promoSummary = (p, t, products = [], categories = []) => {
     main = t('mkt_sum_gift', { buy: p.buyQty, get: p.getQty, target, gift: giftTarget, pct: (p.getDiscount ?? 100) >= 100 ? t('mkt_sum_free') : `−${p.getDiscount}%` })
   } else if (p.kind === 'carousel') main = t('mkt_sum_carousel', { target }) + ' ' + (p.tiers || []).map(x => `${x.qty} → ${x.percent}%`).join(', ')
   else if (p.kind === 'receipt') main = t('mkt_sum_receipt', { min: fmtMoney(p.minTotal || 0), value: valueText(p, t) })
+  else if (p.kind === 'bundle') {
+    const items = (p.bundleItems || []).map(b => {
+      const pr = products.find(x => String(x.id) === String(b.productId))
+      return `${b.qty}× ${pr ? [pr.brand, pr.name].filter(Boolean).join(' ') : b.productId}`
+    }).join(' + ')
+    main = t('mkt_sum_bundle', { items, value: p.discountType === 'fixed_price' ? fmtMoney(p.discountValue) : valueText(p, t) })
+  }
   const c = p.conditions || {}
   const extra = []
   if (c.weekdays?.length) extra.push(c.weekdays.map(d => t('mkt_wd_' + d)).join(', '))

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { AlertCircle, Gift, Plus, Receipt, Repeat, Tag, Trash2, X } from 'lucide-react'
+import { AlertCircle, Gift, Package, Plus, Receipt, Repeat, Tag, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import DateMaskInput from '../../../components/DateMaskInput'
 import { useShopStore } from '../../../store/shopStore'
@@ -13,11 +13,51 @@ const KINDS = [
   { id: 'gift', icon: Gift },
   { id: 'carousel', icon: Repeat },
   { id: 'receipt', icon: Receipt },
+  { id: 'bundle', icon: Package },
 ]
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0]
 
 const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
 const Label = ({ children }) => <label className="text-text-secondary text-xs font-semibold mb-1.5 block">{children}</label>
+
+// Komplekt tarkibi: tovar + soni (masalan, 4 ta shina + 4 ta disk)
+const BundleItemsEditor = ({ items, products, onChange, t }) => {
+  const [q, setQ] = useState('')
+  const name = (id) => { const p = products.find(x => String(x.id) === String(id)); return p ? [p.brand, p.name].filter(Boolean).join(' ') : id }
+  const found = q.trim().length < 2 ? [] : products
+    .filter(p => p.isActive !== false && !items.some(i => String(i.productId) === String(p.id)))
+    .filter(p => [p.name, p.brand, p.size].filter(Boolean).join(' ').toLowerCase().includes(q.trim().toLowerCase()))
+    .slice(0, 8)
+  return (
+    <div>
+      <Label>{t('mkt_bundle_items')}</Label>
+      <div className="space-y-2">
+        {items.map((it, i) => (
+          <div key={it.productId} className="flex items-center gap-2 bg-bg-tertiary border border-border rounded-xl px-3 py-2">
+            <span className="flex-1 text-sm text-text-primary min-w-0 truncate">{name(it.productId)}</span>
+            <input type="number" min="1" value={it.qty}
+              onChange={e => onChange(items.map((x, j) => j === i ? { ...x, qty: Math.max(1, Number(e.target.value) || 1) } : x))}
+              className="w-16 bg-bg-secondary border border-border rounded-lg px-2 py-1 text-sm text-center text-text-primary" />
+            <span className="text-xs text-text-muted">{t('unit_pcs')}</span>
+            <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="p-1.5 text-text-muted hover:text-accent-red"><Trash2 size={14} /></button>
+          </div>
+        ))}
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder={t('mkt_bundle_search_ph')} className={inputCls} />
+        {found.length > 0 && (
+          <div className="border border-border rounded-xl overflow-hidden">
+            {found.map(p => (
+              <button key={p.id} type="button" onClick={() => { onChange([...items, { productId: String(p.id), qty: 1 }]); setQ('') }}
+                className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-bg-tertiary border-b border-border/50 last:border-0">
+                {[p.brand, p.name].filter(Boolean).join(' ')} {p.size && <span className="text-text-muted text-xs">· {p.size}</span>}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-text-muted">{t('mkt_bundle_hint')}</p>
+      </div>
+    </div>
+  )
+}
 
 const PromoFormModal = ({ initial, onClose, onSaved, products, categories, customerGroups }) => {
   const { t } = useTranslation()
@@ -72,7 +112,7 @@ const PromoFormModal = ({ initial, onClose, onSaved, products, categories, custo
 
           <div>
             <Label>{t('mkt_promo_kind')}</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {KINDS.map(k => {
                 const Icon = k.icon
                 return (
@@ -87,7 +127,31 @@ const PromoFormModal = ({ initial, onClose, onSaved, products, categories, custo
             </div>
           </div>
 
-          {f.kind !== 'receipt' && (
+          {f.kind === 'bundle' && (
+            <BundleItemsEditor items={f.bundleItems || []} products={products} onChange={(v) => set('bundleItems', v)} t={t} />
+          )}
+
+          {f.kind === 'bundle' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <Label>{t('mkt_discount_type')}</Label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {['percent', 'amount', 'fixed_price'].map(dt => (
+                    <button key={dt} type="button" onClick={() => set('discountType', dt)}
+                      className={`px-2 py-2 rounded-xl border text-xs font-semibold ${f.discountType === dt ? 'border-accent-red bg-accent-red/10 text-accent-red' : 'border-border bg-bg-tertiary text-text-secondary'}`}>
+                      {t(dt === 'fixed_price' ? 'mkt_bundle_dt_price' : 'mkt_dt_' + dt)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>{f.discountType === 'percent' ? t('mkt_value_percent') : f.discountType === 'fixed_price' ? t('mkt_bundle_value_price') : t('mkt_value_amount')}</Label>
+                {numInput('discountValue', { max: f.discountType === 'percent' ? 100 : undefined })}
+              </div>
+            </div>
+          )}
+
+          {f.kind !== 'receipt' && f.kind !== 'bundle' && (
             <div>
               <Label>{f.kind === 'gift' ? t('mkt_gift_buy_target') : t('mkt_promo_target')}</Label>
               <TargetPicker type={f.targetType} ids={f.targetIds} products={products} categories={categories}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bell, Package, User, Percent, Tag, Settings, AlertTriangle, ShieldAlert, Info, ShoppingBag } from 'lucide-react'
+import { Bell, Package, User, Percent, Tag, Settings, AlertTriangle, ShieldAlert, Info } from 'lucide-react'
 
 const isPrivileged = (role) => role === 'admin' || role === 'manager'
 const formatPrice   = (n) => n?.toLocaleString('uz-UZ') + ' so\'m'
@@ -25,7 +25,6 @@ const TABS = [
   { id: 'products',      labelKey: 'mgmt_tab_products',      icon: Package },
   { id: 'employees',     labelKey: 'mgmt_tab_employees',     icon: User },
   { id: 'discounts',     labelKey: 'mgmt_tab_discounts',     icon: Percent },
-  { id: 'bundles',       labelKey: 'mgmt_tab_bundles',       icon: ShoppingBag },
   { id: 'settings',      labelKey: 'mgmt_tab_settings',      icon: Settings },
 ]
 

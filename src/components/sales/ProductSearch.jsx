@@ -9,12 +9,8 @@ import { useShopStore } from '../../store/shopStore'
 import { useDataStore } from '../../store/dataStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import i18n from '../../i18n'
-
-const BUNDLES_KEY = 'shina_crm_bundles'
-const readBundles = () => {
-  try { return JSON.parse(localStorage.getItem(BUNDLES_KEY) || '[]') }
-  catch { return [] }
-}
+import { getPromotions } from '../../api/promotionService'
+import { promoEligible } from '../../utils/promoEngine'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
@@ -47,9 +43,15 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
   }, [version, selectedShopId])
 
   // Sinxron o'qish — render paytida tayyor bo'ladi
+  // Komplektlar — Marketing → Aksiyalar dagi "Komplekt" turidagi faol aksiyalar (shu do'kon, shu sana)
+  const [bundlePromos, setBundlePromos] = useState([])
+  useEffect(() => {
+    if (allowSold) return
+    getPromotions().then(list => setBundlePromos(list.filter(p => p.kind === 'bundle'))).catch(() => {})
+  }, [allowSold, version])
   const activeBundles = useMemo(
-    () => allowSold ? [] : readBundles().filter(b => b.isActive),
-    [version, allowSold]
+    () => allowSold ? [] : bundlePromos.filter(p => promoEligible(p, { shopId: selectedShopId })),
+    [bundlePromos, selectedShopId, allowSold]
   )
 
   const shopBatchIds = useMemo(() => {
@@ -310,8 +312,10 @@ const ProductSearch = ({ onAdd, onBundleAdd, cartItems, user, addNotification, n
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text-primary truncate">{b.name}</p>
                 <p className="text-xs text-text-muted">
-                  {(b.products || []).length} ta tovar
-                  {b.discount > 0 && <span className="ml-1.5 text-accent-green font-bold">−{b.discount}%</span>}
+                  {(b.bundleItems || []).reduce((a, x) => a + (x.qty || 1), 0)} ta tovar
+                  <span className="ml-1.5 text-accent-green font-bold">
+                    {b.discountType === 'percent' ? `−${b.discountValue}%` : b.discountType === 'amount' ? `−${formatPrice(b.discountValue)}` : formatPrice(b.discountValue)}
+                  </span>
                 </p>
               </div>
               <button

@@ -89,6 +89,20 @@ const candidate = (p, lines) => {
     }
     if (!reductions.size) return null
     used.forEach(k => involved.add(k))
+  } else if (p.kind === 'bundle') {
+    const req = (p.bundleItems || []).filter(b => b.productId && b.qty > 0)
+    if (!req.length) return null
+    const pools = req.map(b => ({ qty: b.qty, lines: lines.filter(l => String(l.product.id) === String(b.productId)).sort((a, c) => c.base - a.base) }))
+    const sets = Math.min(...pools.map(x => Math.floor(x.lines.length / x.qty)))
+    if (!(sets > 0)) return null
+    for (let i = 0; i < sets; i++) {
+      const setLines = pools.flatMap(x => x.lines.slice(i * x.qty, (i + 1) * x.qty))
+      const setBase = setLines.reduce((s, l) => s + l.base, 0)
+      if (!(setBase > 0)) continue
+      const off = Math.min(setBase, reductionFor(p, setBase))
+      setLines.forEach(l => { reductions.set(l.key, off * l.base / setBase); involved.add(l.key) })
+    }
+    if (!reductions.size) return null
   } else {
     return null
   }
@@ -99,7 +113,6 @@ const candidate = (p, lines) => {
 // cart: cartItems; promos: aksiyalar ro'yxati; codePromoIds: kiritilgan promokod(lar) aksiya id → kod
 export const evaluatePromotions = ({ cart, promos, ctx = {}, codePromos = {} }) => {
   const lines = cart
-    .filter(c => c.bundleId == null)
     .map(c => ({ key: c.item.id, product: c.product, base: lineBase(c) }))
   const eligible = (promos || []).filter(p =>
     (!p.requiresCode || codePromos[String(p.id)]) && promoEligible(p, ctx))
@@ -108,7 +121,7 @@ export const evaluatePromotions = ({ cart, promos, ctx = {}, codePromos = {} }) 
   const cands = itemPromos.map(p => candidate(p, lines)).filter(Boolean).sort((a, b) => b.total - a.total)
   const taken = new Map() // lineKey → { reduction, promo }
   for (const cd of cands) {
-    if (cd.promo.kind === 'gift') {
+    if (cd.promo.kind === 'gift' || cd.promo.kind === 'bundle') {
       if ([...cd.involved].some(k => taken.has(k))) continue
       cd.involved.forEach(k => taken.set(k, { reduction: cd.reductions.get(k) || 0, promo: cd.promo }))
     } else {

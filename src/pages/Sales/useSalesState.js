@@ -29,7 +29,6 @@ import { evaluatePromotions } from '../../utils/promoEngine'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
 import { getReservedItemIds } from '../../api/reservationService'
-import { getBundles } from '../../api/bundleService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -430,7 +429,7 @@ export const useSalesState = () => {
     const currentCartIds = new Set(cartItems.map(c => c.item.id))
     let addedCount = 0
 
-    for (const { productId, quantity } of (bundle.products || [])) {
+    for (const { productId, qty: quantity } of (bundle.bundleItems || [])) {
       const product = allProducts.find(p => String(p.id) === String(productId))
       if (!product) continue
       // ID bo'yicha topilmasa, bir xil nomli barcha productlar itemlarini ham qo'shish
@@ -446,11 +445,8 @@ export const useSalesState = () => {
 
       for (const it of available) {
         const itProduct = allProducts.find(p => String(p.id) === String(it.productId)) || product
-        const added = addToCart({ item: it, product: itProduct, bundleId: bundle.id, bundleName: bundle.name })
+        const added = addToCart({ item: it, product: itProduct, bundleId: 'p' + bundle.id, bundleName: bundle.name })
         if (added) {
-          if (bundle.discount > 0) {
-            updateSalePrice(it.id, Math.round(itProduct.cashPrice * (1 - bundle.discount / 100)))
-          }
           currentCartIds.add(it.id)
           addedCount++
         }
@@ -466,7 +462,7 @@ export const useSalesState = () => {
     } else {
       setCartIsBundleSale(true)
     }
-  }, [selectedShopId, cartItems, addToCart, updateSalePrice, addNotification, setCartIsBundleSale])
+  }, [selectedShopId, cartItems, addToCart, addNotification, setCartIsBundleSale])
 
   const removeBundleFromCart = useCallback((bundleId) => {
     cartItems.filter(c => c.bundleId === bundleId).forEach(c => removeFromCart(c.item.id))
@@ -506,6 +502,20 @@ export const useSalesState = () => {
         return
       }
     }
+    // Minimal narx (6-qaror): qo'lda berilgan foizli chegirma narxni minimal narxdan pastga tushirsa — boshqaruvchi tasdig'i
+    if (user?.role !== 'admin' && user?.role !== 'manager' && effectiveDiscount > 0 && !loyaltyActive) {
+      const approved = approvedDiscountReq && effectiveDiscount <= approvedDiscountReq.discount
+      const below = cartItems.some(c => {
+        const base = promoResult.lines.get(c.item.id)?.base ?? c.salePrice ?? c.product.cashPrice
+        const floor = Math.max(c.product.minSalePrice || 0, paymentType === 'installment' ? (c.product.installmentBasePrice || 0) : 0)
+        return floor > 0 && base * (1 - effectiveDiscount / 100) < floor - 1
+      })
+      if (below && !approved) {
+        toast(i18n.t('sl_min_price_need_approval'), 'error')
+        setPinModal({ discount: effectiveDiscount, requiredRole: effectiveDiscount > (discountMediumMax || 10) ? 'admin' : 'manager' })
+        return
+      }
+    }
     requireShop(async (shopId) => {
     setIsSubmitting(true)
     const isNewCustomer = !selectedCustomer?.id ||
@@ -516,12 +526,8 @@ export const useSalesState = () => {
     const commissionPercent = selectedOrg?.commissionPercent || 0
     const commissionAmount = paymentType === 'installment' ? Math.round(total * (commissionPercent / 100)) : 0
 
-    const bundleDiscountAmount = cartItems.reduce((acc, c) => {
-      if (c.bundleId != null && c.salePrice != null) {
-        return acc + Math.max(0, Math.round(c.product.cashPrice - c.salePrice))
-      }
-      return acc
-    }, 0)
+    // Komplekt chegirmasi — aksiya mexanizmidan (narxlar ichida; hisobotlarda ko'rsatish uchun alohida)
+    const bundleDiscountAmount = promoResult.applied.filter(a => a.kind === 'bundle').reduce((acc, a) => acc + Math.round(a.amount), 0)
 
     const salePayload = {
       id: `SALE-${Date.now()}`,
@@ -531,6 +537,8 @@ export const useSalesState = () => {
         productId: c.product.id,
         name:      c.product.name,
         salePrice: promoResult.lines.get(c.item.id)?.price ?? c.salePrice ?? c.product.cashPrice,
+        // Aksiyadan oldingi narx (savdolashilgan yoki birinchi aytilgan) — server minimal narxni shu bilan tekshiradi
+        basePrice: promoResult.lines.get(c.item.id)?.base ?? c.salePrice ?? c.product.cashPrice,
         cashPrice: c.product.cashPrice,
         purchasePrice: c.product.purchasePrice ?? 0,
         qty: 1,
@@ -563,6 +571,7 @@ export const useSalesState = () => {
       })(),
       discount: effectiveDiscount,
       loyaltyDiscountApplied: loyaltyActive,
+      discountRequestId: approvedDiscountReq && effectiveDiscount > 0 && effectiveDiscount <= approvedDiscountReq.discount ? approvedDiscountReq.id : null,
       balanceUsed,
       promoCode: appliedCode && !codeIgnored ? appliedCode.code : null,
       promoDetails: promoResult.applied.map(a => ({ promoId: String(a.promoId), name: a.name, kind: a.kind, amount: a.amount, code: a.code })),
@@ -573,7 +582,7 @@ export const useSalesState = () => {
       onlinePaymentId: onlinePayment ? onlinePayment.id : null,
       giftCardUsed,
       bundleDiscountAmount,
-      isBundle: cartIsBundleSale,
+      isBundle: cartIsBundleSale || bundleDiscountAmount > 0,
       subtotal,
       total,
       soldAt: new Date().toISOString(),
@@ -604,6 +613,7 @@ export const useSalesState = () => {
         clearCart()
         resetForm()
         clearMarketing()
+        setApprovedDiscountReq(null)
         setContractFile(null)
         fetchData()
         bump()

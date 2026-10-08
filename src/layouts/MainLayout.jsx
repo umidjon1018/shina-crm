@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
+import { migrateLocalBundles } from '../utils/migrateLocalBundles'
 import { createSale } from '../api/salesService'
 import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
@@ -142,6 +143,7 @@ export const MainLayout = () => {
     loadBranding(user?.role === 'admin')
     loadBusiness(user?.role)
     useNotificationStore.getState().load()
+    if (user?.role === 'admin' || user?.role === 'manager') migrateLocalBundles()
     syncRolesFromServer().catch(() => {})
     // Ilovaga qaytganda ruxsatlar yangilanadi (admin o'zgartirgan bo'lsa)
     const onVisible = () => { if (document.visibilityState === 'visible') syncRolesFromServer().catch(() => {}) }
