@@ -23,7 +23,7 @@ function ShopsTab() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [shopForm, setShopForm] = useState({
     name: '', address: '', isActive: true,
-    googleMapLink: '', yandexMapLink: '', openTime: '08:00', closeTime: '22:00', managerId: ''
+    googleMapLink: '', yandexMapLink: '', openTime: '08:00', closeTime: '22:00', managerId: '', kind: 'retail'
   })
 
   return (
@@ -36,7 +36,7 @@ function ShopsTab() {
         </div>
         <button
           onClick={() => {
-            setShopForm({ name: '', address: '', isActive: true, googleMapLink: '', yandexMapLink: '', openTime: '08:00', closeTime: '22:00', managerId: '' })
+            setShopForm({ name: '', address: '', isActive: true, googleMapLink: '', yandexMapLink: '', openTime: '08:00', closeTime: '22:00', managerId: '', kind: 'retail' })
             setEditingShop(null)
             setShowShopForm(true)
           }}
@@ -65,6 +65,9 @@ function ShopsTab() {
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold flex-shrink-0 ${shop.isActive ? 'bg-accent-green/10 text-accent-green' : 'bg-bg-tertiary text-text-secondary'}`}>
                   {shop.isActive ? t('mgmt_shop_active') : t('mgmt_shop_inactive')}
                 </span>
+                {shop.kind && shop.kind !== 'retail' && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold flex-shrink-0 bg-accent-blue/10 text-accent-blue">{t('shop_kind_' + shop.kind)}</span>
+                )}
               </div>
               {shop.address && (
                 <div className="flex items-center gap-1 mt-0.5">
@@ -101,7 +104,7 @@ function ShopsTab() {
               </button>
               <button
                 onClick={() => {
-                  setShopForm({ name: shop.name, address: shop.address || '', isActive: shop.isActive, googleMapLink: shop.googleMapLink || '', yandexMapLink: shop.yandexMapLink || '', openTime: shop.openTime || '08:00', closeTime: shop.closeTime || '22:00', managerId: shop.managerId || '' })
+                  setShopForm({ name: shop.name, address: shop.address || '', isActive: shop.isActive, googleMapLink: shop.googleMapLink || '', yandexMapLink: shop.yandexMapLink || '', openTime: shop.openTime || '08:00', closeTime: shop.closeTime || '22:00', managerId: shop.managerId || '', kind: shop.kind || 'retail' })
                   setEditingShop(shop)
                   setShowShopForm(true)
                 }}
@@ -149,6 +152,13 @@ function ShopsTab() {
                 <div>
                   <label className="text-text-secondary text-sm mb-1.5 block">{t('mgmt_shop_field_name')}</label>
                   <input type="text" value={shopForm.name} onChange={e => setShopForm(f => ({ ...f, name: e.target.value }))} placeholder="GoodTires ..." className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm" />
+                </div>
+                <div>
+                  <label className="text-text-secondary text-sm mb-1.5 block">{t('shop_kind_label')}</label>
+                  <select value={shopForm.kind || 'retail'} onChange={e => setShopForm(f => ({ ...f, kind: e.target.value }))} className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm">
+                    {['retail', 'wholesale', 'production'].map(k => <option key={k} value={k}>{t('shop_kind_' + k)}</option>)}
+                  </select>
+                  <p className="text-xs text-text-muted mt-1">{t('shop_kind_hint')}</p>
                 </div>
                 <div>
                   <label className="text-text-secondary text-sm mb-1.5 block">{t('col_address')}</label>

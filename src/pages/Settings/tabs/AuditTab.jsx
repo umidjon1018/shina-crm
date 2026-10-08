@@ -30,6 +30,8 @@ const ACTION_COLORS = {
   audit_order_created: BLUE, audit_order_received: GREEN, audit_supplier_return: ORANGE, audit_promo_created: GREEN,
   audit_promo_updated: BLUE, audit_promo_deleted: RED, audit_giftcard_sold: GREEN, audit_campaign_sent: BLUE,
   audit_reservation_created: BLUE, audit_reservation_cancelled: MUTED,
+  audit_wh_client_created: GREEN, audit_wh_client_updated: BLUE, audit_wh_price_changed: ORANGE, audit_wh_sale: GREEN,
+  audit_wh_consignment: BLUE, audit_wh_cons_settled: GREEN, audit_wh_cons_returned: ORANGE, audit_wh_return: RED, audit_wh_payment: GREEN,
 }
 
 function AuditTab() {

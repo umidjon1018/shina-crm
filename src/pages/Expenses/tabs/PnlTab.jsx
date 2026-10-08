@@ -72,8 +72,8 @@ const PnlTab = () => {
   }
 
   const c = cur, p = prev
-  const revenueAll = c ? c.revenue + c.usedRevenue : 0
-  const prevRevenueAll = p ? p.revenue + p.usedRevenue : 0
+  const revenueAll = c ? c.revenue + c.usedRevenue + (c.wholesaleRevenue || 0) : 0
+  const prevRevenueAll = p ? p.revenue + p.usedRevenue + (p.wholesaleRevenue || 0) : 0
 
   return (
     <div className="space-y-3 sm:space-y-5">
@@ -90,7 +90,7 @@ const PnlTab = () => {
       {c && p && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <StatCard icon={TrendingUp} label={t('fin_pnl_revenue_total')} value={fmtUZS(revenueAll)} sub={`${c.salesCount + c.usedCount} ${t('fin_pnl_sales_cnt')}`} color="bg-green-500/10 text-green-500" />
+            <StatCard icon={TrendingUp} label={t('fin_pnl_revenue_total')} value={fmtUZS(revenueAll)} sub={`${c.salesCount + c.usedCount + (c.wholesaleCount || 0)} ${t('fin_pnl_sales_cnt')}`} color="bg-green-500/10 text-green-500" />
             <StatCard icon={Scale} label={t('fin_pnl_gross')} value={fmtUZS(c.grossProfit)} sub={`${t('fin_pnl_margin')} ${pct(c.grossProfit, revenueAll)}%`} color="bg-blue-500/10 text-blue-500" />
             <StatCard icon={TrendingDown} label={t('fin_pnl_opex')} value={fmtUZS(c.totalExpenses)} sub={`${t('exp_type_fixed')}: ${fmtUZS(c.fixedExpenses)}`} color="bg-accent-red/10 text-accent-red" />
             <StatCard icon={Percent} label={t('fin_pnl_net')} value={fmtUZS(c.netProfit)} sub={`${t('fin_pnl_margin')} ${pct(c.netProfit, revenueAll)}%`}
@@ -120,6 +120,10 @@ const PnlTab = () => {
                   {(c.usedRevenue > 0 || p.usedRevenue > 0) && <>
                     <Row label={t('fin_pnl_used_revenue')} hint={`(${c.usedCount})`} a={c.usedRevenue} b={p.usedRevenue} />
                     <Row label={t('fin_pnl_used_cogs')} a={c.usedCogs} b={p.usedCogs} sign={-1} level={1} />
+                  </>}
+                  {(c.wholesaleRevenue > 0 || p.wholesaleRevenue > 0) && <>
+                    <Row label={t('fin_pnl_wh_revenue')} hint={`(${c.wholesaleCount})`} a={c.wholesaleRevenue} b={p.wholesaleRevenue} />
+                    <Row label={t('fin_pnl_wh_cogs')} a={c.wholesaleCogs} b={p.wholesaleCogs} sign={-1} level={1} />
                   </>}
                   <Row label={t('fin_pnl_gross')} a={c.grossProfit} b={p.grossProfit} strong highlight />
                   {(c.commission > 0 || p.commission > 0) && <Row label={t('fin_pnl_commission')} a={c.commission} b={p.commission} sign={-1} level={1} />}

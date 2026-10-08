@@ -273,7 +273,8 @@ function CompanyTab() {
         <div className="space-y-3">
           {[
             { key:'dashboard', icon:'🏠', defaultLabel: t('dashboard') }, { key:'warehouse', icon:'📦', defaultLabel: t('warehouse') },
-            { key:'sales', icon:'🛒', defaultLabel: t('sales') }, { key:'customers', icon:'👥', defaultLabel: t('customers') },
+            { key:'sales', icon:'🛒', defaultLabel: t('sales') }, { key:'wholesale', icon:'🚚', defaultLabel: t('wh_page_title') },
+            { key:'customers', icon:'👥', defaultLabel: t('customers') },
             { key:'marketing', icon:'📣', defaultLabel: t('mkt_page_title') },
             { key:'income', icon:'📈', defaultLabel: t('income') }, { key:'expenses', icon:'💳', defaultLabel: t('fin_page_title') },
             { key:'reports', icon:'📊', defaultLabel: t('reports') }, { key:'aiAgent', icon:'🤖', defaultLabel: t('ai_agent') },

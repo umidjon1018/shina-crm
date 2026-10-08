@@ -47,7 +47,7 @@ const FinanceOverview = () => {
     const c = categories.find(x => x.id === id)
     return c ? getCatLabel(c, t) : t('fin_pnl_no_category')
   }
-  const revenueAll = pnl ? pnl.revenue + pnl.usedRevenue : 0
+  const revenueAll = pnl ? pnl.revenue + pnl.usedRevenue + (pnl.wholesaleRevenue || 0) : 0
   const expensesByCat = Object.values((pnl?.expenses || []).reduce((acc, x) => {
     const name = catName(x.categoryId)
     acc[name] = { name, value: (acc[name]?.value || 0) + x.total }
@@ -95,7 +95,7 @@ const FinanceOverview = () => {
             <GradientBars height={230} valueFormatter={formatPrice} name={t('unit_som')}
               data={[
                 { label: t('fin_ov_bar_revenue'), value: revenueAll },
-                { label: t('fin_ov_bar_cogs'), value: (pnl?.cogs || 0) + (pnl?.usedCogs || 0) },
+                { label: t('fin_ov_bar_cogs'), value: (pnl?.cogs || 0) + (pnl?.usedCogs || 0) + (pnl?.wholesaleCogs || 0) },
                 { label: t('fin_ov_bar_expenses'), value: pnl?.totalExpenses || 0 },
                 { label: t('fin_ov_bar_net'), value: pnl?.netProfit || 0 },
               ]} />

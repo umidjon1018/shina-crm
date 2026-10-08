@@ -21,7 +21,7 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  Megaphone
+  Megaphone, Boxes
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -49,6 +49,7 @@ const PAGE_KEYS = {
   '/dashboard': 'dashboard',
   '/warehouse': 'warehouse',
   '/sales': 'sales',
+  '/wholesale': 'wholesale',
   '/customers': 'customers',
   '/income': 'income',
   '/expenses': 'expenses',
@@ -296,6 +297,7 @@ export const MainLayout = () => {
           {/* Trade */}
           {((hasPermission('warehouse') && !hidden.includes('warehouse')) ||
             (hasPermission('sales') && !hidden.includes('sales')) ||
+            (hasPermission('wholesale') && !hidden.includes('wholesale')) ||
             (hasPermission('customers') && !hidden.includes('customers')) ||
             (hasPermission('marketing') && !hidden.includes('marketing'))) && (
             <SidebarSection label={t('nav_trade')}>
@@ -304,6 +306,9 @@ export const MainLayout = () => {
               )}
               {hasPermission('sales') && !hidden.includes('sales') && (
                 <SidebarItem to="/sales" icon={ShoppingCart} label={getSlLabel('sales') || t('sales')} isActive={isActive('/sales')} onClick={closeSidebar} replace={isSidebarOpen} />
+              )}
+              {hasPermission('wholesale') && !hidden.includes('wholesale') && (
+                <SidebarItem to="/wholesale" icon={Boxes} label={getSlLabel('wholesale') || t('wh_page_title')} isActive={isActive('/wholesale')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('customers') && !hidden.includes('customers') && (
                 <SidebarItem to="/customers" icon={Users} label={getSlLabel('customers') || t('customers')} isActive={isActive('/customers')} onClick={closeSidebar} replace={isSidebarOpen} />

@@ -41,6 +41,14 @@ export const PERMISSION_TREE = [
     ]
   },
   {
+    id: 'wholesale', label: 'Ulgurji savdo', children: [
+      { id: 'wholesale.docs', label: 'Hujjatlar (sotuv, konsignatsiya, qaytarish)' },
+      { id: 'wholesale.clients', label: 'Ulgurji mijozlar (dilerlar)' },
+      { id: 'wholesale.debts', label: "Qarzlar va to'lovlar" },
+      { id: 'wholesale.prices', label: 'Ulgurji narxlar va narx guruhlari' },
+    ]
+  },
+  {
     id: 'income', label: 'Kirim', children: [
       { id: 'income.batches', label: 'Kirimlar' },
       { id: 'income.suppliers', label: 'Yetkazib beruvchilar' },

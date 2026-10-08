@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { HandCoins, Truck, Building2, User, ArrowRight } from 'lucide-react'
+import { HandCoins, Truck, Building2, User, ArrowRight, Boxes } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
 import { getDebts } from '../../../api/financeService'
@@ -24,6 +24,9 @@ const DebtsTab = () => {
   if (!data) return <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
   const som = t('unit_som')
   const tot = data.totals || {}
+  const groupIcon = (g) => (g?.type === 'org' ? Building2 : g?.type === 'wholesale' ? Boxes : User)
+  const groupKind = (g) => (g?.type === 'org' ? t('fin_debt_org') : g?.type === 'wholesale' ? t('fin_debt_wholesale') : null)
+  const payLink = (g) => (g?.type === 'wholesale' ? '/wholesale?section=debts' : '/sales?section=installment')
 
   const Row = ({ icon: Icon, name, sub, amount, overdue, onClick }) => (
     <button onClick={onClick} className="w-full flex items-center gap-3 py-3 text-left hover:bg-bg-tertiary/40 rounded-xl px-2 -mx-2 transition-colors">
@@ -53,8 +56,8 @@ const DebtsTab = () => {
           right={<button onClick={() => navigate('/sales?section=installment')} className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">{t('fin_debt_to_installments')} <ArrowRight size={15} /></button>}>
           <div className="divide-y divide-border">
             {data.receivable.map(g => (
-              <Row key={g.id} icon={g.type === 'org' ? Building2 : User} name={g.name}
-                sub={`${g.type === 'org' ? t('fin_debt_org') : (g.phone || t('fin_debt_customer'))} · ${t('fin_debt_docs', { n: g.docs.length })}${g.nextDue ? ' · ' + formatDate(g.nextDue) : ''}`}
+              <Row key={g.id} icon={groupIcon(g)} name={g.name}
+                sub={`${groupKind(g) || g.phone || t('fin_debt_customer')} · ${t('fin_debt_docs', { n: g.docs.length })}${g.nextDue ? ' · ' + formatDate(g.nextDue) : ''}`}
                 amount={`${formatNumber(g.debt)} ${som}`} overdue={g.overdue > 0 ? `${t('fin_debt_overdue')}: ${formatNumber(g.overdue)}` : null}
                 onClick={() => setOpen(g)} />
             ))}
@@ -76,9 +79,9 @@ const DebtsTab = () => {
         </ChartCard>
       </div>
 
-      <Modal open={!!open} onClose={() => setOpen(null)} size="lg" icon={open?.type === 'org' ? Building2 : User}
-        title={open?.name} subtitle={open?.type === 'org' ? t('fin_debt_org') : open?.phone}
-        footer={<button onClick={() => navigate('/sales?section=installment')} className="w-full py-3 rounded-xl g-brand text-white font-bold">{t('fin_debt_accept_payment')}</button>}>
+      <Modal open={!!open} onClose={() => setOpen(null)} size="lg" icon={groupIcon(open)}
+        title={open?.name} subtitle={[groupKind(open), open?.type !== 'org' ? open?.phone : null].filter(Boolean).join(' · ')}
+        footer={<button onClick={() => navigate(payLink(open))} className="w-full py-3 rounded-xl g-brand text-white font-bold">{t('fin_debt_accept_payment')}</button>}>
         {open && (
           <div className="space-y-4">
             <DetailGrid cols={3} items={[
@@ -91,7 +94,7 @@ const DebtsTab = () => {
                 <div key={d.kind + d.id} className="py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-text-primary truncate">
-                      #{d.id} {d.kind === 'used_sale' && <Badge color="bg-accent-orange/10 text-accent-orange">B/U</Badge>} {d.customer && open.type === 'org' ? `· ${d.customer}` : ''}
+                      {d.no || `#${d.id}`} {d.kind === 'used_sale' && <Badge color="bg-accent-orange/10 text-accent-orange">B/U</Badge>} {d.customer && open.type === 'org' ? `· ${d.customer}` : ''}
                     </p>
                     <p className="text-sm text-text-muted">{formatDate(d.date)} → {d.due ? formatDate(d.due) : '—'}</p>
                   </div>

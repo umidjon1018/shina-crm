@@ -5,6 +5,7 @@ const map = (s) => ({
   name: s.name,
   address: s.address || '',
   isActive: s.is_active ?? true,
+  kind: s.kind || 'retail',
   googleMapLink: s.google_map_link || '',
   yandexMapLink: s.yandex_map_link || '',
   openTime: s.open_time || '08:00',
@@ -27,6 +28,7 @@ export const createShop = async (shopData) => {
     open_time: shopData.openTime || '08:00',
     close_time: shopData.closeTime || '22:00',
     manager_id: shopData.managerId || null,
+    kind: shopData.kind || 'retail',
   })
   return map(data)
 }
@@ -41,6 +43,7 @@ export const updateShop = async (id, shopData) => {
     open_time: shopData.openTime || '08:00',
     close_time: shopData.closeTime || '22:00',
     manager_id: shopData.managerId || null,
+    kind: shopData.kind || 'retail',
   })
   return map(data)
 }
