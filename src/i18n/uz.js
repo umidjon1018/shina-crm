@@ -4590,4 +4590,12 @@ export default {
   bp_tire: "Shina maydonlari (mavsum, avtomobil toifasi)",
   bp_tire_hint: "Tovar formasida",
   bp_auto_hint: "Ulgurji savdo va Ishlab chiqarish bo'limlari do'kon turiga qarab o'zi chiqadi: Sozlamalar → Do'konlar (ulgurji ombor / ishlab chiqarish sexi).",
+  pr_transfer: "Ko'chirish",
+  pr_transferred: "Ko'chirildi",
+  pr_from_shop: "Qayerdan",
+  pr_to_shop: "Qayerga",
+  pr_move_transfer_out: "Ko'chirildi (chiqim)",
+  pr_move_transfer_in: "Ko'chirildi (kirim)",
+  pr_src_transfer: "Ko'chirish",
+  audit_prod_material_transfer: "Xomashyo ko'chirildi",
 }

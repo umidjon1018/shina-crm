@@ -4716,4 +4716,12 @@ export default {
   bp_tire: "Поля шин (сезон, категория автомобиля)",
   bp_tire_hint: "В форме товара",
   bp_auto_hint: "Разделы «Оптовая торговля» и «Производство» появляются сами по типу магазина: Настройки → Магазины (оптовый склад / цех).",
+  pr_transfer: "Перемещение",
+  pr_transferred: "Перемещено",
+  pr_from_shop: "Откуда",
+  pr_to_shop: "Куда",
+  pr_move_transfer_out: "Перемещено (расход)",
+  pr_move_transfer_in: "Перемещено (приход)",
+  pr_src_transfer: "Перемещение",
+  audit_prod_material_transfer: "Перемещение сырья",
 }

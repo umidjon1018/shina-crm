@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Layers, PackageOpen, ClipboardCheck } from 'lucide-react'
+import { Layers, PackageOpen, ClipboardCheck, ArrowLeftRight } from 'lucide-react'
 import Modal from '../../../components/ui/Modal'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, DetailGrid } from '../../../components/ui/Kit'
@@ -8,7 +8,7 @@ import { toast, errorText } from '../../../components/ui/Toast'
 import { useAuthStore } from '../../../store/authStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
-import { getMaterials, getMaterialDetail, adjustMaterial } from '../../../api/productionService'
+import { getMaterials, getMaterialDetail, adjustMaterial, transferMaterial } from '../../../api/productionService'
 import { formatNumber, formatDate, formatDateTime } from '../../../utils/format'
 import { Spinner, inputCls, labelCls, fmtQty, qtyUnit, KindBadge, usePr } from './prHelpers'
 
@@ -64,6 +64,61 @@ const AdjustModal = ({ material, shopId, onClose }) => {
   )
 }
 
+// Xomashyoni boshqa omborga / sexga ko'chirish (lot narxi va muddati saqlanadi)
+const TransferModal = ({ material, shopId, onClose }) => {
+  const { t } = useTranslation()
+  const { bump } = useDataStore()
+  const shops = useShopStore(s => s.shops).filter(s => s.isActive)
+  const [from, setFrom] = useState(shopId && shopId !== 'all' ? shopId : '')
+  const [to, setTo] = useState('')
+  const [qty, setQty] = useState('')
+  const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [err, setErr] = useState('')
+  const submit = async () => {
+    setErr('')
+    if (!from || !to) return setErr(t('pr_err_shop'))
+    if (!(Number(qty) > 0)) return setErr(t('pr_err_qty'))
+    setSaving(true)
+    try { await transferMaterial({ product_id: material.productId, from_shop_id: from, to_shop_id: to, qty: Number(qty), note }); toast(t('pr_transferred')); bump(); onClose() }
+    catch (e) { setErr(errorText(e, t('exp_err_generic'))) } finally { setSaving(false) }
+  }
+  return (
+    <Modal open onClose={onClose} size="sm" icon={ArrowLeftRight} title={t('pr_transfer')} subtitle={material.name}
+      footer={
+        <div className="space-y-2">
+          {err && <div className="text-sm text-accent-red bg-accent-red/10 px-3 py-2.5 rounded-xl">{err}</div>}
+          <button onClick={submit} disabled={saving} className="w-full py-3 rounded-xl g-brand text-white font-bold disabled:opacity-50">{saving ? '...' : t('pr_save')}</button>
+        </div>
+      }>
+      <div className="space-y-3">
+        <div>
+          <label className={labelCls}>{t('pr_from_shop')}</label>
+          <select value={from} onChange={e => setFrom(e.target.value)} className={inputCls}>
+            <option value="">{t('pr_choose')}</option>
+            {shops.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>{t('pr_to_shop')}</label>
+          <select value={to} onChange={e => setTo(e.target.value)} className={inputCls}>
+            <option value="">{t('pr_choose')}</option>
+            {shops.filter(s => s.id !== from).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>{t('pr_f_qty')} ({material.unit})</label>
+          <input type="number" min="0" step="any" value={qty} onChange={e => setQty(e.target.value)} className={inputCls + ' text-lg font-bold'} />
+        </div>
+        <div>
+          <label className={labelCls}>{t('pr_f_notes')}</label>
+          <input value={note} onChange={e => setNote(e.target.value)} className={inputCls} />
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 // Xomashyo: qoldiq, lotlar (kirim/ishlab chiqarish partiyalari), harakatlar tarixi
 const MaterialModal = ({ productId, shopId, onClose }) => {
   const { t } = useTranslation()
@@ -74,6 +129,7 @@ const MaterialModal = ({ productId, shopId, onClose }) => {
   const [data, setData] = useState(null)
   const [tab, setTab] = useState('lots')
   const [adjust, setAdjust] = useState(false)
+  const [transfer, setTransfer] = useState(false)
 
   useEffect(() => {
     getMaterials(shopId).then(l => setMaterial(l.find(m => m.productId === productId) || null)).catch(() => {})
@@ -92,6 +148,7 @@ const MaterialModal = ({ productId, shopId, onClose }) => {
         <div className="flex flex-wrap gap-2">
           <button onClick={() => pr.receive(material.productId)} className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl g-brand text-white font-bold"><PackageOpen size={18} />{t('pr_receive')}</button>
           <button onClick={() => setAdjust(true)} className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl border border-border font-bold text-text-primary hover:bg-bg-tertiary"><ClipboardCheck size={18} />{t('pr_adjust')}</button>
+          <button onClick={() => setTransfer(true)} className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 rounded-xl border border-border font-bold text-text-primary hover:bg-bg-tertiary"><ArrowLeftRight size={18} />{t('pr_transfer')}</button>
         </div>
       )}>
       <div className="space-y-4">
@@ -131,6 +188,7 @@ const MaterialModal = ({ productId, shopId, onClose }) => {
         )}
       </div>
       {adjust && <AdjustModal material={material} shopId={shopId} onClose={() => setAdjust(false)} />}
+      {transfer && <TransferModal material={material} shopId={shopId} onClose={() => setTransfer(false)} />}
     </Modal>
   )
 }

@@ -18,6 +18,7 @@ export const getMaterialDetail = async (productId, shopId) =>
   (await api.get(`/api/production/materials/${productId}`, { params: shopParam(shopId) })).data
 export const receiveMaterial = async (body) => (await api.post('/api/production/materials/receive', body)).data
 export const adjustMaterial = async (body) => (await api.post('/api/production/materials/adjust', body)).data
+export const transferMaterial = async (body) => (await api.post('/api/production/materials/transfer', body)).data
 
 // ─── Retseptlar ───
 export const getRecipes = async () => (await api.get('/api/production/recipes')).data
