@@ -4824,4 +4824,8 @@ export default {
   ov_work_hours_sub: "Har xodimning soat bo'yicha sotuvlari",
   fullscreen_enter: "To'liq ekran",
   fullscreen_exit: "To'liq ekrandan chiqish",
+  osk_title: "Ekran klaviaturasi",
+  osk_drag_hint: "Ko'chirish uchun shu yerni bosib turing",
+  osk_moving: "Ko'chirilmoqda — barmoqni suring",
+  osk_close: "Klaviaturani yopish",
 }
