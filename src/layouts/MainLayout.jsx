@@ -41,6 +41,7 @@ import { useLangStore } from '../store/langStore'
 import { useOfflineSync } from '../hooks/useOfflineSync'
 import { usePinchZoom } from '../hooks/usePinchZoom'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
+import { FullscreenToggle } from '../components/ui/FullscreenToggle'
 import { useTranslation } from 'react-i18next'
 import { useNotificationStore } from '../store/notificationStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -377,7 +378,8 @@ export const MainLayout = () => {
                 </button>
               ))}
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1.5">
+              <FullscreenToggle />
               <ThemeToggle />
             </div>
           </div>

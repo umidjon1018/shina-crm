@@ -20,7 +20,7 @@ const Tooltip = ({ message, children }) => (
   <div className="relative group inline-block w-full">
     {children}
     {message && (
-      <div className="absolute z-50 bottom-full left-0 mb-1 w-56 text-xs bg-bg-primary border border-border rounded-xl px-3 py-2 shadow-lg text-text-primary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-normal">
+      <div className="absolute z-50 bottom-full left-0 mb-1 w-56 text-xs bg-bg-primary border border-border rounded-xl px-3 py-2 shadow-lg text-text-primary opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none transition-opacity whitespace-normal">
         {message}
       </div>
     )}

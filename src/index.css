@@ -199,6 +199,11 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
 @media (pointer: coarse) {
   button:not(.tap-free) { min-height: 36px; min-width: 36px; }
 }
+/* Ustiga kelganda chiqadigan tugmalar: faqat sichqonchali qurilmada yashiriladi, sensorli ekranda doim ko'rinadi */
+@media (hover: hover) and (pointer: fine) {
+  .hover-reveal { opacity: 0; transition: opacity .15s; }
+  .group:hover .hover-reveal, .hover-reveal:focus-visible { opacity: 1; }
+}
 
 /* ── Diagramma hover'lari mavzuga mos (recharts standarti oq/kulrang) ── */
 .recharts-rectangle.recharts-tooltip-cursor { fill: var(--bg-tertiary) !important; fill-opacity: 0.55 !important; }

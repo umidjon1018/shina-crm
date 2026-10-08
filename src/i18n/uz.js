@@ -4822,4 +4822,6 @@ export default {
   ov_weekdays_title: "Hafta kunlari",
   ov_work_hours: "Ish soatlari",
   ov_work_hours_sub: "Har xodimning soat bo'yicha sotuvlari",
+  fullscreen_enter: "To'liq ekran",
+  fullscreen_exit: "To'liq ekrandan chiqish",
 }

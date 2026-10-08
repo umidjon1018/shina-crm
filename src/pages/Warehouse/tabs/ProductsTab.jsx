@@ -1689,7 +1689,7 @@ const ProductsTab = ({ ctx }) => {
                                     <button
                                       type="button"
                                       onClick={() => setModalImages(prev => prev.filter((_, i) => i !== idx))}
-                                      className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity flex"
+                                      className="hover-reveal absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full items-center justify-center text-white flex"
                                     >
                                       <X size={10} />
                                     </button>

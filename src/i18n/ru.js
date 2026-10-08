@@ -5011,4 +5011,6 @@ export default {
   ov_weekdays_title: "Дни недели",
   ov_work_hours: "Рабочие часы",
   ov_work_hours_sub: "Продажи каждого сотрудника по часам",
+  fullscreen_enter: "Полный экран",
+  fullscreen_exit: "Выйти из полного экрана",
 }

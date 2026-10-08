@@ -44,7 +44,7 @@ export default function MarketingRoadmap({ recommendations = [] }) {
                     <CheckCircle2 size={15} />
                   </button>
                   <span className={`text-xs flex-1 leading-snug ${r.done ? 'text-text-muted' : 'text-text-primary'}`}>{r.text}</span>
-                  <button onClick={() => deleteRoadmapItem(r.id)} className="sm:opacity-0 sm:group-hover:opacity-100 text-text-muted hover:text-accent-red flex-shrink-0">
+                  <button onClick={() => deleteRoadmapItem(r.id)} className="hover-reveal text-text-muted hover:text-accent-red flex-shrink-0">
                     <X size={13} />
                   </button>
                 </div>
