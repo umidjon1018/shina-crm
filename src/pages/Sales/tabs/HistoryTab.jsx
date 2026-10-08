@@ -7,7 +7,7 @@ import EditSaleModal from '../../../components/sales/EditSaleModal'
 import Modal from '../../../components/ui/Modal'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
-import { formatNumber } from '../../../utils/format'
+import { formatNumber, formatDateTime } from '../../../utils/format'
 
 // Sotuvlar tarixi: ixcham ro'yxat (sana, mijoz, tovarlar, summa, to'lov, holat); qator bosilsa — to'liq ma'lumot oynasi
 const HistoryTab = ({ ctx }) => {
@@ -48,7 +48,7 @@ const HistoryTab = ({ ctx }) => {
     { key: 'date', label: t('col_date'), sortValue: s => s.soldAt || '', render: s => (
       <span className="flex items-center gap-2 whitespace-nowrap text-text-secondary">
         {!isUsed && exchangePairColors[s.id] && <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: exchangePairColors[s.id].replace(/,\s*0?\.\d+\)$/, ',1)') }} title={t('sl_hist_exchange_pair')} />}
-        {new Date(s.soldAt).toLocaleString('uz-UZ')}
+        {formatDateTime(s.soldAt)}
         {s.editCount > 0 && <span className="text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
       </span>
     ) },
@@ -93,7 +93,7 @@ const HistoryTab = ({ ctx }) => {
 
       {/* Bitta sotuvning to'liq ma'lumoti */}
       <Modal open={!!open} onClose={() => setOpen(null)} size="lg" icon={Receipt}
-        title={open && new Date(open.soldAt).toLocaleString('uz-UZ')}
+        title={open && formatDateTime(open.soldAt)}
         subtitle={open && <span className="flex items-center gap-2">{open.customerName || "Noma'lum"} {!isUsed && status(open)}</span>}
         actions={open && canEdit && !isUsed && open.status !== 'cancelled' && (
           <button onClick={() => setEditingSale(open)} title={t('sl_edit_title')}

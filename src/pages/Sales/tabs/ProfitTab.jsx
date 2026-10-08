@@ -8,7 +8,7 @@ import Modal from '../../../components/ui/Modal'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
 import { HeroStat, MiniStat, shortNum } from '../../../components/charts/Charts'
-import { formatNumber } from '../../../utils/format'
+import { formatNumber, formatDateTime } from '../../../utils/format'
 
 // Sotuv qatorini dona qatorlariga bo'lish: tushum (chegirma bilan) va nasiya komissiyasi
 // tovarlar orasida narxiga mutanosib taqsimlanadi — jami har doim sotuv summasiga teng
@@ -99,7 +99,7 @@ const ProfitTab = ({ ctx }) => {
 
   // Tovar oynasidagi qatorlar — Sotuv → Foyda jadvalining barcha ustunlari
   const lineColumns = [
-    { key: 'date', label: t('col_date'), sortValue: l => l.sale.soldAt || '', render: l => <span className="whitespace-nowrap text-text-secondary">{new Date(l.sale.soldAt).toLocaleString('uz-UZ')}</span> },
+    { key: 'date', label: t('col_date'), sortValue: l => l.sale.soldAt || '', render: l => <span className="whitespace-nowrap text-text-secondary">{formatDateTime(l.sale.soldAt)}</span> },
     { key: 'barcode', label: t('sl_profit_th_barcode'), render: l => l.sale.isUsedSale ? <Badge color="bg-accent-orange/10 text-accent-orange">{t('sl_profit_used_badge')}</Badge> : <span className="font-mono text-sm text-text-muted">{l.barcode || '—'}</span> },
     { key: 'customer', label: t('col_customer'), sortValue: l => l.sale.customerName, render: l => l.sale.customerName },
     { key: 'seller', label: t('col_employee'), sortValue: l => l.sale.soldByName, render: l => l.sale.soldByName },
@@ -153,7 +153,7 @@ const ProfitTab = ({ ctx }) => {
           onRowClick={setOpenSale} empty={t('sl_profit_empty')}
           rowClass={r => (r.isCancelled ? 'bg-accent-red/5' : '')}
           columns={[
-            { key: 'date', label: t('col_date'), sortValue: r => r.soldAt || '', render: r => <span className="whitespace-nowrap text-text-secondary">{new Date(r.soldAt).toLocaleString('uz-UZ')}</span> },
+            { key: 'date', label: t('col_date'), sortValue: r => r.soldAt || '', render: r => <span className="whitespace-nowrap text-text-secondary">{formatDateTime(r.soldAt)}</span> },
             { key: 'name', label: t('col_product_name'), sortValue: r => r.name, render: r => <span className="block max-w-[260px] truncate font-semibold">{r.name}</span> },
             { key: 'customer', label: t('col_customer'), sortValue: r => r.customerName, render: r => r.customerName, hideOnMobile: true },
             { key: 'total', label: t('sl_profit_th_sale'), align: 'right', sortValue: r => r.totalSale, render: r => <span className="whitespace-nowrap">{money(r.totalSale)}</span> },
@@ -189,7 +189,7 @@ const ProfitTab = ({ ctx }) => {
 
       {/* Bitta sotuv — jadvaldagi barcha ustunlar */}
       <Modal open={!!openSale} onClose={() => setOpenSale(null)} size="lg"
-        title={openSale && new Date(openSale.soldAt).toLocaleString('uz-UZ')} subtitle={openSale?.customerName}>
+        title={openSale && formatDateTime(openSale.soldAt)} subtitle={openSale?.customerName}>
         {openSale && (
           <div className="space-y-4">
             <DetailGrid cols={3} items={[
