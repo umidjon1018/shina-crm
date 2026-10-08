@@ -50,7 +50,7 @@ Katta faylni bo'lishdan oldin **majburiy qadamlar**:
 
 ## JORIY HOLAT VA KEYINGI ISHLAR (har sessiyada BIRINCHI o'qi — yangilangan: 2026-10-08)
 
-**Holat:** lokal = server (24-deploy). Ilova real sinovda (test oyi): xodimlar telefondan ishlaydi, server DB — haqiqiy ma'lumot.
+**Holat:** server = 24-deploy; **lokal serverdan ancha oldinda (deploy qilinmagan)** — katta qayta tuzish: yagona Sozlamalar, server sozlamalari/bildirishnomalar/audit, yangi UI (to'q ko'k, diagrammalar, har sahifada asosiy ko'rinish + bo'limlar modalda), yangi Foyda, Qarzlar, touch numpad. Reja va bajarilganlar: `docs/TAHLIL_VA_REJA_2026-10-08.md` (15–16-bo'limlar). Ilova real sinovda (test oyi): server DB — haqiqiy ma'lumot.
 BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI agentlar arxitekturasi" bo'limi).
 
 **Foydalanuvchidan kutilmoqda (o'zing boshlama, u aytganda tekshir):**
