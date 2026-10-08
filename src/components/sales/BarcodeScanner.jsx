@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Barcode, Camera, X, AlertCircle } from 'lucide-react'
+import { Barcode, Camera, X, AlertCircle, SendHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { findItemByBarcode } from '../../api/itemService'
 import { checkReservation } from '../../api/reservationService'
@@ -118,32 +118,36 @@ const BarcodeScanner = ({ onScan, allowSold = false, user, addNotification, noti
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <div className="relative flex-1 min-w-[220px]">
+      {/* Telefonda bitta qator: maydon + ikonkali tugmalar */}
+      <div className="flex sm:flex-wrap gap-2">
+        <div className="relative flex-1 min-w-0 sm:min-w-[220px]">
           <Barcode size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleManualScan()}
             placeholder={t('sl_bc_placeholder')}
-            className="w-full pl-10 pr-4 py-3 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-red transition-colors"
+            className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-red transition-colors"
           />
         </div>
         <button
           onClick={handleManualScan}
-          className="flex-1 sm:flex-none px-4 py-3 bg-accent-red text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+          title={t('sl_bc_submit')} aria-label={t('sl_bc_submit')}
+          className="shrink-0 flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 bg-accent-red text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
         >
-          {t('sl_bc_submit')}
+          <SendHorizontal size={18} className="sm:hidden" />
+          <span className="hidden sm:inline">{t('sl_bc_submit')}</span>
         </button>
         <button
           onClick={toggleCamera}
-          className={`flex-1 sm:flex-none justify-center px-4 py-3 rounded-xl border transition-all flex items-center gap-2 font-bold text-sm ${
+          title={t('sl_bc_scan')} aria-label={t('sl_bc_scan')}
+          className={`shrink-0 justify-center px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border transition-all flex items-center gap-2 font-bold text-sm ${
             isCameraActive
               ? 'bg-accent-red text-white border-accent-red'
               : 'bg-bg-tertiary border-border text-text-secondary hover:text-text-primary'
           }`}
         >
-          <Camera size={18} /> {t('sl_bc_scan')}
+          <Camera size={18} /> <span className="hidden sm:inline">{t('sl_bc_scan')}</span>
         </button>
       </div>
 
