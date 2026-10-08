@@ -3409,6 +3409,7 @@ export default {
   mkt_tg_cust_optout: "Mijoz bot xabarlaridan obunadan chiqqan",
   mkt_tg_cust_not_linked: "Mijoz botga ulanmagan. Unga bot havolasini bering: /start bosib, telefon raqamini yuborsa — avtomatik ulanadi.",
   mkt_tg_set_title: "Telegram bot",
+  mkt_set_tg_moved: "Bot ulanishi (token, rejim, webhook) — Sozlamalar → Integratsiyalar → Telegram bot",
   mkt_tg_set_mode: "Rejim",
   mkt_tg_mode_off: "O'chiq",
   mkt_tg_mode_test: "Test rejim",

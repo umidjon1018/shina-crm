@@ -3405,6 +3405,7 @@ export default {
   mkt_tg_cust_optout: "Клиент отписался от сообщений бота",
   mkt_tg_cust_not_linked: "Клиент не подключён. Дайте ему ссылку на бота: после /start и отправки номера он подключится автоматически.",
   mkt_tg_set_title: "Telegram-бот",
+  mkt_set_tg_moved: "Подключение бота (токен, режим, webhook) — Настройки → Интеграции → Telegram-бот",
   mkt_tg_set_mode: "Режим",
   mkt_tg_mode_off: "Выключен",
   mkt_tg_mode_test: "Тестовый",

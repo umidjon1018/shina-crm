@@ -5,6 +5,7 @@ import ApiTab from './ApiTab'
 import BotTab from './BotTab'
 import UdsTab from './UdsTab'
 import PaymentsTab from './PaymentsTab'
+import TelegramConnectionCard from '../../../components/marketing/TelegramConnectionCard'
 
 // Sozlamalar → Integratsiyalar (avval alohida sahifa): internet-do'kon API, Telegram botda qoldiq, UDS, to'lov tizimlari
 const SUB = [
@@ -16,7 +17,7 @@ const SUB = [
 
 const IntegrationsSection = () => {
   const { t } = useTranslation()
-  const [tab, setTab] = useState('api')
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('sub') || 'api')
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1 bg-bg-secondary border border-border rounded-2xl p-1 overflow-x-auto no-scrollbar w-fit max-w-full">
@@ -32,7 +33,7 @@ const IntegrationsSection = () => {
         })}
       </div>
       {tab === 'api' && <ApiTab />}
-      {tab === 'bot' && <BotTab />}
+      {tab === 'bot' && <div className="space-y-4"><div className="max-w-2xl"><TelegramConnectionCard /></div><BotTab /></div>}
       {tab === 'uds' && <UdsTab />}
       {tab === 'payments' && <PaymentsTab />}
     </div>
