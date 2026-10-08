@@ -312,7 +312,7 @@ const NewSaleTab = ({ ctx }) => {
         <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto no-scrollbar">
           {/* Customer */}
           <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 sm:mb-3 block">{t('col_customer')}</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2 sm:mb-3 block">{t('col_customer')}</label>
             {selectedCustomer ? (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="bg-bg-tertiary border border-border rounded-2xl overflow-hidden">
                 <div className="p-4 flex items-center justify-between bg-bg-secondary border-b border-border">
@@ -398,7 +398,7 @@ const NewSaleTab = ({ ctx }) => {
               )}
               <div className={loyaltyActive || promoBlocks ? 'opacity-40 pointer-events-none' : ''}>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('sl_ns_discount_label')}</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-text-muted">{t('sl_ns_discount_label')}</label>
                   <span className="text-xs font-bold text-accent-red">{discountPercent}%</span>
                 </div>
                 <input type="range" min="0" max={maxDiscount} value={discountPercent}
@@ -494,7 +494,7 @@ const NewSaleTab = ({ ctx }) => {
 
           {/* Payment Methods */}
           <div className="space-y-2 sm:space-y-3">
-            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_payment_label')}</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_payment_label')}</label>
             <div className="grid grid-cols-4 sm:grid-cols-2 gap-1.5 sm:gap-2">
               {[
                 { id: 'cash', icon: Banknote, label: t('pay_cash') },
@@ -503,8 +503,8 @@ const NewSaleTab = ({ ctx }) => {
                 { id: 'transfer', icon: ArrowRight, label: t('sl_ns_pay_transfer') },
               ].map(pm => (
                 <button key={pm.id} onClick={() => { setPaymentType(pm.id); if (pm.id !== 'installment') setInstallmentOrgId('') }}
-                  className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-1 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border transition-all text-center sm:text-left ${paymentType === pm.id ? 'bg-accent-red text-white border-accent-red shadow-glow-red' : 'bg-bg-tertiary border-border text-text-secondary hover:border-text-primary'}`}>
-                  <pm.icon size={18} className="flex-shrink-0" /><span className="text-[10px] sm:text-xs font-bold leading-tight">{pm.label}</span>
+                  className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-1 sm:px-4 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl border transition-all text-center sm:text-left active:scale-[0.98] ${paymentType === pm.id ? 'g-brand text-white border-transparent shadow-md' : 'bg-bg-secondary border-border text-text-secondary hover:border-text-primary'}`}>
+                  <pm.icon size={20} className="flex-shrink-0" /><span className="text-xs sm:text-sm font-bold leading-tight">{pm.label}</span>
                 </button>
               ))}
             </div>
@@ -540,7 +540,7 @@ const NewSaleTab = ({ ctx }) => {
 
             {paymentType === 'transfer' && (
               <div className="bg-bg-tertiary border border-border rounded-2xl p-4 space-y-3">
-                <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('inc_contract_number')}</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('inc_contract_number')}</label>
                 <input value={contractNumber} onChange={(e) => setContractNumber(e.target.value)} placeholder={t('sl_contract_ph')}
                   className="w-full px-4 py-2 bg-bg-secondary border border-border rounded-xl text-xs text-text-primary focus:outline-none" />
               </div>
@@ -550,7 +550,7 @@ const NewSaleTab = ({ ctx }) => {
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
                 className="bg-bg-tertiary border border-border rounded-2xl p-4 space-y-4 overflow-hidden">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_org_label')}</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_org_label')}</label>
                   <div className="grid grid-cols-2 gap-2">
                     {installmentOrganizations.filter(o => o.isActive !== false).map(o => (
                       <button key={o.id} type="button" onClick={() => setInstallmentOrgId(o.id)}
@@ -570,7 +570,7 @@ const NewSaleTab = ({ ctx }) => {
                       : [3, 6, 12, 24].filter(m => m <= maxM).map(m => ({ value: m, label: `${m} oy` }))
                   return (
                     <div className="space-y-2 pt-2 border-t border-border/50">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_term_label')}</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_term_label')}</label>
                       <div className={`grid gap-2 ${termOptions.length <= 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
                         {termOptions.map(opt => (
                           <button key={opt.value} type="button" onClick={() => setInstallmentTermMonths(opt.value)}
@@ -603,7 +603,7 @@ const NewSaleTab = ({ ctx }) => {
 
           {/* Source */}
           <div className="space-y-2 sm:space-y-3">
-            <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_source_label')}</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_source_label')}</label>
             <div className="flex sm:grid sm:grid-cols-3 gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
               {sources.filter(s => s.isActive !== false).map(s => (
                 <button key={s.id} type="button" onClick={() => setSource(s.id)}
@@ -617,7 +617,7 @@ const NewSaleTab = ({ ctx }) => {
           {/* Trade-in */}
           <div className="space-y-3 pt-3 sm:pt-4 border-t border-border/50">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_ns_tradein_label')}</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_tradein_label')}</label>
               <button type="button" onClick={addTradeInRow} className="text-[10px] font-bold text-accent-blue hover:underline flex items-center gap-1">
                 <Plus size={12} /> {t('sl_ns_tradein_add')}
               </button>
@@ -665,7 +665,7 @@ const NewSaleTab = ({ ctx }) => {
         {/* Total & Checkout */}
         <div className="p-4 sm:p-6 bg-bg-tertiary border-t border-border space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <div className="flex justify-between text-xs">
+            <div className="flex justify-between text-sm">
               <span className="text-text-muted">{t('sl_ns_subtotal')}</span>
               <span className="text-text-primary font-medium">{formatPrice(subtotal, som)}</span>
             </div>
@@ -682,8 +682,8 @@ const NewSaleTab = ({ ctx }) => {
               </div>
             )}
             <div className="flex justify-between pt-2 border-t border-border/50">
-              <span className="text-base font-syne font-extrabold text-text-primary">{t('sl_ns_total_label')}</span>
-              <span className="text-base font-syne font-extrabold text-accent-green">{formatPrice(total, som)}</span>
+              <span className="text-lg font-extrabold text-text-primary">{t('sl_ns_total_label')}</span>
+              <span className="text-2xl font-extrabold text-accent-green">{formatPrice(total, som)}</span>
             </div>
             {udsPointsUsed > 0 && (
               <div className="flex justify-between text-xs">
@@ -742,8 +742,8 @@ const NewSaleTab = ({ ctx }) => {
           </div>
           <button ref={sellBtnRef} onClick={handleSubmitSale}
             disabled={sellDisabled}
-            className="w-full py-3 sm:py-4 bg-accent-green text-white font-syne font-extrabold text-base rounded-2xl hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm">
-            {isSubmitting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_ns_sell_btn')} <ArrowRight size={18} /></>}
+            className="w-full py-4 sm:py-5 g-green text-white font-extrabold text-lg rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-lg">
+            {isSubmitting ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>{t('sl_ns_sell_btn')} <ArrowRight size={22} /></>}
           </button>
         </div>
       </div>

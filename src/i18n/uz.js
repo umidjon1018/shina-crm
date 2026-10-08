@@ -79,6 +79,9 @@ export default {
 
   // Navigation
   dashboard: 'Bosh sahifa',
+  numpad_title: 'Raqam kiriting',
+  numpad_clear: 'Tozalash',
+  numpad_ok: 'Tayyor',
   warehouse: 'Ombor',
   sales: 'Sotuv',
   customers: 'Mijozlar',

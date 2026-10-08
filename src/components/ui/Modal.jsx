@@ -23,7 +23,7 @@ const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-4xl', xl: '
 // xl — bo'lim oynasi: telefonda to'liq ekran, kompyuterda deyarli to'liq balandlik
 const HEIGHTS = { xl: 'h-[100dvh] sm:h-[92vh] rounded-none sm:rounded-3xl' }
 
-const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, children }) => {
+const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, zIndex, children }) => {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
   const zRef = useRef(200)
@@ -34,7 +34,7 @@ const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bo
     entry.onPop = () => { entry.popped = true; entry.closing = true; onCloseRef.current?.() }
     entry.close = () => { entry.closing = true; onCloseRef.current?.() }
     entryRef.current = entry
-    zRef.current = 200 + stack.length * 10
+    zRef.current = zIndex ?? 200 + stack.length * 10
     stack.push(entry)
     window.history.pushState({ ...(window.history.state || {}), modal: entry.id }, '')
     return () => {

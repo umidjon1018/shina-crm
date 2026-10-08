@@ -31,6 +31,7 @@ import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
 import UpdateBanner from '../components/UpdateBanner'
 import Toaster, { toast } from '../components/ui/Toast'
+import NumpadHost from '../components/ui/NumpadHost'
 import NotificationsPanel from '../components/NotificationsPanel'
 import { visibleSettingsSections } from '../pages/Settings'
 import { useShopStore } from '../store/shopStore'
@@ -444,6 +445,7 @@ export const MainLayout = () => {
 
       <UpdateBanner />
       <Toaster />
+      <NumpadHost />
       <AnimatePresence>
         {showProfile && (
           <ProfileModal

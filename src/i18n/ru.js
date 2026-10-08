@@ -79,6 +79,9 @@ export default {
 
   // Navigation
   dashboard: 'Главная',
+  numpad_title: 'Введите число',
+  numpad_clear: 'Очистить',
+  numpad_ok: 'Готово',
   warehouse: 'Склад',
   sales: 'Продажи',
   customers: 'Клиенты',
