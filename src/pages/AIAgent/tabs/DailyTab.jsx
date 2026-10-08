@@ -55,7 +55,7 @@ function SectionItem({ section, digest, open, onToggle, onReloaded }) {
   )
 }
 
-// Kundalik tahlilchi natijasi: 5 bo'lim bitta sahifada + bazadan aniqlangan muammolar
+// Kundalik tahlilchi natijasi: bo'limlar bitta sahifada + bazadan aniqlangan muammolar
 export default function DailyTab() {
   const { t } = useTranslation()
   const { selectedShopId } = useShopStore()
@@ -72,7 +72,7 @@ export default function DailyTab() {
       // Birinchi ochilishda: jiddiy ogohlantirishi bor bo'limlar (bo'lmasa Savdo) ochiq
       setOpenMap(prev => {
         if (prev) return prev
-        const withDanger = SECTIONS.filter(s => d.digests?.[s]?.alerts?.some(a => a.level === 'danger'))
+        const withDanger = (d.sections || SECTIONS).filter(s => d.digests?.[s]?.alerts?.some(a => a.level === 'danger'))
         return Object.fromEntries((withDanger.length ? withDanger : ['sales']).map(s => [s, true]))
       })
     }).catch(err => setLoadError(err?.response?.data?.error || err.message))
@@ -85,6 +85,7 @@ export default function DailyTab() {
 
   const { isAdmin, running, error, run } = useDigestRun(load)
   const digests = data?.digests || {}
+  const sections = data?.sections || SECTIONS
   const latest = Object.values(digests).map(d => d.createdAt).sort().pop()
   const last = data?.status?.last
 
@@ -118,7 +119,7 @@ export default function DailyTab() {
       )}
 
       <div className="space-y-2 sm:space-y-3">
-        {SECTIONS.map(s => (
+        {sections.map(s => (
           <SectionItem key={s} section={s} digest={digests[s] || null} onReloaded={load}
             open={!!openMap?.[s]} onToggle={() => setOpenMap(m => ({ ...(m || {}), [s]: !m?.[s] }))} />
         ))}

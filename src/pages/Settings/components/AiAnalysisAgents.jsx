@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { Bot, Sparkles, Clock, Lock, ChevronDown, ChevronUp, Save, ToggleLeft, ToggleRight, RotateCcw, Play, Loader2, Zap, BookOpen } from 'lucide-react'
 import { getAssistantTools, getAiSchedule, saveAiSchedule } from '../../../api/aiAgentsService'
 import { getAiDigestStatus, runAiDigests } from '../../../api/aiStatsService'
+import { useShopStore } from '../../../store/shopStore'
 
 const MODELS = [
   { value: 'claude-sonnet-5-5', key: 'aiadm_model_sonnet' },
   { value: 'claude-opus-5-5', key: 'aiadm_model_opus' },
   { value: 'claude-haiku-4-5-20251001', key: 'aiadm_model_haiku' },
 ]
-const SECTIONS = ['sales', 'inventory', 'customers', 'marketing', 'staff']
+const SECTIONS = ['sales', 'inventory', 'customers', 'marketing', 'staff', 'wholesale', 'production']
+const SHOP_KIND_SECTIONS = { wholesale: 'wholesale', production: 'production' }
 const pad = (n) => String(n).padStart(2, '0')
 const fmtDT = (iso) => { const d = new Date(iso); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}` }
 
@@ -172,6 +174,8 @@ export function AnalystCard({ agent, onSave }) {
     knowledge: agent.knowledge || '', sections: initSections(),
   })
   const [activeSec, setActiveSec] = useState('sales')
+  const shops = useShopStore(st => st.shops)
+  const visibleSections = SECTIONS.filter(x => !SHOP_KIND_SECTIONS[x] || shops.some(sh => sh.kind === SHOP_KIND_SECTIONS[x] && sh.isActive))
   const [status, setStatus] = useState(null)
   const [running, setRunning] = useState(false)
   const { saving, saved, save } = useSaver(onSave)
@@ -221,7 +225,7 @@ export function AnalystCard({ agent, onSave }) {
       <div className="space-y-2">
         <p className="text-xs font-medium text-text-secondary">{t('aiadm_sections')}</p>
         <div className="flex gap-1 overflow-x-auto no-scrollbar">
-          {SECTIONS.map(s => (
+          {visibleSections.map(s => (
             <button key={s} type="button" onClick={() => setActiveSec(s)}
               className={`px-3 py-1.5 rounded-lg text-xs border flex-shrink-0 ${activeSec === s ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' : 'border-border text-text-muted hover:bg-bg-secondary'} ${form.sections[s].enabled ? '' : 'line-through opacity-60'}`}>
               {t(`aisec_head_${s}`)}

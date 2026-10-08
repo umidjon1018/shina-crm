@@ -10,4 +10,6 @@ export const TAB_COLORS = {
   customers: { bg: 'bg-[#3b82f6]/10',   text: 'text-[#3b82f6]',   border: 'border-[#3b82f6]/30' },
   marketing: { bg: 'bg-[#f97316]/10',   text: 'text-[#f97316]',   border: 'border-[#f97316]/30' },
   staff:     { bg: 'bg-[#a855f7]/10',   text: 'text-[#a855f7]',   border: 'border-[#a855f7]/30' },
+  wholesale: { bg: 'bg-[#06b6d4]/10',   text: 'text-[#06b6d4]',   border: 'border-[#06b6d4]/30' },
+  production:{ bg: 'bg-[#eab308]/10',   text: 'text-[#eab308]',   border: 'border-[#eab308]/30' },
 }
