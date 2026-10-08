@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { AlertCircle, Award, Cake, Gift, Send, Settings2, Tag, Ticket } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
@@ -10,6 +10,9 @@ import MessagesTab from './tabs/MessagesTab'
 import BirthdaysTab from './tabs/BirthdaysTab'
 import SettingsTab from './tabs/SettingsTab'
 import LoyaltyProgramCard from './components/LoyaltyProgramCard'
+import MarketingOverview from './components/MarketingOverview'
+import SectionHub from '../../components/ui/SectionHub'
+import { PageHeader } from '../../components/ui/Kit'
 
 const Marketing = () => {
   const { t } = useTranslation()
@@ -25,9 +28,22 @@ const Marketing = () => {
     { id: 'settings', perm: 'marketing.settings', icon: Settings2 },
   ].filter(tab => hasPermission(tab.perm))
 
-  const [picked, setPicked] = useState(() => new URLSearchParams(window.location.search).get('tab') || TABS[0]?.id)
-  const activeTab = TABS.some(tab => tab.id === picked) ? picked : TABS[0]?.id
-  const goSettings = TABS.some(tab => tab.id === 'settings') ? () => setPicked('settings') : null
+  const MAIN = TABS.some(tab => tab.id === 'promotions') ? 'promotions' : null
+  const [section, setSection] = useState(() => {
+    const q = new URLSearchParams(window.location.search)
+    const id = q.get('section') || q.get('tab')
+    return id && id !== MAIN && TABS.some(tab => tab.id === id) ? id : null
+  })
+  const goSettings = TABS.some(tab => tab.id === 'settings') ? () => setSection('settings') : null
+  const RENDER = {
+    promotions: <PromotionsTab />,
+    codes: <CodesTab />,
+    gift_cards: <GiftCardsTab />,
+    messages: <MessagesTab goSettings={goSettings} />,
+    birthdays: <BirthdaysTab goSettings={goSettings} />,
+    loyalty: <div className="max-w-2xl"><LoyaltyProgramCard canEdit={hasPermission('marketing.loyalty')} /></div>,
+    settings: <SettingsTab />,
+  }
 
   if (!TABS.length) {
     return (
@@ -38,38 +54,18 @@ const Marketing = () => {
     )
   }
 
+  const SECTIONS = TABS.filter(tab => tab.id !== MAIN).map((tab, i) => ({
+    id: tab.id, label: t('mkt_tab_' + tab.id), icon: tab.icon,
+    tone: ['cyan', 'pink', 'blue', 'orange', 'green', 'violet'][i % 6],
+    render: () => RENDER[tab.id],
+  }))
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('mkt_page_title')}</h1>
-        <p className="text-text-secondary text-sm mt-0.5">{t('mkt_page_subtitle')}</p>
-      </div>
-
-      <div className="flex items-center gap-1 bg-bg-secondary border border-border rounded-2xl p-1 overflow-x-auto no-scrollbar">
-        {TABS.map(tab => {
-          const Icon = tab.icon
-          return (
-            <button key={tab.id} onClick={() => setPicked(tab.id)} title={t('mkt_tab_' + tab.id)}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex-1 justify-center shrink-0 whitespace-nowrap
-                ${activeTab === tab.id ? 'bg-accent-red text-white shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
-              <Icon size={15} />
-              <span className={activeTab === tab.id ? 'inline' : 'hidden lg:inline'}>{t('mkt_tab_' + tab.id)}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
-          {activeTab === 'promotions' && <PromotionsTab />}
-          {activeTab === 'codes' && <CodesTab />}
-          {activeTab === 'gift_cards' && <GiftCardsTab />}
-          {activeTab === 'messages' && <MessagesTab goSettings={goSettings} />}
-          {activeTab === 'birthdays' && <BirthdaysTab goSettings={goSettings} />}
-          {activeTab === 'loyalty' && <div className="max-w-2xl"><LoyaltyProgramCard canEdit={hasPermission('marketing.loyalty')} /></div>}
-          {activeTab === 'settings' && <SettingsTab />}
-        </motion.div>
-      </AnimatePresence>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
+      <PageHeader title={t('mkt_page_title')} subtitle={t('mkt_page_subtitle')} />
+      <MarketingOverview onOpen={(id) => TABS.some(x => x.id === id) && setSection(id)} />
+      {SECTIONS.length > 0 && <SectionHub variant={MAIN ? 'bar' : 'tiles'} sections={SECTIONS} openId={section} onOpenChange={setSection} />}
+      {MAIN && RENDER[MAIN]}
     </motion.div>
   )
 }

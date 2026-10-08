@@ -157,7 +157,7 @@ export const GradientBars = ({ data, xKey = 'label', yKey = 'value', height = 24
           {horizontal ? (
             <>
               <XAxis type="number" {...axisProps} tickFormatter={shortNum} />
-              <YAxis type="category" dataKey={xKey} {...axisProps} width={110} />
+              <YAxis type="category" dataKey={xKey} {...axisProps} width={110} tickFormatter={v => (String(v).length > 14 ? String(v).slice(0, 13) + '…' : v)} />
             </>
           ) : (
             <>
