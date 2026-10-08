@@ -19,6 +19,7 @@ const map = (r) => ({
   sectionInstructions: r.sectionInstructions || {},
   basePrompt: r.basePrompt || '',
   sectionPrompts: r.sectionPrompts || {},
+  channelTools: r.channelTools || {},
 })
 
 export const getAiAgents = async () => {
@@ -32,6 +33,7 @@ export const getAvailableTools = async () => {
 }
 
 export const getAssistantTools = async () => (await api.get('/api/ai-agents/assistant-tools')).data
+export const getBotTools = async () => (await api.get('/api/ai-agents/bot-tools')).data
 export const getAiSchedule = async () => (await api.get('/api/ai-agents/schedule')).data
 export const saveAiSchedule = async (hour) => (await api.put('/api/ai-agents/schedule', { hour })).data
 

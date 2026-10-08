@@ -13,7 +13,7 @@ const SECTIONS = ['sales', 'inventory', 'customers', 'marketing', 'staff']
 const pad = (n) => String(n).padStart(2, '0')
 const fmtDT = (iso) => { const d = new Date(iso); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}` }
 
-const Toggle = ({ on, onClick, t }) => (
+export const Toggle = ({ on, onClick, t }) => (
   <button type="button" onClick={onClick} className="flex items-center gap-1.5">
     {on ? <ToggleRight size={22} className="text-accent-green" /> : <ToggleLeft size={22} className="text-text-muted" />}
     <span className={`text-xs ${on ? 'text-accent-green' : 'text-text-muted'}`}>{on ? t('aiadm_on') : t('aiadm_off')}</span>
@@ -21,7 +21,7 @@ const Toggle = ({ on, onClick, t }) => (
 )
 
 // Koddagi asosiy qoidalar — faqat ko'rish uchun
-const BaseRules = ({ text, t }) => {
+export const BaseRules = ({ text, t }) => {
   const [open, setOpen] = useState(false)
   return (
     <div className="rounded-lg border border-border bg-bg-secondary">
@@ -39,7 +39,7 @@ const BaseRules = ({ text, t }) => {
   )
 }
 
-const Field = ({ label, icon: Icon, hint, value, onChange, rows = 4, placeholder }) => (
+export const Field = ({ label, icon: Icon, hint, value, onChange, rows = 4, placeholder }) => (
   <div>
     <label className="text-xs font-medium text-text-secondary mb-1 flex items-center gap-1.5">{Icon && <Icon size={12} />} {label}</label>
     {hint && <p className="text-[11px] text-text-muted mb-1.5">{hint}</p>}
@@ -58,7 +58,7 @@ const ModelSelect = ({ value, onChange, t }) => (
   </div>
 )
 
-const SaveBar = ({ saving, saved, onSave, onReset, t }) => (
+export const SaveBar = ({ saving, saved, onSave, onReset, t }) => (
   <div className="flex flex-wrap gap-2">
     <button onClick={onSave} disabled={saving}
       className={`flex-1 min-w-[10rem] py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 ${saved ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' : 'bg-accent-green text-white hover:bg-accent-green/90'} disabled:opacity-50`}>
@@ -72,7 +72,7 @@ const SaveBar = ({ saving, saved, onSave, onReset, t }) => (
   </div>
 )
 
-const useSaver = (onSave) => {
+export const useSaver = (onSave) => {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const save = async (id, payload) => {
@@ -86,7 +86,7 @@ const useSaver = (onSave) => {
   return { saving, saved, save }
 }
 
-const CardShell = ({ icon: Icon, color, title, desc, isActive, onToggle, children, t }) => {
+export const CardShell = ({ icon: Icon, color, title, desc, isActive, onToggle, children, t }) => {
   const [expanded, setExpanded] = useState(false)
   return (
     <div className="rounded-xl border border-border bg-bg-primary overflow-hidden">

@@ -476,7 +476,8 @@ export default function InstagramTab({ agentConfig }) {
   }, [selectedShopId])
   useEffect(() => { load() }, [load, version])
 
-  const igEnabled = agentConfig?.integrations?.instagram?.enabled || false
+  // Mijozlar botining Instagram kanallari (komment yoki DM) yoqilganmi
+  const igEnabled = agentConfig?.isActive !== false && (agentConfig?.integrations?.instagram?.enabled === true || agentConfig?.integrations?.instagram?.dmEnabled === true)
 
   const socialCustomers = useMemo(() => report?.lists?.find(l => l.key === 'ig_customers')?.rows || [], [report])
   const monthly = useMemo(() => report?.lists?.find(l => l.key === 'ig_monthly')?.rows || [], [report])
@@ -502,7 +503,7 @@ export default function InstagramTab({ agentConfig }) {
       {!igEnabled && (
         <div className="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-400">
           <AlertCircle size={14} className="flex-shrink-0" />
-          <span>Instagram komment boti o'chirilgan. <strong>Admin Panel → AI Agentlar → Instagram agenti</strong> da yoqing.</span>
+          <span>Instagram bot o'chiq (komment va DM). <strong>Admin Panel → AI Agentlar → Mijozlar boti → Kanallar</strong> da yoqiladi.</span>
         </div>
       )}
 
