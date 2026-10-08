@@ -322,7 +322,9 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - Bosqich 6 (tayyorlov): Sozlamalar → Integratsiyalar → Fiskal chek, tovarlarda IKPU/qadoq/QQS, sotuv fiskal navbati va adapter interfeysi. **Qoldi:** provayder tanlash va adapter.
 - Bosqich 7: biznes profili (B/U, shina maydonlari). **Qoldi:** multi-tenant (ikkinchi mijoz, domen/SSL qarorlari bilan).
 - Xomashyoni ko'chirish, ulgurji hujjatda barkod skaneri, Kirim ro'yxatlari telefonda kartochka.
-- **Qoldi (ixtiyoriy):** AI tahlilda ulgurji/ishlab chiqarish bo'limi, kg bilan sotish, Moliya/Marketing ichki jadvallarini yangi uslubga o'tkazish.
+- AI kundalik tahlilda **Ulgurji savdo** va **Ishlab chiqarish** bo'limlari (`aiSections.wholesale/production`: tushum, foyda, qarz va muddati o'tgani, konsignatsiya, dilerlar; buyurtmalar, brak %, xomashyo sarfi reja/fakt, tugayotgan xomashyo, muddati yaqin). Faqat shunday do'kon turi bo'lsa ko'rinadi va tahlil qilinadi; AI yordamchi `get_section_report` ham ularni oladi.
+- Moliya (Xarajatlar, Daromadlar, Pul harakati, Yetkazib beruvchi to'lovlari, Kapital) va Marketing (Kodlar, Hisobot, Sertifikatlar, Xabarlar tarixi) ro'yxatlari telefonda kartochka.
+- **Qoldi (ixtiyoriy):** kg (bulk) tovarni sotish (kassa/ulgurji — hozir faqat dona), 7 eski hisobotni serverga ko'chirish.
 
 ---
 
