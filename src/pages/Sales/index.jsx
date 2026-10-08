@@ -26,6 +26,7 @@ import InstallmentTab from './tabs/InstallmentTab'
 import ProfitTab from './tabs/ProfitTab'
 import { useSalesState } from './useSalesState'
 import { StackGuard } from '../../components/ui/Modal'
+import { useSettingsStore } from '../../store/settingsStore'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
@@ -201,7 +202,7 @@ const Sales = () => {
           contractNumber, setContractNumber, source, setSource,
           tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
           subtotal, total, priceWarnings, setPriceWarnings,
-          handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice, fiscalEnabled: state.fiscalEnabled,
+          handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice, fiscalEnabled: state.fiscalEnabled, usedEnabled: useSettingsStore.getState().modules?.used !== false,
           addBundleToCart, removeBundleFromCart,
           loyaltyInfo: state.loyaltyInfo, loyaltyTierPercent: state.loyaltyTierPercent, loyaltyActive: state.loyaltyActive,
           useBalance: state.useBalance, setUseBalance: state.setUseBalance, balanceInput: state.balanceInput, setBalanceInput: state.setBalanceInput,

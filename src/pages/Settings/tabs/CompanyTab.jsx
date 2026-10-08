@@ -4,6 +4,7 @@ import { Building, Settings, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-r
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useAuditStore } from '../../../store/auditStore'
 import { useAuthStore } from '../../../store/authStore'
+import BusinessProfileCard from '../components/BusinessProfileCard'
 
 function CompanyTab() {
   const { t, i18n } = useTranslation()
@@ -260,6 +261,8 @@ function CompanyTab() {
           </div>
         </div>
       </div>
+
+      {me?.role === 'admin' && <BusinessProfileCard />}
 
       {/* Konfiguratsiya */}
       <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-5">

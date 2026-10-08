@@ -8,6 +8,8 @@ import { useNotificationStore } from './notificationStore'
 import { setSession, clearSession, revokeSessionOnServer } from '../api/session'
 import { useAuditStore } from './auditStore'
 
+const MODULE_NODES = [['used', ['sales.used_sale', 'warehouse.used_stock', 'reports.used']]]
+
 const SESSION_ACTION_KEYS = {
   'Tizimga kirdi (online)': 'audit_session_login',
   'Tizimdan chiqdi (offline)': 'audit_session_logout',
@@ -318,8 +320,10 @@ export const useAuthStore = create(
       hasPermission: (permission) => {
         const { user } = get()
         if (!user) return false
-        if (user.permissions.includes('all')) return true
         const settings = useSettingsStore.getState()
+        // Biznes profilida o'chirilgan modul bo'limlari — hech kimga (admin ham) ko'rinmaydi
+        if (MODULE_NODES.some(([m, nodes]) => settings.modules?.[m] === false && nodes.some(n => permission === n || permission.startsWith(n + '.')))) return false
+        if (user.permissions.includes('all')) return true
         // Xodimga individual ruxsat berilgan bo'lsa — lavozim o'rniga shu ishlatiladi
         const own = user.access && Array.isArray(user.access.checked) ? user.access : null
         const denied = own ? (own.denied || []) : (settings.roleDeniedNodes?.[user.role] || [])

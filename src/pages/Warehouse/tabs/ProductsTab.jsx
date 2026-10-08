@@ -16,6 +16,7 @@ import { productTitle } from '../../../utils/format'
 import { StackGuard } from '../../../components/ui/Modal'
 
 const ProductsTab = ({ ctx }) => {
+  const tireFields = useSettingsStore(st => st.modules?.tireFields !== false)
   const { t, i18n } = useTranslation()
   const {
     // auth & stores
@@ -1617,7 +1618,7 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
-                          <div>
+                          <div className={tireFields ? '' : 'hidden'}>
                             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">{t('mgmt_field_season')}</label>
                             <select
                               id="p_season"
@@ -1641,7 +1642,7 @@ const ProductsTab = ({ ctx }) => {
                             />
                           </div>
 
-                          <div className="col-span-2">
+                          <div className={`col-span-2 ${tireFields ? '' : 'hidden'}`}>
                             <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2 block">
                               {t('mgmt_field_car_category')}
                             </label>

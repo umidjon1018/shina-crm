@@ -31,6 +31,7 @@ const NewSaleTab = ({ ctx }) => {
     tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     productCategories, subtotal, total, priceWarnings, setPriceWarnings,
     handleSubmitSale, isSubmitting, fiscalEnabled,
+    usedEnabled = true,
     salesList, addNextItemOfProduct, updateGroupSalePrice,
     addBundleToCart, removeBundleFromCart,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
@@ -616,7 +617,7 @@ const NewSaleTab = ({ ctx }) => {
           </div>
 
           {/* Trade-in */}
-          <div className="space-y-3 pt-3 sm:pt-4 border-t border-border/50">
+          <div className={`space-y-3 pt-3 sm:pt-4 border-t border-border/50 ${usedEnabled ? '' : 'hidden'}`}>
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_tradein_label')}</label>
               <button type="button" onClick={addTradeInRow} className="text-[10px] font-bold text-accent-blue hover:underline flex items-center gap-1">

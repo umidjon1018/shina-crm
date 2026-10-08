@@ -25,9 +25,9 @@ import { getCategories, createCategory, updateCategory as apiUpdateCat, toggleCa
 const BUSINESS_KEYS = [
   'usdRate', 'sources', 'installmentOrganizations', 'discountSmallMax', 'discountMediumMax',
   'monthlyTargets', 'employeeTargets', 'notificationSettings', 'productAttributeDefs',
-  'priceListSettings', 'downloadEnabled', 'sidebarLabels', 'hiddenPages', 'employeeEditLocked',
+  'priceListSettings', 'downloadEnabled', 'sidebarLabels', 'hiddenPages', 'employeeEditLocked', 'modules',
 ]
-const ADMIN_ONLY_KEYS = ['sidebarLabels', 'hiddenPages', 'employeeEditLocked']
+const ADMIN_ONLY_KEYS = ['sidebarLabels', 'hiddenPages', 'employeeEditLocked', 'modules']
 let businessReady = false
 let applyingRemote = false
 let businessTimer = null
@@ -310,6 +310,9 @@ export const useSettingsStore = create(
         management: '',
       },
       hiddenPages: [],
+      // Biznes profili: B/U savdo, shina maydonlari (ulgurji va ishlab chiqarish — do'kon turiga qarab)
+      modules: { used: true, tireFields: true },
+      setModules: (patch) => set(s => ({ modules: { ...(s.modules || {}), ...patch } })),
 
       setSidebarLabel: (key, label, lang) => set(s => {
         const prev = s.sidebarLabels[key]
