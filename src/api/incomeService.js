@@ -182,6 +182,13 @@ export const togglePromoPassToCustomer = async (batchId) => {
   return data
 }
 
+// Inventar tekshiruvi (serverda): kirim = sotilgan + omborda + qaytarilgan + hisobdan chiqarilgan + dilerda + ko'chirilgan
+export const getInventoryCheck = async (shopId) => {
+  const params = shopId && shopId !== 'all' ? { shop_id: shopId } : {}
+  const { data } = await api.get('/api/batches/inventory-check', { params })
+  return data
+}
+
 export const linkBatchToSupplier = async (batchId, supplierId) => {
   await api.patch(`/api/batches/${batchId}/supplier`, { supplier_id: supplierId })
   return { success: true }

@@ -43,6 +43,8 @@ const BatchesTab = ({ ctx }) => {
     inventoryCheck, allMatch,
     MOCK_PRODUCTS,
   } = ctx
+  // Yetkazib beruvchiga qaytarilgan miqdor (bekor qilinmagan qaytarishlar)
+  const returnedQty = (batchId) => (ctx.returns || []).filter(r => r.batchId === batchId && r.status === 'active').reduce((sum, r) => sum + r.quantity, 0)
 
   const [showImport, setShowImport] = useState(false)
 
@@ -123,6 +125,7 @@ const BatchesTab = ({ ctx }) => {
                   <option value="partial">{t('inc_filter_partial')}</option>
                   <option value="credit">{t('inc_filter_credit')}</option>
                   <option value="unpaid">{t('inc_filter_unpaid')}</option>
+                  <option value="returned">{t('inc_filter_returned')}</option>
                 </select>
               </div>
 
@@ -198,7 +201,10 @@ const BatchesTab = ({ ctx }) => {
                                 </button>
                               )}
                             </td>
-                            <td className="px-3 sm:px-4 py-2.5 sm:py-4 font-bold text-sm text-text-primary">{batch.quantity} {batch.unit || 'dona'}</td>
+                            <td className="px-3 sm:px-4 py-2.5 sm:py-4 font-bold text-sm text-text-primary">
+                              {batch.quantity} {batch.unit || 'dona'}
+                              {returnedQty(batch.id) > 0 && <p className="text-[11px] font-semibold text-violet-500 whitespace-nowrap">↩ {t('inc_returned_n', { n: returnedQty(batch.id) })}</p>}
+                            </td>
                             <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                               <p className="text-sm font-bold text-text-primary">${batch.purchasePriceUSD}</p>
                               <p className="text-xs text-text-muted">
@@ -217,6 +223,7 @@ const BatchesTab = ({ ctx }) => {
                               <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${status.bg} ${status.color}`}>
                                 {t(status.key)}
                               </span>
+                              {batch.returnedUSD > 0 && <p className="text-[11px] text-violet-500 mt-1 whitespace-nowrap">↩ {formatUSD(batch.returnedUSD)}</p>}
                             </td>
                             <td className="px-3 sm:px-4 py-2.5 sm:py-4 text-right">
                               <button
@@ -297,6 +304,7 @@ const BatchesTab = ({ ctx }) => {
                   <option value="partial">{t('inc_filter_partial')}</option>
                   <option value="credit">{t('inc_filter_credit')}</option>
                   <option value="unpaid">{t('inc_filter_unpaid')}</option>
+                  <option value="returned">{t('inc_filter_returned')}</option>
                 </select>
               </div>
 
@@ -393,7 +401,10 @@ const BatchesTab = ({ ctx }) => {
                               <td className="px-3 sm:px-4 py-2.5 sm:py-4">
                                 {(() => {
                                   const s = statusConfig[batch.paymentStatus] || statusConfig.unpaid
-                                  return <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${s.bg} ${s.color}`}>{t(s.key)}</span>
+                                  return <>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${s.bg} ${s.color}`}>{t(s.key)}</span>
+                                    {batch.returnedUSD > 0 && <p className="text-[11px] text-violet-500 mt-1 whitespace-nowrap">↩ {t('inc_returned_usd', { v: formatUSD(batch.returnedUSD) })}</p>}
+                                  </>
                                 })()}
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-4">
@@ -663,22 +674,25 @@ const BatchesTab = ({ ctx }) => {
                       }
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-bg-tertiary rounded-xl py-1.5">
-                        <p className="text-xs font-bold text-text-primary">{c.totalIn}</p>
-                        <p className="text-[10px] text-text-muted">{t('inc_inv_in')}</p>
-                      </div>
-                      <div className="bg-bg-tertiary rounded-xl py-1.5">
-                        <p className="text-xs font-bold text-accent-orange">{c.sold}</p>
-                        <p className="text-[10px] text-text-muted">{t('sold')}</p>
-                      </div>
-                      <div className="bg-bg-tertiary rounded-xl py-1.5">
-                        <p className="text-xs font-bold text-accent-blue">{c.inStock}</p>
-                        <p className="text-[10px] text-text-muted">{t('col_in_stock')}</p>
-                      </div>
+                      {[
+                        [c.totalIn, t('inc_inv_in'), 'text-text-primary', true],
+                        [c.sold, t('sold'), 'text-accent-orange', true],
+                        [c.inStock, t('col_in_stock'), 'text-accent-blue', true],
+                        [c.returned, t('inc_inv_returned'), 'text-violet-500', c.returned > 0],
+                        [c.writtenOff, t('inc_inv_written_off'), 'text-accent-red', c.writtenOff > 0],
+                        [c.consigned, t('inc_inv_consigned'), 'text-accent-green', c.consigned > 0],
+                        [c.moved, t('inc_inv_moved'), 'text-text-secondary', c.moved > 0],
+                        [c.other, t('inc_inv_other'), 'text-text-secondary', c.other > 0],
+                      ].filter(x => x[3]).map(([v, label, color]) => (
+                        <div key={label} className="bg-bg-tertiary rounded-xl py-1.5">
+                          <p className={`text-xs font-bold ${color}`}>{v}</p>
+                          <p className="text-[10px] text-text-muted">{label}</p>
+                        </div>
+                      ))}
                     </div>
                     {!c.isMatch && (
                       <p className="text-xs text-accent-red mt-2 text-center font-medium">
-                        {c.totalIn} ≠ {c.sold} + {c.inStock} ({Math.abs(c.totalIn - c.sold - c.inStock)})
+                        {t('inc_inv_diff_n', { n: Math.abs(c.diff), sign: c.diff > 0 ? t('inc_inv_missing') : t('inc_inv_extra') })}
                       </p>
                     )}
                   </div>

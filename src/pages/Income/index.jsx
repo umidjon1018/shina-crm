@@ -15,10 +15,8 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { getCategoryColor } from '../../utils/categoryColors'
 import {
   getIncomeBatches, updateBatch, addPaymentToBatch, deletePaymentFromBatch,
-  getSuppliers, addSupplier, updateSupplier, deleteSupplier, linkBatchToSupplier
-} from '../../api/incomeService'
+  getSuppliers, addSupplier, updateSupplier, deleteSupplier, linkBatchToSupplier, getInventoryCheck } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
-import { getItems } from '../../api/itemService'
 import { useDataStore } from '../../store/dataStore'
 import { useShopStore } from '../../store/shopStore'
 import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPaymentRateDiff } from './components/incHelpers'
@@ -48,7 +46,7 @@ const Income = () => {
 
   const [batches, setBatches] = useState([])
   const [MOCK_PRODUCTS, setMockProducts] = useState([])
-  const [MOCK_ITEMS, setMockItems] = useState([])
+  const [invData, setInvData] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [orders, setOrders] = useState([])
   const [returns, setReturns] = useState([])
@@ -114,6 +112,9 @@ const Income = () => {
   const [deletePaymentConfirm, setDeletePaymentConfirm] = useState(null)
 
   const normalizeBatches = (b) => b.map(x => {
+    // Hech narsa to'lanmagan, qarz qaytarish bilan yopilgan — "to'langan" emas
+    if ((x.debtUSD || 0) <= 0 && (x.returnedUSD || 0) > 0 && (x.paidUSD || 0) < 0.01)
+      return { ...x, paymentStatus: 'returned' }
     if ((x.debtUSD || 0) <= 0) return { ...x, paymentStatus: 'paid' }
     if ((x.paidUSD || 0) > 0) return { ...x, paymentStatus: 'partial' }
     const status = x.paymentStatus === 'credit' ? 'credit' : 'unpaid'
@@ -121,9 +122,8 @@ const Income = () => {
   })
 
   useEffect(() => {
-    Promise.all([getIncomeBatches(), getSuppliers(), getProducts(), getItems()]).then(([b, s, prods, items]) => {
+    Promise.all([getIncomeBatches(), getSuppliers(), getProducts()]).then(([b, s, prods]) => {
       setMockProducts(prods)
-      setMockItems(items)
       setBatches(normalizeBatches(b))
       setSuppliers(s)
     }).catch((e) => { console.error('Income load error:', e?.response?.data || e?.message || e) }).finally(() => setLoading(false))
@@ -137,12 +137,15 @@ const Income = () => {
   const firstLoad = useRef(true)
   useEffect(() => {
     if (firstLoad.current) { firstLoad.current = false; return }
-    Promise.all([getIncomeBatches(), getProducts(), getItems()]).then(([b, prods, items]) => {
+    Promise.all([getIncomeBatches(), getProducts()]).then(([b, prods]) => {
       setMockProducts(prods)
-      setMockItems(items)
       setBatches(normalizeBatches(b))
     }).catch((e) => { console.error('Income reload error:', e?.response?.data || e?.message || e) })
   }, [version])
+
+  useEffect(() => {
+    getInventoryCheck(selectedShopId).then(setInvData).catch(() => setInvData([]))
+  }, [selectedShopId, version])
 
   const refreshAll = async () => {
     try {
@@ -255,18 +258,8 @@ const Income = () => {
     )
   }
 
-  // Inventory matching logic
-  const shopBatchIds_inv = new Set(shopBatches.map(b => b.id))
-  const invProducts = MOCK_PRODUCTS.filter(p => shopBatches.some(b => b.productId === p.id))
-  const inventoryCheck = invProducts.map(p => {
-    const totalIn = shopBatches
-      .filter(b => b.productId === p.id)
-      .reduce((sum, b) => sum + b.quantity, 0)
-    const sold = MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'sold' && shopBatchIds_inv.has(i.batchId)).length
-    const inStock = MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds_inv.has(i.batchId)).length
-    const isMatch = totalIn === sold + inStock
-    return { product: p, totalIn, sold, inStock, isMatch }
-  })
+  // Inventar tekshiruvi — serverda hisoblanadi (qaytarish, spisaniya, ko'chirish va konsignatsiya ham hisobga olinadi)
+  const inventoryCheck = invData.map(c => ({ ...c, product: { id: c.productId, name: c.name, brand: c.brand }, totalIn: c.kirim }))
   const allMatch = inventoryCheck.every(c => c.isMatch)
 
   const TABS = [
