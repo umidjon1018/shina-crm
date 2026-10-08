@@ -3,60 +3,78 @@
 @tailwind utilities;
 
 :root {
-  /* Light Mode */
-  --bg-primary:     #F0F4F8;
+  /* Yorug' mavzu */
+  --bg-primary:     #F3F5FB;
   --bg-secondary:   #FFFFFF;
-  --bg-tertiary:    #E8EEF5;
-  --sidebar-bg:     #0F1520;
-  --border:         #D1DCE8;
-  --border-bright:  #A0B4C8;
-  --accent-red:     #DC2626;
-  --accent-orange:  #EA7C2B;
-  --accent-blue:    #2563EB;
+  --bg-tertiary:    #EBEEF7;
+  --sidebar-bg:     #1B1E33;
+  --sidebar-text:   #C9CCE3;
+  --sidebar-muted:  #7D82A6;
+  --border:         #DCE1EE;
+  --border-bright:  #B7BFD8;
+  --accent-red:     #E63946;
+  --accent-orange:  #F59E0B;
+  --accent-blue:    #3B82F6;
   --accent-green:   #16A34A;
-  --text-primary:   #0F172A;
-  --text-secondary: #475569;
-  --text-muted:     #94A3B8;
-  --glow-red:       rgba(220, 38, 38, 0.08);
-  --glow-blue:      rgba(37, 99, 235, 0.08);
+  --accent-violet:  #8B5CF6;
+  --accent-pink:    #EC4899;
+  --accent-cyan:    #06B6D4;
+  --text-primary:   #121528;
+  --text-secondary: #4B5170;
+  --text-muted:     #858BAA;
+  --glow-red:       rgba(230, 57, 70, 0.12);
+  --glow-blue:      rgba(59, 130, 246, 0.10);
+  --chart-grid:     #E3E7F2;
 }
 
 .dark {
-  /* Dark Mode */
-  --bg-primary:     #080C14;
-  --bg-secondary:   #0F1520;
-  --bg-tertiary:    #161E2E;
-  --sidebar-bg:     #060A10;
-  --border:         #1E2A3D;
-  --border-bright:  #2A3A54;
-  --accent-red:     #E63946;
-  --accent-orange:  #F4A261;
-  --accent-blue:    #3B82F6;
-  --accent-green:   #22C55E;
-  --text-primary:   #F1F5F9;
-  --text-secondary: #8899B0;
-  --text-muted:     #4A5A70;
-  --glow-red:       rgba(230, 57, 70, 0.15);
-  --glow-blue:      rgba(59, 130, 246, 0.10);
+  /* To'q mavzu — to'q ko'k (CRM dashboard uslubi) */
+  --bg-primary:     #151729;
+  --bg-secondary:   #1E2136;
+  --bg-tertiary:    #272B45;
+  --sidebar-bg:     #12142A;
+  --sidebar-text:   #C3C7E2;
+  --sidebar-muted:  #6E7396;
+  --border:         #2B3050;
+  --border-bright:  #3D4368;
+  --accent-red:     #EF4B5A;
+  --accent-orange:  #F5A524;
+  --accent-blue:    #4F8CFF;
+  --accent-green:   #2ED47A;
+  --accent-violet:  #A86BFF;
+  --accent-pink:    #F062C0;
+  --accent-cyan:    #2BD4F0;
+  --text-primary:   #F3F4FF;
+  --text-secondary: #A8ACCB;
+  --text-muted:     #707597;
+  --glow-red:       rgba(239, 75, 90, 0.22);
+  --glow-blue:      rgba(79, 140, 255, 0.18);
+  --chart-grid:     #2A2E4A;
 }
 
 [data-theme="brand"] {
-  /* Brand Theme — GoodTires colors */
+  /* Brend mavzusi — GoodTires ranglari */
   --bg-primary:     #EEF2FF;
   --bg-secondary:   #FFFFFF;
   --bg-tertiary:    #E0E9FF;
   --sidebar-bg:     #0A2A6E;
+  --sidebar-text:   #D6E2FF;
+  --sidebar-muted:  #8FA9DB;
   --border:         #BFCFEE;
   --border-bright:  #1E5FB8;
   --accent-red:     #E30613;
   --accent-orange:  #EA7C2B;
   --accent-blue:    #1E5FB8;
   --accent-green:   #16A34A;
+  --accent-violet:  #6D5DF6;
+  --accent-pink:    #E0457B;
+  --accent-cyan:    #0EA5C6;
   --text-primary:   #0A2A6E;
   --text-secondary: #1E5FB8;
   --text-muted:     #6B8CC4;
   --glow-red:       rgba(227, 6, 19, 0.12);
   --glow-blue:      rgba(30, 95, 184, 0.12);
+  --chart-grid:     #D7E2FA;
 }
 
 
@@ -69,6 +87,15 @@
     @apply font-syne font-bold tracking-tight;
   }
 }
+
+/* Gradient kartalar (asosiy ko'rsatkichlar) */
+.g-violet { background-image: linear-gradient(135deg, #E27BF5 0%, #B26BFF 52%, #8A6CFF 100%); }
+.g-cyan   { background-image: linear-gradient(135deg, #2BE3E0 0%, #38B6F7 50%, #6A7CFF 100%); }
+.g-brand  { background-image: linear-gradient(135deg, #FF8A65 0%, #EF4B5A 50%, #C2378F 100%); }
+.g-green  { background-image: linear-gradient(135deg, #43E8A0 0%, #20C38A 50%, #1E9BD7 100%); }
+.g-orange { background-image: linear-gradient(135deg, #FFD15C 0%, #F7A23B 50%, #F2615A 100%); }
+.g-blue   { background-image: linear-gradient(135deg, #5AA8FF 0%, #4F7DFF 50%, #7A5CFF 100%); }
+.panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 1.25rem; }
 
 /* Custom Utilities */
 .glass {
@@ -141,4 +168,22 @@
   .grid > * :where(p, h2, h3, h4, span) { overflow-wrap: anywhere; }
   .grid > * .text-3xl { font-size: 1.5rem; line-height: 2rem; }
   .grid > * .text-2xl { font-size: 1.25rem; line-height: 1.75rem; }
+}
+
+
+/* ── Yirik yozuv: juda mayda o'lchamlar butun ilovada kattalashtiriladi ── */
+.text-\[8px\], .text-\[9px\] { font-size: 11px; }
+.text-\[10px\] { font-size: 12px; line-height: 1.35; }
+.text-\[11px\] { font-size: 12.5px; line-height: 1.4; }
+
+/* ── Touch ekran ── */
+button, a, input, select, textarea, label, [role="button"] { touch-action: manipulation; }
+button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+/* Telefonda kiritish maydonlari 16px — iOS avtomatik kattalashtirmaydi */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px; }
+}
+/* Barmoq bilan boshqariladigan ekranlarda kichik tugmalar ham bosish uchun yetarli */
+@media (pointer: coarse) {
+  button:not(.tap-free) { min-height: 36px; min-width: 36px; }
 }

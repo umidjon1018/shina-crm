@@ -64,22 +64,23 @@ const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => (
     replace={replace}
     onClick={onClick}
     className={`
-      flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+      relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group
       ${isActive
-        ? 'bg-accent-red text-white shadow-glow-red'
-        : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}
+        ? 'g-brand text-white shadow-glow-red'
+        : 'text-sidebarText hover:text-white hover:bg-white/5'}
     `}
   >
-    <Icon size={18} className={`${isActive ? 'text-white' : 'text-text-muted group-hover:text-accent-red'} transition-colors flex-shrink-0`} />
-    <span className="font-medium text-sm">{label}</span>
-    {isActive && <ChevronRight size={14} className="ml-auto opacity-50" />}
+    {isActive && <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-7 rounded-r-full bg-white/90" />}
+    <Icon size={20} className={`${isActive ? 'text-white' : 'text-sidebarMuted group-hover:text-white'} transition-colors flex-shrink-0`} />
+    <span className="font-semibold text-[15px]">{label}</span>
+    {isActive && <ChevronRight size={16} className="ml-auto opacity-70" />}
   </Link>
 )
 
 const SidebarSection = ({ label, children }) => (
-  <div className="mb-2">
-    <p className="px-4 text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">{label}</p>
-    <div className="space-y-0.5">{children}</div>
+  <div className="mb-3">
+    <p className="px-4 text-xs font-bold text-accent-pink uppercase tracking-widest mb-1.5">{label}</p>
+    <div className="space-y-1">{children}</div>
   </div>
 )
 
@@ -223,7 +224,7 @@ export const MainLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-64 safe-sidebar bg-sidebar border-r border-border/30 z-50
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-72 safe-sidebar bg-sidebar border-r border-white/5 z-50
         transition-transform duration-300 transform flex flex-col flex-shrink-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
@@ -244,7 +245,7 @@ export const MainLayout = () => {
           }
           <div className="min-w-0">
             <h1 className="text-base font-syne font-bold text-white leading-tight">{companyName}</h1>
-            <p className="text-[9px] text-text-muted uppercase tracking-widest">CRM</p>
+            <p className="text-[10px] text-sidebarMuted uppercase tracking-widest">CRM</p>
           </div>
           <NotificationsPanel className="ml-auto hidden lg:block" />
         </div>
@@ -276,7 +277,7 @@ export const MainLayout = () => {
               <select
                 value={selectedShopId}
                 onChange={e => setSelectedShop(e.target.value)}
-                className="w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-[15px] text-white focus:outline-none focus:border-accent-red [&>option]:text-black"
               >
                 <option value="all">{t('all_shops')}</option>
                 {activeShops.map(s => (
@@ -284,9 +285,9 @@ export const MainLayout = () => {
                 ))}
               </select>
             ) : (
-              <div className="flex items-center gap-2 px-3 py-2 bg-bg-tertiary border border-border rounded-xl">
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl">
                 <div className="w-2 h-2 rounded-full bg-accent-red flex-shrink-0" />
-                <span className="text-sm text-text-primary truncate">
+                <span className="text-[15px] text-white truncate">
                   {activeShops.find(s => s.id === selectedShopId)?.name || t('all_shops')}
                 </span>
               </div>
@@ -359,7 +360,7 @@ export const MainLayout = () => {
 
           {/* Lang toggle */}
           <div className="flex items-center gap-2 px-2">
-            <Globe size={13} className="text-text-muted" />
+            <Globe size={15} className="text-sidebarMuted" />
             <div className="flex gap-1">
               {['uz', 'ru'].map((l) => (
                 <button
@@ -368,7 +369,7 @@ export const MainLayout = () => {
                   className={`px-2 py-0.5 rounded-lg text-xs font-bold uppercase transition-all ${
                     lang === l
                       ? 'bg-accent-red text-white'
-                      : 'text-text-muted hover:text-text-primary'
+                      : 'text-sidebarMuted hover:text-white'
                   }`}
                 >
                   {l}
@@ -389,8 +390,8 @@ export const MainLayout = () => {
               {user?.name?.[0] || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-text-muted truncate">{user?.role ? t(`mgmt_role_${user.role}`) : ''}</p>
+              <p className="text-sm font-bold text-white truncate">{user?.name}</p>
+              <p className="text-xs text-sidebarMuted truncate">{user?.role ? t(`mgmt_role_${user.role}`) : ''}</p>
             </div>
             {user?.role !== 'admin' && (
               <Pencil size={12} className="text-text-muted group-hover:text-accent-red transition-colors flex-shrink-0" />
@@ -400,7 +401,7 @@ export const MainLayout = () => {
           {/* Logout */}
           <button
             onClick={logout}
-            className="flex items-center gap-2 w-full px-3 py-1.5 rounded-xl text-text-muted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-200"
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sidebarMuted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-200"
           >
             <LogOut size={14} />
             <span className="font-medium text-xs">{t('logout')}</span>

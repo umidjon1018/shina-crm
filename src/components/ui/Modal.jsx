@@ -19,7 +19,9 @@ if (typeof window !== 'undefined') {
   })
 }
 
-const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-4xl', xl: 'sm:max-w-6xl' }
+const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-4xl', xl: 'sm:max-w-7xl' }
+// xl — bo'lim oynasi: telefonda to'liq ekran, kompyuterda deyarli to'liq balandlik
+const HEIGHTS = { xl: 'h-[100dvh] sm:h-[92vh] rounded-none sm:rounded-3xl' }
 
 const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, children }) => {
   const onCloseRef = useRef(onClose)
@@ -47,7 +49,7 @@ const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bo
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }} transition={{ duration: 0.18 }}
-        className={`relative w-full ${SIZES[size] || SIZES.md} max-h-[94dvh] sm:max-h-[90vh] bg-bg-primary border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden`}>
+        className={`relative w-full ${SIZES[size] || SIZES.md} ${HEIGHTS[size] || 'max-h-[94dvh] sm:max-h-[90vh] rounded-t-3xl sm:rounded-3xl'} bg-bg-primary border border-border shadow-2xl flex flex-col overflow-hidden`}>
         {(title || actions) && (
           <div className="flex items-start gap-3 px-4 sm:px-6 py-4 border-b border-border bg-bg-secondary">
             {Icon && <div className="w-10 h-10 rounded-xl bg-accent-red/10 text-accent-red flex items-center justify-center shrink-0"><Icon size={20} /></div>}

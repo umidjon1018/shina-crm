@@ -1,211 +1,150 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
-} from 'recharts'
-import {
-  ShoppingCart, Package, Users, TrendingUp, AlertTriangle, ArrowRight
-} from 'lucide-react'
-import { getSales } from '../api/salesService'
-import { getProducts } from '../api/productService'
-import { getCustomers } from '../api/customerService'
-import { getIncomeBatches } from '../api/incomeService'
-import { getItems } from '../api/itemService'
-import { useDataStore } from '../store/dataStore'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useLangStore } from '../store/langStore'
+import { Wallet, TrendingUp, Receipt, ShoppingBag, UserPlus, RotateCcw, AlertTriangle, ArrowRight, Boxes, CreditCard, Truck } from 'lucide-react'
 import { useShopStore } from '../store/shopStore'
-import DashboardSummary from '../components/DashboardSummary'
+import { useDataStore } from '../store/dataStore'
+import { getDashboardReport } from '../api/reportService'
+import { presetRange } from './Expenses/components/PeriodPicker'
+import { PageHeader, Segmented } from '../components/ui/Kit'
+import { HeroStat, MiniStat, ChartCard, TrendArea, DonutChart, GradientBars, Legend, PALETTE, shortNum } from '../components/charts/Charts'
+import { formatPrice, formatNumber, formatUSD } from '../utils/format'
 
-const fmt = (n) => new Intl.NumberFormat('uz-UZ').format(Math.round(n))
+const PRESETS = ['today', 'week', 'month', 'last_month']
+const WD = { uz: ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'], ru: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] }
+const trend = (cur, prev) => (prev ? Math.round(((cur - prev) / Math.abs(prev)) * 100) : null)
 
-const KpiCard = ({ icon: Icon, label, value, sub, color }) => (
-  <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col gap-3 min-w-0">
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
-      <Icon size={20} />
-    </div>
-    <div className="min-w-0">
-      <p className="text-text-secondary text-sm">{label}</p>
-      <p className="text-xl sm:text-2xl font-syne font-bold mt-0.5 leading-tight [overflow-wrap:anywhere]">{value}</p>
-      {sub && <p className="text-text-muted text-xs mt-1">{sub}</p>}
-    </div>
-  </div>
-)
-
+// Bosh sahifa: asosiy ko'rsatkichlar va diagrammalar (hammasi serverda hisoblanadi — /api/reports/dashboard)
 export const Dashboard = () => {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { t } = useTranslation()
-  const { lang } = useLangStore()
   const { selectedShopId } = useShopStore()
   const { version } = useDataStore()
-  const today = new Date().toISOString().slice(0, 10)
-  const locale = lang === 'ru' ? 'ru-RU' : 'uz-UZ'
-
-  const [MOCK_SALES, setMockSales] = useState([])
-  const [MOCK_PRODUCTS, setMockProducts] = useState([])
-  const [MOCK_CUSTOMERS, setMockCustomers] = useState([])
-  const [MOCK_INCOME_BATCHES, setMockIncomeBatches] = useState([])
-  const [MOCK_ITEMS, setMockItems] = useState([])
-  const MOCK_BATCHES = MOCK_INCOME_BATCHES
+  const [preset, setPreset] = useState('month')
+  const [d, setD] = useState(null)
 
   useEffect(() => {
-    Promise.all([getSales(), getProducts(), getCustomers(), getIncomeBatches(), getItems()])
-      .then(([sales, products, customers, batches, items]) => {
-        setMockSales(sales)
-        setMockProducts(products)
-        setMockCustomers(customers)
-        setMockIncomeBatches(batches)
-        setMockItems(items)
-      })
-  }, [version])
+    getDashboardReport({ ...presetRange(preset), shop_id: selectedShopId }).then(setD).catch(() => setD(null))
+  }, [preset, selectedShopId, version])
 
-  const stats = useMemo(() => {
-    const shopSales = selectedShopId === 'all' ? MOCK_SALES : MOCK_SALES.filter(s => s.shopId === selectedShopId)
-    const shopIncomeBatches = selectedShopId === 'all' ? MOCK_INCOME_BATCHES : MOCK_INCOME_BATCHES.filter(b => b.shopId === selectedShopId)
-    const completed = shopSales.filter(s => s.status === 'completed')
-
-    const todaySales = completed.filter(s => s.soldAt.slice(0, 10) === today)
-    const todayTotal = todaySales.reduce((s, x) => s + x.total, 0)
-    const todaySalesCount = todaySales.length
-
-    const shopBatchIds = new Set(
-      (selectedShopId === 'all' ? MOCK_BATCHES : MOCK_BATCHES.filter(b => b.shopId === selectedShopId)).map(b => b.id)
-    )
-    const inStock = MOCK_ITEMS.filter(i => i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length
-
-    const debtUSD = shopIncomeBatches
-      ? shopIncomeBatches.reduce((s, b) => s + (b.debtUSD || 0), 0)
-      : 0
-
-    const customerIds = selectedShopId === 'all'
-      ? new Set(MOCK_CUSTOMERS.map(c => c.id))
-      : new Set(shopSales.filter(s => s.customerId).map(s => s.customerId))
-    const customers = customerIds.size
-
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date()
-      d.setDate(d.getDate() - (6 - i))
-      return d.toISOString().slice(0, 10)
-    })
-
-    const uzDays = ['Yak', 'Du', 'Se', 'Cho', 'Pay', 'Ju', 'Sha']
-    const chart = days.map(day => {
-      const d = new Date(day + 'T12:00:00')
-      const dayName = lang === 'uz'
-        ? `${uzDays[d.getDay()]} ${d.getDate()}`
-        : d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' })
-      const total = completed
-        .filter(s => s.soldAt.slice(0, 10) === day)
-        .reduce((s, x) => s + x.total, 0)
-      return { day: dayName, total }
-    })
-
-    const recent = [...shopSales]
-      .sort((a, b) => new Date(b.soldAt) - new Date(a.soldAt))
-      .slice(0, 5)
-
-    const shopBatchesArr = selectedShopId === 'all' ? MOCK_BATCHES : MOCK_BATCHES.filter(b => b.shopId === selectedShopId)
-    const lowStock = MOCK_PRODUCTS.filter(p => {
-      if (!p.isActive) return false
-      if (!shopBatchesArr.some(b => b.productId === p.id)) return false
-      const stock = MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length
-      return p.lowStockThreshold != null && stock <= p.lowStockThreshold
-    }).map(p => ({
-      ...p,
-      currentStock: MOCK_ITEMS.filter(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId)).length,
-      unit: MOCK_ITEMS.find(i => i.productId === p.id && i.status === 'in_stock' && shopBatchIds.has(i.batchId))?.unit
-        || MOCK_ITEMS.find(i => i.productId === p.id)?.unit || 'dona'
-    }))
-
-    return { todayTotal, todaySalesCount, inStock, debtUSD, customers, chart, recent, lowStock }
-  }, [today, lang, selectedShopId, MOCK_SALES, MOCK_PRODUCTS, MOCK_ITEMS, MOCK_INCOME_BATCHES, MOCK_CUSTOMERS])
+  const c = d?.current, p = d?.previous
+  const hasProfit = c && c.profit !== undefined
+  const lang = i18n.language === 'ru' ? 'ru' : 'uz'
+  const payLabel = (k) => ({ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_ns_pay_transfer') }[k] || k)
+  const daily = (d?.daily || []).map(x => ({ ...x, label: `${x.date.slice(8, 10)}.${x.date.slice(5, 7)}` }))
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 sm:space-y-6"
-    >
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight">{t('dashboard')}</h1>
-          <p className="text-text-secondary">{t('dash_subtitle')}</p>
-        </div>
-        <div className="bg-bg-secondary px-4 py-2 rounded-xl border border-border text-sm font-medium">
-          {t('dash_today')}: <span className="text-accent-blue">
-            {new Date().toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
-          </span>
-        </div>
-      </div>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
+      <PageHeader title={t('dashboard')} subtitle={t('dash_vs_prev')}
+        actions={<Segmented value={preset} onChange={setPreset} options={PRESETS.map(k => ({ id: k, label: t('fin_period_' + k) }))} />} />
 
-      <DashboardSummary supplierDebtUSD={stats.debtUSD} />
-
-      {/* Bottom 2 columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Oxirgi sotuvlar */}
-        <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h2 className="font-syne font-bold text-base">{t('dash_recent_sales')}</h2>
-            <button
-              onClick={() => navigate('/sales?tab=history')}
-              className="text-text-muted hover:text-text-primary flex items-center gap-1 text-sm transition-colors"
-            >
-              {t('filter_all')} <ArrowRight size={14} />
-            </button>
+      {!c ? (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">{[0, 1, 2, 3].map(i => <div key={i} className="h-36 panel animate-pulse" />)}</div>
+      ) : (<>
+        {/* Asosiy ko'rsatkichlar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+          <HeroStat gradient="violet" icon={Wallet} label={t('dash_k_revenue')} value={shortNum(c.revenue)} unit={t('unit_som')}
+            trend={trend(c.revenue, p.revenue)} sub={formatNumber(c.revenue)} />
+          {hasProfit
+            ? <HeroStat gradient="cyan" icon={TrendingUp} label={t('dash_k_profit')} value={shortNum(c.profit)} unit={t('unit_som')}
+                trend={trend(c.profit, p.profit)} sub={formatNumber(c.profit)} />
+            : <HeroStat gradient="cyan" icon={Receipt} label={t('dash_k_checks')} value={c.salesCount} trend={trend(c.salesCount, p.salesCount)} />}
+          <div className="grid grid-cols-1 gap-3">
+            <MiniStat icon={Receipt} tone="pink" label={t('dash_k_checks')} value={c.salesCount} delta={trend(c.salesCount, p.salesCount)} />
+            <MiniStat icon={ShoppingBag} tone="cyan" label={t('dash_k_avg')} value={formatNumber(c.avgCheck)} delta={trend(c.avgCheck, p.avgCheck)} />
           </div>
-          <div className="space-y-2 flex-1">
-            {stats.recent.map(sale => (
-              <div key={sale.id} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                <div>
-                  <p className="text-sm font-medium">{sale.customerName}</p>
-                  <p className="text-xs text-text-muted">
-                    {new Date(sale.soldAt).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    {' · '}{t('pay_' + sale.paymentType) || sale.paymentType}
-                  </p>
-                </div>
-                {sale.status === 'cancelled'
-                ? <span className="text-xs bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full font-medium">{t('cancelled') || 'Bekor'}</span>
-                : <span className="text-sm font-semibold text-green-500">{fmt(sale.total)} {t('dash_so_m')}</span>
-              }
-              </div>
-            ))}
+          <div className="grid grid-cols-1 gap-3">
+            <MiniStat icon={UserPlus} tone="green" label={t('dash_k_new_customers')} value={c.newCustomers} delta={trend(c.newCustomers, p.newCustomers)} />
+            <MiniStat icon={RotateCcw} tone="orange" label={t('dash_k_returns')} value={formatNumber(c.returnsAmount)} />
           </div>
         </div>
 
-        {/* Kam qolgan tovarlar */}
-        <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 flex flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h2 className="font-syne font-bold text-base">{t('dash_low_stock')}</h2>
-            <button
-              onClick={() => navigate('/warehouse')}
-              className="text-text-muted hover:text-text-primary flex items-center gap-1 text-sm transition-colors"
-            >
-              {t('dash_to_warehouse')} <ArrowRight size={14} />
-            </button>
-          </div>
-          <div className="space-y-2 flex-1">
-            {stats.lowStock.length === 0 && (
-              <p className="text-text-muted text-sm py-4 text-center">{t('dash_all_ok')}</p>
-            )}
-            {stats.lowStock.map(p => (
-              <div key={p.id} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                <div className="flex items-center gap-2.5">
-                  <AlertTriangle size={15} className="text-amber-500 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">{p.name}</p>
-                    <p className="text-xs text-text-muted">{t('cat_' + p.category, { defaultValue: p.categoryLabel })}</p>
+        {/* Dinamika + to'lov turlari */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4">
+          <ChartCard className="xl:col-span-2" title={t('dash_chart_period')}
+            right={<Legend items={[{ label: t('dash_k_revenue'), color: PALETTE[0] }, ...(hasProfit ? [{ label: t('dash_k_profit'), color: PALETTE[1], dashed: true }] : [])]} />}>
+            <TrendArea data={daily} height={270} valueFormatter={formatPrice}
+              series={[{ key: 'revenue', label: t('dash_k_revenue'), color: PALETTE[0] }, ...(hasProfit ? [{ key: 'profit', label: t('dash_k_profit'), color: PALETTE[1], dashed: true }] : [])]} />
+          </ChartCard>
+          <ChartCard title={t('dash_payments')}>
+            <DonutChart height={190} valueFormatter={formatPrice} centerLabel={t('dash_k_checks')} centerValue={c.salesCount}
+              data={(d.payments || []).map(x => ({ name: payLabel(x.type), value: x.amount }))} />
+          </ChartCard>
+        </div>
+
+        {/* Kategoriyalar, hafta kunlari, top tovarlar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+          <ChartCard title={t('dash_categories')}>
+            <DonutChart height={190} valueFormatter={formatPrice} centerLabel={t('dash_k_items')} centerValue={c.itemsSold}
+              data={(d.categories || []).map(x => ({ name: x.name, value: x.revenue }))} />
+          </ChartCard>
+          <ChartCard title={t('dash_weekdays')} subtitle={t('dash_weekdays_sub')}>
+            <GradientBars height={220} name={t('dash_k_checks')} valueFormatter={formatNumber}
+              data={(d.weekday || []).map((x, i) => ({ label: WD[lang][i], value: x.count }))} />
+          </ChartCard>
+          <ChartCard title={t('dash_top_products')} className="lg:col-span-2 xl:col-span-1">
+            <div className="space-y-3">
+              {(d.topProducts || []).map((x, i) => {
+                const max = d.topProducts[0]?.revenue || 1
+                return (
+                  <div key={x.id} className="min-w-0">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="text-[15px] font-semibold text-text-primary truncate">{i + 1}. {x.name}</p>
+                      <p className="text-sm font-bold text-text-primary whitespace-nowrap">{shortNum(x.revenue)}</p>
+                    </div>
+                    <div className="mt-1 h-2 rounded-full bg-bg-tertiary overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${Math.max(4, (x.revenue / max) * 100)}%`, background: `linear-gradient(90deg, ${PALETTE[0]}, ${PALETTE[1]})` }} />
+                    </div>
+                    <p className="text-xs text-text-muted mt-0.5">{x.qty} {t('unit_pcs')}</p>
                   </div>
+                )
+              })}
+              {!d.topProducts?.length && <p className="text-sm text-text-muted py-6 text-center">—</p>}
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Oxirgi sotuvlar, kam qolganlar, qarzlar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+          <ChartCard title={t('dash_recent_sales')}
+            right={<button onClick={() => navigate('/sales?section=history')} className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">{t('filter_all')} <ArrowRight size={15} /></button>}>
+            <div className="divide-y divide-border">
+              {(d.recent || []).map(r => (
+                <div key={r.id} className="flex items-center gap-3 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-semibold text-text-primary truncate">{r.customer || t('dash_walk_in')}</p>
+                    <p className="text-sm text-text-muted">{r.at?.slice(8, 10)}.{r.at?.slice(5, 7)} {r.at?.slice(11, 16)} · {payLabel(r.type)}</p>
+                  </div>
+                  {r.status === 'cancelled'
+                    ? <span className="text-sm font-bold text-accent-red">{t('sl_hist_status_cancelled')}</span>
+                    : <span className="text-[15px] font-bold text-accent-green whitespace-nowrap">{formatNumber(r.amount)}</span>}
                 </div>
-                <span className="text-sm font-semibold text-amber-500">
-                  {p.currentStock} / {p.lowStockThreshold} {p.unit || 'dona'}
-                </span>
-              </div>
-            ))}
+              ))}
+              {!d.recent?.length && <p className="text-sm text-text-muted py-6 text-center">—</p>}
+            </div>
+          </ChartCard>
+          <ChartCard title={t('dash_low_stock')}
+            right={<button onClick={() => navigate('/warehouse')} className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">{t('dash_to_warehouse')} <ArrowRight size={15} /></button>}>
+            <div className="divide-y divide-border">
+              {(d.lowStock || []).map(x => (
+                <div key={x.id} className="flex items-center gap-3 py-2.5">
+                  <AlertTriangle size={18} className="text-accent-orange shrink-0" />
+                  <p className="flex-1 text-[15px] text-text-primary truncate">{x.name}</p>
+                  <span className={`text-[15px] font-bold whitespace-nowrap ${x.qty === 0 ? 'text-accent-red' : 'text-accent-orange'}`}>{x.qty} / {x.threshold}</span>
+                </div>
+              ))}
+              {!d.lowStock?.length && <p className="text-sm text-text-muted py-6 text-center">{t('dash_all_ok')}</p>}
+            </div>
+          </ChartCard>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 lg:col-span-2 xl:col-span-1">
+            <MiniStat icon={CreditCard} tone="pink" label={t('dash_installment_debt')} value={formatNumber(d.installmentDebt)} onClick={() => navigate('/sales?section=installment')} />
+            {d.supplierDebtUSD !== undefined && <MiniStat icon={Truck} tone="orange" label={t('dash_debt_suppliers')} value={formatUSD(d.supplierDebtUSD)} onClick={() => navigate('/income')} />}
+            <MiniStat icon={Boxes} tone="violet" label={t('dash_stock_now')} value={`${formatNumber(d.stock?.qty)} ${t('unit_pcs')}`} onClick={() => navigate('/warehouse')} />
+            <MiniStat icon={Wallet} tone="blue" label={t('dash_stock_value')} value={shortNum(d.stock?.retail)} />
           </div>
         </div>
-      </div>
+      </>)}
     </motion.div>
   )
 }
