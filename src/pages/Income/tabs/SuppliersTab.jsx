@@ -36,6 +36,11 @@ const SuppliersTab = ({ ctx }) => {
     paged1, totalPages1, paged2, totalPages2,
   } = ctx
 
+  // Do'kon tanlanganda — shu do'konda kirimi borlar va hali hech qayerda kirimi yo'q (yangi) yetkazib beruvchilar
+  const visibleSuppliers = selectedShopId === 'all'
+    ? suppliers
+    : suppliers.filter(s => shopBatches.some(b => b.supplierId === s.id) || !batches.some(b => b.supplierId === s.id))
+
   return (
           <div className="space-y-5 sm:space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -48,8 +53,7 @@ const SuppliersTab = ({ ctx }) => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-              {/* Do'kon tanlanganda — shu do'konda kirimi borlar va hali hech qayerda kirimi yo'q (yangi) yetkazib beruvchilar */}
-              {(selectedShopId === 'all' ? suppliers : suppliers.filter(s => shopBatches.some(b => b.supplierId === s.id) || !batches.some(b => b.supplierId === s.id))).map(s => {
+              {visibleSuppliers.map(s => {
                 const supplierBatches = shopBatches.filter(b => b.supplierId === s.id)
                 const supplierDebts = supplierBatches.reduce((sum, b) => sum + (b.debtUSD || 0), 0)
                 const contractActivatedAt = s.contractActivatedAt || null
@@ -171,6 +175,13 @@ const SuppliersTab = ({ ctx }) => {
                 )
               })}
             </div>
+            {visibleSuppliers.length === 0 && (
+              <div className="bg-bg-secondary border border-border rounded-2xl py-14 px-4 text-center space-y-1">
+                <Truck size={32} className="mx-auto text-text-muted opacity-50" />
+                <p className="text-[15px] font-semibold text-text-primary">{suppliers.length ? t('inc_no_suppliers_shop') : t('inc_no_suppliers')}</p>
+                <p className="text-sm text-text-muted">{t('inc_no_suppliers_hint')}</p>
+              </div>
+            )}
           </div>
 
   )

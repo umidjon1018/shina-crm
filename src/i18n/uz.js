@@ -4502,4 +4502,7 @@ export default {
   sup_err_name: "Nomini kiriting",
   sup_err_pick_supplier: "Yetkazib beruvchini tanlang",
   inc_supplier_no_contract: "Kiritilmagan",
+  inc_no_suppliers: "Yetkazib beruvchilar yo'q",
+  inc_no_suppliers_shop: "Bu do'konda yetkazib beruvchilardan kirim yo'q",
+  inc_no_suppliers_hint: "\"Yangi yetkazib beruvchi\" tugmasi bilan qo'shing. Kirimga keyin ham biriktirish mumkin — Kirimlar ro'yxatida \"Biriktirish\" yoki qaytarish oynasida.",
 }
