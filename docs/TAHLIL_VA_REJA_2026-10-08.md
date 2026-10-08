@@ -324,7 +324,10 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - Xomashyoni ko'chirish, ulgurji hujjatda barkod skaneri, Kirim ro'yxatlari telefonda kartochka.
 - AI kundalik tahlilda **Ulgurji savdo** va **Ishlab chiqarish** bo'limlari (`aiSections.wholesale/production`: tushum, foyda, qarz va muddati o'tgani, konsignatsiya, dilerlar; buyurtmalar, brak %, xomashyo sarfi reja/fakt, tugayotgan xomashyo, muddati yaqin). Faqat shunday do'kon turi bo'lsa ko'rinadi va tahlil qilinadi; AI yordamchi `get_section_report` ham ularni oladi.
 - Moliya (Xarajatlar, Daromadlar, Pul harakati, Yetkazib beruvchi to'lovlari, Kapital) va Marketing (Kodlar, Hisobot, Sertifikatlar, Xabarlar tarixi) ro'yxatlari telefonda kartochka.
-- **Qoldi (ixtiyoriy):** kg (bulk) tovarni sotish (kassa/ulgurji — hozir faqat dona), 7 eski hisobotni serverga ko'chirish.
+- **kg (miqdorli) tovarni sotish** (2026-10-09): kassada "Kg / litr tovar" tanlash oynasi (qoldiq, miqdor, narx, minimal narx), savatda alohida qator; backend `utils/bulkSale.js` — lotlardan FEFO yechish, `sale_items.qty/unit_price/unit/cost`, bekorda o'sha lotlarga qaytadi; tannarx barcha hisobotlarda `COALESCE(si.cost, partiya)`. Ulgurji: hujjatda kasr miqdor, qisman qaytarish (qaytgan miqdor yangi lot), konsignatsiyaga berilmaydi. Qaytarish (kassa): kg qatori tanlanmaydi — sotuvni bekor qilish orqali.
+- **7 eski hisobot serverda** (2026-10-09): `analyticsController` — `/api/reports/{sales,stock,used,customers,staff,profit,finance}-overview`; Hisobotlar sahifasida shu bo'limlar yangi ko'rinishda (KPI, diagramma, jadval, oldingi davr bilan solishtirma). Eski batafsil ko'rinish "Eski batafsil ko'rinish" tugmasi bilan (faqat shunda hamma ma'lumot yuklanadi) — foydalanuvchi tasdiqlagach olib tashlanadi.
+- **Sotuvchi moliyani ko'rmaydi** (2026-10-09): xarajat/kapital API ruxsat bilan, AI toollari `TOOL_PERMS`, yetkazib beruvchi qarzi AI bo'limlarida sezgir.
+- **Keyinga qoldirilgan (foydalanuvchi qarori):** fiskal chek adapteri (provayder tanlovi), ikkinchi mijoz (multi-tenant).
 
 ---
 
