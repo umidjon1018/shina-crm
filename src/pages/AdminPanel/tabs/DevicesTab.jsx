@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Ban, CheckSquare, RotateCcw, ScanFace, Shield, ShieldAlert, ShieldCheck, Smartphone, Trash2, User, X, XSquare } from 'lucide-react'
+import { AlertTriangle, Ban, CheckSquare, ScanFace, ShieldAlert, Smartphone, User, X, XSquare } from 'lucide-react'
 import { useAuthStore } from '../../../store/authStore'
-import { useSettingsStore } from '../../../store/settingsStore'
 import { useAuditStore } from '../../../store/auditStore'
-import { useFaceStore } from '../../../store/faceStore'
 import api from '../../../api/client'
 import { MONTHS_UZ, MONTHS_RU, formatDateTimeWithMonths, Badge, ModalWrap } from '../apHelpers.jsx'
 
@@ -16,16 +14,11 @@ function DevicesTab() {
   const { approveDevice, rejectDevice, revokeDevice } = useAuthStore()
   const { addLog } = useAuditStore()
   const { user: me } = useAuthStore()
-  const { employees } = useSettingsStore()
-  const { descriptors, removeDescriptor } = useFaceStore()
   const [attempts, setAttempts] = useState([])
-  const [trusted, setTrusted] = useState([])
   const [selfieModal, setSelfieModal] = useState(null)
   const [showClearAttempts, setShowClearAttempts] = useState(false)
   const PAGE_SIZE = 5
   const [attPage, setAttPage] = useState(1)
-  const [trustedPage, setTrustedPage] = useState(1)
-  const [facePage, setFacePage] = useState(1)
 
   const load = async () => {
     try {
@@ -45,10 +38,6 @@ function DevicesTab() {
         allowMultiDevice: a.allow_multi_device || false,
       })))
     } catch { setAttempts([]) }
-    try {
-      const raw = JSON.parse(localStorage.getItem('shina_trusted_devices') || '[]')
-      setTrusted(raw.map(d => typeof d === 'string' ? { deviceId: d, userId: null } : d))
-    } catch { setTrusted([]) }
   }
   useEffect(() => { load() }, [])
   // Yangi kirish urinishi yoki holat o'zgarishi — ro'yxat darhol yangilanadi
@@ -63,20 +52,6 @@ function DevicesTab() {
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Kirish tarixi tozalandi', actionKey: 'audit_login_history_cleared', entity: 'device', details: `${attempts.length} ta yozuv` })
     setAttempts([])
     setShowClearAttempts(false)
-  }
-
-  const resetFaceId = (userId) => {
-    removeDescriptor(userId)
-    const name = faceIdOwner(userId)
-    addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Yuz ID o\'chirildi', actionKey: 'audit_face_id_deleted', entity: 'device', details: name })
-  }
-
-  const faceIdOwner = (userId) => {
-    const fromAttempts = attempts.find(a => a.userId === userId || a.username === userId)
-    if (fromAttempts) return fromAttempts.fullName || fromAttempts.username
-    const fromEmployees = employees.find(e => e.id === userId)
-    if (fromEmployees) return fromEmployees.name
-    return userId
   }
 
   const parseUserAgent = (ua) => {
@@ -119,22 +94,10 @@ function DevicesTab() {
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Qurilma bloklandi', entity: 'device', details: `${a.username} — ${a.deviceId}` })
     load()
   }
-  const removeTrusted = (deviceId) => {
-    const updated = trusted.filter(d => (d.deviceId || d) !== deviceId)
-    localStorage.setItem('shina_trusted_devices', JSON.stringify(updated))
-    addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Ishonchli qurilma o\'chirildi', actionKey: 'audit_trusted_device_deleted', entity: 'device', details: deviceId })
-    setTrusted(updated)
-  }
-
   const needsAttention = attempts.filter(a => !a.isTrusted && (a.status === 'pending' || a.status === 'face_review')).length
 
-  const faceKeys = Object.keys(descriptors)
   const attPages  = Math.max(1, Math.ceil(attempts.length / PAGE_SIZE))
-  const trPages   = Math.max(1, Math.ceil(trusted.length / PAGE_SIZE))
-  const facePages = Math.max(1, Math.ceil(faceKeys.length / PAGE_SIZE))
   const attSlice  = attempts.slice((attPage - 1) * PAGE_SIZE, attPage * PAGE_SIZE)
-  const trSlice   = trusted.slice((trustedPage - 1) * PAGE_SIZE, trustedPage * PAGE_SIZE)
-  const faceSlice = faceKeys.slice((facePage - 1) * PAGE_SIZE, facePage * PAGE_SIZE)
 
   const Pager = ({ page, total, setPage, itemCount }) => total <= 1 ? null : (
     <div className="flex items-center justify-between px-5 py-3 border-t border-border">
@@ -242,64 +205,6 @@ function DevicesTab() {
           </div>
         )}
       </div>
-
-      <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border flex items-center gap-3">
-          <ShieldCheck size={18} className="text-accent-green" />
-          <h3 className="font-syne font-bold text-text-primary">{t('adm_dev_trusted')}</h3>
-          <span className="ml-auto text-xs text-text-muted">{trusted.length} {t('unit_pcs')}</span>
-        </div>
-        {trusted.length === 0 ? (
-          <div className="text-center py-10 text-text-muted text-sm">{t('adm_dev_no_trusted')}</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {trSlice.map(d => {
-              const did = d.deviceId || d
-              const owner = attempts.find(a => a.deviceId === did)
-              return (
-                <div key={did} className="px-5 py-3.5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-accent-green/10 flex items-center justify-center flex-shrink-0">
-                    <Shield size={14} className="text-accent-green" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {owner && <p className="text-sm font-semibold text-text-primary">{owner.fullName || owner.username}</p>}
-                    <code className="text-xs text-text-secondary font-mono truncate block opacity-50">{did}</code>
-                  </div>
-                  <button onClick={() => removeTrusted(did)} className="p-1.5 hover:bg-accent-red/10 rounded-lg text-text-muted hover:text-accent-red transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              )
-            })}
-            <Pager page={trustedPage} total={trPages} setPage={setTrustedPage} itemCount={trusted.length} />
-          </div>
-        )}
-      </div>
-
-      {Object.keys(descriptors).length > 0 && (
-        <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-border flex items-center gap-3">
-            <ScanFace size={18} className="text-accent-blue" />
-            <h3 className="font-syne font-bold text-text-primary">{t('adm_dev_face_id')}</h3>
-            <span className="ml-auto text-xs text-text-muted">{Object.keys(descriptors).length} {t('adm_dev_face_registered')}</span>
-          </div>
-          <div className="divide-y divide-border">
-            {faceSlice.map(userId => (
-              <div key={userId} className="px-5 py-3.5 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center flex-shrink-0">
-                  <ScanFace size={14} className="text-accent-blue" />
-                </div>
-                <p className="flex-1 text-sm font-semibold text-text-primary">{faceIdOwner(userId)}</p>
-                <button onClick={() => resetFaceId(userId)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/10 transition-colors">
-                  <RotateCcw size={12} /> {t('adm_dev_re_register')}
-                </button>
-              </div>
-            ))}
-            <Pager page={facePage} total={facePages} setPage={setFacePage} itemCount={faceKeys.length} />
-          </div>
-        </div>
-      )}
 
       <AnimatePresence>
         {selfieModal && (

@@ -308,18 +308,6 @@ export const useSettingsStore = create(
       },
       hiddenPages: [],
 
-      // AI Agent — API kaliti va chuqurroq sozlamalar (Admin panelida boshqariladi)
-      aiApiKey: '',
-      aiApiProvider: 'anthropic', // anthropic | openai
-      aiModel: 'claude-sonnet',
-      aiMonthlyLimit: 0, // 0 = cheklanmagan
-      aiAgentEnabled: true,
-      setAiApiKey: (key) => set({ aiApiKey: key }),
-      setAiApiProvider: (provider) => set({ aiApiProvider: provider }),
-      setAiModel: (model) => set({ aiModel: model }),
-      setAiMonthlyLimit: (limit) => set({ aiMonthlyLimit: limit }),
-      toggleAiAgentEnabled: () => set(s => ({ aiAgentEnabled: !s.aiAgentEnabled })),
-
       setSidebarLabel: (key, label, lang) => set(s => {
         const prev = s.sidebarLabels[key]
         const prevObj = (prev && typeof prev === 'object') ? prev : {}
@@ -488,6 +476,8 @@ export const useSettingsStore = create(
           state.employees = []
         }
         if (version < 6) {
+          // AI kaliti endi serverda (Admin → Sozlamalar)
+          delete state.aiApiKey; delete state.aiApiProvider; delete state.aiModel; delete state.aiMonthlyLimit; delete state.aiAgentEnabled
           // Xodim parollari va mahalliy tahrir tarixi endi brauzerda saqlanmaydi
           state.employees = (state.employees || []).map(({ password, ...e }) => e)
           state.employeeEditHistory = []

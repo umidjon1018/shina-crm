@@ -1,4 +1,3 @@
-import { useSettingsStore } from '../store/settingsStore'
 import { getFreshToken } from './session'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
@@ -28,7 +27,6 @@ export const getInstagramStats = async () => {
 
 export const streamChat = async ({ messages, agentId, systemPrompt, section, onToken, onModel, onDone, onError }) => {
   const token = await getFreshToken()
-  const { aiApiKey } = useSettingsStore.getState()
 
   let response
   try {
@@ -38,7 +36,7 @@ export const streamChat = async ({ messages, agentId, systemPrompt, section, onT
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ messages, agentId, systemPrompt, section, ...(aiApiKey ? { apiKey: aiApiKey } : {}) }),
+      body: JSON.stringify({ messages, agentId, systemPrompt, section }),
     })
   } catch (err) {
     onError?.('Server bilan aloqa yo\'q')

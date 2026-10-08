@@ -1,9 +1,62 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building, Settings, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useAuditStore } from '../../../store/auditStore'
 import { useAuthStore } from '../../../store/authStore'
+import { getAiSettings, saveAiSettings } from '../../../api/settingsService'
+import { toast, errorText } from '../../../components/ui/Toast'
+
+// AI kaliti serverda saqlanadi (barcha qurilmalar va kundalik tahlil uchun bitta), ekranga faqat oxirgi 4 belgisi chiqadi
+const AiKeyCard = () => {
+  const { t } = useTranslation()
+  const [status, setStatus] = useState(null)
+  const [value, setValue] = useState('')
+  const [show, setShow] = useState(false)
+  const [saving, setSaving] = useState(false)
+  useEffect(() => { getAiSettings().then(setStatus).catch(() => {}) }, [])
+  const save = async (apiKey) => {
+    setSaving(true)
+    try { setStatus(await saveAiSettings(apiKey)); setValue(''); toast(t('mkt_set_saved')) }
+    catch (e) { toast(errorText(e), 'error') }
+    finally { setSaving(false) }
+  }
+  return (
+    <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center"><KeyRound size={20}/></div>
+        <div>
+          <h3 className="font-syne font-bold text-text-primary text-base">{t('adm_set_ai_title')}</h3>
+          <p className="text-xs text-text-muted">{t('adm_ai_key_server_note')}</p>
+        </div>
+      </div>
+      {status && (
+        <p className={`text-sm font-semibold ${status.hasKey ? 'text-accent-green' : 'text-accent-red'}`}>
+          {status.hasKey ? t(status.source === 'env' ? 'adm_ai_key_env' : 'adm_ai_key_set', { hint: status.hint }) : t('adm_ai_key_none')}
+        </p>
+      )}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 relative">
+          <input type={show ? 'text' : 'password'} value={value} onChange={e => setValue(e.target.value)}
+            placeholder={t('adm_set_ai_key_placeholder')}
+            className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 pr-10 text-text-primary focus:outline-none focus:border-accent-red text-sm font-mono" />
+          <button type="button" onClick={() => setShow(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
+            {show ? <EyeOff size={16}/> : <Eye size={16}/>}
+          </button>
+        </div>
+        <button disabled={saving || !value.trim()} onClick={() => save(value.trim())}
+          className="px-4 py-2.5 rounded-xl font-bold text-sm bg-accent-red text-white hover:opacity-90 shadow-glow-red disabled:opacity-50">
+          {t('save')}
+        </button>
+      </div>
+      {status?.source === 'settings' && (
+        <button disabled={saving} onClick={() => save('')} className="text-xs font-semibold text-text-muted hover:text-accent-red">
+          {t('adm_ai_key_remove')}
+        </button>
+      )}
+    </div>
+  )
+}
 
 function SettingsTab() {
   const { t, i18n } = useTranslation()
@@ -11,8 +64,6 @@ function SettingsTab() {
     companyName, companyLogo, companyLogoOriginal, loginIconMode, loginPageTitle, sidebarLogoSize,
     setCompanyName, setCompanyLogo, setCompanyLogoOriginal, setLoginIconMode, setLoginPageTitle, setSidebarLogoSize,
     sidebarLabels, hiddenPages, setSidebarLabel, toggleHiddenPage,
-    aiApiKey, aiApiProvider, setAiApiKey, setAiApiProvider,
-    aiModel, setAiModel, aiMonthlyLimit, setAiMonthlyLimit, aiAgentEnabled, toggleAiAgentEnabled,
   } = useSettingsStore()
   const { addLog } = useAuditStore()
   const { user: me } = useAuthStore()
@@ -83,9 +134,6 @@ function SettingsTab() {
       setCropPad({ top: 0, right: 0, bottom: 0, left: 0 })
     }
   }
-
-  const [showAiKey, setShowAiKey] = useState(false)
-  const [aiKeySaved, setAiKeySaved] = useState(false)
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-2xl">
@@ -302,76 +350,8 @@ function SettingsTab() {
         </div>
       </div>
 
-      {/* AI Agent */}
-      <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center"><KeyRound size={20}/></div>
-            <div>
-              <h3 className="font-syne font-bold text-text-primary text-base">🤖 {t('adm_set_ai_title')}</h3>
-              <p className="text-xs text-text-muted">{t('adm_set_ai_subtitle')}</p>
-            </div>
-          </div>
-          <button onClick={() => { toggleAiAgentEnabled(); addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: aiAgentEnabled ? 'AI Agent o\'chirildi' : 'AI Agent yoqildi', actionKey: aiAgentEnabled ? 'audit_ai_disabled' : 'audit_ai_enabled', entity: 'settings', details: 'aiAgentEnabled' }) }}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${aiAgentEnabled ? 'bg-accent-green/10 text-accent-green hover:bg-accent-green/20' : 'bg-bg-primary text-text-muted hover:text-accent-red hover:bg-accent-red/10 border border-border'}`}>
-            {aiAgentEnabled ? t('adm_set_ai_enabled') : t('adm_set_ai_disabled')}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_provider')}</label>
-            <select value={aiApiProvider} onChange={e=>setAiApiProvider(e.target.value)}
-              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm">
-              <option value="anthropic">Anthropic (Claude)</option>
-              <option value="openai">OpenAI (ChatGPT)</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_model')}</label>
-            <select value={aiModel} onChange={e=>setAiModel(e.target.value)}
-              className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm">
-              {aiApiProvider === 'anthropic' ? (
-                <>
-                  <option value="claude-haiku">Claude Haiku ({t('adm_ai_desc_fast')})</option>
-                  <option value="claude-sonnet">Claude Sonnet ({t('adm_ai_desc_balanced')})</option>
-                  <option value="claude-opus">Claude Opus ({t('adm_ai_desc_powerful')})</option>
-                </>
-              ) : (
-                <>
-                  <option value="gpt-4o-mini">GPT-4o mini ({t('adm_ai_desc_fast')})</option>
-                  <option value="gpt-4o">GPT-4o ({t('adm_ai_desc_balanced')})</option>
-                </>
-              )}
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_key')}</label>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 relative">
-              <input type={showAiKey ? 'text' : 'password'} value={aiApiKey} onChange={e=>setAiApiKey(e.target.value)}
-                placeholder={t('adm_set_ai_key_placeholder')}
-                className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 pr-10 text-text-primary focus:outline-none focus:border-accent-red text-sm font-mono" />
-              <button type="button" onClick={()=>setShowAiKey(v=>!v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
-                {showAiKey ? <EyeOff size={16}/> : <Eye size={16}/>}
-              </button>
-            </div>
-            <button onClick={()=>{ setAiKeySaved(true); addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'AI API kaliti yangilandi', actionKey: 'audit_ai_key_updated', entity: 'settings', details: aiApiProvider }); setTimeout(()=>setAiKeySaved(false),2000) }}
-              className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 flex-shrink-0 transition-all ${aiKeySaved ? 'bg-accent-green text-white' : 'bg-accent-red text-white hover:opacity-90 shadow-glow-red'}`}>
-              {aiKeySaved ? <CheckCircle size={16}/> : t('save')}
-            </button>
-          </div>
-          <p className="text-xs text-text-muted mt-2">{t('adm_set_ai_key_note')}</p>
-        </div>
-
-        <div>
-          <label className="text-text-secondary text-xs font-medium block mb-2">{t('adm_set_ai_limit')}</label>
-          <input type="number" min="0" value={aiMonthlyLimit} onChange={e=>setAiMonthlyLimit(Number(e.target.value))}
-            className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red font-semibold text-sm" />
-        </div>
-      </div>
+      {/* AI kaliti (serverda, shifrlangan) */}
+      <AiKeyCard />
 
     </div>
   )

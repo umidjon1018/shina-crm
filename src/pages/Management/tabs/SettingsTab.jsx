@@ -87,47 +87,6 @@ const SettingsTab = ({ ctx }) => {
     <>
           <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4 sm:space-y-6 max-w-2xl">
             
-            {/* BLOK 0.6 — AI Agent API kaliti */}
-            <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-accent-blue/10 text-accent-blue rounded-xl flex items-center justify-center">
-                  <KeyRound size={20} />
-                </div>
-                <div>
-                  <h3 className="font-syne font-bold text-text-primary text-base">{t('mgmt_ai_title')}</h3>
-                  <p className="text-xs text-text-muted">{t('mgmt_ai_subtitle')}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <select
-                  value={aiApiProvider}
-                  onChange={e => setAiApiProvider(e.target.value)}
-                  className="bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent-red text-sm"
-                >
-                  <option value="anthropic">Anthropic (Claude)</option>
-                  <option value="openai">OpenAI (ChatGPT)</option>
-                </select>
-
-                <div className="relative">
-                  <input
-                    type={showAiKey ? 'text' : 'password'}
-                    value={aiApiKey}
-                    onChange={e => setAiApiKey(e.target.value)}
-                    placeholder={t('mgmt_ai_key_ph')}
-                    className="w-full bg-bg-tertiary border border-border rounded-xl px-4 py-2.5 pr-10 text-text-primary focus:outline-none focus:border-accent-red text-sm font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowAiKey(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
-                  >
-                    {showAiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* BLOK 1 — USD kursi */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">

@@ -32,3 +32,7 @@ export const saveBusinessSettings = async (patch) => {
   const { data } = await api.put('/api/settings/business', patch)
   return data
 }
+
+// AI kaliti — faqat admin; kalitning o'zi qaytarilmaydi ({ hasKey, source, hint })
+export const getAiSettings = async () => (await api.get('/api/settings/ai')).data
+export const saveAiSettings = async (apiKey) => (await api.put('/api/settings/ai', { apiKey })).data

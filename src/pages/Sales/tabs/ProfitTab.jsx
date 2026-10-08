@@ -205,10 +205,14 @@ const ProfitTab = ({ ctx }) => {
                   </td>
                   <td className="px-3 py-2 sm:py-3 text-text-muted whitespace-nowrap">{item.commission > 0 ? formatPrice(item.commission, som) : '—'}</td>
                   <td className="px-3 py-2 sm:py-3">
-                    <span className={`text-xs font-extrabold ${item.margin >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{item.margin}%</span>
+                    {item.missingCost
+                      ? <span className="text-xs font-bold text-accent-orange">—</span>
+                      : <span className={`text-xs font-extrabold ${item.margin >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{item.margin}%</span>}
                   </td>
                   <td className="px-3 py-2 sm:py-3 font-bold text-right whitespace-nowrap">
-                    <span className={item.profit >= 0 ? 'text-accent-green' : 'text-accent-red'}>{formatPrice(item.profit, som)}</span>
+                    {item.missingCost
+                      ? <span className="text-xs font-bold text-accent-orange whitespace-nowrap">{t('sl_profit_no_cost')}</span>
+                      : <span className={item.profit >= 0 ? 'text-accent-green' : 'text-accent-red'}>{formatPrice(item.profit, som)}</span>}
                   </td>
                 </tr>
               ))}

@@ -1594,14 +1594,13 @@ export const useSalesState = () => {
       const itemsNames = s.items.map(i => i.name || i.productName || 'Tovar').join(', ');
       const totalQty = s.items.reduce((sum, it) => sum + (it.qty || 1), 0);
 
-      const purchaseTotal = s.items.reduce((acc, it) => {
-        const purchasePrice = it.purchasePrice || Math.round((it.price || it.salePrice || 0) * 0.8);
-        return acc + purchasePrice * (it.qty || 1);
-      }, 0);
+      // Kirim narxi kiritilmagan tovar — foyda taxmin qilinmaydi, "narx kiritilmagan" deb ko'rsatiladi
+      const missingCost = s.items.some(it => !it.purchasePrice)
+      const purchaseTotal = s.items.reduce((acc, it) => acc + (it.purchasePrice || 0) * (it.qty || 1), 0);
       const saleTotal = s.total;
       const commission = (!isCancelled && s.paymentType === 'installment') ? (s.installmentCommissionAmount ?? 0) : 0;
-      const netProfit = totalProfit - commission;
-      const margin = (!isCancelled && saleTotal > 0) ? Math.round((netProfit / saleTotal) * 100) : 0;
+      const netProfit = missingCost ? 0 : totalProfit - commission;
+      const margin = (!isCancelled && !missingCost && saleTotal > 0) ? Math.round((netProfit / saleTotal) * 100) : 0;
 
       items.push({
         id: s.id,
@@ -1622,6 +1621,7 @@ export const useSalesState = () => {
         commission,
         profit: netProfit,
         margin,
+        missingCost,
         totalSale: s.total,
         status: s.status,
         isCancelled,
