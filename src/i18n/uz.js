@@ -188,6 +188,8 @@ export default {
 
   // Ombor sahifasi
   wh_subtitle: "Tovarlar qoldig'i, kirim va barkodlar",
+  wh_table_full: "To'liq jadval",
+  wh_table_compact: "Ixcham jadval",
   wh_ov_in_stock: 'Ombordagi qoldiq',
   wh_ov_kinds: 'xil tovar',
   wh_ov_retail_value: 'Qoldiq qiymati (sotuv narxida)',

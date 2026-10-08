@@ -188,6 +188,8 @@ export default {
 
   // Склад
   wh_subtitle: 'Остатки товаров, поступления и штрих-коды',
+  wh_table_full: "Полная таблица",
+  wh_table_compact: "Компактная таблица",
   wh_ov_in_stock: 'Остаток на складе',
   wh_ov_kinds: 'видов товара',
   wh_ov_retail_value: 'Стоимость остатка (по цене продажи)',

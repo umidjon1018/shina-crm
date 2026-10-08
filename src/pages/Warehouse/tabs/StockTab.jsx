@@ -79,6 +79,8 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
   const [category, setCategory] = useState('all')
   const [season, setSeason] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [fullTable, setFullTable] = useState(() => { try { return localStorage.getItem('wh_stock_full') === '1' } catch { return false } })
+  const toggleFull = () => setFullTable(v => { try { localStorage.setItem('wh_stock_full', v ? '0' : '1') } catch {} ; return !v })
   const [attrFilters, setAttrFilters] = useState({}) // { defId: selectedValue | 'all' }
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [showPriceList, setShowPriceList] = useState(false)
@@ -364,6 +366,8 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     return { qty, retail, low, empty, cats: Object.entries(cats).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value) }
   }, [items, products, shopBatchIds, shopProducts, productCategories])
 
+  const colTotal = fullTable ? 11 + (selectedShopId !== 'all' ? 1 : 0) + (canSeePurchasePrice ? 1 : 0) : 6
+
   return (
     <div className="space-y-3 sm:space-y-5">
       {/* Umumiy ko'rinish: qoldiq, qiymat, holat va kategoriyalar */}
@@ -411,6 +415,9 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             <ArrowRightLeft size={16} /> Ko'chirish
           </button>
         )}
+        <button onClick={toggleFull} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-colors whitespace-nowrap ${fullTable ? 'g-brand text-white border-transparent' : 'bg-bg-tertiary text-text-secondary border-border hover:text-text-primary'}`}>
+          {fullTable ? t('wh_table_compact') : t('wh_table_full')}
+        </button>
         <button onClick={openHistory} className="flex items-center gap-2 px-4 py-2.5 bg-bg-tertiary text-text-secondary border border-border rounded-xl text-sm font-bold hover:bg-bg-tertiary/80 transition-colors whitespace-nowrap">
           Tarix
         </button>
@@ -476,34 +483,34 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                     {t('col_category')} <SortIcon field="category" sortField={sortField} sortDir={sortDir} />
                   </span>
                 </Th>
-                <Th sortable onClick={() => handleSort('season')}>
+                {fullTable && <Th sortable onClick={() => handleSort('season')}>
                   <span className="inline-flex items-center gap-1">
                     {t('wh_th_season')} <SortIcon field="season" sortField={sortField} sortDir={sortDir} />
                   </span>
-                </Th>
-                <Th sortable onClick={() => handleSort('country')}>
+                </Th>}
+                {fullTable && <Th sortable onClick={() => handleSort('country')}>
                   <span className="inline-flex items-center gap-1">
                     {t('col_country')} <SortIcon field="country" sortField={sortField} sortDir={sortDir} />
                   </span>
-                </Th>
-                <Th right>{t('wh_th_in_qty')}</Th>
-                {selectedShopId !== 'all' && <Th right>Ko'chirish</Th>}
+                </Th>}
+                {fullTable && <Th right>{t('wh_th_in_qty')}</Th>}
+                {fullTable && selectedShopId !== 'all' && <Th right>Ko'chirish</Th>}
                 <Th right>{t('wh_th_remaining')}</Th>
-                <Th right>{t('sold')}</Th>
+                {fullTable && <Th right>{t('sold')}</Th>}
                 <Th sortable right onClick={() => handleSort('cashPrice')}>
                   <span className="inline-flex items-center gap-1">
                     {t('wh_th_cash_price')} <SortIcon field="cashPrice" sortField={sortField} sortDir={sortDir} />
                   </span>
                 </Th>
-                {canSeePurchasePrice && <Th right>{t('wh_th_purchase_price')}</Th>}
-                <Th>{t('wh_th_last_sale')}</Th>
+                {fullTable && canSeePurchasePrice && <Th right>{t('wh_th_purchase_price')}</Th>}
+                {fullTable && <Th>{t('wh_th_last_sale')}</Th>}
                 <Th>{t('col_status')}</Th>
                 <Th>{t('wh_th_detail')}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {sorted.length === 0 ? (
-                <tr><td colSpan={canSeePurchasePrice ? 13 : 12} className="text-center py-12 text-text-muted">{t('wh_no_product')}</td></tr>
+                <tr><td colSpan={colTotal} className="text-center py-12 text-text-muted">{t('wh_no_product')}</td></tr>
               ) : sorted.map(p => {
                 const status = shopStockStatus(p)
                 const { key: statusKey, icon: StatusIcon, cls } = STATUS_CONFIG[status]
@@ -569,14 +576,14 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       const catLabel = catObj ? t('cat_' + catObj.id, { defaultValue: catObj.label }) : (p.categoryLabel || '—')
                       return <Td><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></Td>
                     })()}
-                    <Td><Badge cls={SEASON_COLORS[p.season] || 'text-text-muted bg-bg-tertiary'}>{t('season_' + p.season) || '—'}</Badge></Td>
-                    <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>
+                    {fullTable && <Td><Badge cls={SEASON_COLORS[p.season] || 'text-text-muted bg-bg-tertiary'}>{t('season_' + p.season) || '—'}</Badge></Td>}
+                    {fullTable && <Td muted>{t('country_' + p.country, { defaultValue: p.country })}</Td>}
                     {(() => { const unit = getProductUnit(p.id); const tr = transferSummary[String(p.id)]; const netTr = tr ? (tr.in - tr.out) : 0; return (<>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
+                    {fullTable && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="text-text-secondary">{batches.filter(b => b.productId === p.id && b.batchType !== 'transfer_in').reduce((sum, b) => sum + (b.quantityIn || 0), 0)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
-                    </td>
-                    {selectedShopId !== 'all' && (
+                    </td>}
+                    {fullTable && selectedShopId !== 'all' && (
                       <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                         {netTr === 0 ? (
                           <span className="text-text-muted text-xs">—</span>
@@ -591,23 +598,23 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       <span className="font-bold text-text-primary">{shopStock(p.id)}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
                     </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
+                    {fullTable && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="text-text-secondary">{shopItemCount(p.id, 'sold')}</span>
                       <span className="text-text-muted text-xs ml-1">{unit}</span>
-                    </td>
+                    </td>}
                     </>) })()}
                     <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                       <span className="font-medium text-text-primary text-sm">{p.cashPrice.toLocaleString('uz')}</span>
                       <span className="text-text-muted text-xs ml-1">{som}</span>
                     </td>
-                    {canSeePurchasePrice && (
+                    {fullTable && canSeePurchasePrice && (
                       <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
                         {maxPurchasePrice > 0
                           ? <><span className="font-medium text-accent-orange text-sm">{maxPurchasePrice.toLocaleString('uz')}</span><span className="text-text-muted text-xs ml-1">{som}</span></>
                           : <span className="text-text-muted text-xs">—</span>}
                       </td>
                     )}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
+                    {fullTable && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       {(() => {
                         const soldSales = items.filter(i => i.productId === p.id && i.soldAt && shopBatchIds.has(i.batchId))
                         if (soldSales.length === 0) return <span className="text-text-muted text-xs">—</span>
@@ -623,7 +630,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                         else { label = t('wh_years_ago', { n: Math.floor(diffDays / 365) }); cls = 'text-accent-red' }
                         return <span className={`text-xs font-medium ${cls}`}>{label}</span>
                       })()}
-                    </td>
+                    </td>}
                     <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
                       <Badge cls={cls}><StatusIcon size={12} />{label}</Badge>
                     </td>
@@ -650,7 +657,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
                       }
                       return true
                     })
-                    const colCount = canSeePurchasePrice ? 13 : 12
+                    const colCount = colTotal
                     const hasDefs = productAttributeDefs?.length > 0
                     return (
                       <tr>
