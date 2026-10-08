@@ -47,7 +47,8 @@ const TONES = {
 }
 
 // ── Kichik ko'rsatkich (rasmdagi "Messages −20%") ──
-export const MiniStat = ({ icon: Icon, label, value, delta, tone = 'cyan', onClick, active }) => (
+// invert — o'sish yomon bo'lgan ko'rsatkichlar uchun (xarajat, qaytarish)
+export const MiniStat = ({ icon: Icon, label, value, delta, tone = 'cyan', onClick, active, invert = false }) => (
   <div onClick={onClick}
     className={`panel flex items-center gap-3 px-4 py-3.5 min-w-0 ${onClick ? 'cursor-pointer hover:border-border-bright transition-colors' : ''} ${active ? 'ring-2 ring-accent-red/40 border-accent-red/60' : ''}`}>
     {Icon && (
@@ -60,7 +61,7 @@ export const MiniStat = ({ icon: Icon, label, value, delta, tone = 'cyan', onCli
       <p className="text-xl font-bold text-text-primary leading-tight [overflow-wrap:anywhere]">{value}</p>
     </div>
     {delta !== undefined && delta !== null && Number.isFinite(delta) && (
-      <span className={`px-2.5 py-1 rounded-lg text-sm font-bold shrink-0 ${delta >= 0 ? 'bg-accent-green/15 text-accent-green' : 'bg-accent-red/15 text-accent-red'}`}>
+      <span className={`px-2.5 py-1 rounded-lg text-sm font-bold shrink-0 ${(invert ? delta <= 0 : delta >= 0) ? 'bg-accent-green/15 text-accent-green' : 'bg-accent-red/15 text-accent-red'}`}>
         {delta > 0 ? '+' : ''}{delta}%
       </span>
     )}

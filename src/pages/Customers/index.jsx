@@ -5,7 +5,8 @@ import {
   Users, Search, UserPlus, Eye, X, CreditCard,
   History, Calendar, TrendingUp, AlertCircle,
   CheckCircle, Star, Phone, DollarSign, Package,
-  Check, Info, User, Pencil, Trash2, GitMerge, Link2, Recycle, ArrowDownToLine, ArrowUpFromLine
+  Check, Info, User, Pencil, Trash2, GitMerge, Link2, Recycle, ArrowDownToLine, ArrowUpFromLine,
+  ChevronRight,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -24,7 +25,9 @@ import EditCustomerModal    from './components/EditCustomerModal'
 import DeleteModal          from './components/DeleteModal'
 import MergeModal           from './components/MergeModal'
 import DataTable from '../../components/ui/DataTable'
-import { PageHeader, KpiCard, KpiStrip, Badge } from '../../components/ui/Kit'
+import { PageHeader, Badge } from '../../components/ui/Kit'
+import { HeroStat, MiniStat, ChartCard, GradientBars } from '../../components/charts/Charts'
+import { monthShort } from '../../utils/format'
 
 const formatPriceRaw = (n) => n?.toLocaleString('uz-UZ')
 const EMPTY_CUST = { name: '', phone: '+998', birthDate: '', instagram: '', carModel: '', gender: '', address: '', email: '', group: '', tags: [] }
@@ -33,7 +36,7 @@ const EMPTY_CUST = { name: '', phone: '+998', birthDate: '', instagram: '', carM
 const TIER_COLORS = ['bg-orange-100 text-orange-700', 'bg-slate-100 text-slate-700', 'bg-yellow-100 text-yellow-700', 'bg-purple-100 text-purple-700']
 
 const Customers = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const formatPrice = (n) => formatPriceRaw(n) + ' ' + t('unit_som')
   const { user } = useAuthStore()
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
@@ -447,6 +450,23 @@ const Customers = () => {
     return { total, activeInstallments, latePayments, goldCount, balanceCount }
   }, [customers, selectedShopId, shopCustomerIds, shopSales, loyaltyCfg, version])
 
+  // Yangi mijozlar: shu oy va oxirgi 6 oy
+  const growth = useMemo(() => {
+    const now = new Date()
+    const visible = selectedShopId === 'all' ? customers
+      : customers.filter(c => c.shopId === selectedShopId || (shopCustomerIds && shopCustomerIds.has(String(c.id))))
+    const months = []
+    for (let k = 5; k >= 0; k--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - k, 1)
+      months.push({ key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: monthShort(d.getMonth(), i18n.language), value: 0 })
+    }
+    for (const c of visible) {
+      const slot = months.find(m => m.key === (c.createdAt || '').slice(0, 7))
+      if (slot) slot.value++
+    }
+    return { months, thisMonth: months[5].value }
+  }, [customers, selectedShopId, shopCustomerIds, i18n.language])
+
   const handleAddCustomer = async (e) => {
     e.preventDefault()
     if (!newCust.name || !newCust.phone || saving) return
@@ -538,23 +558,36 @@ const Customers = () => {
         </button>
       } />
 
-      {/* Ko'rsatkichlar — bosilsa filtr */}
-      <KpiStrip cols={5}>
-        {[
-          { id: 'all', label: t('cust_stat_total'), value: stats.total, icon: Users, color: 'text-accent-blue bg-accent-blue/10' },
-          { id: 'installment', label: t('cust_stat_installment'), value: stats.activeInstallments, icon: Calendar, color: 'text-accent-green bg-accent-green/10' },
-          { id: 'overdue', label: t('cust_stat_overdue'), value: stats.latePayments, icon: AlertCircle, color: 'text-accent-red bg-accent-red/10' },
-          { id: 'gold', label: t('cust_stat_gold'), value: stats.goldCount, icon: Star, color: 'text-yellow-500 bg-yellow-500/10' },
-          { id: 'balance', label: t('cust_stat_balance'), value: stats.balanceCount, icon: CreditCard, color: 'text-accent-orange bg-accent-orange/10' },
-        ].map(k => (
-          <KpiCard key={k.id} icon={k.icon} label={k.label} value={k.value} color={k.color} className="min-w-[160px] snap-start sm:min-w-0"
-            active={activeFilter === k.id || (k.id === 'all' && activeFilter === null)}
-            onClick={() => {
-              if (k.id === 'overdue') { setShowOverdueModal(true); return }
-              setActiveFilter(activeFilter === k.id || k.id === 'all' ? null : k.id)
-            }} />
-        ))}
-      </KpiStrip>
+      {/* Umumiy ko'rinish — kartalar bosilsa ro'yxat filtrlanadi */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        <HeroStat gradient="violet" icon={Users} label={t('cust_stat_total')} value={stats.total}
+          sub={`${t('cust_ov_new_month')}: ${growth.thisMonth}`} onClick={() => setActiveFilter(null)} />
+        <HeroStat gradient="cyan" icon={Calendar} label={t('cust_stat_installment')} value={stats.activeInstallments}
+          sub={`${t('cust_stat_overdue')}: ${stats.latePayments}`} onClick={() => setActiveFilter(activeFilter === 'installment' ? null : 'installment')} />
+        <div className="grid grid-cols-1 gap-3">
+          <MiniStat icon={Star} tone="orange" label={t('cust_stat_gold')} value={stats.goldCount}
+            active={activeFilter === 'gold'} onClick={() => setActiveFilter(activeFilter === 'gold' ? null : 'gold')} />
+          <MiniStat icon={CreditCard} tone="green" label={t('cust_stat_balance')} value={stats.balanceCount}
+            active={activeFilter === 'balance'} onClick={() => setActiveFilter(activeFilter === 'balance' ? null : 'balance')} />
+        </div>
+        <ChartCard title={t('cust_ov_new_6m')}>
+          <GradientBars height={150} name={t('cust_ov_new_month')} valueFormatter={v => v} data={growth.months} />
+        </ChartCard>
+      </div>
+      {stats.latePayments > 0 && (
+        <button onClick={() => setShowOverdueModal(true)}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-accent-red/10 border border-accent-red/30 text-accent-red text-[15px] font-semibold text-left">
+          <AlertCircle size={20} className="shrink-0" />
+          <span className="flex-1">{t('cust_ov_overdue_banner', { n: stats.latePayments })}</span>
+          <ChevronRight size={18} />
+        </button>
+      )}
+      {activeFilter && (
+        <div className="flex items-center gap-2 text-[15px] text-text-secondary">
+          <Badge color="bg-accent-red/10 text-accent-red">{t({ installment: 'cust_stat_installment', gold: 'cust_stat_gold', balance: 'cust_stat_balance' }[activeFilter] || 'filter_all')}</Badge>
+          <button onClick={() => setActiveFilter(null)} className="text-sm underline">{t('cust_ov_clear_filter')}</button>
+        </div>
+      )}
 
       {/* Qidiruv va filtrlar */}
       <div className="flex flex-wrap items-center gap-2">

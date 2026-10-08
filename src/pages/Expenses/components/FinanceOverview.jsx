@@ -71,7 +71,7 @@ const FinanceOverview = () => {
         )}
         {canPnl && (
           <div className="grid grid-cols-1 gap-3">
-            <MiniStat icon={TrendingDown} tone="orange" label={t('fin_pnl_opex')} value={formatNumber(pnl?.totalExpenses || 0)}
+            <MiniStat icon={TrendingDown} tone="orange" invert label={t('fin_pnl_opex')} value={formatNumber(pnl?.totalExpenses || 0)}
               delta={pnl && prev ? trend(pnl.totalExpenses, prev.totalExpenses) : null} />
             <MiniStat icon={TrendingUp} tone="green" label={t('fin_pnl_other_income')} value={formatNumber(pnl?.totalOtherIncome || 0)} />
           </div>
