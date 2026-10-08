@@ -185,6 +185,10 @@ export default {
 
   // Склад
   wh_subtitle: 'Остатки товаров, поступления и штрих-коды',
+  wh_ov_in_stock: 'Остаток на складе',
+  wh_ov_kinds: 'видов товара',
+  wh_ov_retail_value: 'Стоимость остатка (по цене продажи)',
+  wh_ov_by_category: 'По категориям',
   wh_tab_stock: 'Остаток',
   wh_tab_products: 'Товары',
   wh_tab_used_stock: 'Б/У остаток',

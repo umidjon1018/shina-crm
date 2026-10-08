@@ -14,6 +14,8 @@ import { updateItemAttributes } from '../../../api/itemService'
 import { exportBatchesToExcel } from '../../../utils/excelIncomeImport'
 import PriceListModal from '../components/PriceListModal'
 import api from '../../../api/client'
+import { HeroStat, MiniStat, ChartCard, DonutChart, PALETTE, shortNum } from '../../../components/charts/Charts'
+import { formatNumber } from '../../../utils/format'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -344,13 +346,49 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
     return s + uzs
   }, 0)
 
+  const overview = useMemo(() => {
+    const byId = new Map(products.map(p => [p.id, p]))
+    const catName = (id) => { const c = (productCategories || []).find(x => x.id === id); return c ? t('cat_' + c.id, { defaultValue: c.label }) : (id || '—') }
+    let qty = 0, retail = 0
+    const cats = {}
+    for (const i of items) {
+      if (i.status !== 'in_stock' || !shopBatchIds.has(i.batchId)) continue
+      const p = byId.get(i.productId)
+      qty++
+      retail += p?.cashPrice || 0
+      const name = catName(p?.category)
+      cats[name] = (cats[name] || 0) + 1
+    }
+    let low = 0, empty = 0
+    for (const p of shopProducts) { const st = shopStockStatus(p); if (st === 'low') low++; else if (st === 'empty') empty++ }
+    return { qty, retail, low, empty, cats: Object.entries(cats).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value) }
+  }, [items, products, shopBatchIds, shopProducts, productCategories])
+
   return (
     <div className="space-y-3 sm:space-y-5">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label={t('wh_stat_total')} value={shopProducts.length} icon={Package} cls="bg-accent-blue/10 text-accent-blue" />
-        <StatCard label={t('wh_stat_low')} value={shopProducts.filter(p => shopStockStatus(p) === 'low').length} icon={AlertTriangle} cls="bg-accent-orange/10 text-accent-orange" />
-        <StatCard label={t('stock_empty')} value={shopProducts.filter(p => shopStockStatus(p) === 'empty').length} icon={XCircle} cls="bg-accent-red/10 text-accent-red" />
-        <StatCard label={t('wh_stat_value')} value={totalValue.toLocaleString('uz') + ' ' + t('dash_so_m')} icon={BarChart2} cls="bg-accent-green/10 text-accent-green" />
+      {/* Umumiy ko'rinish: qoldiq, qiymat, holat va kategoriyalar */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        <HeroStat gradient="violet" icon={Package} label={t('wh_ov_in_stock')} value={formatNumber(overview.qty)} unit={pcs}
+          sub={`${shopProducts.length} ${t('wh_ov_kinds')}`} />
+        <HeroStat gradient="cyan" icon={BarChart2} label={t('wh_ov_retail_value')} value={shortNum(overview.retail)} unit={som}
+          sub={canSeePurchasePrice && totalValue > 0 ? `${t('wh_stat_value')}: ${formatNumber(totalValue)}` : formatNumber(overview.retail)} />
+        <div className="grid grid-cols-1 gap-3">
+          <MiniStat icon={AlertTriangle} tone="orange" label={t('wh_stat_low')} value={overview.low}
+            active={statusFilter === 'low'} onClick={() => setStatusFilter(f => f === 'low' ? 'all' : 'low')} />
+          <MiniStat icon={XCircle} tone="pink" label={t('stock_empty')} value={overview.empty}
+            active={statusFilter === 'empty'} onClick={() => setStatusFilter(f => f === 'empty' ? 'all' : 'empty')} />
+        </div>
+        <ChartCard title={t('wh_ov_by_category')}>
+          <DonutChart height={150} legend={false} valueFormatter={v => `${formatNumber(v)} ${pcs}`} centerLabel={pcs} centerValue={formatNumber(overview.qty)}
+            data={overview.cats} />
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+            {overview.cats.map((c, i) => (
+              <span key={c.name} className="flex items-center gap-1.5 text-sm text-text-secondary">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: PALETTE[i % PALETTE.length] }} />{c.name} <b className="text-text-primary">{c.value}</b>
+              </span>
+            ))}
+          </div>
+        </ChartCard>
       </div>
 
       {/* 1-qator: Qidiruv + Tugmalar */}

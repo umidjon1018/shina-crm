@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { Package, PackagePlus, Barcode, Recycle, ClipboardCheck, Trash2 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useNotificationStore } from '../../store/notificationStore'
@@ -10,7 +11,9 @@ import { getUsedStock, getUsedSales } from '../../api/usedService'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
 import { getItems } from '../../api/itemService'
-import { TABS, TabBtn } from './whHelpers.jsx'
+import { TABS } from './whHelpers.jsx'
+import SectionHub from '../../components/ui/SectionHub'
+import { PageHeader } from '../../components/ui/Kit'
 import StockTab from './tabs/StockTab'
 import UsedStockTab from './tabs/UsedStockTab'
 import IncomeTab from './tabs/IncomeTab'
@@ -26,9 +29,7 @@ const Warehouse = () => {
   const { addNotification } = useNotificationStore()
   const { version, bump } = useDataStore()
   const { selectedShopId } = useShopStore()
-  const [pickedTab, setActiveTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'stock')
   const WH_TABS = TABS.filter(id => hasPermission('warehouse.' + id))
-  const activeTab = WH_TABS.includes(pickedTab) ? pickedTab : WH_TABS[0]
   const [products, setProducts] = useState([])
   const [batches, setBatches] = useState([])
   const [items, setItems] = useState([])
@@ -74,43 +75,29 @@ const Warehouse = () => {
     bump()
   }
 
+  const firstLoad = loading && products.length === 0
+  const SECTIONS = [
+    { id: 'products', icon: Package, tone: 'violet', render: () => <ProductsSection products={products} batches={shopBatches} items={items} refresh={refreshData} /> },
+    { id: 'income', icon: PackagePlus, tone: 'cyan', render: () => <IncomeTab products={shopProductsList} batches={shopBatches} userRole={user?.role} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} shopBatchIds={shopBatchIds} /> },
+    { id: 'barcode', icon: Barcode, tone: 'blue', render: () => <BarcodeTab products={shopProductsList} batches={shopBatches} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} /> },
+    { id: 'used_stock', icon: Recycle, tone: 'green', render: () => <UsedStockTab usedStock={selectedShopId === 'all' ? usedStock : usedStock.filter(u => !u.shopId || u.shopId === selectedShopId)} usedSales={usedSales} productCategories={productCategories} /> },
+    { id: 'stocktake', icon: ClipboardCheck, tone: 'orange', render: () => <StocktakeTab /> },
+    { id: 'writeoff', icon: Trash2, tone: 'red', render: () => <WriteoffTab products={shopProductsList} items={shopItems} batches={shopBatches} /> },
+  ].filter(x => WH_TABS.includes(x.id)).map(x => ({ ...x, label: t('wh_tab_' + x.id) }))
+  const hasStock = WH_TABS.includes('stock')
+
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl font-syne font-extrabold tracking-tight text-text-primary">{t('warehouse')}</h1>
-        <p className="text-text-secondary text-sm">{t('wh_subtitle')}</p>
-      </div>
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
+      <PageHeader title={t('warehouse')} subtitle={t('wh_subtitle')} />
 
-      <div className="flex gap-2 bg-bg-secondary border border-border rounded-2xl p-1.5 w-fit max-w-full overflow-x-auto no-scrollbar">
-        {WH_TABS.map(tab => (
-          <TabBtn key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
-            {t('wh_tab_' + tab)}
-          </TabBtn>
-        ))}
-      </div>
+      {SECTIONS.length > 0 && <SectionHub variant={hasStock ? 'bar' : 'tiles'} sections={SECTIONS} />}
 
-      {loading ? (
+      {firstLoad ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {activeTab === 'stock' && <StockTab products={products} batches={shopBatches} items={items} userRole={user?.role} productCategories={productCategories} />}
-            {activeTab === 'products' && <ProductsSection products={products} batches={shopBatches} items={items} refresh={refreshData} />}
-            {activeTab === 'used_stock' && <UsedStockTab usedStock={selectedShopId === 'all' ? usedStock : usedStock.filter(u => !u.shopId || u.shopId === selectedShopId)} usedSales={usedSales} productCategories={productCategories} />}
-            {activeTab === 'income' && <IncomeTab products={shopProductsList} batches={shopBatches} userRole={user?.role} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} shopBatchIds={shopBatchIds} />}
-            {activeTab === 'barcode' && <BarcodeTab products={shopProductsList} batches={shopBatches} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} />}
-            {activeTab === 'stocktake' && <StocktakeTab />}
-            {activeTab === 'writeoff' && <WriteoffTab products={shopProductsList} items={shopItems} batches={shopBatches} />}
-          </motion.div>
-        </AnimatePresence>
+      ) : hasStock && (
+        <StockTab products={products} batches={shopBatches} items={items} userRole={user?.role} productCategories={productCategories} />
       )}
     </motion.div>
   )

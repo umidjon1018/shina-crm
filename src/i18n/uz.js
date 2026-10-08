@@ -185,6 +185,10 @@ export default {
 
   // Ombor sahifasi
   wh_subtitle: "Tovarlar qoldig'i, kirim va barkodlar",
+  wh_ov_in_stock: 'Ombordagi qoldiq',
+  wh_ov_kinds: 'xil tovar',
+  wh_ov_retail_value: 'Qoldiq qiymati (sotuv narxida)',
+  wh_ov_by_category: "Kategoriyalar bo'yicha",
   wh_tab_stock: 'Qoldiq',
   wh_tab_products: 'Tovarlar',
   wh_tab_used_stock: 'B/U Qoldiq',
