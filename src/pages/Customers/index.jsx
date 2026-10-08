@@ -23,6 +23,8 @@ import CustomerProfileModal from './components/CustomerProfileModal'
 import EditCustomerModal    from './components/EditCustomerModal'
 import DeleteModal          from './components/DeleteModal'
 import MergeModal           from './components/MergeModal'
+import DataTable from '../../components/ui/DataTable'
+import { PageHeader, KpiCard, KpiStrip, Badge } from '../../components/ui/Kit'
 
 const formatPriceRaw = (n) => n?.toLocaleString('uz-UZ')
 const EMPTY_CUST = { name: '', phone: '+998', birthDate: '', instagram: '', carModel: '', gender: '', address: '', email: '', group: '', tags: [] }
@@ -404,6 +406,16 @@ const Customers = () => {
     return result
   }, [customers, search, activeFilter, loyaltyMinAmount, loyaltyVisitsRequired, custSort, selectedShopId, shopCustomerIds, shopSales, shopUsedSales, version, filterGroup, filterTag])
 
+  const metrics = useMemo(() => {
+    const m = {}
+    filtered.forEach(c => {
+      const debt = shopSales.filter(s => s.customerId === c.id && s.paymentType === 'installment' && s.status !== 'cancelled')
+        .reduce((sum, s) => sum + Math.max(0, s.installmentDebt ?? s.total ?? 0), 0)
+      m[c.id] = { visits: getTotalVisits(c), spent: getTotalSpent(c), debt, last: getLastVisit(c), level: computeLoyaltyLevel(c) }
+    })
+    return m
+  }, [filtered, shopSales, loyaltyCfg])
+
   // Pagination reset when filter/search/sort changes
   useEffect(() => { setCustomersPage(1) }, [search, activeFilter, custSort, filterGroup, filterTag])
 
@@ -519,266 +531,118 @@ const Customers = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4 sm:space-y-6"
     >
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('cust_title')}</h1>
-          <p className="text-text-secondary text-sm">{t('cust_subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 md:flex-none min-w-[180px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-            <input 
-              type="text" 
-              placeholder={t('cust_search_ph')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red w-full md:w-64 transition-all"
-            />
-          </div>
-          {customerGroups.length > 0 && (
-            <select value={filterGroup} onChange={e => setFilterGroup(e.target.value)}
-              className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[150px]">
-              <option value="">{t('cust_all_groups')}</option>
-              {customerGroups.map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-          )}
-          {customerTags.length > 0 && (
-            <select value={filterTag} onChange={e => setFilterTag(e.target.value)}
-              className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[150px]">
-              <option value="">{t('cust_all_tags')}</option>
-              {customerTags.map(g => <option key={g} value={g}>#{g}</option>)}
-            </select>
-          )}
-          <button 
-            onClick={() => requireShop(() => setShowAddModal(true))}
-            className="flex items-center gap-2 px-4 sm:px-6 py-2.5 bg-accent-red text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-glow-red shrink-0"
-          >
-            <UserPlus size={18} /> <span className="hidden sm:inline">{t('cust_new')}</span>
-          </button>
-        </div>
-      </div>
+      <PageHeader title={t('cust_title')} subtitle={t('cust_subtitle')} actions={
+        <button onClick={() => requireShop(() => setShowAddModal(true))}
+          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-accent-red text-white rounded-xl font-bold hover:opacity-90 shadow-glow-red">
+          <UserPlus size={18} /> {t('cust_new')}
+        </button>
+      } />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Ko'rsatkichlar — bosilsa filtr */}
+      <KpiStrip cols={5}>
         {[
-          { id: 'all',         label: t('cust_stat_total'), value: stats.total, icon: Users, color: 'text-accent-blue bg-accent-blue/10' },
+          { id: 'all', label: t('cust_stat_total'), value: stats.total, icon: Users, color: 'text-accent-blue bg-accent-blue/10' },
           { id: 'installment', label: t('cust_stat_installment'), value: stats.activeInstallments, icon: Calendar, color: 'text-accent-green bg-accent-green/10' },
-          { id: 'overdue',     label: t('cust_stat_overdue'), value: stats.latePayments, icon: AlertCircle, color: 'text-accent-red bg-accent-red/10' },
-          { id: 'gold',        label: t('cust_stat_gold'), value: stats.goldCount, icon: Star, color: 'text-yellow-500 bg-yellow-500/10' },
-          { id: 'balance',     label: t('cust_stat_balance'), value: stats.balanceCount, icon: CreditCard, color: 'text-accent-orange bg-accent-orange/10' },
-        ].map((s, i) => (
-          <div 
-            key={i} 
+          { id: 'overdue', label: t('cust_stat_overdue'), value: stats.latePayments, icon: AlertCircle, color: 'text-accent-red bg-accent-red/10' },
+          { id: 'gold', label: t('cust_stat_gold'), value: stats.goldCount, icon: Star, color: 'text-yellow-500 bg-yellow-500/10' },
+          { id: 'balance', label: t('cust_stat_balance'), value: stats.balanceCount, icon: CreditCard, color: 'text-accent-orange bg-accent-orange/10' },
+        ].map(k => (
+          <KpiCard key={k.id} icon={k.icon} label={k.label} value={k.value} color={k.color} className="min-w-[160px] snap-start sm:min-w-0"
+            active={activeFilter === k.id || (k.id === 'all' && activeFilter === null)}
             onClick={() => {
-              if (s.id === 'overdue') { setShowOverdueModal(true); return }
-              setActiveFilter(activeFilter === s.id ? null : s.id)
-            }}
-            className={`bg-bg-secondary border rounded-2xl p-3 sm:p-5 flex items-center gap-2.5 sm:gap-4 min-w-0 cursor-pointer transition-all ${
-              (activeFilter === s.id || (s.id === 'all' && activeFilter === null))
-                ? 'border-accent-red ring-2 ring-accent-red/20 shadow-glow-red/10' 
-                : 'border-border hover:border-text-muted'
-            }`}
-          >
-            <div className={`w-9 h-9 sm:w-12 sm:h-12 ${s.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-              <s.icon size={20} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-extrabold font-syne text-text-primary">{s.value}</p>
-              <p className="text-xs text-text-muted font-medium">{s.label}</p>
-            </div>
-          </div>
+              if (k.id === 'overdue') { setShowOverdueModal(true); return }
+              setActiveFilter(activeFilter === k.id || k.id === 'all' ? null : k.id)
+            }} />
         ))}
-      </div>
+      </KpiStrip>
 
-      {/* Customers Table */}
-      <div className="bg-bg-secondary border border-border rounded-3xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm" style={{minWidth:'1590px'}}>
-            <colgroup>
-              <col style={{width:'50px'}} />
-              <col style={{width:'200px'}} />
-              <col style={{width:'160px'}} />
-              <col style={{width:'150px'}} />
-              <col style={{width:'80px'}} />
-              <col style={{width:'100px'}} />
-              <col style={{width:'80px'}} />
-              <col style={{width:'90px'}} />
-              <col style={{width:'160px'}} />
-              <col style={{width:'150px'}} />
-              <col style={{width:'130px'}} />
-              <col style={{width:'120px'}} />
-              <col style={{width:'110px'}} />
-              <col style={{width:'10px'}} />
-            </colgroup>
-            <thead className="bg-bg-tertiary">
-              <tr>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">#</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('name')}>{t('col_customer')} <CustSortIcon col="name" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('phone')}>{t('col_phone')} <CustSortIcon col="phone" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px]">{t('cust_th_car')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('visits')}>{t('cust_th_visits')} <CustSortIcon col="visits" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_loyalty')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('col_product')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-center">{t('cust_th_used_items')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('totalSpent')}>{t('cust_th_total')} <CustSortIcon col="totalSpent" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('col_debt')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] text-right">{t('cust_th_balance')}</th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('lastVisit')}>{t('cust_th_last_visit')} <CustSortIcon col="lastVisit" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-bold uppercase tracking-wider text-[10px] cursor-pointer select-none hover:text-text-primary" onClick={() => toggleCustSort('loyaltyLevel')}>{t('col_tier')} <CustSortIcon col="loyaltyLevel" /></th>
-                <th className="px-4 sm:px-6 py-2.5 sm:py-4"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.slice((customersPage - 1) * CUSTOMERS_PER_PAGE, customersPage * CUSTOMERS_PER_PAGE).map((c, idx) => (
-                <tr key={c.id} className="hover:bg-bg-tertiary/50 transition-colors group">
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-muted font-mono">{(customersPage - 1) * CUSTOMERS_PER_PAGE + idx + 1}</td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4">
-                    <p className="font-bold text-text-primary">{c.name}</p>
-                    <p className="text-[10px] text-text-muted font-mono">{c.id}</p>
-                    {(c.group || c.tags?.length > 0) && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {c.group && <span className="px-1.5 py-0.5 rounded bg-accent-orange/10 text-accent-orange text-[10px] font-bold">{c.group}</span>}
-                        {(c.tags || []).slice(0, 3).map(tg => <span key={tg} className="px-1.5 py-0.5 rounded bg-accent-blue/10 text-accent-blue text-[10px] font-bold">#{tg}</span>)}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary">
-                    <div>{c.phone}</div>
-                    {c.phone2 && <div className="text-text-muted text-[10px]">{c.phone2} <span className="bg-bg-tertiary px-1 rounded">2</span></div>}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-sm">
-                    {c.carModel || <span className="text-text-muted">—</span>}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
-                    <span className="bg-bg-tertiary px-2 py-1 rounded-lg font-bold text-text-primary">
-                      {getTotalVisits(c)}
-                    </span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
-                    <span className="bg-accent-green/10 text-accent-green px-2 py-1 rounded-lg font-bold">
-                      {computeLoyaltyLevel(c).percent ? `${computeLoyaltyLevel(c).percent}%` : '—'}
-                    </span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
-                    <span className="bg-bg-tertiary px-2 py-1 rounded-lg font-bold text-text-primary">
-                      {getTotalItems(c)}
-                    </span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center">
-                    {getUsedItemsCount(c) > 0
-                      ? <span className="bg-accent-orange/10 text-accent-orange px-2 py-1 rounded-lg font-bold">{getUsedItemsCount(c)}</span>
-                      : <span className="text-text-muted">—</span>}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-text-primary whitespace-nowrap">
-                    {formatPrice(getTotalSpent(c))}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap">
-                    {(() => {
-                      const debt = allSales.filter(s => s.customerId === c.id && s.paymentType === 'installment' && s.status !== 'cancelled').reduce((sum, s) => sum + (s.installmentDebt ?? s.total ?? 0), 0)
-                      return debt > 0
-                        ? <span className="font-bold text-accent-red">{formatPrice(debt)}</span>
-                        : <span className="text-text-muted">—</span>
-                    })()}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap">
-                    {c.balance ? <span className={`font-bold ${c.balance > 0 ? 'text-accent-green' : 'text-accent-red'}`}>{formatPrice(c.balance)}</span> : <span className="text-text-muted">—</span>}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs whitespace-nowrap">
-                    {(() => {
-                      const lv = getLastVisit(c)
-                      if (!lv) return <span className="text-text-muted">—</span>
-                      const days = Math.floor((Date.now() - new Date(lv)) / 86400000)
-                      return <>{new Date(lv).toLocaleDateString('uz-UZ')}<p className="text-[10px] text-text-muted">{days <= 0 ? t('cust_today') : t('cust_days_ago', { n: days })}</p></>
-                    })()}
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${computeLoyaltyLevel(c).color}`}>
-                        {computeLoyaltyLevel(c).isTop && <Star size={10} className="inline mr-1 mb-0.5" />}
-                        {computeLoyaltyLevel(c).label}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => { setSelectedCustomer(c); setModalTab('general') }}
-                        className="p-2 text-text-muted hover:text-accent-blue hover:bg-accent-blue/10 rounded-lg transition-all"
-                        title="Ko'rish"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleEditOpen(c)}
-                        className="p-2 text-text-muted hover:text-accent-orange hover:bg-accent-orange/10 rounded-lg transition-all"
-                        title="Tahrirlash"
-                      >
-                        <Pencil size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleManualMergeClick(c)}
-                        className={`p-2 rounded-lg transition-all ${
-                          mergeSource?.id === c.id
-                            ? 'text-white bg-accent-blue'
-                            : mergeSource
-                            ? 'text-accent-blue bg-accent-blue/10 animate-pulse'
-                            : 'text-text-muted hover:text-accent-blue hover:bg-accent-blue/10'
-                        }`}
-                        title={mergeSource ? (mergeSource.id === c.id ? 'Bekor qilish' : 'Shu bilan birlashtirish') : 'Birlashtirish'}
-                      >
-                        <GitMerge size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(c)}
-                        className="p-2 text-text-muted hover:text-accent-red hover:bg-accent-red/10 rounded-lg transition-all"
-                        title="O'chirish"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={14} className="px-4 sm:px-6 py-20 text-center">
-                    <Users size={40} className="mx-auto text-text-muted mb-4 opacity-20" />
-                    <p className="text-text-muted">{t('cust_not_found')}</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Qidiruv va filtrlar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+          <input type="text" placeholder={t('cust_search_ph')} value={search} onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-[15px] focus:outline-none focus:border-accent-red w-full" />
         </div>
-        {/* Pagination */}
-        {filtered.length > CUSTOMERS_PER_PAGE && (
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-border">
-            <span className="text-sm text-text-muted">
-              {(customersPage - 1) * CUSTOMERS_PER_PAGE + 1}–{Math.min(customersPage * CUSTOMERS_PER_PAGE, filtered.length)} / {filtered.length} ta
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCustomersPage(p => Math.max(1, p - 1))}
-                disabled={customersPage === 1}
-                className="px-3 py-1.5 rounded-lg text-sm font-bold border border-border disabled:opacity-40 hover:bg-bg-tertiary transition-colors"
-              >←</button>
-              {Array.from({ length: Math.ceil(filtered.length / CUSTOMERS_PER_PAGE) }, (_, i) => i + 1).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setCustomersPage(p)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-colors ${p === customersPage ? 'bg-accent-red text-white border-accent-red' : 'border-border hover:bg-bg-tertiary'}`}
-                >{p}</button>
-              ))}
-              <button
-                onClick={() => setCustomersPage(p => Math.min(Math.ceil(filtered.length / CUSTOMERS_PER_PAGE), p + 1))}
-                disabled={customersPage === Math.ceil(filtered.length / CUSTOMERS_PER_PAGE)}
-                className="px-3 py-1.5 rounded-lg text-sm font-bold border border-border disabled:opacity-40 hover:bg-bg-tertiary transition-colors"
-              >→</button>
-            </div>
-          </div>
+        {customerGroups.length > 0 && (
+          <select value={filterGroup} onChange={e => setFilterGroup(e.target.value)}
+            className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[170px]">
+            <option value="">{t('cust_all_groups')}</option>
+            {customerGroups.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+        )}
+        {customerTags.length > 0 && (
+          <select value={filterTag} onChange={e => setFilterTag(e.target.value)}
+            className="px-3 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:border-accent-red max-w-[170px]">
+            <option value="">{t('cust_all_tags')}</option>
+            {customerTags.map(g => <option key={g} value={g}>#{g}</option>)}
+          </select>
         )}
       </div>
+
+      {/* Birlashtirish rejimi: ikkinchi mijozni tanlash */}
+      {mergeSource && (
+        <div className="flex flex-wrap items-center gap-3 bg-accent-blue/10 border border-accent-blue/30 rounded-2xl px-4 py-3 text-[15px] text-accent-blue">
+          <GitMerge size={18} />
+          <span className="flex-1">{t('cust_merge_pick_second', { name: mergeSource.name })}</span>
+          <button onClick={() => setMergeSource(null)} className="px-3 py-1.5 rounded-xl border border-accent-blue/40 text-sm font-semibold">{t('cancel')}</button>
+        </div>
+      )}
+
+      <DataTable
+        rows={filtered}
+        resetKey={`${search}|${activeFilter}|${filterGroup}|${filterTag}`}
+        onRowClick={(c) => { if (mergeSource) { handleManualMergeClick(c); return } setSelectedCustomer(c); setModalTab('general') }}
+        rowClass={(c) => (mergeSource?.id === c.id ? 'ring-2 ring-accent-blue/50' : '')}
+        empty={<><Users size={40} className="mx-auto mb-3 opacity-20" />{t('cust_not_found')}</>}
+        columns={[
+          { key: 'name', label: t('col_customer'), sortValue: c => c.name, render: c => (
+            <div className="min-w-0">
+              <p className="font-bold text-text-primary">{c.name}</p>
+              <p className="text-sm text-text-muted">{c.phone}{c.phone2 ? ` · ${c.phone2}` : ''}</p>
+              {(c.group || c.tags?.length > 0) && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {c.group && <Badge color="bg-accent-orange/10 text-accent-orange">{c.group}</Badge>}
+                  {(c.tags || []).slice(0, 3).map(tg => <Badge key={tg} color="bg-accent-blue/10 text-accent-blue">#{tg}</Badge>)}
+                </div>
+              )}
+            </div>
+          ) },
+          { key: 'spent', label: t('cust_th_total'), align: 'right', sortValue: c => metrics[c.id]?.spent || 0, render: c => (
+            <div><p className="font-bold whitespace-nowrap">{formatPrice(metrics[c.id]?.spent || 0)}</p><p className="text-sm text-text-muted">{t('cust_visits_n', { n: metrics[c.id]?.visits || 0 })}</p></div>
+          ) },
+          { key: 'debt', label: t('col_debt'), align: 'right', sortValue: c => metrics[c.id]?.debt || 0, render: c => (
+            (metrics[c.id]?.debt || 0) > 0 ? <span className="font-bold text-accent-red whitespace-nowrap">{formatPrice(metrics[c.id].debt)}</span> : <span className="text-text-muted">—</span>
+          ) },
+          { key: 'tier', label: t('col_tier'), sortValue: c => metrics[c.id]?.level?.idx ?? -1, render: c => (
+            <Badge color={metrics[c.id]?.level?.color}>{metrics[c.id]?.level?.isTop && <Star size={11} />}{metrics[c.id]?.level?.label}</Badge>
+          ) },
+          { key: 'last', label: t('cust_th_last_visit'), sortValue: c => metrics[c.id]?.last || '', render: c => {
+            const lv = metrics[c.id]?.last
+            if (!lv) return <span className="text-text-muted">—</span>
+            const days = Math.floor((Date.now() - new Date(lv)) / 86400000)
+            return <div className="whitespace-nowrap"><p>{new Date(lv).toLocaleDateString('ru-RU')}</p><p className="text-sm text-text-muted">{days <= 0 ? t('cust_today') : t('cust_days_ago', { n: days })}</p></div>
+          } },
+        ]}
+        mobileCard={(c) => {
+          const m = metrics[c.id] || {}
+          return (
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-bold text-text-primary">{c.name}</p>
+                <p className="text-sm text-text-muted">{c.phone}</p>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  {m.level && <Badge color={m.level.color}>{m.level.label}</Badge>}
+                  <span className="text-sm text-text-muted">{t('cust_visits_n', { n: m.visits || 0 })}</span>
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[15px] font-bold text-text-primary">{formatPrice(m.spent || 0)}</p>
+                {(m.debt || 0) > 0 && <p className="text-sm font-bold text-accent-red">{t('col_debt')}: {formatPrice(m.debt)}</p>}
+              </div>
+            </div>
+          )
+        }}
+      />
       <AddCustomerModal     ctx={ctx} />
       <CustomerProfileModal ctx={ctx} />
       <EditCustomerModal    ctx={ctx} />

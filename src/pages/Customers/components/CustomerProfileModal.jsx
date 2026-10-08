@@ -5,6 +5,10 @@ import { AlertCircle, ArrowDownToLine, ArrowUpFromLine, Calendar, Check, CheckCi
 import { useSettingsStore } from '../../../store/settingsStore'
 import { Heart, MessageSquare, Wallet, Mail, MapPin, Tag, Clock } from 'lucide-react'
 import { PreferencesTab, NotesTab, BalanceTab, DebtPayPanel } from './ProfileExtraTabs'
+import Modal from '../../../components/ui/Modal'
+import { Segmented, Badge } from '../../../components/ui/Kit'
+import SaleDetailModal from './SaleDetailModal'
+import { GitMerge, ChevronRight } from 'lucide-react'
 import CustomerTelegramTab from './CustomerTelegramTab'
 import { useAuthStore } from '../../../store/authStore'
 const CustomerProfileModal = ({ ctx }) => {
@@ -43,6 +47,12 @@ const CustomerProfileModal = ({ ctx }) => {
     products, getLastVisit, reloadCustomerData,
   } = ctx
   const MOCK_SALES = allSales || []
+  // 5 ta tab: Umumiy (+afzalliklar), Xaridlar [Yangi | B/U], Moliya [Nasiya | Balans], Izohlar, Telegram
+  const [purchasesSub, setPurchasesSub] = useState('new')
+  const [financeSub, setFinanceSub] = useState('installments')
+  const [saleDetail, setSaleDetail] = useState(null)
+  const level = selectedCustomer ? computeLoyaltyLevel(selectedCustomer) : null
+  const closeAnd = (fn) => { const c = selectedCustomer; setSelectedCustomer(null); fn(c) }
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
 
   const getCustomerSales = (customer) =>
@@ -72,78 +82,69 @@ const CustomerProfileModal = ({ ctx }) => {
   return (
     <>
 
-      {/* CUSTOMER PROFILE MODAL */}
-      <AnimatePresence>
-        {selectedCustomer && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedCustomer(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 40 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 40 }}
-              className="relative w-full max-w-4xl bg-bg-primary border border-border rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
-            >
-              {/* Profile Header */}
-              <div className="p-5 sm:p-8 pb-4 flex items-start justify-between bg-bg-secondary">
-                <div className="flex items-center gap-3 sm:gap-6">
-                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-extrabold text-2xl sm:text-3xl ${computeLoyaltyLevel(selectedCustomer).color}`}>
-                    {selectedCustomer.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-syne font-extrabold text-text-primary">{selectedCustomer.name}</h2>
-                    <div className="flex items-center gap-4 mt-2">
-                      <span className="text-sm text-text-secondary flex items-center gap-1.5"><Phone size={14} /> {selectedCustomer.phone}</span>
-                      {selectedCustomer.phone2 && (
-                        <span className="text-sm text-text-muted flex items-center gap-1.5"><Phone size={12} /> {selectedCustomer.phone2} <span className="text-[10px] bg-bg-tertiary px-1.5 py-0.5 rounded">2</span></span>
-                      )}
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-tight ${computeLoyaltyLevel(selectedCustomer).color}`}>
-                        {computeLoyaltyLevel(selectedCustomer).isTop && <Star size={10} className="inline mr-1" />}
-                        {computeLoyaltyLevel(selectedCustomer).label}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedCustomer(null)} className="p-3 text-text-muted hover:text-accent-red hover:bg-accent-red/10 rounded-2xl transition-all">
-                  <X size={24} />
-                </button>
+      {/* MIJOZ PROFILI — hamma ma'lumot bitta oynada, xarid bosilsa chek ichma-ich ochiladi */}
+      <Modal open={!!selectedCustomer} onClose={() => setSelectedCustomer(null)} size="lg" bodyClass="p-0"
+        title={selectedCustomer?.name}
+        subtitle={selectedCustomer && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <a href={`tel:${selectedCustomer.phone}`} className="flex items-center gap-1 hover:text-accent-red"><Phone size={14} /> {selectedCustomer.phone}</a>
+            {selectedCustomer.phone2 && <a href={`tel:${selectedCustomer.phone2}`} className="flex items-center gap-1 text-text-muted hover:text-accent-red"><Phone size={13} /> {selectedCustomer.phone2}</a>}
+            {level && <Badge color={level.color}>{level.isTop && <Star size={11} />}{level.label}</Badge>}
+          </div>
+        )}
+        actions={selectedCustomer && (
+          <>
+            <button title={t('edit')} onClick={() => closeAnd(handleEditOpen)} className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-accent-orange hover:bg-accent-orange/10"><Pencil size={18} /></button>
+            <button title={t('cust_merge_btn')} onClick={() => closeAnd(c => setMergeSource(c))} className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-accent-blue hover:bg-accent-blue/10"><GitMerge size={18} /></button>
+            <button title={t('cust_delete_btn')} onClick={() => closeAnd(c => setDeleteTarget(c))} className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-accent-red hover:bg-accent-red/10"><Trash2 size={18} /></button>
+          </>
+        )}>
+        {selectedCustomer && (<>
+          {/* Asosiy ko'rsatkichlar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-4 sm:px-6 py-3 bg-bg-secondary border-b border-border">
+            {[
+              { label: t('cust_stat_visits'), value: getTotalVisits(selectedCustomer) },
+              { label: t('cust_stat_spent'), value: formatPrice(getTotalSpent(selectedCustomer)) },
+              { label: t('col_debt'), value: getCustomerDebt(selectedCustomer) > 0 ? formatPrice(getCustomerDebt(selectedCustomer)) : '—', cls: getCustomerDebt(selectedCustomer) > 0 ? 'text-accent-red' : '' },
+              { label: t('cust_th_balance'), value: selectedCustomer.balance ? formatPrice(selectedCustomer.balance) : '—', cls: (selectedCustomer.balance || 0) > 0 ? 'text-accent-green' : '' },
+            ].map((x, i) => (
+              <div key={i} className="bg-bg-primary border border-border rounded-xl px-3 py-2 min-w-0">
+                <p className="text-xs text-text-muted">{x.label}</p>
+                <p className={`text-base sm:text-lg font-syne font-bold text-text-primary [overflow-wrap:anywhere] ${x.cls || ''}`}>{x.value}</p>
               </div>
+            ))}
+          </div>
 
-              {/* Tabs */}
-              <div className="flex border-b border-border bg-bg-secondary px-4 sm:px-8 overflow-x-auto no-scrollbar">
-                {[
-                  { id: 'general', label: t('cust_tab_general'), icon: Users },
-                  { id: 'history', label: t('cust_tab_history'), icon: History },
-                  { id: 'installments', label: t('cust_tab_installments'), icon: Calendar },
-                  { id: 'used', label: t('cust_tab_used'), icon: Recycle },
-                  { id: 'preferences', label: t('cust_tab_preferences'), icon: Heart },
-                  { id: 'notes', label: t('cust_tab_notes'), icon: MessageSquare },
-                  { id: 'balance', label: t('cust_tab_balance'), icon: Wallet },
-                  ...(canSms ? [{ id: 'telegram', label: 'Telegram', icon: MessageSquare }] : []),
-                ].map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setModalTab(t.id)}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative ${
-                      modalTab === t.id ? 'text-accent-red' : 'text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    <t.icon size={16} />
-                    {t.label}
-                    {modalTab === t.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-accent-red rounded-t-full" />
-                    )}
-                  </button>
-                ))}
-              </div>
+          {/* Tablar */}
+          <div className="flex border-b border-border bg-bg-secondary px-2 sm:px-4 overflow-x-auto no-scrollbar">
+            {[
+              { id: 'general', label: t('cust_tab_general'), icon: Users },
+              { id: 'purchases', label: t('cust_tab_purchases'), icon: History },
+              { id: 'finance', label: t('cust_tab_finance'), icon: Wallet },
+              { id: 'notes', label: t('cust_tab_notes'), icon: MessageSquare },
+              ...(canSms ? [{ id: 'telegram', label: 'Telegram', icon: MessageSquare }] : []),
+            ].map(tb => (
+              <button key={tb.id} onClick={() => setModalTab(tb.id)}
+                className={`flex items-center gap-2 px-3 sm:px-5 py-3.5 text-sm font-bold whitespace-nowrap relative ${modalTab === tb.id ? 'text-accent-red' : 'text-text-muted hover:text-text-primary'}`}>
+                <tb.icon size={16} /> {tb.label}
+                {modalTab === tb.id && <span className="absolute bottom-0 left-0 right-0 h-1 bg-accent-red rounded-t-full" />}
+              </button>
+            ))}
+          </div>
 
-              {/* Content Area */}
-              <div className="p-5 sm:p-8 overflow-y-auto no-scrollbar flex-1 bg-bg-primary" style={{ minHeight: '320px' }}>
+          <div className="p-4 sm:p-6 space-y-4" style={{ minHeight: '320px' }}>
+                {modalTab === 'purchases' && (
+                  <Segmented value={purchasesSub} onChange={setPurchasesSub} options={[
+                    { id: 'new', label: t('cust_sub_new') },
+                    { id: 'used', label: t('cust_tab_used') },
+                  ]} />
+                )}
+                {modalTab === 'finance' && (
+                  <Segmented value={financeSub} onChange={setFinanceSub} options={[
+                    { id: 'installments', label: t('cust_tab_installments') },
+                    { id: 'balance', label: t('cust_tab_balance') },
+                  ]} />
+                )}
                 {modalTab === 'general' && (
                   <div className="space-y-5 sm:space-y-8">
                     {computeLoyaltyLevel(selectedCustomer).isTop && (
@@ -158,50 +159,29 @@ const CustomerProfileModal = ({ ctx }) => {
                       </motion.div>
                     )}
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {[
-                        { label: t('cust_stat_visits'), value: getTotalVisits(selectedCustomer), icon: Calendar },
-                        { label: t('cust_stat_loyalty'), value: computeLoyaltyLevel(selectedCustomer).percent ? `${computeLoyaltyLevel(selectedCustomer).percent}%` : '—', icon: Star, color: 'text-accent-green' },
-                        { label: t('cust_stat_items'), value: getTotalItems(selectedCustomer), icon: Package },
-                        { label: t('cust_stat_spent'), value: formatPrice(getTotalSpent(selectedCustomer)), icon: DollarSign },
-                      ].map((s, i) => (
-                        <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-4 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{s.label}</span>
-                            <s.icon size={14} className={s.color || "text-text-muted"} />
-                          </div>
-                          <p className={`text-lg font-syne font-extrabold ${s.color || "text-text-primary"}`}>{s.value}</p>
-                        </div>
-                      ))}
-                    </div>
-
                     {(() => {
+                      // Qarz, balans, xaridlar soni va jami summa — yuqorida; bu yerda qolganlari
                       const all = getCustomerAllSales(selectedCustomer)
                       const spent = getTotalSpent(selectedCustomer)
                       const avg = all.length ? Math.round(spent / all.length) : 0
-                      const debt = getCustomerDebt(selectedCustomer)
-                      const bal = selectedCustomer.balance || 0
                       const last = getLastVisit(selectedCustomer)
                       const lastDays = daysAgo(last)
                       const firstSale = all.reduce((m, s) => (!m || s.soldAt < m) ? s.soldAt : m, '')
                       const regDate = selectedCustomer.createdAt || firstSale
+                      const pct = computeLoyaltyLevel(selectedCustomer).percent
                       return (
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                           {[
-                            { label: t('cust_stat_avg_check'), value: formatPrice(avg), icon: TrendingUp },
-                            { label: t('cust_balance'), value: formatPrice(bal), icon: Wallet, color: bal > 0 ? 'text-accent-green' : bal < 0 ? 'text-accent-red' : null, tab: 'balance' },
-                            { label: t('col_debt'), value: formatPrice(debt), icon: CreditCard, color: debt > 0 ? 'text-accent-red' : null, tab: 'installments' },
-                            { label: t('cust_registered'), value: regDate ? new Date(regDate).toLocaleDateString('uz-UZ') : '—', icon: User },
-                            { label: t('cust_last_visit'), value: last ? new Date(last).toLocaleDateString('uz-UZ') : '—', sub: lastDays === null ? null : lastDays <= 0 ? t('cust_today') : t('cust_days_ago', { n: lastDays }), icon: Clock },
-                          ].map((s, i) => (
-                            <div key={i} onClick={s.tab ? () => setModalTab(s.tab) : undefined}
-                              className={`bg-bg-secondary border border-border rounded-2xl p-4 space-y-2 ${s.tab ? 'cursor-pointer hover:border-text-muted' : ''}`}>
-                              <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{s.label}</span>
-                                <s.icon size={14} className={s.color || 'text-text-muted'} />
-                              </div>
-                              <p className={`text-lg font-syne font-extrabold ${s.color || 'text-text-primary'}`}>{s.value}</p>
-                              {s.sub && <p className="text-[10px] text-text-muted -mt-1">{s.sub}</p>}
+                            { label: t('cust_stat_loyalty'), value: pct ? `${pct}%` : '—', cls: pct ? 'text-accent-green' : '' },
+                            { label: t('cust_stat_items'), value: getTotalItems(selectedCustomer) },
+                            { label: t('cust_stat_avg_check'), value: formatPrice(avg) },
+                            { label: t('cust_registered'), value: regDate ? new Date(regDate).toLocaleDateString('ru-RU') : '—' },
+                            { label: t('cust_last_visit'), value: last ? new Date(last).toLocaleDateString('ru-RU') : '—', sub: lastDays === null ? null : lastDays <= 0 ? t('cust_today') : t('cust_days_ago', { n: lastDays }) },
+                          ].map((x, i) => (
+                            <div key={i} className="bg-bg-secondary border border-border rounded-xl px-3 py-2.5 min-w-0">
+                              <p className="text-xs text-text-muted">{x.label}</p>
+                              <p className={`text-[15px] font-bold text-text-primary [overflow-wrap:anywhere] ${x.cls || ''}`}>{x.value}</p>
+                              {x.sub && <p className="text-xs text-text-muted">{x.sub}</p>}
                             </div>
                           ))}
                         </div>
@@ -284,7 +264,7 @@ const CustomerProfileModal = ({ ctx }) => {
                   </div>
                 )}
 
-                {modalTab === 'history' && (() => {
+                {modalTab === 'purchases' && purchasesSub === 'new' && (() => {
                   const customerSales = getAllCustomerSales(selectedCustomer)
                     .slice()
                     .sort((a, b) => new Date(b.soldAt) - new Date(a.soldAt))
@@ -305,66 +285,34 @@ const CustomerProfileModal = ({ ctx }) => {
                   }
 
                   return (
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {customerSales.map((sale) => {
                         const isCancelled = sale.status === 'cancelled'
-                        const saleDate = new Date(sale.soldAt).toLocaleDateString('uz-UZ', {
-                          year: 'numeric', month: '2-digit', day: '2-digit'
-                        })
                         return (
-                          <div key={sale.id} className={`border rounded-2xl overflow-hidden transition-all ${
-                            isCancelled ? 'border-accent-red/20 bg-accent-red/5' : 'border-border bg-bg-secondary/30'
-                          }`}>
-                            <div className="p-4 bg-bg-secondary border-b border-border space-y-3">
-                              <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-xs font-mono text-text-muted">[{sale.id}]</span>
-                                <span className={`text-sm font-bold text-text-primary`}>{saleDate}</span>
-                                {sale.soldByName && (
-                                  <span className="flex items-center gap-1 text-xs text-text-muted">
-                                    <User size={12} /> {sale.soldByName}
-                                  </span>
-                                )}
-                                <span className={`ml-auto text-sm font-bold text-text-primary`}>
-                                  {formatPrice(sale.total)}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {isCancelled && (
-                                  <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-accent-red/10 text-accent-red flex items-center gap-1">
-                                    <X size={10} /> {t('cust_cancelled')}
-                                  </span>
-                                )}
-                                <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-bg-tertiary text-text-muted">
-                                  {paymentLabel(sale.paymentType)}
-                                </span>
-                                {sale.discount > 0 && (
-                                  <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase bg-accent-orange/10 text-accent-orange">
-                                    {t('cust_discount', { n: sale.discount })}
-                                  </span>
-                                )}
+                          <button key={sale.id} onClick={() => setSaleDetail(sale)}
+                            className={`w-full text-left flex items-center gap-3 rounded-2xl border px-3.5 py-3 transition-colors hover:border-text-muted ${isCancelled ? 'border-accent-red/20 bg-accent-red/5' : 'border-border bg-bg-secondary'}`}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[15px] font-semibold text-text-primary">
+                                {new Date(sale.soldAt).toLocaleDateString('ru-RU')}
+                                <span className="text-text-muted font-normal text-sm"> · {t('cust_items_count', { n: (sale.items || []).length })}</span>
+                              </p>
+                              <p className="text-sm text-text-muted truncate">{(sale.items || []).map(i => i.name).join(', ')}</p>
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                {isCancelled && <Badge color="bg-accent-red/10 text-accent-red">{t('cust_cancelled')}</Badge>}
+                                <Badge>{paymentLabel(sale.paymentType)}</Badge>
+                                {sale.discount > 0 && <Badge color="bg-accent-orange/10 text-accent-orange">{t('cust_discount', { n: sale.discount })}</Badge>}
                               </div>
                             </div>
-                            <div className="p-4">
-                              <div className="space-y-2">
-                                {(sale.items || []).map((item, idx) => (
-                                  <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-border/50 last:border-0">
-                                    <div className="flex items-center gap-3">
-                                      <span className={`text-[10px] font-mono text-text-muted ${barcodeSelectClass}`}>{item.barcode}</span>
-                                      <span className={`font-medium text-text-primary`}>{item.name}</span>
-                                    </div>
-                                    <span className={`font-bold text-text-primary`}>{formatPrice(item.salePrice)}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
+                            <p className="text-[15px] font-bold text-text-primary whitespace-nowrap">{formatPrice(sale.total)}</p>
+                            <ChevronRight size={18} className="text-text-muted shrink-0" />
+                          </button>
                         )
                       })}
                     </div>
                   )
                 })()}
 
-                {modalTab === 'installments' && (() => {
+                {modalTab === 'finance' && financeSub === 'installments' && (() => {
                   const today = new Date()
                   const instSales = MOCK_SALES.filter(s =>
                     s.customerId === selectedCustomer.id &&
@@ -515,16 +463,16 @@ const CustomerProfileModal = ({ ctx }) => {
                   )
                 })()}
 
-                {modalTab === 'preferences' && (
+                {modalTab === 'general' && (
                   <PreferencesTab sales={getCustomerAllSales(selectedCustomer)} products={products} />
                 )}
                 {modalTab === 'notes' && <NotesTab customer={selectedCustomer} user={user} />}
                 {modalTab === 'telegram' && <CustomerTelegramTab customer={selectedCustomer} />}
-                {modalTab === 'balance' && (
+                {modalTab === 'finance' && financeSub === 'balance' && (
                   <BalanceTab customer={selectedCustomer} user={user} selectedShopId={selectedShopId} onChanged={reloadCustomerData} />
                 )}
 
-                {modalTab === 'used' && (() => {
+                {modalTab === 'purchases' && purchasesSub === 'used' && (() => {
                   const acquiredItems = getCustomerUsedStock(selectedCustomer)
                     .slice()
                     .sort((a, b) => new Date(b.acquiredAt || 0) - new Date(a.acquiredAt || 0))
@@ -667,11 +615,10 @@ const CustomerProfileModal = ({ ctx }) => {
                     </div>
                   )
                 })()}
-              </div>
-            </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </>)}
+      </Modal>
+      <SaleDetailModal sale={saleDetail} onClose={() => setSaleDetail(null)} barcodeSelectClass={barcodeSelectClass} />
 
     </>
   )
