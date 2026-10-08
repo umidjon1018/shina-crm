@@ -6,6 +6,7 @@ const map = (c) => ({
   labelRu: c.labelRu ?? c.label_ru ?? c.label,
   isActive: c.isActive ?? c.is_active ?? true,
   sortOrder: c.sortOrder ?? c.sort_order ?? 0,
+  turnoverDays: c.turnoverDays ?? c.turnover_days ?? null,
 })
 
 export const getCategories = async () => {
@@ -21,6 +22,7 @@ export const createCategory = async (cat) => {
     label: cat.label,
     label_ru: cat.labelRu || cat.label,
     sort_order: cat.sortOrder || 0,
+    turnover_days: cat.turnoverDays || null,
   })
   return map(data)
 }
@@ -30,7 +32,7 @@ export const updateCategory = async (id, cat) => {
     label: cat.label,
     label_ru: cat.labelRu || cat.label,
     is_active: cat.isActive ?? true,
-    sort_order: cat.sortOrder || 0,
+    turnover_days: cat.turnoverDays || null,
   })
   return map(data)
 }

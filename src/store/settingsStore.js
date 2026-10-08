@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getEmployees, createEmployee, updateEmployee as apiUpdateEmp, deactivateEmployee, activateEmployee, deleteEmployee } from '../api/employeeService'
 import { getProductImageMap, saveProductImages } from '../api/productImageService'
-import { getBranding, saveBranding } from '../api/settingsService'
+import { getBranding, saveBranding, getBusinessSettings, saveBusinessSettings } from '../api/settingsService'
+import { toast, errorText } from '../components/ui/Toast'
 
 // Brend sozlamalari serverga yoziladi (admin yozishni to'xtatgach 600ms dan keyin, bitta so'rov)
 const BRANDING_KEYS = ['companyName', 'companyLogo', 'loginIconMode', 'loginPageTitle', 'sidebarLogoSize']
@@ -18,6 +19,20 @@ const queueBrandingSave = (patch) => {
   }, 600)
 }
 import { getCategories, createCategory, updateCategory as apiUpdateCat, toggleCategory as apiToggleCat, deleteCategory as apiDeleteCat } from '../api/categoryService'
+
+// Savdo sozlamalari serverda (app_settings 'business'), localStorage — faqat oflayn kesh.
+// O'zgarish store'ga yozilgach avtomatik serverga yuboriladi (pastdagi subscribe); server rad etsa — qaytariladi.
+const BUSINESS_KEYS = [
+  'usdRate', 'sources', 'installmentOrganizations', 'discountSmallMax', 'discountMediumMax',
+  'monthlyTargets', 'employeeTargets', 'notificationSettings', 'productAttributeDefs',
+  'priceListSettings', 'downloadEnabled', 'sidebarLabels', 'hiddenPages',
+]
+const ADMIN_ONLY_KEYS = ['sidebarLabels', 'hiddenPages']
+let businessReady = false
+let applyingRemote = false
+let businessTimer = null
+let businessPatch = {}
+let businessRole = null
 
 export const useSettingsStore = create(
   persist(
@@ -258,6 +273,32 @@ export const useSettingsStore = create(
       },
       setPriceListSettings: (s) => set(state => ({ priceListSettings: { ...state.priceListSettings, ...s } })),
 
+      // Serverdagi savdo sozlamalari. Serverda hali yo'q kalit: admin/boshqaruvchi qurilmasidagi
+      // o'zgartirilgan qiymat serverga ko'chiriladi (birinchi marta), boshqalarda — standart qiymat.
+      loadBusiness: async (role = businessRole) => {
+        businessRole = role
+        try {
+          const remote = await getBusinessSettings()
+          const cur = get()
+          const init = useSettingsStore.getInitialState()
+          const next = {}
+          const seed = {}
+          const canSeed = role === 'admin' || role === 'manager'
+          for (const k of BUSINESS_KEYS) {
+            if (remote[k] !== undefined) next[k] = remote[k]
+            else if (canSeed && (role === 'admin' || !ADMIN_ONLY_KEYS.includes(k)) && JSON.stringify(cur[k]) !== JSON.stringify(init[k])) seed[k] = cur[k]
+            else next[k] = init[k]
+          }
+          applyingRemote = true
+          set(next)
+          applyingRemote = false
+          businessReady = true
+          for (const [k, v] of Object.entries(seed)) {
+            await saveBusinessSettings({ [k]: v }).catch(() => {})
+          }
+        } catch { /* oflayn — mahalliy kesh qoladi */ }
+      },
+
       // Sidebar konfiguratsiyasi
       sidebarLabels: {
         dashboard: '',
@@ -326,31 +367,28 @@ export const useSettingsStore = create(
       },
       addProductCategory: async ({ id, label, labelRu, turnoverDays }) => {
         try {
-          const created = await createCategory({ id, label, labelRu: labelRu || label, sortOrder: 0 })
-          set(s => ({ productCategories: [...s.productCategories, { ...created, turnoverDays: turnoverDays || 30 }] }))
-        } catch {
-          set(s => ({ productCategories: [...s.productCategories, { id, label, turnoverDays: turnoverDays || 30, isActive: true }] }))
-        }
+          const created = await createCategory({ id, label, labelRu: labelRu || label, sortOrder: 0, turnoverDays: turnoverDays || 30 })
+          set(s => ({ productCategories: [...s.productCategories, created] }))
+        } catch (e) { toast(errorText(e), 'error') }
       },
       updateProductCategory: async (id, data) => {
         try {
-          const updated = await apiUpdateCat(id, { label: data.label, labelRu: data.labelRu || data.label, isActive: data.isActive ?? true })
-          set(s => ({ productCategories: s.productCategories.map(x => x.id === id ? { ...x, ...updated, turnoverDays: data.turnoverDays ?? x.turnoverDays } : x) }))
-        } catch {
-          set(s => ({ productCategories: s.productCategories.map(x => x.id === id ? { ...x, ...data } : x) }))
-        }
+          const cur = get().productCategories.find(x => x.id === id) || {}
+          const updated = await apiUpdateCat(id, { label: data.label ?? cur.label, labelRu: data.labelRu || data.label || cur.labelRu, isActive: data.isActive ?? cur.isActive ?? true, turnoverDays: data.turnoverDays ?? cur.turnoverDays })
+          set(s => ({ productCategories: s.productCategories.map(x => x.id === id ? { ...x, ...updated } : x) }))
+        } catch (e) { toast(errorText(e), 'error') }
       },
       removeProductCategory: async (id) => {
-        set(s => ({ productCategories: s.productCategories.filter(x => x.id !== id) }))
-        try { await apiDeleteCat(id) } catch {}
+        try {
+          await apiDeleteCat(id)
+          set(s => ({ productCategories: s.productCategories.filter(x => x.id !== id) }))
+        } catch (e) { toast(errorText(e), 'error') }
       },
       toggleProductCategory: async (id) => {
         try {
           const updated = await apiToggleCat(id)
           set(s => ({ productCategories: s.productCategories.map(x => x.id === id ? { ...x, isActive: updated.isActive } : x) }))
-        } catch {
-          set(s => ({ productCategories: s.productCategories.map(x => x.id === id ? { ...x, isActive: !x.isActive } : x) }))
-        }
+        } catch (e) { toast(errorText(e), 'error') }
       },
 
       // Maqsadlar
@@ -468,3 +506,22 @@ export const useSettingsStore = create(
     }
   )
 )
+
+// Savdo sozlamasi o'zgarsa — 500ms dan keyin bitta so'rov bilan serverga
+useSettingsStore.subscribe((state, prev) => {
+  if (!businessReady || applyingRemote) return
+  let changed = false
+  for (const k of BUSINESS_KEYS) {
+    if (state[k] !== prev[k]) { businessPatch[k] = state[k]; changed = true }
+  }
+  if (!changed) return
+  clearTimeout(businessTimer)
+  businessTimer = setTimeout(() => {
+    const patch = businessPatch
+    businessPatch = {}
+    saveBusinessSettings(patch).catch(e => {
+      toast(errorText(e), 'error')
+      useSettingsStore.getState().loadBusiness()
+    })
+  }, 500)
+})

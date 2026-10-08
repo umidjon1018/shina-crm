@@ -32,6 +32,7 @@ import { createSale } from '../api/salesService'
 import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
 import UpdateBanner from '../components/UpdateBanner'
+import Toaster from '../components/ui/Toast'
 import { useShopStore } from '../store/shopStore'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
@@ -129,7 +130,7 @@ export const MainLayout = () => {
   const { areaRef, contentRef, zoom, resetZoom } = usePinchZoom()
   const { getUnreadCount } = useNotificationStore()
   const unreadCount = getUnreadCount()
-  const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages, loadBranding } = useSettingsStore()
+  const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages, loadBranding, loadBusiness } = useSettingsStore()
   const { shops, selectedShopId, setSelectedShop, loadShops } = useShopStore()
   const activeShops = shops.filter(s => s.isActive)
 
@@ -139,6 +140,7 @@ export const MainLayout = () => {
     loadProductCategories()
     loadProductImages()
     loadBranding(user?.role === 'admin')
+    loadBusiness(user?.role)
     syncRolesFromServer().catch(() => {})
     // Ilovaga qaytganda ruxsatlar yangilanadi (admin o'zgartirgan bo'lsa)
     const onVisible = () => { if (document.visibilityState === 'visible') syncRolesFromServer().catch(() => {}) }
@@ -153,6 +155,7 @@ export const MainLayout = () => {
   }
   useRealtime({
     perm_changed: () => { syncRolesFromServer().catch(() => {}); loadEmployees() },
+    settings_changed: () => loadBusiness(user?.role),
     device_revoked: (d) => { if (user?.role !== 'admin') kick(d.reason === 'other_device' ? 'rt_kick_other_device' : 'rt_kick_revoked') },
     account_disabled: () => kick('rt_kick_disabled'),
     login_attempt: (d) => {
@@ -450,6 +453,7 @@ export const MainLayout = () => {
       </main>
 
       <UpdateBanner />
+      <Toaster />
       <AnimatePresence>
         {showProfile && (
           <ProfileModal

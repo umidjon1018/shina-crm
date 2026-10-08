@@ -21,3 +21,14 @@ export const saveLoyaltySettings = async (cfg) => {
   const { data } = await api.put('/api/settings/loyalty', cfg)
   return data
 }
+
+// Savdo sozlamalari (kurs, manbalar, nasiya tashkilotlari, chegirma chegaralari, rejalar...) — serverda
+export const getBusinessSettings = async () => {
+  const { data } = await api.get('/api/settings/business')
+  return data || {}
+}
+
+export const saveBusinessSettings = async (patch) => {
+  const { data } = await api.put('/api/settings/business', patch)
+  return data
+}
