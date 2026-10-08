@@ -245,3 +245,21 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - ✅ Ro'yxat so'rovlari o'lchandi (12-bo'lim).
 - ✅ 2-bo'limdagi xatolar kod orqali tasdiqlangan (saqlash joyi va server route'lari).
 - ⛔ **Server bazasi hajmi** — avtomatik rejim server bazasiga ulanishni rad etdi ("Production Reads"). Hal qilish: foydalanuvchi ruxsat beradi yoki buyruqni o'zi ishga tushiradi.
+
+---
+
+## 15. Bajarilganlar (lokal, deploy qilinmagan)
+
+### Bosqich 0 ✅ (2026-10-08)
+| Band | Natija | Commit (frontend / backend) |
+|---|---|---|
+| Savdo sozlamalari serverda | `app_settings.business` (kurs, manbalar, nasiya tashkilotlari, chegirma chegaralari, rejalar, ogohlantirish sozlamalari, atributlar, narxnoma, menyu nomlari, yashirin sahifalar, xodim tahrir qulfi); kalit bo'yicha ruxsat; SSE `settings_changed`; birinchi kirishda admin/boshqaruvchi qurilmasidagi o'zgartirilgan qiymat serverga ko'chadi. Kategoriya aylanish muddati serverda | 1e7ff335 / 6ddf4bb |
+| Bildirishnomalar serverda | `notifications` + `notification_reads`; chegirma so'rovi boshqaruvchiga real vaqtda, tasdiq sotuvchiga qaytadi; kim tasdiqlashini server belgilaydi; tasdiq bir marta ishlatiladi | 97cc6a73 / bb5dfbd |
+| Audit serverda | `audit_log`; sotuv bekor/tahrir, narx o'zgarishi, xodim, qurilma, do'kon, sozlamalar, chegirma tasdig'i — server yozadi; Admin → Audit serverdan | 3222744e / 5a44a35 |
+| Xodimlar (4A) | boshqaruvchi o'zidan past lavozimni boshqaradi, rol/ruxsatni o'zgartirmaydi, bo'shatish — so'rov + admin tasdig'i (so'rovda turgan xodim ishlaydi); bloklash serverda (`is_blocked`); admin tahrir qulfi; xodim parollari brauzerda saqlanmaydi | 3222744e / 5a44a35 |
+| Komplekt → Aksiya (8) | `promotions.bundle_items`, "Komplekt" turi; kassada aksiya mexanizmi to'liq to'plamga chegirma beradi (cash_price dan); eski mahalliy komplektlar avtomatik ko'chiriladi; Boshqaruv → Komplektlar olib tashlandi | 1202c3ca / 4470f76 |
+| Minimal narx (6) | serverda: sotuvchi savdolashib/qo'lda chegirma bilan min narxdan pastga tusha olmaydi (faqat tasdiqlangan so'rov bilan); rol chegarasi (sotuvchi 5%, boshqaruvchi 10%) serverda; aksiya/komplekt/sodiqlik chegaraga tushmaydi; `sale_items` uchun `base_price` | 1202c3ca / 4470f76 |
+| Xavfsizlik | AI kaliti serverda shifrlangan; do'konga biriktirilgan xodim faqat o'z do'koni sotuvlari; xarajat/kapital ro'yxati ruxsat bilan | 20550789 / 13b1e7d |
+| Tozalash | o'lik AI sozlamalari, Boshqaruvdagi takror AI kaliti, "ishonchli qurilmalar", mahalliy Face ID, 80% tannarx taxmini | 20550789 |
+
+**Deploy eslatmalari (Bosqich 0):** yangi jadvallar va ustunlar avtomatik yaratiladi (`notifications`, `notification_reads`, `audit_log`, `employees.is_blocked/blocked_by_admin`, `product_categories.turnover_days`, `promotions.bundle_items`). `middleware/auth.js`, `utils/tokens.js`, `authController` dagi xodim sharti `pending_delete = FALSE` → `is_blocked IS NOT TRUE` ga o'zgardi (bo'shatish so'rovidagi xodim admin tasdiqlaguncha ishlaydi). Deploydan keyin admin bir marta ilovaga kirishi kerak — uning brauzeridagi sozlamalar (kurs, nasiya tashkilotlari...) serverga ko'chadi. Keyin Sozlamalarni tekshirish.
