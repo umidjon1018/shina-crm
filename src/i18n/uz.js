@@ -4598,4 +4598,5 @@ export default {
   pr_move_transfer_in: "Ko'chirildi (kirim)",
   pr_src_transfer: "Ko'chirish",
   audit_prod_material_transfer: "Xomashyo ko'chirildi",
+  wh_scan_not_in_wh: "{{name}} — bu ulgurji omborda yo'q",
 }

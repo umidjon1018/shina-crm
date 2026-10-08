@@ -9,6 +9,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { getWhClients, getWhProducts, createWhDoc } from '../../../api/wholesaleService'
 import { formatNumber } from '../../../utils/format'
 import { inputCls, labelCls, SourceBadge, MethodPicker, som, sizeOf } from './whHelpers'
+import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 
 const n = (v) => Number(v) || 0
 
@@ -170,6 +171,14 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
             <p className="flex items-center gap-2 text-sm text-accent-orange"><AlertTriangle size={16} />{t('wh_limit_warn')}</p>
           )}
 
+          {shopId && (
+            <BarcodeScanner onScan={({ product }) => {
+              // Skanerlangan tovar shu ulgurji omborda bo'lsa — qatorga qo'shiladi (bor bo'lsa soni oshadi)
+              const p = products.find(x => x.id === String(product?.id))
+              if (!p || p.stock <= 0) setErr(t('wh_scan_not_in_wh', { name: product?.name || '' }))
+              else { setErr(''); addLine(p) }
+            }} />
+          )}
           {shopId && (
             <div className="relative">
               <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
