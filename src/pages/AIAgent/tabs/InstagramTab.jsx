@@ -21,8 +21,8 @@ function fmtDate(iso) {
 
 const LOYALTY_LABEL = {
   vip: { label: 'VIP', color: 'text-yellow-400 bg-yellow-400/10' },
-  gold: { label: 'Oltin', color: 'text-yellow-400 bg-yellow-400/10' },
-  silver: { label: 'Kumush', color: 'text-blue-400 bg-blue-400/10' },
+  gold: { label: 'VIP', color: 'text-yellow-400 bg-yellow-400/10' },
+  silver: { label: 'Sodiq', color: 'text-blue-400 bg-blue-400/10' },
   loyal: { label: 'Sodiq', color: 'text-accent-green bg-accent-green/10' },
   none: { label: 'Yangi', color: 'text-text-muted bg-bg-secondary' },
 }
@@ -52,15 +52,18 @@ function buildCustomerStats(customers, sales) {
     if (!s.customerId) return
     if (!byId[s.customerId]) byId[s.customerId] = { spent: 0, count: 0, debt: 0, last: null, purchases: [] }
     const row = byId[s.customerId]
-    if (s.status === 'completed') {
-      row.spent += s.total || 0
-      row.count++
-      if (!row.last || s.createdAt > row.last) row.last = s.createdAt
-      row.purchases.unshift(s)
-    }
+    if (s.status === 'cancelled') return
+    row.spent += s.total || 0
+    row.count++
+    if (!row.last || s.createdAt > row.last) row.last = s.createdAt
+    row.purchases.unshift(s)
     if (s.installmentDebt) row.debt += s.installmentDebt
   })
-  return customers.map(c => ({ ...c, ...byId[c.id] || { spent: 0, count: 0, debt: 0, last: null, purchases: [] } }))
+  // Daraja xaridlar soniga qarab: VIP 3+, sodiq 2, yangi 0-1
+  return customers.map(c => {
+    const st = byId[c.id] || { spent: 0, count: 0, debt: 0, last: null, purchases: [] }
+    return { ...c, ...st, loyaltyLevel: st.count >= 3 ? 'gold' : st.count === 2 ? 'silver' : 'none' }
+  })
 }
 
 // ─────────── Monthly chart ───────────
