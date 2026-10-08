@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, ChevronDown, CircleX, Eye } from 'lucide-react'
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import CustomerMessenger from '../../../components/customers/CustomerMessenger'
+import UiModal from '../../../components/ui/Modal'
 
 // === SHARED KOMPONENTLAR ===
 const InstagramDM = ({ instagram, phone, name, isBirthdayMonth, birthDate }) => (
@@ -22,61 +23,13 @@ const InstagramDM = ({ instagram, phone, name, isBirthdayMonth, birthDate }) => 
   </div>
 )
 
-const Modal = ({ open, onClose, title, subtitle, children, size = 'lg' }) => {
-  React.useEffect(() => {
-    if (!open) return
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [open, onClose])
-
-  if (!open) return null
-
-  const sizeClass = {
-    sm: 'max-w-lg',
-    md: 'max-w-2xl',
-    lg: 'max-w-4xl',
-    xl: 'max-w-6xl',
-    '2xl': 'max-w-7xl',
-    '3xl': 'max-w-[90vw]',
-  }[size] || 'max-w-4xl'
-
-  return (
-    <div
-      className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 16 }}
-        transition={{ duration: 0.18 }}
-        className={`w-full ${sizeClass} bg-bg-secondary border border-border rounded-3xl shadow-2xl flex flex-col`}
-        style={{ height: '88vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-start justify-between px-4 sm:px-6 py-5 border-b border-border flex-shrink-0">
-          <div>
-            <h3 className="text-lg font-syne font-bold text-text-primary">{title}</h3>
-            {subtitle && <p className="text-text-muted text-sm mt-0.5">{subtitle}</p>}
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-bg-tertiary flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-border transition-all ml-4 flex-shrink-0"
-          >
-            ✕
-          </button>
-        </div>
-        {/* Body */}
-        <div className="overflow-y-auto overflow-x-auto flex-1 px-4 sm:px-6 py-5 min-h-0">
-          {children}
-        </div>
-      </motion.div>
-    </div>
-  )
-}
+// Hisobotlar ichidagi oynalar — umumiy Modal (ichma-ich, Esc/orqaga faqat ustidagini yopadi, xl — keng)
+const MODAL_SIZE = { sm: 'md', md: 'md', lg: 'lg', xl: 'xl', '2xl': 'xl', '3xl': 'xl' }
+const Modal = ({ open, onClose, title, subtitle, children, size = 'lg' }) => (
+  <UiModal open={!!open} onClose={onClose} title={title} subtitle={subtitle} size={MODAL_SIZE[size] || 'lg'} bodyClass="p-4 sm:p-6 overflow-x-auto">
+    {children}
+  </UiModal>
+)
 
 const MonthYearFilter = ({ value, onChange, includeAll = true }) => {
   const { t } = useTranslation()

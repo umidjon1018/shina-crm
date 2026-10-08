@@ -175,7 +175,7 @@ const CustomersTab = ({ ctx }) => {
                         </td>
                         <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-text-secondary text-xs">
                           <p>{c.phone || '—'}</p>
-                          {c.instagram && <p className="text-accent-blue mt-0.5">@{c.instagram}</p>}
+                          {c.instagram && <p className="text-accent-blue mt-0.5">@{c.instagram.replace(/^@/, '')}</p>}
                         </td>
                         <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-center font-bold text-text-primary">{c.totalVisits}</td>
                         <td className="px-4 sm:px-6 py-2.5 sm:py-4 text-right font-bold text-text-primary">{fmtUZS(c.totalSpent)}</td>
@@ -398,7 +398,7 @@ const CustomersTab = ({ ctx }) => {
             {modal === 'customerProfileModal' && selectedCustomer && (() => {
               const c = selectedCustomer
               return (
-                <Modal open title={c.name} subtitle={[c.phone, c.instagram ? `@${c.instagram}` : null].filter(Boolean).join(' • ') || '—'} size="xl" onClose={closeModal}>
+                <Modal open title={c.name} subtitle={[c.phone, c.instagram ? `@${c.instagram.replace(/^@/, '')}` : null].filter(Boolean).join(' • ') || '—'} size="xl" onClose={closeModal}>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 sm:mb-6">
                     {[
                       { label:t('rep_cust_stat_total_spent'), value: fmtUZS(c.totalSpent),  color: C.green  },

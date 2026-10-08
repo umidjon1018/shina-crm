@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
@@ -19,14 +19,15 @@ if (typeof window !== 'undefined') {
   })
 }
 
-const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-4xl', xl: 'sm:max-w-7xl' }
+const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-5xl', xl: 'sm:max-w-[min(96vw,1840px)]' }
 // xl — bo'lim oynasi: telefonda to'liq ekran, kompyuterda deyarli to'liq balandlik
 const HEIGHTS = { xl: 'h-[100dvh] sm:h-[92vh] rounded-none sm:rounded-3xl' }
 
 const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, zIndex, children }) => {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
-  const zRef = useRef(200)
+  // Ichma-ich oynalar: har yangisi oldingisidan yuqorida (birinchi chizishdayoq)
+  const [z] = useState(() => zIndex ?? 200 + stack.length * 10)
   const entryRef = useRef(null)
   const requestClose = () => { if (entryRef.current) entryRef.current.closing = true; onClose?.() }
   useEffect(() => {
@@ -34,7 +35,6 @@ const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bo
     entry.onPop = () => { entry.popped = true; entry.closing = true; onCloseRef.current?.() }
     entry.close = () => { entry.closing = true; onCloseRef.current?.() }
     entryRef.current = entry
-    zRef.current = zIndex ?? 200 + stack.length * 10
     stack.push(entry)
     window.history.pushState({ ...(window.history.state || {}), modal: entry.id }, '')
     return () => {
@@ -45,7 +45,7 @@ const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bo
   }, [])
 
   return (
-    <div className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4" style={{ zIndex: zRef.current }}>
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4" style={{ zIndex: z }}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
       <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }} transition={{ duration: 0.18 }}
