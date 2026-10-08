@@ -348,7 +348,7 @@ const BatchesTab = ({ ctx }) => {
                           <span className="text-text-muted">{batch.supplierId ? getSupplierName(batch.supplierId) : '—'}</span>
                           <span className="whitespace-nowrap">
                             {batch.paidUSD > 0 && <span className="text-accent-green font-semibold">{formatUSD(batch.paidUSD)}</span>}
-                            {batch.debtUSD > 0 && <span className="text-accent-red font-bold"> · {formatUSD(batch.debtUSD)}</span>}
+                            {batch.debtUSD > 0 && <span className="text-accent-red font-bold">{batch.paidUSD > 0 ? ' · ' : ''}{formatUSD(batch.debtUSD)}</span>}
                           </span>
                         </div>
                         {batch.debtUSD > 0 && dd !== null && (
