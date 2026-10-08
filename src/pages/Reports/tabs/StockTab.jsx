@@ -1,4 +1,5 @@
 import React from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, PieChart, Pie, Cell,
@@ -194,6 +195,7 @@ const StockTab = ({ ctx }) => {
                   <div className="w-2 h-2 rounded-full bg-accent-orange ml-2" /> {t('rep_status_low')}
                 </div>
               </div>
+              <TableView id="rep_stock_main" optional={[t('col_category'), t('rep_col_est_out'), t('rep_col_turnover'), t('rep_col_purchase_price'), t('col_margin'), t('rep_col_receive_date')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -329,6 +331,7 @@ const StockTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
               <div className="px-4 sm:px-6 py-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
                 <span>{stockStats.withDaysLeft.length} {t('rep_total_types')}</span>
                 <div className="flex items-center gap-1">

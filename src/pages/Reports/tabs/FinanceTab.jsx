@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line,
@@ -477,6 +478,7 @@ const FinanceTab = ({ ctx }) => {
                   <div className="px-4 sm:px-6 py-4 border-b border-border">
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_fin_incoming_debts')}</h4>
                   </div>
+                  <TableView id="rep_fin_debts" optional={[t('rep_fin_col_paid_usd'), t('rep_fin_col_progress'), t('rep_fin_col_due')]}>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm table-fixed">
                       <thead>
@@ -545,6 +547,7 @@ const FinanceTab = ({ ctx }) => {
                       </tbody>
                     </table>
                   </div>
+                  </TableView>
                   <div className="px-4 sm:px-6 py-3 border-t border-border bg-bg-tertiary flex items-center gap-3 sm:gap-6 text-sm">
                     <span className="text-text-muted">{t('rep_fin_total_debt_label')} <span className="font-bold text-accent-red">${financeStats.totalDebtUSD}</span></span>
                     <span className="text-text-muted">{t('rep_fin_total_paid_label')} <span className="font-bold text-accent-green">${MOCK_INCOME_BATCHES.reduce((s,x)=>s+x.paidUSD,0)}</span></span>
@@ -942,6 +945,7 @@ const FinanceTab = ({ ctx }) => {
                   </div>
 
                   {/* Jadval */}
+                  <TableView id="rep_fin_cf" optional={[t('rep_fin_cf_new_batch'), t('rep_fin_cf_supplier_pay'), t('rep_fin_cf_shop_exp'), t('rep_fin_cf_financial'), t('rep_fin_cf_growth')]}>
                   <div className="rounded-xl border border-border overflow-hidden">
                     <table className="w-full text-sm">
                       <thead>
@@ -1003,6 +1007,7 @@ const FinanceTab = ({ ctx }) => {
                       </tfoot>
                     </table>
                   </div>
+                  </TableView>
                 </Modal>
                 )
               })()}

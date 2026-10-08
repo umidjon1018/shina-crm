@@ -1,19 +1,24 @@
 import { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ViewToggle, useTableView } from './TableView'
 
 // Ixcham jadval: kompyuterda jadval, telefonda karta. Qator bosilsa — onRowClick (odatda to'liq ma'lumot modali).
-// columns: [{ key, label, render(row), sortValue(row), align: 'left'|'right'|'center', className, hideOnMobile }]
+// columns: [{ key, label, render(row), sortValue(row), align: 'left'|'right'|'center', className, hideOnMobile, optional }]
+// optional — "Ixcham" ko'rinishda yashiriladi ("To'liq" tugmasi bilan ochiladi; tableId bo'yicha eslab qolinadi)
 const DataTable = ({
-  columns, rows, rowKey = (r) => r.id, onRowClick, mobileCard, pageSize = 20,
-  empty, initialSort = null, rowClass, resetKey,
+  columns: allColumns, rows, rowKey = (r) => r.id, onRowClick, mobileCard, pageSize = 20,
+  empty, initialSort = null, rowClass, resetKey, tableId,
 }) => {
+  const hasOptional = allColumns.some(c => c.optional)
+  const [full, setFull] = useTableView(tableId || 'dt_' + allColumns.map(c => c.key).join('_'))
+  const columns = hasOptional && !full ? allColumns.filter(c => !c.optional) : allColumns
   const [sort, setSort] = useState(initialSort)
   const [page, setPage] = useState(1)
   useEffect(() => { setPage(1) }, [resetKey, rows.length])
 
   const sorted = useMemo(() => {
     if (!sort) return rows
-    const col = columns.find(c => c.key === sort.key)
+    const col = allColumns.find(c => c.key === sort.key)
     if (!col) return rows
     const val = col.sortValue || ((r) => r[col.key])
     return [...rows].sort((a, b) => {
@@ -21,7 +26,7 @@ const DataTable = ({
       const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av ?? '').localeCompare(String(bv ?? ''))
       return sort.dir === 'asc' ? cmp : -cmp
     })
-  }, [rows, sort, columns])
+  }, [rows, sort, allColumns])
 
   const pages = Math.max(1, Math.ceil(sorted.length / pageSize))
   const cur = Math.min(page, pages)
@@ -38,6 +43,7 @@ const DataTable = ({
 
   return (
     <div className="space-y-3">
+      {hasOptional && <div className="flex justify-end"><ViewToggle full={full} onChange={setFull} /></div>}
       {/* Telefon: kartalar */}
       {mobileCard && (
         <div className="sm:hidden space-y-2">

@@ -58,17 +58,17 @@ const MovementTab = () => {
 
   const movCols = [
     { key: 'name', label: t('rpt_col_product'), value: name, className: 'text-text-primary font-medium' },
-    { key: 'category', label: t('col_category'), render: r => catLabel(r.category), excelValue: r => catLabel(r.category) },
+    { optional: true, key: 'category', label: t('col_category'), render: r => catLabel(r.category), excelValue: r => catLabel(r.category) },
     { key: 'opening', label: t('rpt_col_opening'), align: 'right', sum: true },
     { key: 'received', label: t('rpt_col_received'), align: 'right', sum: true, className: 'text-accent-green' },
     { key: 'sold', label: t('rpt_col_sold'), align: 'right', sum: true, className: 'text-accent-red' },
-    { key: 'writtenOff', label: t('rpt_col_written_off'), align: 'right', sum: true },
-    { key: 'toSupplier', label: t('rpt_col_to_supplier'), align: 'right', sum: true },
+    { optional: true, key: 'writtenOff', label: t('rpt_col_written_off'), align: 'right', sum: true },
+    { optional: true, key: 'toSupplier', label: t('rpt_col_to_supplier'), align: 'right', sum: true },
     { key: 'closing', label: t('rpt_col_closing'), align: 'right', sum: true, className: 'text-text-primary font-bold' },
-    { key: 'customerReturns', label: t('rpt_col_customer_returns'), align: 'right', sum: true, className: 'text-text-secondary' },
+    { optional: true, key: 'customerReturns', label: t('rpt_col_customer_returns'), align: 'right', sum: true, className: 'text-text-secondary' },
     ...(shopSelected ? [
-      { key: 'transferIn', label: t('rpt_col_transfer_in'), align: 'right', sum: true, className: 'text-text-secondary' },
-      { key: 'transferOut', label: t('rpt_col_transfer_out'), align: 'right', sum: true, className: 'text-text-secondary' },
+      { optional: true, key: 'transferIn', label: t('rpt_col_transfer_in'), align: 'right', sum: true, className: 'text-text-secondary' },
+      { optional: true, key: 'transferOut', label: t('rpt_col_transfer_out'), align: 'right', sum: true, className: 'text-text-secondary' },
     ] : []),
   ]
   const asOfCols = [

@@ -26,19 +26,19 @@ const ShopsReportTab = () => {
     { key: 'name', label: t('rpt_col_shop'), className: 'text-text-primary font-medium' },
     { key: 'revenue', label: t('rpt_col_revenue'), align: 'right', sum: true, render: r => money(r.revenue), renderTotal: money },
     { key: 'salesCount', label: t('rpt_col_checks'), align: 'right', sum: true },
-    { key: 'avgCheck', label: t('rpt_col_avg_check'), align: 'right', render: r => money(r.avgCheck) },
-    { key: 'itemsSold', label: t('rpt_col_sold_qty'), align: 'right', sum: true },
+    { optional: true, key: 'avgCheck', label: t('rpt_col_avg_check'), align: 'right', render: r => money(r.avgCheck) },
+    { optional: true, key: 'itemsSold', label: t('rpt_col_sold_qty'), align: 'right', sum: true },
     ...(sp ? [
       { key: 'profit', label: t('rpt_col_gross_profit'), align: 'right', sum: true, render: r => money(r.profit), renderTotal: money },
-      { key: 'expenses', label: t('rpt_col_expenses'), align: 'right', sum: true, render: r => money(r.expenses), renderTotal: money },
+      { optional: true, key: 'expenses', label: t('rpt_col_expenses'), align: 'right', sum: true, render: r => money(r.expenses), renderTotal: money },
       { key: 'netProfit', label: t('rpt_col_net_profit'), align: 'right', sum: true, render: r => <span className={r.netProfit >= 0 ? 'text-accent-green font-semibold' : 'text-accent-red font-semibold'}>{money(r.netProfit)}</span>, renderTotal: money },
     ] : []),
-    { key: 'returnsAmount', label: t('rpt_col_returns'), align: 'right', sum: true, render: r => money(r.returnsAmount), renderTotal: money },
-    { key: 'customers', label: t('rpt_col_customers'), align: 'right' },
-    { key: 'newCustomers', label: t('rpt_col_new_customers'), align: 'right', sum: true },
-    { key: 'stockQty', label: t('rpt_col_stock'), align: 'right', sum: true },
-    { key: 'stockRetail', label: t('rpt_col_stock_retail'), align: 'right', sum: true, render: r => money(r.stockRetail), renderTotal: money },
-    { key: 'installmentDebt', label: t('rpt_col_installment_debt'), align: 'right', sum: true, render: r => money(r.installmentDebt), renderTotal: money },
+    { optional: true, key: 'returnsAmount', label: t('rpt_col_returns'), align: 'right', sum: true, render: r => money(r.returnsAmount), renderTotal: money },
+    { optional: true, key: 'customers', label: t('rpt_col_customers'), align: 'right' },
+    { optional: true, key: 'newCustomers', label: t('rpt_col_new_customers'), align: 'right', sum: true },
+    { optional: true, key: 'stockQty', label: t('rpt_col_stock'), align: 'right', sum: true },
+    { optional: true, key: 'stockRetail', label: t('rpt_col_stock_retail'), align: 'right', sum: true, render: r => money(r.stockRetail), renderTotal: money },
+    { optional: true, key: 'installmentDebt', label: t('rpt_col_installment_debt'), align: 'right', sum: true, render: r => money(r.installmentDebt), renderTotal: money },
   ]
 
   return (

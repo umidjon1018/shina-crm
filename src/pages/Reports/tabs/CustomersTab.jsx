@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -119,6 +120,7 @@ const CustomersTab = ({ ctx }) => {
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_cust_ltv_title')}</h4>
                 <span className="text-text-muted text-xs ml-auto">{t('rep_cust_ltv_desc')}</span>
               </div>
+              <TableView id="rep_cust_main" optional={[t('rep_col_contact'), t('rep_col_avg_check'), t('rep_cancelled'), t('rep_col_next_visit')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -207,6 +209,7 @@ const CustomersTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
               <Pagination
                 total={customerStats.ltvList.length}
                 pageSize={CUSTOMERS_PAGE_SIZE}

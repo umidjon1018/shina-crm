@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
@@ -384,6 +385,7 @@ const SalesTab = ({ ctx }) => {
                   {salesData.filtered.length} {t('unit_pcs')} ({salesData.salesCount} {t('rep_stat_done')}, {salesData.cancelledCount} {t('rep_stat_cancelled')}, {salesData.exchangedCount} {t('rep_stat_exchanged')})
                 </span>
               </div>
+              <TableView id="rep_sales_top" optional={[t('col_source'), t('col_discount'), t('rep_col_payment'), t('role_seller')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -465,6 +467,7 @@ const SalesTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
               <Pagination
                 total={salesData.filtered.length}
                 pageSize={SALES_PAGE_SIZE}

@@ -79,6 +79,8 @@ export default {
 
   // Navigation
   dashboard: 'Главная',
+  tbl_compact: "Компактно",
+  tbl_full: "Полностью",
   numpad_title: 'Введите число',
   numpad_clear: 'Очистить',
   numpad_ok: 'Готово',

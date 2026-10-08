@@ -211,3 +211,8 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 .recharts-default-tooltip .recharts-tooltip-label { color: var(--text-secondary) !important; }
+
+/* ── Jadval: Ixcham / To'liq ko'rinish (TableView) ── */
+[data-tv-hide] { display: none !important; }
+col[data-tv-hide] { display: table-column !important; visibility: collapse !important; width: 0 !important; }
+.tv-compact table { min-width: 0 !important; }

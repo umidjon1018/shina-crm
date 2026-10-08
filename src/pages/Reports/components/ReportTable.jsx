@@ -2,12 +2,17 @@ import React, { useState, useMemo } from 'react'
 import { ChevronDown, ChevronUp, Download, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { exportXLSX } from './shared'
+import { ViewToggle, useTableView } from '../../../components/ui/TableView'
 
 const PAGE = 25
 
-// columns: [{ key, label, align, render(row), value(row) (saralash/Excel uchun), sum: true, excel: false }]
-const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialSort, extraFilters, emptyText, footerNote }) => {
+// columns: [{ key, label, align, render(row), value(row) (saralash/Excel uchun), sum: true, excel: false, optional: true }]
+// optional — "Ixcham" ko'rinishda yashiriladi; Excel'ga har doim barcha ustunlar chiqadi
+const ReportTable = ({ title, columns: allColumns, rows, fileName, searchKeys = [], initialSort, extraFilters, emptyText, footerNote, tableId }) => {
   const { t } = useTranslation()
+  const hasOptional = allColumns.some(c => c.optional)
+  const [full, setFull] = useTableView(tableId || 'rt_' + allColumns.map(c => c.key).join('_'))
+  const columns = hasOptional && !full ? allColumns.filter(c => !c.optional) : allColumns
   const [q, setQ] = useState('')
   const [sort, setSort] = useState(initialSort || null)
   const [page, setPage] = useState(1)
@@ -21,7 +26,7 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
       l = l.filter(r => searchKeys.some(k => String(r[k] ?? '').toLowerCase().includes(s)))
     }
     if (sort) {
-      const c = columns.find(x => x.key === sort.key)
+      const c = allColumns.find(x => x.key === sort.key)
       if (c) l = [...l].sort((a, b) => {
         const av = val(c, a), bv = val(c, b)
         const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av ?? '').localeCompare(String(bv ?? ''))
@@ -29,13 +34,13 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
       })
     }
     return l
-  }, [rows, q, sort, columns])
+  }, [rows, q, sort, allColumns])
 
   const totals = useMemo(() => {
     const o = {}
-    columns.filter(c => c.sum).forEach(c => { o[c.key] = filtered.reduce((s, r) => s + (Number(val(c, r)) || 0), 0) })
+    allColumns.filter(c => c.sum).forEach(c => { o[c.key] = filtered.reduce((s, r) => s + (Number(val(c, r)) || 0), 0) })
     return o
-  }, [filtered, columns])
+  }, [filtered, allColumns])
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE))
   const shown = filtered.slice((page - 1) * PAGE, page * PAGE)
@@ -46,7 +51,7 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
   }
 
   const doExport = () => {
-    const cols = columns.filter(c => c.excel !== false)
+    const cols = allColumns.filter(c => c.excel !== false)
     const data = filtered.map(r => Object.fromEntries(cols.map(c => [c.label, c.excelValue ? c.excelValue(r) : val(c, r) ?? ''])))
     if (Object.keys(totals).length) data.push(Object.fromEntries(cols.map((c, i) => [c.label, c.sum ? totals[c.key] : (i === 0 ? t('rpt_total') : '')])))
     exportXLSX(fileName || 'hisobot', [{ name: (title || 'Hisobot').slice(0, 31), rows: data }])
@@ -64,6 +69,7 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
               className="w-full bg-bg-tertiary border border-border rounded-xl pl-8 pr-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red" />
           </div>
         )}
+        {hasOptional && <ViewToggle full={full} onChange={setFull} />}
         <button onClick={doExport} disabled={!filtered.length}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent-green/10 text-accent-green text-xs font-bold disabled:opacity-40">
           <Download size={14} /> Excel
@@ -74,7 +80,7 @@ const ReportTable = ({ title, columns, rows, fileName, searchKeys = [], initialS
           <thead>
             <tr className="border-b border-border">
               {columns.map(c => (
-                <th key={c.key} onClick={() => toggleSort(c)}
+                <th key={c.key} onClick={() => toggleSort(c)} title={c.title}
                   className={`px-3 py-2.5 text-[11px] uppercase tracking-wide font-bold text-text-muted whitespace-nowrap select-none ${c.sortable === false ? '' : 'cursor-pointer hover:text-text-primary'} ${c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left'}`}>
                   {c.label}
                   {sort?.key === c.key && (sort.dir === 'asc' ? <ChevronUp size={12} className="inline ml-0.5" /> : <ChevronDown size={12} className="inline ml-0.5" />)}

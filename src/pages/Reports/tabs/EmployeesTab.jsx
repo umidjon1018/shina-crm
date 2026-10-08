@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
@@ -156,6 +157,7 @@ const EmployeesTab = ({ ctx }) => {
               <div className="px-4 sm:px-6 py-4 border-b border-border">
                 <h4 className="font-syne font-bold text-text-primary">{t('rep_emp_rating_title')}</h4>
               </div>
+              <TableView id="rep_emp_main" optional={[t('rep_emp_col_avg_check'), t('rep_emp_col_new'), t('rep_emp_col_cancel_pct'), t('rep_emp_col_last_sale'), t('rep_emp_col_cancel_count'), t('rep_emp_col_discount_pct')]}>
               <div className="overflow-x-auto">
                 <table className="w-auto min-w-full text-sm whitespace-nowrap">
                   <thead>
@@ -241,6 +243,7 @@ const EmployeesTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
             </div>
 
             {isPrivileged && (

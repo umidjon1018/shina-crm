@@ -34,19 +34,19 @@ const SegmentsTab = () => {
 
   const cols = [
     { key: 'name', label: t('col_customer'), className: 'text-text-primary font-medium' },
-    { key: 'phone', label: t('col_phone'), className: 'text-text-secondary' },
+    { optional: true, key: 'phone', label: t('col_phone'), className: 'text-text-secondary' },
     { key: 'segment', label: t('rpt_col_segment'), render: r => <span className="px-2 py-0.5 rounded-md text-[11px] font-bold" style={{ background: SEG_COLORS[r.segment] + '22', color: SEG_COLORS[r.segment] }}>{t('rpt_seg_' + r.segment)}</span>, excelValue: r => t('rpt_seg_' + r.segment) },
     { key: 'visits', label: t('rpt_col_visits'), align: 'right', sum: true },
     { key: 'spent', label: t('rpt_col_spent'), align: 'right', sum: true, render: r => money(r.spent), renderTotal: money },
-    { key: 'avgCheck', label: t('rpt_col_avg_check'), align: 'right', render: r => money(r.avgCheck) },
-    { key: 'items', label: t('rpt_col_items'), align: 'right', sum: true },
-    { key: 'periodVisits', label: t('rpt_col_period_visits'), align: 'right', sum: true },
-    { key: 'periodSpent', label: t('rpt_col_period_spent'), align: 'right', sum: true, render: r => money(r.periodSpent), renderTotal: money },
-    { key: 'firstVisit', label: t('rpt_col_first_visit'), render: r => dmy(r.firstVisit), className: 'text-text-secondary' },
+    { optional: true, key: 'avgCheck', label: t('rpt_col_avg_check'), align: 'right', render: r => money(r.avgCheck) },
+    { optional: true, key: 'items', label: t('rpt_col_items'), align: 'right', sum: true },
+    { optional: true, key: 'periodVisits', label: t('rpt_col_period_visits'), align: 'right', sum: true },
+    { optional: true, key: 'periodSpent', label: t('rpt_col_period_spent'), align: 'right', sum: true, render: r => money(r.periodSpent), renderTotal: money },
+    { optional: true, key: 'firstVisit', label: t('rpt_col_first_visit'), render: r => dmy(r.firstVisit), className: 'text-text-secondary' },
     { key: 'lastVisit', label: t('rpt_col_last_visit'), render: r => dmy(r.lastVisit), className: 'text-text-secondary' },
-    { key: 'recency', label: t('rpt_col_recency'), align: 'right', value: r => (r.recency == null ? 99999 : r.recency), render: r => r.recency ?? '—' },
-    ...(data?.loyaltyEnabled ? [{ key: 'loyaltyPercent', label: t('rpt_col_loyalty'), align: 'right', render: r => (r.loyaltyPercent ? `${r.loyaltyPercent}%` : '—') }] : []),
-    { key: 'group', label: t('rpt_col_group'), className: 'text-text-secondary' },
+    { optional: true, key: 'recency', label: t('rpt_col_recency'), align: 'right', value: r => (r.recency == null ? 99999 : r.recency), render: r => r.recency ?? '—' },
+    ...(data?.loyaltyEnabled ? [{ optional: true, key: 'loyaltyPercent', label: t('rpt_col_loyalty'), align: 'right', render: r => (r.loyaltyPercent ? `${r.loyaltyPercent}%` : '—') }] : []),
+    { optional: true, key: 'group', label: t('rpt_col_group'), className: 'text-text-secondary' },
   ]
 
   return (

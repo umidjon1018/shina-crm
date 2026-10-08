@@ -42,26 +42,26 @@ const ProductsReportTab = () => {
     { key: 'name', label: t('rpt_col_product'), value: name, className: 'text-text-primary font-medium' },
     { key: 'soldQty', label: t('rpt_col_sold_qty'), align: 'right', sum: true },
     { key: 'revenue', label: t('rpt_col_revenue'), align: 'right', sum: true, render: r => money(r.revenue), renderTotal: money },
-    { key: 'avgPrice', label: t('rpt_col_avg_price'), align: 'right', render: r => money(r.avgPrice) },
+    { optional: true, key: 'avgPrice', label: t('rpt_col_avg_price'), align: 'right', render: r => money(r.avgPrice) },
     ...(sp ? [
-      { key: 'cost', label: t('rpt_col_cost'), align: 'right', sum: true, render: r => money(r.cost), renderTotal: money },
+      { optional: true, key: 'cost', label: t('rpt_col_cost'), align: 'right', sum: true, render: r => money(r.cost), renderTotal: money },
       { key: 'profit', label: t('rpt_col_profit'), align: 'right', sum: true, render: r => <span className={r.profit >= 0 ? 'text-accent-green' : 'text-accent-red'}>{money(r.profit)}</span>, renderTotal: money },
       { key: 'margin', label: t('rpt_col_margin'), align: 'right', render: r => `${r.margin}%` },
     ] : []),
-    { key: 'returnedQty', label: t('rpt_col_returned'), align: 'right', sum: true },
-    { key: 'revenueShare', label: t('rpt_col_share'), align: 'right', render: r => `${r.revenueShare}%` },
+    { optional: true, key: 'returnedQty', label: t('rpt_col_returned'), align: 'right', sum: true },
+    { optional: true, key: 'revenueShare', label: t('rpt_col_share'), align: 'right', render: r => `${r.revenueShare}%` },
   ]
   const effCols = [
     { key: 'name', label: t('rpt_col_product'), value: name, className: 'text-text-primary font-medium' },
     { key: 'abc', label: 'ABC', title: t('rpt_abc_what'), align: 'center', render: r => <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${ABC_CLS[r.abc]}`}>{r.abc}</span> },
     { key: 'soldQty', label: t('rpt_col_sold_qty'), align: 'right', sum: true },
     { key: 'stockQty', label: t('rpt_col_stock'), align: 'right', sum: true },
-    { key: 'sellThrough', label: t('rpt_col_sell_through'), align: 'right', render: r => `${r.sellThrough}%` },
-    { key: 'coverDays', label: t('rpt_col_cover_days'), align: 'right', value: r => (r.coverDays == null ? 99999 : r.coverDays), render: r => (r.coverDays == null ? '∞' : r.coverDays), excelValue: r => (r.coverDays == null ? '∞' : r.coverDays) },
+    { optional: true, key: 'sellThrough', label: t('rpt_col_sell_through'), align: 'right', render: r => `${r.sellThrough}%` },
+    { optional: true, key: 'coverDays', label: t('rpt_col_cover_days'), align: 'right', value: r => (r.coverDays == null ? 99999 : r.coverDays), render: r => (r.coverDays == null ? '∞' : r.coverDays), excelValue: r => (r.coverDays == null ? '∞' : r.coverDays) },
     { key: 'daysSinceSale', label: t('rpt_col_days_since_sale'), align: 'right', value: r => (r.daysSinceSale == null ? 99999 : r.daysSinceSale), render: r => (r.daysSinceSale == null ? t('rpt_never') : r.daysSinceSale) },
-    { key: 'stockAgeDays', label: t('rpt_col_stock_age'), align: 'right', render: r => r.stockAgeDays ?? '—' },
-    { key: 'stockRetail', label: t('rpt_col_stock_retail'), align: 'right', sum: true, render: r => money(r.stockRetail), renderTotal: money },
-    ...(sp ? [{ key: 'stockCost', label: t('rpt_col_stock_cost'), align: 'right', sum: true, render: r => money(r.stockCost), renderTotal: money }] : []),
+    { optional: true, key: 'stockAgeDays', label: t('rpt_col_stock_age'), align: 'right', render: r => r.stockAgeDays ?? '—' },
+    { optional: true, key: 'stockRetail', label: t('rpt_col_stock_retail'), align: 'right', sum: true, render: r => money(r.stockRetail), renderTotal: money },
+    ...(sp ? [{ optional: true, key: 'stockCost', label: t('rpt_col_stock_cost'), align: 'right', sum: true, render: r => money(r.stockCost), renderTotal: money }] : []),
   ]
 
   return (

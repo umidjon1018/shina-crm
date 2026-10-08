@@ -79,6 +79,8 @@ export default {
 
   // Navigation
   dashboard: 'Bosh sahifa',
+  tbl_compact: "Ixcham",
+  tbl_full: "To'liq",
   numpad_title: 'Raqam kiriting',
   numpad_clear: 'Tozalash',
   numpad_ok: 'Tayyor',

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
 import {
@@ -820,6 +821,7 @@ const ProfitTab = ({ ctx }) => {
                     </ResponsiveContainer>
                   </div>
                   {/* Jadval */}
+                  <TableView id="rep_profit_months" optional={['Yangi sotuv', 'B/U sotuv', t('rep_chart_expense'), t('rep_profit_growth_col')]}>
                   <div className="rounded-xl border border-border overflow-hidden">
                     <table className="w-full text-sm">
                       <thead>
@@ -855,6 +857,7 @@ const ProfitTab = ({ ctx }) => {
                       </tbody>
                     </table>
                   </div>
+                  </TableView>
                 </Modal>
               )}
 
