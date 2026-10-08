@@ -272,3 +272,8 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - `/management`, `/admin`, `/integrations` → `/settings` ga yo'naltiriladi. Boshqaruv, Admin Panel, Integratsiyalar sahifalari o'chirildi.
 - Commitlar: frontend c7251363, backend 16773fc.
 - Qoldi (Bosqich 2 da): Telegram bot sozlamalarini Marketingdan Integratsiyalarga ko'chirish; xodim samaradorligi oynasi (Boshqaruvdagi) → Hisobotlar → Xodimlar.
+
+### Bosqich 2 — boshlandi (2026-10-08)
+- **UI to'plami** (`src/components/ui/`): `Modal` (ichma-ich, telefonda pastdan chiqadi, "orqaga"/Esc faqat yuqoridagisini yopadi), `DataTable` (saralash, sahifalash, telefonda karta, qator bosish), `Kit.jsx` (PageHeader, KpiCard, KpiStrip — telefonda gorizontal, Segmented, DetailGrid, Badge), `Toast`, `utils/format.js`.
+- **Mijozlar — namuna sahifa** ✅: ro'yxat 14 ustun → 5 (mijoz, jami summa+xaridlar soni, qarz, daraja, oxirgi tashrif); qator bosilsa profil; birlashtirish rejimi banneri. Profil modali: yuqorida asosiy ko'rsatkichlar (xaridlar, summa, qarz, balans) va tezkor tugmalar (tahrirlash, birlashtirish, o'chirish); 5 tab — Umumiy, Xaridlar [Yangi|B/U], Moliya [Nasiya|Balans], Izohlar, Telegram; xarid bosilsa chek oynasi ichma-ich ochiladi. Commit 432bf775.
+- **Kutilmoqda:** foydalanuvchi namuna uslubini tasdiqlashi → keyin Sotuv, Ombor, Kirim, Moliya (yangi Foyda, Qarzlar), Marketing, Hisobotlar shu uslubga.
