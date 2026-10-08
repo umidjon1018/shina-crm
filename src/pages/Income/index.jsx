@@ -208,7 +208,7 @@ const Income = () => {
     let monthUSD = 0, monthCount = 0, debt = 0, due = 0, overdue = 0
     const debtSup = new Set()
     for (const b of shopBatches) {
-      if (b.batchType === 'transfer_in') continue
+      if (b.batchType === 'transfer_in' || b.batchType === 'production') continue
       const m = ym(b.receivedAt)
       const usd = b.totalUSD || (b.purchasePriceUSD || 0) * (b.quantityIn || 0)
       const slot = months.find(x => x.key === m)

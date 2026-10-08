@@ -274,6 +274,7 @@ function CompanyTab() {
           {[
             { key:'dashboard', icon:'🏠', defaultLabel: t('dashboard') }, { key:'warehouse', icon:'📦', defaultLabel: t('warehouse') },
             { key:'sales', icon:'🛒', defaultLabel: t('sales') }, { key:'wholesale', icon:'🚚', defaultLabel: t('wh_page_title') },
+            { key:'production', icon:'🏭', defaultLabel: t('pr_page_title') },
             { key:'customers', icon:'👥', defaultLabel: t('customers') },
             { key:'marketing', icon:'📣', defaultLabel: t('mkt_page_title') },
             { key:'income', icon:'📈', defaultLabel: t('income') }, { key:'expenses', icon:'💳', defaultLabel: t('fin_page_title') },

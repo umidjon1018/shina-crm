@@ -21,7 +21,7 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  Megaphone, Boxes
+  Megaphone, Boxes, Factory
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -50,6 +50,7 @@ const PAGE_KEYS = {
   '/warehouse': 'warehouse',
   '/sales': 'sales',
   '/wholesale': 'wholesale',
+  '/production': 'production',
   '/customers': 'customers',
   '/income': 'income',
   '/expenses': 'expenses',
@@ -184,6 +185,10 @@ export const MainLayout = () => {
   }, { enabled: isAuthenticated, onAuthFail: (status) => { if (status === 401) kick('rt_kick_session') } })
   const sl = sidebarLabels || {}
   const hidden = hiddenPages || []
+  // Ulgurji va ishlab chiqarish bo'limlari shunday turdagi do'kon (ombor/sex) bo'lsagina menyuda ko'rinadi
+  const hasKind = (kind) => shops.some(s => s.kind === kind && s.isActive)
+  const showWholesale = hasPermission('wholesale') && !hidden.includes('wholesale') && hasKind('wholesale')
+  const showProduction = hasPermission('production') && !hidden.includes('production') && hasKind('production')
   const getSlLabel = (key) => {
     const val = sl[key]
     if (!val) return ''
@@ -297,7 +302,7 @@ export const MainLayout = () => {
           {/* Trade */}
           {((hasPermission('warehouse') && !hidden.includes('warehouse')) ||
             (hasPermission('sales') && !hidden.includes('sales')) ||
-            (hasPermission('wholesale') && !hidden.includes('wholesale')) ||
+            showWholesale || showProduction ||
             (hasPermission('customers') && !hidden.includes('customers')) ||
             (hasPermission('marketing') && !hidden.includes('marketing'))) && (
             <SidebarSection label={t('nav_trade')}>
@@ -307,7 +312,10 @@ export const MainLayout = () => {
               {hasPermission('sales') && !hidden.includes('sales') && (
                 <SidebarItem to="/sales" icon={ShoppingCart} label={getSlLabel('sales') || t('sales')} isActive={isActive('/sales')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
-              {hasPermission('wholesale') && !hidden.includes('wholesale') && (
+              {showProduction && (
+                <SidebarItem to="/production" icon={Factory} label={getSlLabel('production') || t('pr_page_title')} isActive={isActive('/production')} onClick={closeSidebar} replace={isSidebarOpen} />
+              )}
+              {showWholesale && (
                 <SidebarItem to="/wholesale" icon={Boxes} label={getSlLabel('wholesale') || t('wh_page_title')} isActive={isActive('/wholesale')} onClick={closeSidebar} replace={isSidebarOpen} />
               )}
               {hasPermission('customers') && !hidden.includes('customers') && (

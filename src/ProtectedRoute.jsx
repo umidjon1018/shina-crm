@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 
 // Bosh sahifaga ruxsati yo'q xodim uchun — ruxsati bor birinchi sahifa
-const HOME_ORDER = [['dashboard', '/dashboard'], ['sales', '/sales'], ['warehouse', '/warehouse'], ['wholesale', '/wholesale'], ['customers', '/customers'],
+const HOME_ORDER = [['dashboard', '/dashboard'], ['sales', '/sales'], ['warehouse', '/warehouse'], ['wholesale', '/wholesale'], ['production', '/production'], ['customers', '/customers'],
   ['income', '/income'], ['expenses', '/expenses'], ['reports', '/reports'], ['marketing', '/marketing'],
   ['ai_agent', '/ai-agent'], ['settings', '/settings']]
 export const homePath = (hasPermission) => (HOME_ORDER.find(([perm]) => hasPermission(perm)) || HOME_ORDER[0])[1]

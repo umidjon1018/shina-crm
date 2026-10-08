@@ -12,8 +12,9 @@ const mapBatch = (b) => ({
   productCategory: b.product_category || '',
   shopName: b.shop_name || '',
   batchNumber: b.batch_number || '',
-  quantity: Number(b.quantity_in) || 0,
-  quantityIn: Number(b.quantity_in) || 0,
+  // Xomashyo (miqdor bo'yicha) partiyasida miqdor lotda saqlanadi
+  quantity: b.bulk_qty != null ? Number(b.bulk_qty) : Number(b.quantity_in) || 0,
+  quantityIn: b.bulk_qty != null ? Number(b.bulk_qty) : Number(b.quantity_in) || 0,
   quantityRemaining: Number(b.quantity_remaining) || 0,
   purchasePrice: Number(b.purchase_price) || 0,
   purchasePriceUSD: Number(b.purchase_price_usd) || 0,

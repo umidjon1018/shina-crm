@@ -49,6 +49,13 @@ export const PERMISSION_TREE = [
     ]
   },
   {
+    id: 'production', label: 'Ishlab chiqarish', children: [
+      { id: 'production.orders', label: 'Buyurtmalar (ishlab chiqarish, yakunlash)' },
+      { id: 'production.materials', label: 'Xomashyo kirimi va inventarizatsiya' },
+      { id: 'production.recipes', label: 'Retseptlar va mahsulotlar' },
+    ]
+  },
+  {
     id: 'income', label: 'Kirim', children: [
       { id: 'income.batches', label: 'Kirimlar' },
       { id: 'income.suppliers', label: 'Yetkazib beruvchilar' },
