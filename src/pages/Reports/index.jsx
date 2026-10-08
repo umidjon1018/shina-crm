@@ -20,6 +20,7 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { getCategoryColor, CATEGORY_COLOR_PALETTE } from '../../utils/categoryColors'
 import { getReturns } from '../../api/returnService'
 import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
+import ReportsOverview from './components/ReportsOverview'
 import { localizeDates, localToday, localMonth } from '../../utils/tz'
 import { getUsedSales, getUsedStock } from '../../api/usedService'
 import { getSales } from '../../api/salesService'
@@ -52,6 +53,8 @@ import CustomersTab from './tabs/CustomersTab'
 import EmployeesTab from './tabs/EmployeesTab'
 import FinanceTab from './tabs/FinanceTab'
 import UsedTab from './tabs/UsedTab'
+
+const LEGACY_TABS = ['sales', 'stock', 'profit', 'customers', 'employees', 'finance', 'used']
 
 export const Reports = () => {
   const { t, i18n } = useTranslation()
@@ -123,8 +126,12 @@ export const Reports = () => {
   const [_allUsedSales, setUsedSales] = useState([])
   const [_allUsedStock, setUsedStock] = useState([])
   const [MOCK_RETURNS, setReturns] = useState([])
+  // Eski (brauzerda hisoblanadigan) hisobotlar uchun barcha ma'lumot faqat shunday bo'lim ochilganda yuklanadi
+  const [needLegacy, setNeedLegacy] = useState(() => LEGACY_TABS.includes(new URLSearchParams(window.location.search).get('section')))
+  const [legacyLoaded, setLegacyLoaded] = useState(false)
 
   useEffect(() => {
+    if (!needLegacy) return
     Promise.all([
       getSales(),
       getCustomers(),
@@ -150,8 +157,8 @@ export const Reports = () => {
       setUsedSales(localizeDates(usedSales, ['soldAt', 'createdAt']))
       setUsedStock(localizeDates(usedStock, ['acquiredAt', 'soldAt', 'scrapAt', 'createdAt']))
       setReturns(localizeDates(returns, ['returnedAt', 'soldAt']))
-    }).catch(() => {})
-  }, [version])
+    }).catch(() => {}).finally(() => setLegacyLoaded(true))
+  }, [version, needLegacy])
 
   const MOCK_SALES = useMemo(() => selectedShopId === 'all' ? _allSales : _allSales.filter(s => s.shopId === selectedShopId), [_allSales, selectedShopId])
   const MOCK_USED_SALES = useMemo(() => selectedShopId === 'all' ? _allUsedSales : _allUsedSales.filter(s => String(s.shopId) === String(selectedShopId)), [_allUsedSales, selectedShopId])
@@ -1890,7 +1897,9 @@ export const Reports = () => {
     render: () => (
       <div className="space-y-4 sm:space-y-6">
         {!NEW_TABS.includes(tab.id) && legacyToolbar(tab.id)}
-        {REPORT_VIEW[tab.id]}
+        {!NEW_TABS.includes(tab.id) && !legacyLoaded
+          ? <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
+          : REPORT_VIEW[tab.id]}
       </div>
     ),
   }))
@@ -1899,7 +1908,8 @@ export const Reports = () => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
       <PageHeader title={t('reports')} subtitle={t('rep_subtitle')} actions={<TelegramStatsButton />} />
       <SectionHub sections={SECTIONS} openId={section}
-        onOpenChange={(id) => { setSection(id); setShowExportMenu(false); if (id) setActiveTab(id) }} />
+        onOpenChange={(id) => { setSection(id); setShowExportMenu(false); if (id) setActiveTab(id); if (LEGACY_TABS.includes(id)) setNeedLegacy(true) }} />
+      <ReportsOverview />
     </motion.div>
   )
 }

@@ -6,6 +6,7 @@ const params = (p = {}) => {
   return o
 }
 
+export const getChannelsReport = async (p) => (await api.get('/api/reports/channels', { params: params(p) })).data
 export const getDashboardReport = async (p) => (await api.get('/api/reports/dashboard', { params: params(p) })).data
 export const getProductsReport = async (p) => (await api.get('/api/reports/products', { params: params(p) })).data
 export const getStockAsOf = async (p) => (await api.get('/api/reports/stock-as-of', { params: params(p) })).data
