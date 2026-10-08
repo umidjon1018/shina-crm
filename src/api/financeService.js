@@ -80,6 +80,12 @@ export const getPnl = async ({ from, to, shopId }) => {
   return data
 }
 
+export const getDebts = async (shopId) => {
+  const params = shopId && shopId !== 'all' ? { shop_id: shopId } : {}
+  const { data } = await api.get('/api/finance/debts', { params })
+  return data
+}
+
 export const getCashToday = async (shopId) => {
   const params = shopId && shopId !== 'all' ? { shop_id: shopId } : {}
   const { data } = await api.get('/api/finance/cash-today', { params })

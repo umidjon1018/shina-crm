@@ -57,6 +57,7 @@ export const PERMISSION_TREE = [
       { id: 'expenses.income', label: 'Daromadlar' },
       { id: 'expenses.cashflow', label: 'Pul harakati' },
       { id: 'expenses.pnl', label: 'Foyda va zarar' },
+      { id: 'expenses.debts', label: 'Qarzlar' },
       { id: 'expenses.supplier', label: 'Yetkazib beruvchi to\'lovlari' },
       { id: 'expenses.capital', label: 'Kapital harakati' },
       { id: 'expenses.categories', label: 'Kategoriyalar' },

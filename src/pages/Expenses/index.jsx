@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Wallet, Package, Landmark, AlertCircle, TrendingUp, ArrowLeftRight, Scale, Tags } from 'lucide-react'
+import { Wallet, Package, Landmark, AlertCircle, TrendingUp, ArrowLeftRight, Scale, Tags, HandCoins } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import ShopExpensesTab     from './tabs/ShopExpensesTab'
@@ -9,6 +9,7 @@ import PnlTab              from './tabs/PnlTab'
 import SupplierPaymentsTab from './tabs/SupplierPaymentsTab'
 import CapitalTabWithHeader from './tabs/CapitalTab'
 import CategoriesTab       from './tabs/CategoriesTab'
+import DebtsTab            from './tabs/DebtsTab'
 import FinanceOverview     from './components/FinanceOverview'
 import SectionHub          from '../../components/ui/SectionHub'
 import { PageHeader }      from '../../components/ui/Kit'
@@ -22,6 +23,7 @@ const Expenses = () => {
     { id: 'income',     perm: 'expenses.income',     label: t('fin_tab_income'),    icon: TrendingUp },
     { id: 'cashflow',   perm: 'expenses.cashflow',   label: t('fin_tab_cashflow'),  icon: ArrowLeftRight },
     { id: 'pnl',        perm: 'expenses.pnl',        label: t('fin_tab_pnl'),       icon: Scale },
+    { id: 'debts',      perm: 'expenses.debts',      label: t('fin_tab_debts'),     icon: HandCoins },
     { id: 'supplier',   perm: 'expenses.supplier',   label: t('exp_tab_supplier'),  icon: Package },
     { id: 'capital',    perm: 'expenses.capital',    label: t('exp_tab_capital'),   icon: Landmark },
     { id: 'categories', perm: 'expenses.categories', label: t('fin_tab_categories'), icon: Tags },
@@ -32,6 +34,7 @@ const Expenses = () => {
     income: <IncomesTab currentUser={user} />,
     cashflow: <CashflowTab />,
     pnl: <PnlTab />,
+    debts: <DebtsTab />,
     supplier: <SupplierPaymentsTab />,
     capital: <CapitalTabWithHeader />,
     categories: <CategoriesTab />,
@@ -53,7 +56,7 @@ const Expenses = () => {
 
   const SECTIONS = TABS.map((tab, i) => ({
     id: tab.id, label: tab.label, icon: tab.icon, desc: t('fin_desc_' + tab.id),
-    tone: ['orange', 'green', 'cyan', 'violet', 'blue', 'pink', 'red'][i % 7],
+    tone: ['orange', 'green', 'cyan', 'violet', 'red', 'blue', 'pink', 'green'][i % 8],
     render: () => RENDER[tab.id],
   }))
 
