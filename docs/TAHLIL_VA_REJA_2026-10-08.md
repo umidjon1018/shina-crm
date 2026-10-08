@@ -296,6 +296,15 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - **Qoldi (2B):** Kirim → Partiyalar jadvali, Moliya bo'limlari ichi, Marketing ro'yxatlari, Hisobotlar ichidagi eski jadvallar, eski modallarni `Modal` ga o'tkazish (Esc/orqaga hozircha bo'lim oynasini yopadi).
 - **Qoldi (3):** Hisobotlarni serverga ko'chirish (hozir klientda), yagona foyda formulasi barcha hisobotlarda.
 
+### Bosqich 4 ✅ (2026-10-08) — Omborlar turlari + Ulgurji savdo
+- **Do'kon turi:** `shops.kind` — chakana do'kon / ulgurji ombor / ishlab chiqarish sexi (Sozlamalar → Do'konlar). Tovar ulgurji omborga mavjud "Ko'chirish" bilan o'tadi (ko'chirishda partiya narxi endi saqlanadi — yangi `transfer_in` partiya).
+- **Backend** `wholesaleController` (`/api/wholesale`): dilerlar (kredit limiti, to'lov muddati, narx guruhi), narx tartibi — mijozga individual narx → standart ulgurji narx (guruh chegirmasi bilan) → chakana; hujjatlar `UL-00000`: sotuv, konsignatsiya → sotildi (`cons_sale`, qarzga aylanadi) / qaytib keldi (`cons_return`, omborga), sotuvdan qaytarish; itemlar FIFO, konsignatsiyadagi dona holati `consigned`; to'lovlar avval biriktirilgan hujjatga, qolgani eng eski qarzga (FIFO); akt sverka; xulosa. Kredit limiti oshsa `CREDIT_LIMIT` (foydalanuvchi "Baribir saqlash" bilan tasdiqlaydi).
+- **Moliya bilan bog'liq:** Foyda va zarar (ulgurji tushum/tannarx alohida qator), Pul harakati (`wholesale_payment`), Qarzlar (ulgurji mijozlar debitorlikda).
+- **Frontend** `/wholesale` "Ulgurji savdo": ko'rsatkichlar + 6 oy + eng katta qarzdorlar, hujjatlar ro'yxati; bo'limlar — Dilerlar (profil: hujjatlar, akt sverka + chop etish, to'lovlar, individual narxlar), Qarzlar va to'lovlar, Dilerlardagi tovar, Ulgurji narxlar (narx guruhlari, jadvalda narx tahriri); hujjat oynasi — sotildi / qaytib keldi / qaytarish, to'lov, yuk xati chop etish.
+- **Ruxsat:** `wholesale` (.docs, .clients, .debts, .prices) — standartda boshqaruvchi va admin (server rollar daraxtiga bir martalik migratsiya `perm_wholesale_v1`).
+- Sinov: API to'liq oqim + brauzerda (sotildi, to'lov, individual narx, yangi sotuv, bo'limlar) — lokal bazada, keyin tozalandi. Commitlar: backend 73b13c9, frontend 7d99d08b.
+- **Keyinroq (kerak bo'lsa):** Hisobotlar → Savdo `[Chakana | Ulgurji]` filtri, AI tahlilda ulgurji bo'limi, barkod skaner bilan hujjat to'ldirish.
+
 ---
 
 ## 16. Foydalanuvchi fikri va yangi talablar (2026-10-08, 3-versiya)
@@ -376,7 +385,7 @@ Misollar: kafel kleyi (qum, sement, qo'shimchalar tonnalab → qop-qop klei), sh
 | 2B ⏳ | Bo'limlar ichini yangi komponentlarga (DataTable, Modal, yirik yozuv) — sahifama-sahifa (Sotuv bo'limlari, Ombor qoldiq ✅) |
 | 2C ✅ | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
 | 3 ⏳ | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi ✅ + Moliya → Qarzlar ✅ + yagona kirim formasi ✅ + Telegram → Integratsiyalar ✅ |
-| 4 | Omborlar turlari + Ulgurji savdo (konsignatsiya, narx guruhlari) |
+| 4 ✅ | Omborlar turlari + Ulgurji savdo (konsignatsiya, narx guruhlari) |
 | 5 | Ishlab chiqarish: miqdor bo'yicha hisob, retseptura, ishlab chiqarish buyurtmalari, tannarx |
 | 6 | Fiskal chek: tayyorlov → provayder tanlangach ulanish |
 | 7 | Tozalash, biznes profili (modullarni yoqish), multi-tenant |
