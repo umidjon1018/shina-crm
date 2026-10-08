@@ -1,3 +1,4 @@
+import { matchPeriod } from '../../../utils/period'
 import React, { useState, useEffect, useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -44,7 +45,7 @@ const ShopExpensesTab = ({ currentUser }) => {
   }, [expenses])
 
   const monthExpenses = useMemo(() => {
-    let list = filterMonth ? expenses.filter(e => e.date.startsWith(filterMonth)) : expenses
+    let list = filterMonth ? expenses.filter(e => matchPeriod(e.date, filterMonth)) : expenses
     if (selectedShopId !== 'all') list = list.filter(e => e.shopId === selectedShopId)
     return list
   }, [expenses, filterMonth, selectedShopId])
@@ -66,7 +67,7 @@ const ShopExpensesTab = ({ currentUser }) => {
   const filtered = useMemo(() => {
     let list = [...expenses]
     if (selectedShopId !== 'all') list = list.filter(e => e.shopId === selectedShopId)
-    if (filterMonth) list = list.filter(e => e.date.startsWith(filterMonth))
+    if (filterMonth) list = list.filter(e => matchPeriod(e.date, filterMonth))
     if (filterCategory !== 'all') list = list.filter(e => e.categoryId === filterCategory)
     if (filterCurrency !== 'all') list = list.filter(e => e.currency === filterCurrency)
     if (search.trim()) {

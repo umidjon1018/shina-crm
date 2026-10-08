@@ -1,4 +1,5 @@
-﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { matchPeriod } from '../../utils/period'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
@@ -1396,14 +1397,7 @@ export const useSalesState = () => {
   const baseSalesForHistory = selectedShopId === 'all' ? salesList : salesList.filter(s => s.shopId === selectedShopId);
 
   const historyMonthOptions = getMonthOptions(baseSalesForHistory.map(s => s.soldAt));
-  const filteredSalesForHistory = baseSalesForHistory.filter(s => {
-    if (historyMonthFilter === 'all') return true;
-    if (!s.soldAt) return false;
-    const date = new Date(s.soldAt);
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    return `${y}-${m}` === historyMonthFilter;
-  });
+  const filteredSalesForHistory = baseSalesForHistory.filter(s => matchPeriod(s.soldAt, historyMonthFilter));
 
   // 2. Returns History Month and Sorting Calculations
   const shopReturnsList = useMemo(() =>
@@ -1490,25 +1484,13 @@ export const useSalesState = () => {
   }, [enrichedSalesForHistory, historySortField, historySortOrder]);
 
   const returnsMonthOptions = getMonthOptions(shopReturnsList.map(r => r.returnedAt));
-  const filteredReturnsHistory = shopReturnsList.filter(r => {
-    if (returnsMonthFilter === 'all') return true;
-    if (!r.returnedAt) return false;
-    const date = new Date(r.returnedAt);
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    return `${y}-${m}` === returnsMonthFilter;
-  });
+  const filteredReturnsHistory = shopReturnsList.filter(r => matchPeriod(r.returnedAt, returnsMonthFilter));
 
   // Bekor tarixi: barcha qaytarishlar (refund, exchange, cancel)
   const cancelledReturns = useMemo(() => shopReturnsList, [shopReturnsList])
 
   const returnsMonthOptions2 = getMonthOptions(cancelledReturns.map(r => r.returnedAt))
-  const filteredCancelledReturns = cancelledReturns.filter(r => {
-    if (returnsHistoryMonthFilter === 'all') return true
-    if (!r.returnedAt) return false
-    const date = new Date(r.returnedAt)
-    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}` === returnsHistoryMonthFilter
-  })
+  const filteredCancelledReturns = cancelledReturns.filter(r => matchPeriod(r.returnedAt, returnsHistoryMonthFilter))
 
   const enrichedReturnsHistory = useMemo(() => {
     return filteredCancelledReturns.map(r => {
@@ -1679,13 +1661,7 @@ export const useSalesState = () => {
   const filteredProfitItems = useMemo(() => {
     const q = profitSearch.trim().toLowerCase()
     return profitItems.filter(item => {
-      if (profitMonthFilter !== 'all') {
-        if (!item.soldAt) return false;
-        const date = new Date(item.soldAt);
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        if (`${y}-${m}` !== profitMonthFilter) return false;
-      }
+      if (!matchPeriod(item.soldAt, profitMonthFilter)) return false;
       if (profitTypeFilter === 'new' && item.isUsedSale) return false;
       if (profitTypeFilter === 'used' && !item.isUsedSale) return false;
       if (!q) return true;
@@ -1721,14 +1697,7 @@ export const useSalesState = () => {
         if (installmentTypeFilter === 'used') return !!s.isUsedSale
         return true
       })
-      .filter(s => {
-        if (installmentMonthFilter === 'all') return true;
-        if (!s.soldAt) return false;
-        const date = new Date(s.soldAt);
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        return `${y}-${m}` === installmentMonthFilter;
-      })
+      .filter(s => matchPeriod(s.soldAt, installmentMonthFilter))
       .filter(s => {
         if (!q) return true
         const name = (s.customerName || '').toLowerCase()

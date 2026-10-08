@@ -6,14 +6,14 @@ import { Wallet, TrendingUp, Receipt, ShoppingBag, UserPlus, RotateCcw, AlertTri
 import { useShopStore } from '../store/shopStore'
 import { useDataStore } from '../store/dataStore'
 import { getDashboardReport } from '../api/reportService'
-import { presetRange } from './Expenses/components/PeriodPicker'
-import { PageHeader, Segmented } from '../components/ui/Kit'
+import { presetRange } from '../utils/period'
+import { PageHeader } from '../components/ui/Kit'
+import PeriodFilter from '../components/ui/PeriodFilter'
 import { HeroStat, MiniStat, ChartCard, TrendArea, DonutChart, GradientBars, Legend, PALETTE, shortNum } from '../components/charts/Charts'
-import { formatPrice, formatNumber, formatUSD } from '../utils/format'
+import { formatPrice, formatNumber, formatUSD, monthShort } from '../utils/format'
 
-const PRESETS = ['today', 'week', 'month', 'last_month']
 const WD = { uz: ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'], ru: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] }
-const trend = (cur, prev) => (prev ? Math.round(((cur - prev) / Math.abs(prev)) * 100) : null)
+const trendPct = (cur, prev) => (prev ? Math.round(((cur - prev) / Math.abs(prev)) * 100) : null)
 
 // Bosh sahifa: asosiy ko'rsatkichlar va diagrammalar (hammasi serverda hisoblanadi — /api/reports/dashboard)
 export const Dashboard = () => {
@@ -22,22 +22,28 @@ export const Dashboard = () => {
   const { selectedShopId } = useShopStore()
   const { version } = useDataStore()
   const [preset, setPreset] = useState('month')
+  const [range, setRange] = useState(() => presetRange('month'))
   const [d, setD] = useState(null)
 
   useEffect(() => {
-    getDashboardReport({ ...presetRange(preset), shop_id: selectedShopId }).then(setD).catch(() => setD(null))
-  }, [preset, selectedShopId, version])
+    getDashboardReport({ ...range, shop_id: selectedShopId }).then(setD).catch(() => setD(null))
+  }, [range.from, range.to, selectedShopId, version])
 
   const c = d?.current, p = d?.previous
   const hasProfit = c && c.profit !== undefined
   const lang = i18n.language === 'ru' ? 'ru' : 'uz'
   const payLabel = (k) => ({ cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_ns_pay_transfer') }[k] || k)
-  const daily = (d?.daily || []).map(x => ({ ...x, label: `${x.date.slice(8, 10)}.${x.date.slice(5, 7)}` }))
+  const daily = (d?.daily || []).map(x => ({
+    ...x,
+    label: d.granularity === 'month' ? `${monthShort(Number(x.date.slice(5, 7)) - 1, lang)} ${x.date.slice(2, 4)}` : `${x.date.slice(8, 10)}.${x.date.slice(5, 7)}`,
+  }))
+  // "Barchasi" da oldingi davr yo'q — o'sish foizi ko'rsatilmaydi
+  const trend = (cur, prev) => (preset === 'all' ? null : trendPct(cur, prev))
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
-      <PageHeader title={t('dashboard')} subtitle={t('dash_vs_prev')}
-        actions={<Segmented value={preset} onChange={setPreset} options={PRESETS.map(k => ({ id: k, label: t('fin_period_' + k) }))} />} />
+      <PageHeader title={t('dashboard')} subtitle={preset === 'all' ? t('rep_all_time') : t('dash_vs_prev')}
+        actions={<PeriodFilter preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />} />
 
       {!c ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">{[0, 1, 2, 3].map(i => <div key={i} className="h-36 panel animate-pulse" />)}</div>

@@ -1,6 +1,9 @@
 import React from 'react'
 import { ChevronLeft, ChevronRight, Building2, Zap, Users, Truck, Wrench, Megaphone, MoreHorizontal, Sparkles, Monitor, Banknote, CreditCard, Landmark, Home, Fuel, Phone, ShieldCheck, Receipt, Coffee, Package, Briefcase, Gift, Percent, Car } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { CalendarRange } from 'lucide-react'
+import DateRangeModal from '../../../components/ui/DateRangeModal'
+import { isRange, parseRange, makeRange, rangeText } from '../../../utils/period'
 import i18n from '../../../i18n'
 
 // ─── ICON MAP ────────────────────────────────────────────
@@ -70,6 +73,7 @@ const getCatLabel = (cat, t) => {
 const PAGE_SIZE = 15
 
 const monthLabel = (m, t) => {
+  if (isRange(m)) { const r = parseRange(m); return rangeText(r.from, r.to) }
   const [y, mo] = m.split('-')
   const names = t('exp_month_names', { returnObjects: true })
   return `${names[parseInt(mo) - 1]} ${y}`
@@ -90,23 +94,29 @@ const StatCard = ({ icon: Icon, label, value, sub, color }) => (
 )
 
 // ─── MONTH FILTER BAR ─────────────────────────────────────
+// Oylar + Barchasi + Oraliq (sanalar tanlanib tasdiqlanadi). filterMonth: '' (barchasi) | 'YYYY-MM' | 'r:from:to'
 const MonthFilterBar = ({ months, filterMonth, setFilterMonth, resetPage }) => {
   const { t } = useTranslation()
+  const [picking, setPicking] = React.useState(false)
+  const btn = (on) => `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5
+    ${on ? 'bg-accent-red text-white' : 'bg-bg-secondary border border-border text-text-secondary hover:border-accent-red/50'}`
+  const custom = isRange(filterMonth) ? parseRange(filterMonth) : null
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-text-secondary text-sm">{t('exp_month_label')}</span>
       {months.map(m => (
-        <button key={m} onClick={() => { setFilterMonth(m); resetPage() }}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-            ${filterMonth === m ? 'bg-accent-red text-white' : 'bg-bg-secondary border border-border text-text-secondary hover:border-accent-red/50'}`}>
+        <button key={m} onClick={() => { setFilterMonth(m); resetPage() }} className={btn(filterMonth === m)}>
           {monthLabel(m, t)}
         </button>
       ))}
-      <button onClick={() => { setFilterMonth(''); resetPage() }}
-        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-          ${!filterMonth ? 'bg-accent-red text-white' : 'bg-bg-secondary border border-border text-text-secondary hover:border-accent-red/50'}`}>
+      <button onClick={() => { setFilterMonth(''); resetPage() }} className={btn(!filterMonth)}>
         {t('filter_all')}
       </button>
+      <button onClick={() => setPicking(true)} className={btn(!!custom)}>
+        <CalendarRange size={15} /> {custom ? rangeText(custom.from, custom.to) : t('period_custom')}
+      </button>
+      <DateRangeModal open={picking} initial={custom} onClose={() => setPicking(false)}
+        onApply={(from, to) => { setPicking(false); setFilterMonth(makeRange(from, to)); resetPage() }} />
     </div>
   )
 }

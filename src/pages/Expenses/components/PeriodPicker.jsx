@@ -1,26 +1,8 @@
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import DateMaskInput from '../../../components/DateMaskInput'
+import PeriodFilter from '../../../components/ui/PeriodFilter'
 
-const pad = (n) => String(n).padStart(2, '0')
-export const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-
-export const presetRange = (id) => {
-  const now = new Date()
-  const y = now.getFullYear(), m = now.getMonth()
-  switch (id) {
-    case 'today': return { from: ymd(now), to: ymd(now) }
-    case 'week': {
-      const d = new Date(now); d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
-      return { from: ymd(d), to: ymd(now) }
-    }
-    case 'last_month': return { from: ymd(new Date(y, m - 1, 1)), to: ymd(new Date(y, m, 0)) }
-    case 'quarter': return { from: ymd(new Date(y, Math.floor(m / 3) * 3, 1)), to: ymd(now) }
-    case 'year': return { from: `${y}-01-01`, to: ymd(now) }
-    case 'month':
-    default: return { from: ymd(new Date(y, m, 1)), to: ymd(now) }
-  }
-}
+// presetRange/ymd — umumiy utils/period da (eski importlar ishlashi uchun qayta eksport)
+export { presetRange, ymd } from '../../../utils/period'
+import { ymd } from '../../../utils/period'
 
 // Shu uzunlikdagi oldingi davr (taqqoslash uchun)
 const isMonthEnd = (d) => d.getDate() === new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
@@ -45,27 +27,9 @@ export const previousRange = ({ from, to }) => {
 
 const PRESETS = ['today', 'week', 'month', 'last_month', 'quarter', 'year']
 
-const PeriodPicker = ({ preset, range, onChange, presets = PRESETS }) => {
-  const { t } = useTranslation()
-  const inputCls = 'w-32 bg-bg-secondary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red'
-  return (
-    <div className="flex items-center gap-2 flex-wrap min-w-0 max-w-full">
-      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full min-w-0">
-        {presets.map(p => (
-          <button key={p} onClick={() => onChange(p, presetRange(p))}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap
-              ${preset === p ? 'bg-accent-red text-white' : 'bg-bg-secondary border border-border text-text-secondary hover:border-accent-red/50'}`}>
-            {t('fin_period_' + p)}
-          </button>
-        ))}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <DateMaskInput value={range.from} onChange={e => e.target.value && onChange('custom', { ...range, from: e.target.value })} className={inputCls} />
-        <span className="text-text-muted">—</span>
-        <DateMaskInput value={range.to} onChange={e => e.target.value && onChange('custom', { ...range, to: e.target.value })} className={inputCls} />
-      </div>
-    </div>
-  )
-}
+// Tayyor davrlar + Barchasi + Oraliq (tasdiqlanadi) — umumiy PeriodFilter
+const PeriodPicker = ({ preset, range, onChange, presets = PRESETS }) => (
+  <PeriodFilter preset={preset} range={range} onChange={onChange} presets={presets} size="sm" />
+)
 
 export default PeriodPicker

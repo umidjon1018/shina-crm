@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../../../store/settingsStore'
 import EditReturnModal from '../../../components/sales/EditReturnModal'
 import Modal from '../../../components/ui/Modal'
+import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
 import DataTable from '../../../components/ui/DataTable'
 import { Badge, DetailGrid } from '../../../components/ui/Kit'
 import { formatNumber, formatDateTime } from '../../../utils/format'
@@ -57,10 +58,8 @@ const ReturnsHistoryTab = ({ ctx }) => {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <select value={returnsHistoryMonthFilter} onChange={(e) => { setReturnsHistoryMonthFilter(e.target.value); setReturnsHistoryPage(1) }}
-          className="bg-bg-secondary border border-border text-text-primary px-3 py-2.5 rounded-xl text-[15px] focus:outline-none focus:border-accent-red cursor-pointer">
-          {(returnsMonthOptions2 || []).map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
-        </select>
+        <MonthRangeSelect value={returnsHistoryMonthFilter} onChange={(v) => { setReturnsHistoryMonthFilter(v); setReturnsHistoryPage(1) }}
+          months={returnsMonthOptions2 || []} monthLabel={formatMonthValue} />
         <span className="text-[15px] text-text-muted">{t('sl_rh_total', { n: filteredCancelledReturns.length })}</span>
       </div>
 

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useAuthStore } from '../../../store/authStore'
 import { motion } from 'framer-motion'
 import Modal from '../../../components/ui/Modal'
+import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
+import { matchPeriod, isRange, parseRange, rangeText } from '../../../utils/period'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
 import { formatNumber, formatDateTime } from '../../../utils/format'
@@ -89,10 +91,8 @@ const InstallmentTab = ({ ctx }) => {
       <div className="flex flex-wrap items-center gap-2">
         <Segmented value={installmentTypeFilter} onChange={(v) => { setInstallmentTypeFilter(v); setInstallmentSalesPage(1) }}
           options={[{ id: 'all', label: t('filter_all') }, { id: 'new', label: t('sl_profit_type_new') }, { id: 'used', label: t('sl_profit_used_badge') }]} />
-        <select value={installmentMonthFilter} onChange={(e) => { setInstallmentMonthFilter(e.target.value); setInstallmentSalesPage(1) }}
-          className="bg-bg-secondary border border-border text-text-primary px-3 py-2.5 rounded-xl text-[15px] focus:outline-none focus:border-accent-red cursor-pointer">
-          {installmentMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
-        </select>
+        <MonthRangeSelect value={installmentMonthFilter} onChange={(v) => { setInstallmentMonthFilter(v); setInstallmentSalesPage(1) }}
+          months={installmentMonthOptions} monthLabel={formatMonthValue} />
         <div className="relative flex-1 min-w-[200px]">
           <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input type="text" value={installmentSearch} onChange={e => { setInstallmentSearch(e.target.value); setInstallmentSalesPage(1) }}
@@ -160,15 +160,14 @@ const InstallmentTab = ({ ctx }) => {
       {/* Batafsil modal */}
       {detailedOrg && (() => {
         const orgSales = filteredInstallmentSales.filter(s => s.paymentType === 'installment' && s.status !== 'cancelled' && (s.installmentOrgId === detailedOrg.id || (!s.installmentOrgId && detailedOrg.id === 'oddiy_nasiya')))
-        const filteredSales = orgSales.filter(s => orgMonthFilter === 'all' || s.soldAt?.startsWith(orgMonthFilter))
+        const filteredSales = orgSales.filter(s => matchPeriod(s.soldAt, orgMonthFilter))
 
         const totalSalesAmount = orgSales.reduce((sum, s) => sum + s.total, 0)
         const totalSalesPaid = orgSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.paidAmount ?? 0), 0)
         const totalSalesDebt = orgSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? s.total), 0)
         const totalSalesCommission = orgSales.reduce((sum, s) => sum + (s.total * (detailedOrg.commissionPercent || 0) / 100), 0)
 
-        const targetMonth = orgMonthFilter === 'all' ? thisMonth : orgMonthFilter
-        const monthSales = orgSales.filter(s => s.soldAt?.startsWith(targetMonth))
+        const monthSales = orgSales.filter(s => matchPeriod(s.soldAt, orgMonthFilter === 'all' ? thisMonth : orgMonthFilter))
         const monthSalesAmount = monthSales.reduce((sum, s) => sum + s.total, 0)
         const monthSalesPaid = monthSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.paidAmount ?? 0), 0)
         const monthSalesDebt = monthSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? s.total), 0)
@@ -188,13 +187,8 @@ const InstallmentTab = ({ ctx }) => {
 
               <div className="bg-bg-tertiary p-4 border border-border rounded-2xl space-y-2">
                 <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted block">{t('sl_inst_modal_month_filter')}</label>
-                <select value={orgMonthFilter} onChange={e => setOrgMonthFilter(e.target.value)}
-                  className="w-full bg-bg-secondary text-text-primary text-xs font-bold border border-border rounded-xl px-3 py-2.5 outline-none focus:border-accent-blue">
-                  <option value="all">{t('filter_all')}</option>
-                  {Array.from(new Set(orgSales.map(s => s.soldAt?.substring(0, 7)))).map(m => (
-                    <option key={m} value={m}>{formatMonthValue(m)}</option>
-                  ))}
-                </select>
+                <MonthRangeSelect value={orgMonthFilter} onChange={setOrgMonthFilter} className="w-full"
+                  months={Array.from(new Set(orgSales.map(s => s.soldAt?.substring(0, 7)).filter(Boolean)))} monthLabel={formatMonthValue} />
               </div>
 
               <div className="space-y-4">
@@ -219,7 +213,7 @@ const InstallmentTab = ({ ctx }) => {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest block mb-2">
-                    {orgMonthFilter === 'all' ? t('sl_inst_modal_month_header_current', { month: formatMonthValue(thisMonth) }) : t('sl_inst_modal_month_header_selected', { month: formatMonthValue(orgMonthFilter) })}
+                    {orgMonthFilter === 'all' ? t('sl_inst_modal_month_header_current', { month: formatMonthValue(thisMonth) }) : t('sl_inst_modal_month_header_selected', { month: isRange(orgMonthFilter) ? rangeText(parseRange(orgMonthFilter).from, parseRange(orgMonthFilter).to) : formatMonthValue(orgMonthFilter) })}
                   </span>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[

@@ -1,3 +1,4 @@
+import { matchPeriod, monthInPeriod, periodMonth } from '../../../utils/period'
 import React from 'react'
 import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
@@ -287,7 +288,7 @@ const UsedTab = ({ ctx }) => {
             {modal === 'usedScrappedModal' && (() => {
               const filtered = usedScrappedMonth === 'all'
                 ? usedData.allScrapped
-                : usedData.allScrapped.filter(x => (x.scrapAt || x.soldAt)?.startsWith(usedScrappedMonth))
+                : usedData.allScrapped.filter(x => matchPeriod(x.scrapAt || x.soldAt, usedScrappedMonth))
               const totalValue = filtered.reduce((s, x) => s + (x.acquiredPrice || 0), 0)
               return (
                 <Modal open title={t('rep_bu_modal_scrapped_title')} subtitle={t('rep_bu_modal_scrapped_sub')} size="xl" onClose={closeModal}>

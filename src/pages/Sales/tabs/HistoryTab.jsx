@@ -5,6 +5,7 @@ import { Pencil, Receipt } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import EditSaleModal from '../../../components/sales/EditSaleModal'
 import Modal from '../../../components/ui/Modal'
+import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
 import { formatNumber, formatDateTime } from '../../../utils/format'
@@ -83,10 +84,8 @@ const HistoryTab = ({ ctx }) => {
           { id: 'used', label: t('sl_hist_kind_used'), count: usedSalesList.length },
         ]} />
         {kind === 'new' && (
-          <select value={historyMonthFilter} onChange={(e) => { setHistoryMonthFilter(e.target.value); setHistoryPage(1) }}
-            className="bg-bg-secondary border border-border text-text-primary px-3 py-2.5 rounded-xl text-[15px] focus:outline-none focus:border-accent-red cursor-pointer">
-            {historyMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
-          </select>
+          <MonthRangeSelect value={historyMonthFilter} onChange={(v) => { setHistoryMonthFilter(v); setHistoryPage(1) }}
+            months={historyMonthOptions} monthLabel={formatMonthValue} />
         )}
       </div>
 

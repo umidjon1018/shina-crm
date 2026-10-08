@@ -1,3 +1,4 @@
+import { matchPeriod } from '../../../utils/period'
 import React, { useState, useEffect, useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -45,7 +46,7 @@ const IncomesTab = ({ currentUser }) => {
   }, [shopIncomes])
 
   const monthList = useMemo(() =>
-    filterMonth ? shopIncomes.filter(i => i.date.startsWith(filterMonth)) : shopIncomes,
+    filterMonth ? shopIncomes.filter(i => matchPeriod(i.date, filterMonth)) : shopIncomes,
   [shopIncomes, filterMonth])
 
   const filtered = useMemo(() => {

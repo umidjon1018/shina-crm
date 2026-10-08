@@ -1,3 +1,4 @@
+import { matchPeriod } from '../../../utils/period'
 import React, { useState, useEffect, useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -31,7 +32,7 @@ const CapitalTabWithHeader = () => {
 
   const filtered = useMemo(() => {
     let l = [...capital]
-    if (filterMonth) l = l.filter(c => c.date.startsWith(filterMonth))
+    if (filterMonth) l = l.filter(c => matchPeriod(c.date, filterMonth))
     if (filterType !== 'all') l = l.filter(c => c.type === filterType)
     if (search.trim()) {
       const q = search.toLowerCase()

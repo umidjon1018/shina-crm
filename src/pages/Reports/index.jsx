@@ -1,3 +1,5 @@
+import MonthRangeSelect from '../../components/ui/MonthRangeSelect'
+import { matchPeriod, periodMonth, isRange, parseRange, rangeText } from '../../utils/period'
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { getLoyaltySettings } from '../../api/settingsService'
 import { useTranslation } from 'react-i18next'
@@ -86,6 +88,8 @@ export const Reports = () => {
   // Oy nomini t() orqali olish: '2026-03' → 'Mart 2026'
   const getMonthLabel = (m) => {
     if (!m) return '—'
+    if (isRange(m)) { const r = parseRange(m); return rangeText(r.from, r.to) }
+    if (m === 'all') return t('filter_all')
     const [y, mo] = m.split('-')
     return `${t('rep_month_' + parseInt(mo))} ${y}`
   }
@@ -319,7 +323,7 @@ export const Reports = () => {
 
   const filterByPeriod = useCallback((arr, dateField) => {
     if (period === 'all') return arr
-    return arr.filter(item => item[dateField] && item[dateField].startsWith(period))
+    return arr.filter(item => matchPeriod(item[dateField], period))
   }, [period])
 
   React.useEffect(() => {
@@ -340,7 +344,7 @@ export const Reports = () => {
 
     const installmentTotal = completed.filter(s => s.paymentType === 'installment').reduce((s, x) => s + (x.installmentDebt ?? Math.max(0, x.total - (x.installmentPaidAmount || 0))), 0)
 
-    const curMonth = period === 'all' ? (localMonth()) : period
+    const curMonth = periodMonth(period)
     const targetMonthSales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(curMonth)).reduce((sum, x) => sum + x.total, 0)
     const prevMonth = (() => {
       if (!curMonth) return null
@@ -514,7 +518,7 @@ export const Reports = () => {
     const allSold = filterByPeriod(soldStockAll.filter(u => !scrapSaleIds.has(u.soldSaleId)), 'soldAt')
     const soldCount = allSold.length
     const allScrappedRaw = [...MOCK_USED_STOCK.filter(u => u.status === 'scrapped'), ...scrappedViaSale]
-    const allScrapped = period === 'all' ? allScrappedRaw : allScrappedRaw.filter(x => (x.scrapAt || x.soldAt)?.startsWith(period))
+    const allScrapped = period === 'all' ? allScrappedRaw : allScrappedRaw.filter(x => matchPeriod(x.scrapAt || x.soldAt, period))
     const scrappedCount = allScrapped.length
     const scrappedValue = allScrapped.reduce((s, x) => s + (x.acquiredPrice || 0), 0)
 
@@ -532,7 +536,7 @@ export const Reports = () => {
 
   const filterUsedByMonth = (arr, dateField, month) => {
     if (month === 'all') return arr
-    return arr.filter(item => item[dateField] && item[dateField].startsWith(month))
+    return arr.filter(item => matchPeriod(item[dateField], month))
   }
 
   const usedChartCategories = (() => {
@@ -1609,7 +1613,7 @@ export const Reports = () => {
 
   const getExportData = (format) => {
     setShowExportMenu(false)
-    const periodLabel = period === 'all' ? 'Barchasi' : period
+    const periodLabel = period === 'all' ? 'Barchasi' : getMonthLabel(period)
     const date = localToday()
 
     if (activeTab === 'sales') {
@@ -1785,16 +1789,7 @@ export const Reports = () => {
   )
 
   const MonthFilterSelect = ({ value, onChange }) => (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="appearance-none bg-bg-tertiary border border-border rounded-xl pl-3 pr-8 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent-red cursor-pointer"
-      >
-        {periodOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-    </div>
+    <MonthRangeSelect value={value} onChange={onChange} months={periodOptions.map(o => o.value)} monthLabel={getMonthLabel} />
   )
 
 
@@ -1857,13 +1852,9 @@ export const Reports = () => {
   // Eski (klientda hisoblanadigan) hisobotlar uchun davr va eksport — hisobot oynasining tepasida
   const legacyToolbar = (id) => (
     <div className="flex items-center justify-end gap-2 flex-wrap mb-4">
-      <div className="relative">
-        <select value={period} onChange={e => setPeriod(e.target.value)} disabled={id === 'stock'}
-          className="appearance-none bg-bg-secondary border border-border rounded-xl pl-4 pr-10 py-2.5 text-[15px] text-text-primary focus:outline-none focus:border-accent-red disabled:opacity-50 transition-all cursor-pointer">
-          {periodOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-      </div>
+      {id !== 'stock' && (
+        <MonthRangeSelect value={period} onChange={setPeriod} months={periodOptions.map(o => o.value)} monthLabel={getMonthLabel} />
+      )}
       <div className="relative">
         <button onClick={() => setShowExportMenu(v => !v)}
           className="flex items-center gap-2 px-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-[15px] font-bold text-text-primary hover:bg-bg-tertiary transition-all">

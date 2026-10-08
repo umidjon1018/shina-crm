@@ -8,11 +8,10 @@ import { getPnl, getCashflow } from '../../../api/financeService'
 import { useFinanceCategories } from './useFinanceCategories'
 import { getCatLabel } from './expHelpers'
 import { presetRange, previousRange } from './PeriodPicker'
-import { Segmented } from '../../../components/ui/Kit'
+import PeriodFilter from '../../../components/ui/PeriodFilter'
 import { HeroStat, MiniStat, ChartCard, DonutChart, GradientBars, shortNum } from '../../../components/charts/Charts'
 import { formatNumber, formatPrice } from '../../../utils/format'
 
-const PRESETS = ['today', 'week', 'month', 'last_month']
 const trend = (cur, prev) => (prev ? Math.round(((cur - prev) / Math.abs(prev)) * 100) : null)
 const sum3 = (o) => (o?.cash || 0) + (o?.card || 0) + (o?.transfer || 0)
 
@@ -26,19 +25,20 @@ const FinanceOverview = () => {
   const canPnl = hasPermission('expenses.pnl')
   const canCash = hasPermission('expenses.cashflow')
   const [preset, setPreset] = useState('month')
+  const [range, setRange] = useState(() => presetRange('month'))
   const [pnl, setPnl] = useState(null)
   const [prev, setPrev] = useState(null)
   const [cash, setCash] = useState(null)
 
   useEffect(() => {
     if (!canPnl && !canCash) return
-    const r = presetRange(preset)
+    const r = range
     Promise.all([
       canPnl ? getPnl({ ...r, shopId: selectedShopId }) : null,
-      canPnl ? getPnl({ ...previousRange(r), shopId: selectedShopId }) : null,
+      canPnl && preset !== 'all' ? getPnl({ ...previousRange(r), shopId: selectedShopId }) : null,
       canCash ? getCashflow({ ...r, shopId: selectedShopId }) : null,
     ]).then(([a, b, c]) => { setPnl(a); setPrev(b); setCash(c) }).catch(() => {})
-  }, [preset, selectedShopId, version, canPnl, canCash])
+  }, [range.from, range.to, selectedShopId, version, canPnl, canCash])
 
   if (!canPnl && !canCash) return null
 
@@ -57,7 +57,7 @@ const FinanceOverview = () => {
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex items-center justify-end">
-        <Segmented value={preset} onChange={setPreset} options={PRESETS.map(k => ({ id: k, label: t('fin_period_' + k) }))} />
+        <PeriodFilter preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">

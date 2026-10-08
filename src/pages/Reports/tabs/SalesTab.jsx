@@ -1,3 +1,4 @@
+import { matchPeriod, monthInPeriod, periodMonth } from '../../../utils/period'
 import React, { useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
@@ -142,7 +143,7 @@ const SalesTab = ({ ctx }) => {
                   <div>
                     <h4 className="font-syne font-bold text-text-primary">{t('rep_daily_dynamics')}</h4>
                     <p className="text-text-secondary text-sm">
-                      {getMonthLabel(period === 'all' ? localMonth() : period)} — {t('rep_daily_results')}
+                      {getMonthLabel(periodMonth(period))} — {t('rep_daily_results')}
                     </p>
                   </div>
                   <DetailButton onClick={() => openModal('dailyChartModal')} />
@@ -150,7 +151,7 @@ const SalesTab = ({ ctx }) => {
                 <div className="h-[220px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={(() => {
-                      const curMonth = period === 'all' ? localMonth() : period
+                      const curMonth = periodMonth(period)
                       const dailyMap = {}
                       const daysInMonth = new Date(parseInt(curMonth.split('-')[0]), parseInt(curMonth.split('-')[1]), 0).getDate()
                       for (let d = 1; d <= daysInMonth; d++) {
@@ -479,7 +480,7 @@ const SalesTab = ({ ctx }) => {
         const monthlyData = getMonthlySalesChart()
         const filtered = (modalFilter === 'all'
           ? MOCK_SALES.filter(s => s.status !== 'cancelled')
-          : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+          : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter))
         ).sort((a,b) => b.total - a.total)
 
         return (
@@ -550,7 +551,7 @@ const SalesTab = ({ ctx }) => {
         const monthlyData = getMonthlySalesChart()
         const effectiveFilter = modalFilter !== 'all' ? modalFilter : (period !== 'all' ? period : null)
         const filtered = (effectiveFilter
-          ? MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(effectiveFilter))
+          ? MOCK_SALES.filter(s => s.status !== 'cancelled' && matchPeriod(s.soldAt, effectiveFilter))
           : MOCK_SALES.filter(s => s.status !== 'cancelled')
         ).sort((a,b) => (b.soldAt||'').localeCompare(a.soldAt||''))
 
@@ -656,7 +657,7 @@ const SalesTab = ({ ctx }) => {
         const monthlyData = getMonthlySalesChart()
         const tableData = modalFilter === 'all'
           ? monthlyData
-          : monthlyData.filter(m => m.month === modalFilter)
+          : monthlyData.filter(m => monthInPeriod(m.month, modalFilter))
         return (
           <Modal open title={t('rep_modal_count_title')} subtitle={t('rep_modal_count_sub')} size="lg" onClose={closeModal}>
             <div className="flex items-center justify-between mb-5">
@@ -778,7 +779,7 @@ const SalesTab = ({ ctx }) => {
         const allInstallments = financeStats.installmentSales
         const filtered = modalFilter === 'all'
           ? allInstallments
-          : allInstallments.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
+          : allInstallments.filter(s => s.soldAt && matchPeriod(s.soldAt, modalFilter))
 
         return (
           <Modal open title={t('rep_modal_installment_title')} subtitle={t('rep_modal_installment_sub')} size="2xl" onClose={closeModal}>
@@ -846,7 +847,7 @@ const SalesTab = ({ ctx }) => {
         })
         const displayedMonths = modalFilter === 'all'
           ? allMonths
-          : allMonths.filter(m => m === modalFilter)
+          : allMonths.filter(m => monthInPeriod(m, modalFilter))
         return (
           <Modal open title={t('rep_modal_daily_title')} subtitle={t('rep_modal_daily_sub')} size="xl" onClose={closeModal}>
             <div className="flex justify-end mb-4">
@@ -926,7 +927,7 @@ const SalesTab = ({ ctx }) => {
           const [y, mo] = m.split('-')
           monthNames[m] = `${monthNamesArr[parseInt(mo) - 1] || mo} ${y}`
         })
-        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => m === modalFilter)
+        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => monthInPeriod(m, modalFilter))
         const payLabels = { cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment') }
         const payColors = { cash: C.green, card: C.blue, installment: C.orange }
 
@@ -1026,7 +1027,7 @@ const SalesTab = ({ ctx }) => {
         const allMonths = Array.from(monthsSet).sort().reverse()
         const monthNames = {}
         allMonths.forEach(m => { monthNames[m] = getMonthLabel(m) })
-        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => m === modalFilter)
+        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => monthInPeriod(m, modalFilter))
         const catLabels = {
           tire:      getCatLabel('tire'),
           wheel:     getCatLabel('wheel'),
@@ -1216,7 +1217,7 @@ const SalesTab = ({ ctx }) => {
         const allMonths = Array.from(monthsSet).sort().reverse()
         const monthNames = {}
         allMonths.forEach(m => { monthNames[m] = getMonthLabel(m) })
-        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => m === modalFilter)
+        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => monthInPeriod(m, modalFilter))
 
         const tableData = months.map(m => {
           const sales = MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(m))
@@ -1321,7 +1322,7 @@ const SalesTab = ({ ctx }) => {
           : h < 21 ? '19-21' : '21-22'
 
         // Tanlangan oy (kunlik tab uchun)
-        const selectedMonth = (modalFilter === 'all' || !MONTHS_LIST.includes(modalFilter)) ? MONTHS_LIST[0] : modalFilter
+        const selectedMonth = (modalFilter === 'all' || !MONTHS_LIST.includes(periodMonth(modalFilter))) ? MONTHS_LIST[0] : periodMonth(modalFilter)
 
         // Kunlik tab: tanlangan oy ichidagi har kun uchun soat tahlili
         const daysInMonth = new Date(
@@ -1632,7 +1633,7 @@ const SalesTab = ({ ctx }) => {
           const [y, mo] = m.split('-')
           monthNames[m] = `${mNamesArr[parseInt(mo) - 1] || mo} ${y}`
         })
-        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => m === modalFilter)
+        const months = modalFilter === 'all' ? allMonths : allMonths.filter(m => monthInPeriod(m, modalFilter))
         const srcKeys = Object.keys(SOURCE_LABELS)
         const colors = [C.blue, C.green, C.orange, C.purple, C.teal]
 
@@ -1714,7 +1715,7 @@ const SalesTab = ({ ctx }) => {
       {modal === 'cancelModal' && (() => {
         const cancelled = modalFilter === 'all'
           ? MOCK_SALES.filter(s => s.status === 'cancelled')
-          : MOCK_SALES.filter(s => s.status === 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+          : MOCK_SALES.filter(s => s.status === 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter))
         // Har bir bekor sotuv uchun MOCK_RETURNS dan haqiqiy qaytarilgan summani olamiz
         const returnByOrigSale = {}
         ;(MOCK_RETURNS || []).forEach(r => {

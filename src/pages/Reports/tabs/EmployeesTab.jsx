@@ -1,3 +1,4 @@
+import { matchPeriod, monthInPeriod, periodMonth } from '../../../utils/period'
 import React, { useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
@@ -493,7 +494,7 @@ const EmployeesTab = ({ ctx }) => {
               const filtered = modalFilter === 'all'
                 ? employeeStats.cancelByEmp
                 : employeeStats.cancelByEmp.map(e => {
-                    const det = e.details.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
+                    const det = e.details.filter(s => s.soldAt && matchPeriod(s.soldAt, modalFilter))
                     return { ...e, details: det, cancelCount: det.length, lostRevenue: calcLost(det) }
                   }).filter(e => e.cancelCount > 0)
               const totalLost = filtered.reduce((s,e) => s + e.lostRevenue, 0)
@@ -838,7 +839,7 @@ const EmployeesTab = ({ ctx }) => {
             {modal === 'discountDetailModal' && (() => {
               const baseSales = modalFilter === 'all'
                 ? MOCK_SALES.filter(s => s.status !== 'cancelled')
-                : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+                : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter))
               const discountSales = baseSales
                 .map(s => enrichSale(s))
                 .filter(s => s.discount > 0 || (s.isBundle && s.bundleDiscountAmount > 0))
@@ -908,7 +909,7 @@ const EmployeesTab = ({ ctx }) => {
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                   </div>
                   {hourTab === 'daily' && (() => {
-                    const selMonth = modalFilter === 'all' ? localMonth() : modalFilter
+                    const selMonth = periodMonth(modalFilter)
                     const selMonthName = wrkMonthNames[selMonth] || selMonth
                     const [yr, mo] = selMonth.split('-').map(Number)
                     const daysInMonth = new Date(yr, mo, 0).getDate()
@@ -979,7 +980,7 @@ const EmployeesTab = ({ ctx }) => {
                     <div className="space-y-4">
                       {(() => {
                         const displayMonths = modalFilter !== 'all'
-                          ? MONTHS_LIST.filter(m => m === modalFilter)
+                          ? MONTHS_LIST.filter(m => monthInPeriod(m, modalFilter))
                           : MONTHS_LIST
                         if (displayMonths.length === 0) return (
                           <p className="text-text-muted text-sm text-center py-5 sm:py-8">{t('rep_emp_modal_work_hours_no_data')}</p>

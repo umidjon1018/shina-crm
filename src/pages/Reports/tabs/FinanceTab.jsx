@@ -1,3 +1,4 @@
+import { matchPeriod, monthInPeriod, periodMonth } from '../../../utils/period'
 import React, { useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
@@ -442,7 +443,7 @@ const FinanceTab = ({ ctx }) => {
                         {(() => {
                           const filteredCapData = modalFilter === 'all'
                             ? financeStats.capitalWithRunning
-                            : financeStats.capitalWithRunning.filter(c => c.date && c.date.startsWith(modalFilter))
+                            : financeStats.capitalWithRunning.filter(c => c.date && matchPeriod(c.date, modalFilter))
                           return filteredCapData.map((c) => (
                           <tr key={c.id} className="hover:bg-bg-tertiary transition-colors">
                             <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted whitespace-nowrap">{c.date}</td>
@@ -660,7 +661,7 @@ const FinanceTab = ({ ctx }) => {
                   <div className="flex items-center justify-between mb-5">
                     <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                     <span className="text-text-muted text-xs">
-                      {t('rep_fin_modal_injections_count', { count: MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all' || c.date && c.date.startsWith(modalFilter))).length })}
+                      {t('rep_fin_modal_injections_count', { count: MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all' || c.date && matchPeriod(c.date, modalFilter))).length })}
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
@@ -674,7 +675,7 @@ const FinanceTab = ({ ctx }) => {
                   <MonthlyDynamicsChart data={financeStats.monthlyInjected} dataKey="value" color={C.green} formatter={v => fmtUZS(v)} name={t('rep_fin_modal_value')} />
                   <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_inject_history')}</p>
                   <ModalTable
-                    data={MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all'||c.date && c.date.startsWith(modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
+                    data={MOCK_CAPITAL.filter(c => c.type==='inject' && (modalFilter==='all'||c.date && matchPeriod(c.date, modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
                     pageSize={10}
                     columns={[
                       { key:'date',      label:t('col_date') },
@@ -712,7 +713,7 @@ const FinanceTab = ({ ctx }) => {
                   <MonthlyDynamicsChart data={financeStats.monthlyReturned} dataKey="value" color={C.red} formatter={v => fmtUZS(v)} name={t('rep_fin_modal_value')} />
                   <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_return_history')}</p>
                   <ModalTable
-                    data={MOCK_CAPITAL.filter(c => c.type==='return' && (modalFilter==='all'||c.date && c.date.startsWith(modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
+                    data={MOCK_CAPITAL.filter(c => c.type==='return' && (modalFilter==='all'||c.date && matchPeriod(c.date, modalFilter))).sort((a,b) => b.date.localeCompare(a.date))}
                     pageSize={10}
                     columns={[
                       { key:'date',      label:t('col_date') },
@@ -746,7 +747,7 @@ const FinanceTab = ({ ctx }) => {
                   <MonthlyDynamicsChart data={financeStats.monthlyCapital} dataKey="net" color={C.blue} formatter={v => fmtUZS(v)} name={t('col_net_profit')} />
                   <p className="text-text-secondary text-sm font-medium mt-4 sm:mt-6 mb-3">{t('rep_fin_modal_history')}</p>
                   <ModalTable
-                    data={financeStats.capitalWithRunning.filter(c => modalFilter==='all'||c.date && c.date.startsWith(modalFilter))}
+                    data={financeStats.capitalWithRunning.filter(c => modalFilter==='all'||c.date && matchPeriod(c.date, modalFilter))}
                     pageSize={10}
                     columns={[
                       { key:'date',         label:t('col_date'),   width:'120px' },
@@ -779,12 +780,12 @@ const FinanceTab = ({ ctx }) => {
                   </div>
                   {/* 3 bo'lim */}
                   {[
-                    { key:'overdue', label:t('rep_fin_modal_overdue_section'), color:'accent-red',    items: financeStats.debtItems.filter(x => x.dueDate && x.dueDate < TODAY && x.paymentStatus !== 'paid' && (modalFilter==='all'||x.dueDate.startsWith(modalFilter))) },
-                    { key:'urgent',  label:t('rep_fin_modal_urgent_section'), color:'accent-orange', items: financeStats.urgentDebts.filter(x => modalFilter==='all'||x.dueDate.startsWith(modalFilter)) },
+                    { key:'overdue', label:t('rep_fin_modal_overdue_section'), color:'accent-red',    items: financeStats.debtItems.filter(x => x.dueDate && x.dueDate < TODAY && x.paymentStatus !== 'paid' && (modalFilter==='all'||matchPeriod(x.dueDate, modalFilter))) },
+                    { key:'urgent',  label:t('rep_fin_modal_urgent_section'), color:'accent-orange', items: financeStats.urgentDebts.filter(x => modalFilter==='all'||matchPeriod(x.dueDate, modalFilter)) },
                     { key:'normal',  label:t('rep_fin_modal_normal_section'),  color:'accent-green',  items: financeStats.debtItems.filter(x => {
                       if (!x.dueDate || x.paymentStatus === 'paid') return false
                       const diff = Math.round((new Date(x.dueDate)-new Date(TODAY))/86400000)
-                      return diff > 10 && (modalFilter==='all'||x.dueDate.startsWith(modalFilter))
+                      return diff > 10 && (modalFilter==='all'||matchPeriod(x.dueDate, modalFilter))
                     })},
                   ].map(section => section.items.length > 0 && (
                     <div key={section.key} className="mb-4 sm:mb-6">
@@ -832,7 +833,7 @@ const FinanceTab = ({ ctx }) => {
                     </div>
                   </div>
                   <ModalTable
-                    data={financeStats.installmentSales.filter(s => modalFilter==='all'||(s.soldAt && s.soldAt.startsWith(modalFilter)))}
+                    data={financeStats.installmentSales.filter(s => modalFilter==='all'||(s.soldAt && matchPeriod(s.soldAt, modalFilter)))}
                     pageSize={10}
                     columns={[
                       { key:'soldAt',       label:t('col_sold_date'), render: r => <span className="whitespace-nowrap text-xs">{fmtSoldAt(r.soldAt)}</span> },

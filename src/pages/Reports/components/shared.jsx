@@ -1,3 +1,4 @@
+import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
 import React, { useState, useMemo, useEffect } from 'react'
 import { localToday, localMonth } from '../../../utils/tz'
 import { useTranslation } from 'react-i18next'
@@ -55,19 +56,10 @@ const MonthYearFilter = ({ value, onChange, includeAll = true }) => {
   }
 
   const months = getMonthsList()
-  const options = includeAll ? [{ value:'all', label: t('filter_all') }, ...months] : months
-
+  const labels = Object.fromEntries(months.map(m => [m.value, m.label]))
   return (
-    <div className="relative inline-block">
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="appearance-none bg-bg-tertiary border border-border rounded-xl pl-3 pr-8 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent-red transition-all cursor-pointer"
-      >
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-    </div>
+    <MonthRangeSelect value={value} onChange={onChange} includeAll={includeAll}
+      months={months.map(m => m.value)} monthLabel={(m) => labels[m] || m} />
   )
 }
 

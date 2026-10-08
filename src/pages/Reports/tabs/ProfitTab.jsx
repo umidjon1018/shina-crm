@@ -1,3 +1,4 @@
+import { matchPeriod, monthInPeriod, periodMonth } from '../../../utils/period'
 import React, { useMemo } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { localToday, localMonth } from '../../../utils/tz'
@@ -221,10 +222,10 @@ const ProfitTab = ({ ctx }) => {
                 const usedList = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled')
                 const newFiltered = modalFilter === 'all'
                   ? MOCK_SALES.filter(s => s.status !== 'cancelled')
-                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter))
                 const usedFiltered = modalFilter === 'all'
                   ? usedList
-                  : usedList.filter(s => s.soldAt && s.soldAt.startsWith(modalFilter))
+                  : usedList.filter(s => s.soldAt && matchPeriod(s.soldAt, modalFilter))
                 const filtered = [...newFiltered, ...usedFiltered].sort((a,b)=>(b.soldAt||'').localeCompare(a.soldAt||''))
                 const newAmt = newFiltered.reduce((s,x) => s + (x.total||0), 0)
                 const usedAmt = usedFiltered.reduce((s,x) => s + (x.total||0), 0)
@@ -312,7 +313,7 @@ const ProfitTab = ({ ctx }) => {
               {modal === 'grossProfitModal' && (() => {
                 const filtered = modalFilter === 'all'
                   ? MOCK_SALES.filter(s => s.status !== 'cancelled').sort((a,b)=>(b.soldAt||'').localeCompare(a.soldAt||''))
-                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter)).sort((a,b)=>(b.soldAt||'').localeCompare(a.soldAt||''))
+                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter)).sort((a,b)=>(b.soldAt||'').localeCompare(a.soldAt||''))
                 return (
                   <Modal open title={t('rep_modal_gross_title')} subtitle={t('rep_modal_gross_sub')} size="3xl" onClose={closeModal}>
                     <div className="flex items-center justify-between mb-5">
@@ -414,13 +415,13 @@ const ProfitTab = ({ ctx }) => {
               {modal === 'totalExpModal' && (() => {
                 const filteredExp = modalFilter === 'all'
                   ? MOCK_EXPENSES
-                  : MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(modalFilter))
+                  : MOCK_EXPENSES.filter(e => e.date && matchPeriod(e.date, modalFilter))
                 const totalOp = filteredExp.reduce((s,e) => s+e.amountUZS, 0)
                 const filteredBatches = MOCK_INCOME_BATCHES.filter(x => x.paidUSD > 0 &&
-                  (modalFilter === 'all' || x.receivedAt?.startsWith(modalFilter)))
+                  (modalFilter === 'all' || matchPeriod(x.receivedAt, modalFilter)))
                 const totalInventory = filteredBatches.reduce((s,x) => s + Math.round(x.paidUSD * USD_RATE), 0)
                 const filteredCap = MOCK_CAPITAL.filter(c => c.type === 'return' &&
-                  (modalFilter === 'all' || c.date?.startsWith(modalFilter)))
+                  (modalFilter === 'all' || matchPeriod(c.date, modalFilter)))
                 const totalCapReturn = filteredCap.reduce((s,c) => s+c.amountUZS, 0)
                 return (
                   <Modal open title={t('rep_modal_total_exp_title')} subtitle={t('rep_modal_total_exp_sub')} size="xl" onClose={closeModal}>
@@ -482,7 +483,7 @@ const ProfitTab = ({ ctx }) => {
               {modal === 'netProfitModal' && (() => {
                 const filtered = (modalFilter === 'all'
                   ? profitStats.dailyBreakdown
-                  : profitStats.dailyBreakdown.filter(d => d.date.startsWith(modalFilter))
+                  : profitStats.dailyBreakdown.filter(d => matchPeriod(d.date, modalFilter))
                 ).slice().sort((a,b) => b.date.localeCompare(a.date))
                 return (
                   <Modal open title={t('rep_modal_net_title')} subtitle={t('rep_modal_net_sub')} size="xl" onClose={closeModal}>
@@ -563,17 +564,17 @@ const ProfitTab = ({ ctx }) => {
                 MONTHS_BE.forEach(m => { monthNames_BE[m] = getMonthLabel(m) })
                 const filteredMonths_BE = modalFilter === 'all'
                   ? MONTHS_BE
-                  : MONTHS_BE.filter(m => m === modalFilter)
+                  : MONTHS_BE.filter(m => monthInPeriod(m, modalFilter))
 
                 // Filtr bo'yicha sotuv va xarajat
                 const filtSales = modalFilter === 'all'
                   ? MOCK_SALES.filter(s => s.status !== 'cancelled')
-                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && s.soldAt.startsWith(modalFilter))
+                  : MOCK_SALES.filter(s => s.status !== 'cancelled' && s.soldAt && matchPeriod(s.soldAt, modalFilter))
                 const filtUsed = (MOCK_USED_SALES || []).filter(s => s.status !== 'cancelled' &&
-                  (modalFilter === 'all' || (s.soldAt && s.soldAt.startsWith(modalFilter))))
+                  (modalFilter === 'all' || (s.soldAt && matchPeriod(s.soldAt, modalFilter))))
                 const filtExp = modalFilter === 'all'
                   ? MOCK_EXPENSES
-                  : MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(modalFilter))
+                  : MOCK_EXPENSES.filter(e => e.date && matchPeriod(e.date, modalFilter))
                 // Zararsizlik: yalpi foyda (sotuv − tannarx − komissiya, yangi + B/U) xarajatni qoplaydimi
                 const filtSalesAmt = filtSales.reduce((s,x) => s+getNetSaleProfit(x), 0)
                   + filtUsed.reduce((s,x) => s+getUsedSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0)
@@ -706,7 +707,7 @@ const ProfitTab = ({ ctx }) => {
               {/* === MODAL: O'zgaruvchan xarajatlar === */}
               {modal === 'varExpModal' && (() => {
                 const allVar = MOCK_EXPENSES.filter(e => e.expenseType === 'variable')
-                const varList = varMonthFilter === 'all' ? allVar : allVar.filter(e => e.date && e.date.startsWith(varMonthFilter))
+                const varList = varMonthFilter === 'all' ? allVar : allVar.filter(e => e.date && matchPeriod(e.date, varMonthFilter))
                 const catMap = {}
                 varList.forEach(e => {
                   const key = i18n.language === 'ru' ? (e.noteRu || e.note || e.categoryLabel || 'Прочее') : (e.note || e.categoryLabel || 'Boshqa')
@@ -865,7 +866,7 @@ const ProfitTab = ({ ctx }) => {
               {modal === 'expDistModal' && (() => {
                 const filtered = modalFilter === 'all'
                   ? MOCK_EXPENSES
-                  : MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(modalFilter))
+                  : MOCK_EXPENSES.filter(e => e.date && matchPeriod(e.date, modalFilter))
                 const catMap = {}
                 filtered.forEach(e => {
                   const key = i18n.language === 'ru' ? (e.noteRu || e.note || e.categoryLabel || 'Прочее') : (e.note || e.categoryLabel || 'Boshqa')

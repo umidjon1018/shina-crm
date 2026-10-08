@@ -1,3 +1,4 @@
+import { matchPeriod } from '../../../utils/period'
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import TableView from '../../../components/ui/TableView'
 import { motion } from 'framer-motion'
@@ -60,7 +61,7 @@ const SupplierPaymentsTab = () => {
 
   const filtered = useMemo(() => {
     let list = [...allPayments]
-    if (filterMonth) list = list.filter(p => p.date.startsWith(filterMonth))
+    if (filterMonth) list = list.filter(p => matchPeriod(p.date, filterMonth))
     if (selectedShopId !== 'all') list = list.filter(p => p.shopId === selectedShopId)
     if (search.trim()) {
       const q = search.toLowerCase()

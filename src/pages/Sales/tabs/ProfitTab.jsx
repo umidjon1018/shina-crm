@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { getCategoryColor } from '../../../utils/categoryColors'
 import { useSettingsStore } from '../../../store/settingsStore'
 import Modal from '../../../components/ui/Modal'
+import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
 import DataTable from '../../../components/ui/DataTable'
 import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
 import { HeroStat, MiniStat, shortNum } from '../../../components/charts/Charts'
@@ -126,11 +127,8 @@ const ProfitTab = ({ ctx }) => {
         <Segmented value={view} onChange={setView} options={[{ id: 'products', label: t('sl_profit_view_products') }, { id: 'sales', label: t('sl_profit_view_sales') }]} />
         <Segmented value={profitTypeFilter} onChange={(v) => { setProfitTypeFilter(v); setProfitPage(1) }}
           options={[{ id: 'all', label: t('filter_all') }, { id: 'new', label: t('sl_profit_type_new') }, { id: 'used', label: t('sl_profit_used_badge') }]} />
-        <select value={profitMonthFilter} onChange={e => { setProfitMonthFilter(e.target.value); setProfitPage(1) }}
-          className="bg-bg-secondary text-text-primary text-[15px] border border-border rounded-xl px-3 py-2.5 outline-none focus:border-accent-blue">
-          <option value="all">{t('filter_all')}</option>
-          {profitMonthOptions.filter(m => m !== 'all').map(m => <option key={m} value={m}>{formatMonthValue(m)}</option>)}
-        </select>
+        <MonthRangeSelect value={profitMonthFilter} onChange={(v) => { setProfitMonthFilter(v); setProfitPage(1) }}
+          months={profitMonthOptions} monthLabel={formatMonthValue} />
         <div className="relative flex-1 min-w-[200px]">
           <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input type="text" value={profitSearch} onChange={e => { setProfitSearch(e.target.value); setProfitPage(1) }} placeholder={t('sl_profit_search_ph')}
