@@ -2874,6 +2874,8 @@ export default {
   cust_registered: "Ro'yxatdan o'tgan",
   cust_last_visit: "Oxirgi tashrif",
   cust_field_gender: "Jinsi",
+  cust_personal_info: "Shaxsiy ma'lumotlar",
+  cust_bd_this_month: "shu oy",
   cust_gender_male: "Erkak",
   cust_gender_female: "Ayol",
   cust_field_group: "Guruh",

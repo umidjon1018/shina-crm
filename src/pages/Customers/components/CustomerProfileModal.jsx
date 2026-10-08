@@ -6,7 +6,8 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { Heart, MessageSquare, Wallet, Mail, MapPin, Tag, Clock } from 'lucide-react'
 import { PreferencesTab, NotesTab, BalanceTab, DebtPayPanel } from './ProfileExtraTabs'
 import Modal from '../../../components/ui/Modal'
-import { Segmented, Badge } from '../../../components/ui/Kit'
+import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
+import CustomerMessenger from '../../../components/customers/CustomerMessenger'
 import SaleDetailModal from './SaleDetailModal'
 import { GitMerge, ChevronRight } from 'lucide-react'
 import CustomerTelegramTab from './CustomerTelegramTab'
@@ -188,47 +189,39 @@ const CustomerProfileModal = ({ ctx }) => {
                       )
                     })()}
 
-                    {(selectedCustomer.group || selectedCustomer.tags?.length > 0 || selectedCustomer.gender || selectedCustomer.address || selectedCustomer.email) && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedCustomer.group && (
-                          <span className="flex items-center gap-1.5 text-sm bg-accent-orange/10 text-accent-orange rounded-xl px-3 py-2 font-bold"><Users size={14} />{selectedCustomer.group}</span>
-                        )}
-                        {(selectedCustomer.tags || []).map(tg => (
-                          <span key={tg} className="flex items-center gap-1 text-sm bg-accent-blue/10 text-accent-blue rounded-xl px-3 py-2 font-bold"><Tag size={13} />{tg}</span>
-                        ))}
-                        {selectedCustomer.gender && (
-                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><User size={14} className="text-text-muted" />{selectedCustomer.gender === 'female' ? t('cust_gender_female') : t('cust_gender_male')}</span>
-                        )}
-                        {selectedCustomer.address && (
-                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><MapPin size={14} className="text-text-muted" />{selectedCustomer.address}</span>
-                        )}
-                        {selectedCustomer.email && (
-                          <span className="flex items-center gap-1.5 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-3 py-2 font-bold"><Mail size={14} className="text-text-muted" />{selectedCustomer.email}</span>
-                        )}
-                      </div>
-                    )}
+                    {/* Shaxsiy ma'lumotlar — har doim ko'rinadi (bo'sh maydon "—") */}
+                    {(() => {
+                      const c = selectedCustomer
+                      const ig = (c.instagram || '').replace(/^@/, '')
+                      const bd = c.birthDate ? new Date(c.birthDate) : null
+                      const bdMonth = bd && bd.getMonth() === new Date().getMonth()
+                      return (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-bold uppercase tracking-wider text-text-muted">{t('cust_personal_info')}</h4>
+                          <DetailGrid cols={3} items={[
+                            { label: t('cust_field_phone_main'), value: c.phone ? <a href={`tel:${c.phone}`} className="hover:text-accent-blue">{c.phone}</a> : '—' },
+                            { label: t('cust_field_phone2'), value: c.phone2 || '—' },
+                            { label: t('cust_field_birthday'), value: bd ? <>{bd.toLocaleDateString('ru-RU')}{bdMonth && <span className="ml-2">🎂 {t('cust_bd_this_month')}</span>}</> : '—' },
+                            { label: 'Instagram', value: ig ? <a href={`https://instagram.com/${ig}`} target="_blank" rel="noopener noreferrer" className="text-accent-pink hover:underline">@{ig}</a> : '—' },
+                            { label: t('cust_field_car'), value: c.carModel || '—' },
+                            { label: t('cust_field_gender'), value: c.gender ? (c.gender === 'female' ? t('cust_gender_female') : t('cust_gender_male')) : '—' },
+                            { label: t('cust_field_address'), value: c.address || '—' },
+                            { label: 'Email', value: c.email || '—' },
+                            { label: t('cust_field_group'), value: c.group || '—' },
+                          ]} />
+                          {(c.tags || []).length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {c.tags.map(tg => (
+                                <span key={tg} className="flex items-center gap-1 text-sm bg-accent-blue/10 text-accent-blue rounded-xl px-3 py-1.5 font-bold"><Tag size={13} />{tg}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
 
-                    {(selectedCustomer.birthDate || selectedCustomer.instagram || selectedCustomer.carModel) && (
-                      <div className="flex flex-wrap gap-4">
-                        {selectedCustomer.birthDate && (
-                          <div className="flex items-center gap-2 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-4 py-2.5">
-                            <Calendar size={14} className="text-text-muted shrink-0" />
-                            <span className="font-bold">{new Date(selectedCustomer.birthDate).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                          </div>
-                        )}
-                        {selectedCustomer.instagram && (
-                          <div className="flex items-center gap-2 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-4 py-2.5">
-                            <Link2 size={14} className="text-text-muted shrink-0" />
-                            <span className="font-bold">@{selectedCustomer.instagram.replace(/^@/, '')}</span>
-                          </div>
-                        )}
-                        {selectedCustomer.carModel && (
-                          <div className="flex items-center gap-2 text-sm text-text-secondary bg-bg-secondary border border-border rounded-xl px-4 py-2.5">
-                            <Package size={14} className="text-text-muted shrink-0" />
-                            <span className="font-bold">{selectedCustomer.carModel}</span>
-                          </div>
-                        )}
-                      </div>
+                    {(selectedCustomer.instagram || selectedCustomer.phone) && (
+                      <CustomerMessenger instagram={selectedCustomer.instagram} phone={selectedCustomer.phone} name={selectedCustomer.name} />
                     )}
 
                     <div className="space-y-4">

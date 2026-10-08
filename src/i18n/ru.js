@@ -2870,6 +2870,8 @@ export default {
   cust_registered: "Зарегистрирован",
   cust_last_visit: "Последний визит",
   cust_field_gender: "Пол",
+  cust_personal_info: "Личные данные",
+  cust_bd_this_month: "в этом месяце",
   cust_gender_male: "Мужской",
   cust_gender_female: "Женский",
   cust_field_group: "Группа",
