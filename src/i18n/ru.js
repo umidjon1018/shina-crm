@@ -5017,4 +5017,6 @@ export default {
   osk_drag_hint: "Удерживайте здесь, чтобы переместить",
   osk_moving: "Перемещение — ведите пальцем",
   osk_close: "Закрыть клавиатуру",
+  sidebar_collapse: "Свернуть меню",
+  sidebar_expand: "Развернуть меню",
 }

@@ -21,9 +21,10 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  Megaphone, Boxes, Factory
+  Megaphone, Boxes, Factory, ChevronsLeft, ChevronsRight, Store
 } from 'lucide-react'
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense, createContext, useContext } from 'react'
+import { useUiStore } from '../store/uiStore'
 import { syncRolesFromServer } from '../utils/rolesSync'
 import { migrateLocalBundles } from '../utils/migrateLocalBundles'
 import { createSale } from '../api/salesService'
@@ -62,31 +63,43 @@ const PAGE_KEYS = {
   '/settings': 'nav_settings',
 }
 
-const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => (
-  <Link
-    to={to}
-    replace={replace}
-    onClick={onClick}
-    className={`
-      relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group
-      ${isActive
-        ? 'g-brand text-white shadow-glow-red'
-        : 'text-sidebarText hover:text-sidebarStrong hover:bg-sidebarHover'}
-    `}
-  >
-    {isActive && <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-7 rounded-r-full bg-white/90" />}
-    <Icon size={20} className={`${isActive ? 'text-white' : 'text-sidebarMuted group-hover:text-sidebarStrong'} transition-colors flex-shrink-0`} />
-    <span className="font-semibold text-[15px]">{label}</span>
-    {isActive && <ChevronRight size={16} className="ml-auto opacity-70" />}
-  </Link>
-)
+// Ixcham menyu: faqat ikonkalar (lg va undan katta ekranda; telefondagi ochiladigan menyu doim to'liq)
+const MiniCtx = createContext(false)
 
-const SidebarSection = ({ label, children }) => (
-  <div className="mb-3">
-    <p className="px-4 text-xs font-bold text-accent-pink uppercase tracking-widest mb-1.5">{label}</p>
-    <div className="space-y-1">{children}</div>
-  </div>
-)
+const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => {
+  const mini = useContext(MiniCtx)
+  return (
+    <Link
+      to={to}
+      replace={replace}
+      onClick={onClick}
+      title={mini ? label : undefined}
+      className={`
+        relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group
+        ${mini ? 'lg:justify-center lg:px-0' : ''}
+        ${isActive
+          ? 'g-brand text-white shadow-glow-red'
+          : 'text-sidebarText hover:text-sidebarStrong hover:bg-sidebarHover'}
+      `}
+    >
+      {isActive && <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-7 rounded-r-full bg-white/90" />}
+      <Icon size={20} className={`${isActive ? 'text-white' : 'text-sidebarMuted group-hover:text-sidebarStrong'} transition-colors flex-shrink-0`} />
+      <span className={`font-semibold text-[15px] ${mini ? 'lg:hidden' : ''}`}>{label}</span>
+      {isActive && <ChevronRight size={16} className={`ml-auto opacity-70 ${mini ? 'lg:hidden' : ''}`} />}
+    </Link>
+  )
+}
+
+const SidebarSection = ({ label, children }) => {
+  const mini = useContext(MiniCtx)
+  return (
+    <div className="mb-3">
+      <p className={`px-4 text-xs font-bold text-accent-pink uppercase tracking-widest mb-1.5 ${mini ? 'lg:hidden' : ''}`}>{label}</p>
+      {mini && <div className="hidden lg:block mx-2 mb-2 border-t border-sidebarBorder" />}
+      <div className="space-y-1">{children}</div>
+    </div>
+  )
+}
 
 export const MainLayout = () => {
   const { isAuthenticated, logout, user, hasPermission, updateProfile, verifyPassword } = useAuthStore()
@@ -94,6 +107,7 @@ export const MainLayout = () => {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { sidebarCollapsed: mini, toggleSidebar, setSidebarCollapsed } = useUiStore()
   // Telefonda menyu ochilganda tarixga belgi qo'yiladi — "orqaga" tugmasi avval menyuni yopadi
   useEffect(() => {
     if (!isSidebarOpen) return
@@ -219,13 +233,19 @@ export const MainLayout = () => {
       )}
 
       {/* Sidebar */}
+      <MiniCtx.Provider value={mini}>
       <aside className={`
-        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-72 safe-sidebar bg-sidebar border-r border-sidebarBorder z-50
-        transition-transform duration-300 transform flex flex-col flex-shrink-0
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-72 ${mini ? 'lg:w-[84px]' : ''} safe-sidebar bg-sidebar border-r border-sidebarBorder z-50
+        transition-[transform,width] duration-300 transform flex flex-col flex-shrink-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
+        {/* Menyuni kichraytirish / kattalashtirish (kompyuter va monoblokda) */}
+        <button type="button" onClick={toggleSidebar} title={mini ? t('sidebar_expand') : t('sidebar_collapse')} aria-label={mini ? t('sidebar_expand') : t('sidebar_collapse')}
+          className="hidden lg:flex absolute -right-4 top-24 z-10 w-8 h-8 rounded-full bg-bg-secondary border border-sidebarBorder items-center justify-center text-sidebarMuted hover:text-accent-red hover:border-accent-red shadow-md transition-colors">
+          {mini ? <ChevronsRight size={17} /> : <ChevronsLeft size={17} />}
+        </button>
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebarBorder">
+        <div className={`flex items-center gap-3 px-5 py-5 border-b border-sidebarBorder ${mini ? 'lg:flex-col lg:px-2 lg:py-3 lg:gap-2' : ''}`}>
           {companyLogo
             ? <img
                 src={companyLogo}
@@ -233,24 +253,24 @@ export const MainLayout = () => {
                 className={`rounded-xl object-contain flex-shrink-0 ${
                   sidebarLogoSize === 'small'  ? 'w-8 h-8' :
                   sidebarLogoSize === 'large'  ? 'w-16 h-16' : 'w-12 h-12'
-                }`}
+                } ${mini ? 'lg:w-10 lg:h-10' : ''}`}
               />
             : <div className="w-8 h-8 bg-accent-red rounded-lg flex items-center justify-center shadow-glow-red flex-shrink-0">
                 <Package size={16} className="text-white" />
               </div>
           }
-          <div className="min-w-0">
+          <div className={`min-w-0 ${mini ? 'lg:hidden' : ''}`}>
             <h1 className="text-base font-syne font-bold text-sidebarStrong leading-tight">{companyName}</h1>
             <p className="text-[10px] text-sidebarMuted uppercase tracking-widest">CRM</p>
           </div>
-          <NotificationsPanel className="ml-auto hidden lg:block" />
+          <NotificationsPanel className={`ml-auto hidden lg:block ${mini ? 'lg:ml-0' : ''}`} />
         </div>
 
         {/* Offline badge */}
         {(!isOnline || pendingCount > 0) && (
-          <div className="mx-4 mt-3 px-3 py-2 rounded-lg bg-accent-orange/10 border border-accent-orange/20 flex items-center gap-2">
+          <div title={!isOnline ? t('offline_badge') : undefined} className={`mx-4 mt-3 px-3 py-2 rounded-lg bg-accent-orange/10 border border-accent-orange/20 flex items-center gap-2 ${mini ? 'lg:mx-2 lg:justify-center' : ''}`}>
             <WifiOff size={14} className="text-accent-orange flex-shrink-0" />
-            <div className="flex-1 min-w-0">
+            <div className={`flex-1 min-w-0 ${mini ? 'lg:hidden' : ''}`}>
               <span className="text-xs text-accent-orange font-medium block">
                 {isSyncing ? t('syncing') : !isOnline ? t('offline_badge') : t('sync_done')}
               </span>
@@ -267,8 +287,15 @@ export const MainLayout = () => {
         )}
 
         {/* Shop selector */}
+        {activeShops.length >= 1 && mini && (
+          <button type="button" onClick={() => setSidebarCollapsed(false)}
+            title={activeShops.find(s => s.id === selectedShopId)?.name || t('all_shops')}
+            className="hidden lg:flex mx-auto mt-3 mb-1 w-11 h-11 rounded-xl bg-sidebarField border border-sidebarBorder items-center justify-center text-sidebarStrong hover:border-accent-red">
+            <Store size={18} />
+          </button>
+        )}
         {activeShops.length >= 1 && (
-          <div className="mx-3 mt-3 mb-1">
+          <div className={`mx-3 mt-3 mb-1 ${mini ? 'lg:hidden' : ''}`}>
             {isPrivileged(user?.role) ? (
               <select
                 value={selectedShopId}
@@ -362,9 +389,13 @@ export const MainLayout = () => {
         <div className="px-3 py-2 border-t border-sidebarBorder space-y-1.5">
 
           {/* Lang toggle */}
-          <div className="flex items-center gap-2 px-2">
-            <Globe size={15} className="text-sidebarMuted" />
-            <div className="flex gap-1">
+          <div className={`flex items-center gap-2 px-2 ${mini ? 'lg:flex-col lg:px-0' : ''}`}>
+            <Globe size={15} className={`text-sidebarMuted ${mini ? 'lg:hidden' : ''}`} />
+            {mini && (
+              <button type="button" onClick={() => setLang(lang === 'uz' ? 'ru' : 'uz')} title="UZ / RU"
+                className="hidden lg:block px-2 py-0.5 rounded-lg text-xs font-bold uppercase bg-accent-red text-white">{lang}</button>
+            )}
+            <div className={`flex gap-1 ${mini ? 'lg:hidden' : ''}`}>
               {['uz', 'ru'].map((l) => (
                 <button
                   key={l}
@@ -379,7 +410,7 @@ export const MainLayout = () => {
                 </button>
               ))}
             </div>
-            <div className="ml-auto flex items-center gap-1.5">
+            <div className={`ml-auto flex items-center gap-1.5 ${mini ? 'lg:ml-0 lg:flex-col' : ''}`}>
               <FullscreenToggle />
               <ThemeToggle />
             </div>
@@ -387,31 +418,34 @@ export const MainLayout = () => {
 
           {/* User info */}
           <div
-            className={`flex items-center gap-2 px-2 ${user?.role !== 'admin' ? 'cursor-pointer hover:bg-bg-tertiary rounded-xl' : ''} py-1 -mx-0.5 transition-colors group`}
+            title={mini ? user?.name : undefined}
+            className={`flex items-center gap-2 px-2 ${mini ? 'lg:justify-center lg:px-0' : ''} ${user?.role !== 'admin' ? 'cursor-pointer hover:bg-bg-tertiary rounded-xl' : ''} py-1 -mx-0.5 transition-colors group`}
             onClick={() => user?.role !== 'admin' && setShowProfile(true)}
           >
             <div className="w-7 h-7 rounded-full bg-bg-tertiary border border-border flex items-center justify-center font-bold text-accent-red text-xs flex-shrink-0">
               {user?.name?.[0] || 'U'}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className={`flex-1 min-w-0 ${mini ? 'lg:hidden' : ''}`}>
               <p className="text-sm font-bold text-sidebarStrong truncate">{user?.name}</p>
               <p className="text-xs text-sidebarMuted truncate">{user?.role ? t(`mgmt_role_${user.role}`) : ''}</p>
             </div>
             {user?.role !== 'admin' && (
-              <Pencil size={12} className="text-text-muted group-hover:text-accent-red transition-colors flex-shrink-0" />
+              <Pencil size={12} className={`text-text-muted group-hover:text-accent-red transition-colors flex-shrink-0 ${mini ? 'lg:hidden' : ''}`} />
             )}
           </div>
 
           {/* Logout */}
           <button
             onClick={logout}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sidebarMuted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-200"
+            title={mini ? t('logout') : undefined}
+            className={`flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sidebarMuted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-200 ${mini ? 'lg:justify-center lg:px-0' : ''}`}
           >
             <LogOut size={14} />
-            <span className="font-medium text-xs">{t('logout')}</span>
+            <span className={`font-medium text-xs ${mini ? 'lg:hidden' : ''}`}>{t('logout')}</span>
           </button>
         </div>
       </aside>
+      </MiniCtx.Provider>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">

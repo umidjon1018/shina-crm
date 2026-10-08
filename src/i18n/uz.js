@@ -4828,4 +4828,6 @@ export default {
   osk_drag_hint: "Ko'chirish uchun shu yerni bosib turing",
   osk_moving: "Ko'chirilmoqda — barmoqni suring",
   osk_close: "Klaviaturani yopish",
+  sidebar_collapse: "Menyuni kichraytirish",
+  sidebar_expand: "Menyuni kattalashtirish",
 }
