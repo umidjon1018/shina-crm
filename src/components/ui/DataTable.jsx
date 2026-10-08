@@ -43,7 +43,7 @@ const DataTable = ({
 
   return (
     <div className="space-y-3">
-      {hasOptional && <div className="flex justify-end"><ViewToggle full={full} onChange={setFull} /></div>}
+      {hasOptional && <div className={`${mobileCard ? 'hidden sm:flex' : 'flex'} justify-end`}><ViewToggle full={full} onChange={setFull} /></div>}
       {/* Telefon: kartalar */}
       {mobileCard && (
         <div className="sm:hidden space-y-2">

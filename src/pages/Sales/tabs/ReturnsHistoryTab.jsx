@@ -79,7 +79,11 @@ const ReturnsHistoryTab = ({ ctx }) => {
             </div>
           ) },
           { key: 'amount', label: t('col_amount'), align: 'right', sortValue: r => r.displayAmount || 0, render: r => <span className="font-bold text-accent-red whitespace-nowrap">{money(r.displayAmount)}</span> },
-        ]} />
+          { key: 'saleDate', label: t('sl_rh_th_sale_date'), optional: true, sortValue: r => r.soldAt || '', render: r => <span className="whitespace-nowrap text-text-secondary">{dt(r.soldAt)}</span> },
+          { key: 'extra', label: t('sl_rh_th_extra'), optional: true, align: 'right', sortValue: r => r.additionalPayment || 0, render: r => (r.additionalPayment || 0) > 0 ? money(r.additionalPayment) : '—' },
+          { key: 'pay', label: t('sl_rh_th_payment'), optional: true, render: r => r.payLabel || '—' },
+          { key: 'reason', label: t('col_reason'), optional: true, render: r => <span className="block max-w-[200px] truncate">{r.reasonLabel || '—'}</span> },
+        ]} tableId="returns_history" />
 
       <Modal open={!!open} onClose={() => setOpen(null)} size="lg" icon={RotateCcw}
         title={open && dt(open.returnedAt)} subtitle={open && <span className="flex items-center gap-2">{open.customerName || '—'} {typeBadge(open)}</span>}

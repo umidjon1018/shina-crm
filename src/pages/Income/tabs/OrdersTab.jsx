@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { ClipboardList, Plus, Search, Trash2, Send, PackageCheck, Ban, Edit3, Wallet, Printer, AlertTriangle } from 'lucide-react'
@@ -438,6 +439,7 @@ const OrdersTab = ({ ctx }) => {
       </div>
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+        <TableView id="inc_orders" optional={[t('sup_expected_date'), t('sup_received_qty'), t('sup_advance_paid')]}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[760px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
@@ -480,6 +482,7 @@ const OrdersTab = ({ ctx }) => {
             </tbody>
           </table>
         </div>
+        </TableView>
         <Pager page={page} setPage={setPage} total={filtered.length} pageSize={PS} />
       </div>
 

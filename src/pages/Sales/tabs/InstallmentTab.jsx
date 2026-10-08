@@ -121,8 +121,13 @@ const InstallmentTab = ({ ctx }) => {
           { key: 'status', label: t('col_status'), sortValue: s => info(s).debtAmount, render: s => (
             <div className="space-y-0.5">{statusBadge(s)}{info(s).status !== 'paid' && <p className="text-sm text-accent-red whitespace-nowrap">{money(info(s).debtAmount)}</p>}</div>
           ) },
+          { key: 'term', label: t('sl_inst_th_term'), optional: true, sortValue: s => s.installmentTermMonths || 0, render: s => s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—' },
+          { key: 'paid', label: t('sl_inst_org_th_total_paid'), optional: true, align: 'right', sortValue: s => info(s).paidAmount, render: s => <span className="text-accent-green whitespace-nowrap">{money(info(s).paidAmount)}</span> },
+          { key: 'seller', label: t('col_employee'), optional: true, sortValue: s => s.soldByName || '', render: s => s.soldByName || '—' },
+          { key: 'qty', label: t('sl_inst_th_qty'), optional: true, align: 'center', sortValue: s => s.qty || 0, render: s => s.qty },
+          ...(canPercent ? [{ key: 'comm', label: t('sl_inst_th_commission'), optional: true, align: 'right', sortValue: s => commAmt(s), render: s => <span className="whitespace-nowrap">{money(commAmt(s))}</span> }] : []),
           { key: 'pay', label: '', sortable: false, align: 'right', render: payButton },
-        ]} />
+        ]} tableId="installments" />
 
       {/* Bitta nasiya sotuv — barcha ustunlar */}
       <Modal open={!!openSale} onClose={() => setOpenSale(null)} size="lg" icon={Calendar}

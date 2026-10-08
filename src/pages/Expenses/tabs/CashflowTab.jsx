@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { ArrowDownLeft, ArrowUpRight, Banknote, CreditCard, Landmark, RefreshCw, Search, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useShopStore } from '../../../store/shopStore'
@@ -192,6 +193,7 @@ const CashflowTab = () => {
             {paginated.length === 0 ? (
               <div className="p-12 text-center text-text-secondary text-sm">{t('fin_cf_empty')}</div>
             ) : (
+              <TableView id="exp_cashflow" optional={[t('fin_cf_account'), t('exp_col_responsible')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -224,6 +226,7 @@ const CashflowTab = () => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
             )}
             <Pagination page={page} totalPages={totalPages} total={rows.length} setPage={setPage} />
           </div>

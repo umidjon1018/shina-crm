@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Package, Truck, Edit3, Search, Plus, DollarSign, Clock, ChevronDown, ChevronUp, Check, X, Trash2, ExternalLink, Filter, Info, CheckCircle, Wallet, BarChart3, TrendingUp, AlertCircle, Users, FileSpreadsheet } from 'lucide-react'
@@ -126,6 +127,7 @@ const BatchesTab = ({ ctx }) => {
 
               {/* Jadval 1 */}
               <div className="bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
+                <TableView id="inc_batches" optional={[t('col_category'), t('inc_th_unit_price'), t('inc_th_entry_rate')]}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
@@ -237,6 +239,7 @@ const BatchesTab = ({ ctx }) => {
                     </tbody>
                   </table>
                 </div>
+                </TableView>
               </div>
 
               {/* Pagination 1 — yo'riqnomadagi universal format */}
@@ -298,6 +301,7 @@ const BatchesTab = ({ ctx }) => {
 
               {/* Jadval 2 */}
               <div className="bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
+                <TableView id="inc_batches_pay" optional={[t('col_category'), t('col_uzs'), t('inc_pay_col_rate_diff')]}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
@@ -600,6 +604,7 @@ const BatchesTab = ({ ctx }) => {
                     </tbody>
                   </table>
                 </div>
+                </TableView>
               </div>
 
               {/* Pagination 2 */}

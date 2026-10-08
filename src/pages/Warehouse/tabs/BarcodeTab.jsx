@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Tag, Printer, Eye, Layers, Hash, X, AlertCircle, Download, Plus, Pencil, Trash2 } from 'lucide-react'
@@ -1299,6 +1300,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             </div>
           </div>
 
+          <TableView id="wh_bc_pending" optional={[t('wh_bc_income_date'), t('wh_bc_bc_date'), 'Rejim']}>
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'auto' }}>
               <thead className="bg-bg-tertiary">
@@ -1356,6 +1358,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
               </tbody>
             </table>
           </div>
+          </TableView>
 
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
             <p className="text-xs text-text-muted">{Math.min(allBarcodesPage * ALL_BARCODES_PER_PAGE, allBarcodeItems.length)} / {allBarcodeItems.length} ta</p>
@@ -1387,6 +1390,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             </div>
           </div>
 
+          <TableView id="wh_bc_done" optional={[t('wh_bc_income_date'), t('wh_bc_bc_date')]}>
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'auto' }}>
               <thead className="bg-bg-tertiary">
@@ -1431,6 +1435,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
               </tbody>
             </table>
           </div>
+          </TableView>
 
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
             <p className="text-xs text-text-muted">{Math.min(soldBarcodesPage * SOLD_PER_PAGE, soldBarcodeItems.length)} / {soldBarcodeItems.length} ta</p>

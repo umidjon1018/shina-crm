@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowDownCircle, ArrowUpCircle, BarChart3, Landmark, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -112,6 +113,7 @@ const CapitalTabWithHeader = () => {
             <p className="text-text-secondary text-sm">{t('exp_cap_not_found')}</p>
           </div>
         ) : (
+          <TableView id="exp_capital" optional={[t('col_source'), t('col_uzs')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -154,6 +156,7 @@ const CapitalTabWithHeader = () => {
               </tbody>
             </table>
           </div>
+          </TableView>
         )}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>

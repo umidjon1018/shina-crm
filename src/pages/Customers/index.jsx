@@ -655,7 +655,13 @@ const Customers = () => {
             const days = Math.floor((Date.now() - new Date(lv)) / 86400000)
             return <div className="whitespace-nowrap"><p>{new Date(lv).toLocaleDateString('ru-RU')}</p><p className="text-sm text-text-muted">{days <= 0 ? t('cust_today') : t('cust_days_ago', { n: days })}</p></div>
           } },
+          { key: 'car', label: t('cust_field_car'), optional: true, sortValue: c => c.carModel || '', render: c => c.carModel || <span className="text-text-muted">—</span> },
+          { key: 'birth', label: t('cust_field_birthday'), optional: true, sortValue: c => c.birthDate || '', render: c => c.birthDate ? new Date(c.birthDate).toLocaleDateString('ru-RU') : <span className="text-text-muted">—</span> },
+          { key: 'instagram', label: 'Instagram', optional: true, sortValue: c => c.instagram || '', render: c => c.instagram ? <span className="text-accent-pink">@{c.instagram.replace(/^@/, '')}</span> : <span className="text-text-muted">—</span> },
+          { key: 'avg', label: t('cust_stat_avg_check'), optional: true, align: 'right', sortValue: c => (metrics[c.id]?.visits ? (metrics[c.id].spent / metrics[c.id].visits) : 0), render: c => metrics[c.id]?.visits ? <span className="whitespace-nowrap">{formatPrice(Math.round(metrics[c.id].spent / metrics[c.id].visits))}</span> : '—' },
+          { key: 'created', label: t('cust_registered'), optional: true, sortValue: c => c.createdAt || '', render: c => c.createdAt ? new Date(c.createdAt).toLocaleDateString('ru-RU') : <span className="text-text-muted">—</span> },
         ]}
+        tableId="customers_list"
         mobileCard={(c) => {
           const m = metrics[c.id] || {}
           return (

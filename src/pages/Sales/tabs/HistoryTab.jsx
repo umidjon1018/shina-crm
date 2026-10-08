@@ -66,6 +66,10 @@ const HistoryTab = ({ ctx }) => {
       </div>
     ) },
     ...(isUsed ? [] : [{ key: 'status', label: t('sl_hist_th_status'), align: 'right', sortValue: s => s.status, render: status }]),
+    { key: 'qty', label: t('sl_hist_th_qty'), optional: true, align: 'center', sortValue: s => qtyOf(s), render: s => qtyOf(s) },
+    { key: 'discount', label: t('col_discount'), optional: true, render: s => discountText(s) ? <span className="text-accent-orange whitespace-nowrap">{discountText(s)}</span> : <span className="text-text-muted">—</span> },
+    { key: 'source', label: t('col_source'), optional: true, sortValue: s => sourceLabel(s), render: s => sourceLabel(s) },
+    { key: 'card', label: t('pay_card'), optional: true, render: s => (s.paymentType === 'card' && s.cardType ? String(s.cardType).toUpperCase() : <span className="text-text-muted">—</span>) },
   ]
 
   const rows = kind === 'new' ? filteredSalesForHistory : usedSalesList
@@ -86,7 +90,7 @@ const HistoryTab = ({ ctx }) => {
         )}
       </div>
 
-      <DataTable key={kind} rows={rows} columns={columns(kind === 'used')} rowKey={s => (kind === 'used' ? 'u' : 'n') + s.id}
+      <DataTable key={kind} tableId={'sales_history_' + kind} rows={rows} columns={columns(kind === 'used')} rowKey={s => (kind === 'used' ? 'u' : 'n') + s.id}
         initialSort={{ key: 'date', dir: 'desc' }} resetKey={historyMonthFilter} onRowClick={setOpen}
         rowClass={s => (s.status === 'cancelled' ? 'bg-accent-red/5' : '')}
         empty={kind === 'used' ? t('sl_hist_bu_not_found') : t('sl_profit_empty')} />

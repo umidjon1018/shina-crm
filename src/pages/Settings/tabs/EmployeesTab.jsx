@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Archive, ArchiveRestore, CheckSquare, Eye, EyeOff, Lock, Pencil, Plus, Search, Shield, ShieldAlert, Trash2, Unlock, X, XSquare } from 'lucide-react'
@@ -170,6 +171,7 @@ function EmployeesTab() {
         </p>
       )}
 
+      <TableView id="set_employees" optional={[t('adm_emp_col_username'), t('adm_emp_col_joined')]}>
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-bg-tertiary">
@@ -225,6 +227,7 @@ function EmployeesTab() {
           <div className="text-center py-12 text-text-muted text-sm">{t('adm_emp_not_found')}</div>
         )}
       </div>
+      </TableView>
 
       {employees.filter(e => e.pendingDelete).length > 0 && (
         <div className="bg-bg-secondary border border-accent-orange/30 rounded-2xl overflow-hidden">

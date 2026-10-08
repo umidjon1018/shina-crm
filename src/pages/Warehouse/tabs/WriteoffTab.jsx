@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2, X, CheckCircle, Search, AlertTriangle } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
@@ -143,6 +144,7 @@ const WriteoffTab = ({ products, items, batches }) => {
         ) : list.length === 0 ? (
           <div className="text-center py-16 text-text-muted text-sm">Hisobdan chiqarilgan tovar yo'q</div>
         ) : (
+          <TableView id="wh_writeoffs" optional={['Dona narxi', 'Xarajat', 'Kim']}>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-tertiary text-text-muted text-xs font-semibold uppercase tracking-wide">
@@ -207,6 +209,7 @@ const WriteoffTab = ({ products, items, batches }) => {
               ))}
             </tbody>
           </table>
+          </TableView>
         )}
       </div>
 

@@ -14,6 +14,7 @@ import { updateItemAttributes } from '../../../api/itemService'
 import { exportBatchesToExcel } from '../../../utils/excelIncomeImport'
 import PriceListModal from '../components/PriceListModal'
 import api from '../../../api/client'
+import { ViewToggle } from '../../../components/ui/TableView'
 import { HeroStat, MiniStat, ChartCard, DonutChart, PALETTE, shortNum } from '../../../components/charts/Charts'
 import { formatNumber } from '../../../utils/format'
 
@@ -415,9 +416,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
             <ArrowRightLeft size={16} /> Ko'chirish
           </button>
         )}
-        <button onClick={toggleFull} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-colors whitespace-nowrap ${fullTable ? 'g-brand text-white border-transparent' : 'bg-bg-tertiary text-text-secondary border-border hover:text-text-primary'}`}>
-          {fullTable ? t('wh_table_compact') : t('wh_table_full')}
-        </button>
+        <ViewToggle full={fullTable} onChange={(v) => { if (v !== fullTable) toggleFull() }} />
         <button onClick={openHistory} className="flex items-center gap-2 px-4 py-2.5 bg-bg-tertiary text-text-secondary border border-border rounded-xl text-sm font-bold hover:bg-bg-tertiary/80 transition-colors whitespace-nowrap">
           Tarix
         </button>

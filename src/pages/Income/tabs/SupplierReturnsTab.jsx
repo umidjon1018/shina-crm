@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { Undo2, Plus, Search, RotateCcw } from 'lucide-react'
 import { createSupplierReturn, cancelSupplierReturn } from '../../../api/supplierOpsService'
@@ -149,6 +150,7 @@ const SupplierReturnsTab = ({ ctx }) => {
       <ErrorBox text={err} />
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+        <TableView id="inc_sup_returns" optional={[t('sup_document'), t('sup_reason')]}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[820px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
@@ -188,6 +190,7 @@ const SupplierReturnsTab = ({ ctx }) => {
             </tbody>
           </table>
         </div>
+        </TableView>
         <Pager page={page} setPage={setPage} total={filtered.length} pageSize={PS} />
       </div>
 

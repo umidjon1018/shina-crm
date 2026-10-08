@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { History, Search } from 'lucide-react'
 import DateMaskInput from '../../../components/DateMaskInput'
@@ -87,6 +88,7 @@ const PaymentsHistoryTab = ({ ctx }) => {
       </div>
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+        <TableView id="inc_pay_hist" optional={[t('sup_document'), t('sup_description'), t('col_rate')]}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[820px]">
             <thead className="bg-bg-tertiary text-text-muted text-xs">
@@ -120,6 +122,7 @@ const PaymentsHistoryTab = ({ ctx }) => {
             </tbody>
           </table>
         </div>
+        </TableView>
         <Pager page={page} setPage={setPage} total={filtered.length} pageSize={PS} />
       </div>
     </div>

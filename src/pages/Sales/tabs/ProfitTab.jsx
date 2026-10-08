@@ -147,7 +147,10 @@ const ProfitTab = ({ ctx }) => {
             { key: 'revenue', label: t('sl_profit_th_sale'), align: 'right', sortValue: g => g.revenue, render: g => <span className="whitespace-nowrap">{money(g.revenue)}</span> },
             { key: 'profit', label: t('sl_profit_th_profit'), align: 'right', sortValue: g => g.profit, render: profitCell },
             { key: 'margin', label: t('sl_profit_th_margin'), align: 'right', sortValue: g => g.margin, render: marginCell, hideOnMobile: true },
-          ]} />
+            { key: 'cost', label: t('sl_profit_th_purchase'), optional: true, align: 'right', sortValue: g => g.cost, render: g => g.missingCost ? '—' : <span className="whitespace-nowrap">{money(g.cost)}</span> },
+            { key: 'comm', label: t('sl_profit_th_commission'), optional: true, align: 'right', sortValue: g => g.commission, render: g => g.commission > 0 ? <span className="whitespace-nowrap">{money(g.commission)}</span> : '—' },
+            { key: 'sales', label: t('sl_profit_view_sales'), optional: true, align: 'center', sortValue: g => g.lines.length, render: g => g.lines.length },
+          ]} tableId="profit_products" />
       ) : (
         <DataTable rows={filteredProfitItems} rowKey={r => (r.isUsedSale ? 'u' : 'n') + r.id} resetKey={`${profitSearch}|${profitMonthFilter}|${profitTypeFilter}`} initialSort={{ key: 'date', dir: 'desc' }}
           onRowClick={setOpenSale} empty={t('sl_profit_empty')}
@@ -158,7 +161,12 @@ const ProfitTab = ({ ctx }) => {
             { key: 'customer', label: t('col_customer'), sortValue: r => r.customerName, render: r => r.customerName, hideOnMobile: true },
             { key: 'total', label: t('sl_profit_th_sale'), align: 'right', sortValue: r => r.totalSale, render: r => <span className="whitespace-nowrap">{money(r.totalSale)}</span> },
             { key: 'profit', label: t('sl_profit_th_profit'), align: 'right', sortValue: r => r.profit, render: r => r.isCancelled ? statusBadge(r) : profitCell(r) },
-          ]} />
+            { key: 'seller', label: t('col_employee'), optional: true, sortValue: r => r.soldByName || '', render: r => r.soldByName },
+            { key: 'pay', label: t('sl_profit_th_payment'), optional: true, render: r => payLabel(r) },
+            { key: 'qty', label: t('sl_profit_th_qty'), optional: true, align: 'center', sortValue: r => r.qty, render: r => r.qty },
+            { key: 'cost', label: t('sl_profit_th_purchase'), optional: true, align: 'right', sortValue: r => r.purchaseTotal || 0, render: r => r.missingCost ? '—' : <span className="whitespace-nowrap">{money(r.purchaseTotal)}</span> },
+            { key: 'margin', label: t('sl_profit_th_margin'), optional: true, align: 'right', sortValue: r => r.margin, render: marginCell },
+          ]} tableId="profit_sales" />
       )}
 
       {/* Tovar bo'yicha to'liq ma'lumot */}

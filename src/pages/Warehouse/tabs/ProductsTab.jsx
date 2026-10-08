@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, BarChart2, Building, CheckCircle, ChevronRight, DollarSign, Edit3, Eye, EyeOff, Image as ImageIcon, MapPin, Package, Pencil, Plus, Search, Store, Tag, ToggleLeft, ToggleRight, Trash2, X, TrendingUp, TrendingDown } from 'lucide-react'
@@ -1058,6 +1059,7 @@ const ProductsTab = ({ ctx }) => {
                 </div>
               )}
 
+              <TableView id="wh_products" optional={[t('mgmt_col_size_season'), t('mgmt_col_car_attr'), t('mgmt_col_installment'), t('mgmt_col_warranty_turnover'), t('mgmt_col_barcode_stock')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm border-collapse table-fixed" style={{ minWidth: '1230px' }}>
                   <colgroup>
@@ -1299,6 +1301,7 @@ const ProductsTab = ({ ctx }) => {
                   </tbody>
                 </table>
               </div>
+              </TableView>
 
               {totalProductPages > 1 && (
                 <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-border">

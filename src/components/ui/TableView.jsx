@@ -40,6 +40,8 @@ const TableView = ({ id, optional = [], children, className = '', toolbar = null
       root.querySelectorAll('[data-tv-hide]').forEach(el => el.removeAttribute('data-tv-hide'))
       if (full || !opts.length) return
       root.querySelectorAll('table').forEach(table => {
+        // Ichma-ich jadvallar (yoyiladigan qator ichidagi) o'zgarmaydi
+        if (table.parentElement?.closest('table') && root.contains(table.parentElement.closest('table'))) return
         const head = table.tHead?.rows?.[table.tHead.rows.length - 1] || table.rows?.[0]
         if (!head) return
         const hide = new Set()

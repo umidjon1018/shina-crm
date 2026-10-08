@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Banknote, CreditCard, Landmark, MoreHorizontal, Pencil, Plus, Search, Trash2, TrendingUp, User } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -130,6 +131,7 @@ const IncomesTab = ({ currentUser }) => {
             <p className="text-text-secondary text-sm">{t('fin_inc_empty')}</p>
           </div>
         ) : (
+          <TableView id="exp_incomes" optional={[t('exp_col_responsible'), t('fin_payment_method')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -185,6 +187,7 @@ const IncomesTab = ({ currentUser }) => {
               </tbody>
             </table>
           </div>
+          </TableView>
         )}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>

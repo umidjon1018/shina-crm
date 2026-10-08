@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, Ban, CreditCard, Gift, History, Layers, Plus, Search, Wallet, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -120,6 +121,7 @@ const GiftCardsTab = () => {
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
         {loading ? <div className="p-12 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div> : (
+          <TableView id="mkt_giftcards" optional={[t('mkt_gc_nominal'), t('mkt_gc_sold_at')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -161,6 +163,7 @@ const GiftCardsTab = () => {
               </tbody>
             </table>
           </div>
+          </TableView>
         )}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>

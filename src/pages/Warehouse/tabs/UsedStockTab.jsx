@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ArrowDownToLine, BarChart2, CheckCircle, ChevronDown, ChevronRight, Package, Search } from 'lucide-react'
 import { getCategoryColor } from '../../../utils/categoryColors'
@@ -175,6 +176,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
 
       {/* Table */}
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+        <TableView id="wh_used" optional={[t('wh_bu_replaced'), t('customers'), t('wh_th_in_qty'), t('wh_bu_unit_price'), t('wh_bu_seller'), t('col_sold_date'), t('wh_bu_buyer'), t('wh_bu_sold_price')]}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -345,6 +347,7 @@ const UsedStockTab = ({ usedStock, usedSales = [], productCategories }) => {
             </tbody>
           </table>
         </div>
+        </TableView>
       </div>
     </div>
   )

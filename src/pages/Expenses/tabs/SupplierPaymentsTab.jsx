@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion } from 'framer-motion'
 import { Truck, Package, DollarSign, Search, Store, Filter, TrendingDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -113,6 +114,7 @@ const SupplierPaymentsTab = () => {
             <p className="text-text-secondary text-sm">{t('exp_sup_not_found')}</p>
           </div>
         ) : (
+          <TableView id="exp_sup_pay" optional={[t('exp_sup_col_pay_type'), t('col_note'), 'UZS']}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -173,6 +175,7 @@ const SupplierPaymentsTab = () => {
               </tbody>
             </table>
           </div>
+          </TableView>
         )}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>

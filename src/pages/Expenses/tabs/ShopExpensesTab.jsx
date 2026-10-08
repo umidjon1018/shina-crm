@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DollarSign, Filter, MoreHorizontal, Pencil, Plus, RefreshCw, Search, Store, Trash2, TrendingDown, User, Wallet, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -171,6 +172,7 @@ const ShopExpensesTab = ({ currentUser }) => {
             <p className="text-text-secondary text-sm">{t('exp_not_found')}</p>
           </div>
         ) : (
+          <TableView id="exp_shop" optional={[t('exp_col_period'), t('col_type'), t('exp_col_responsible'), t('col_uzs')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -243,6 +245,7 @@ const ShopExpensesTab = ({ currentUser }) => {
               </tbody>
             </table>
           </div>
+          </TableView>
         )}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>

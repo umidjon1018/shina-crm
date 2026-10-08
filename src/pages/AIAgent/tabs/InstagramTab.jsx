@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { Globe, Users, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, BarChart2, Send, Loader2, Clock, Phone, Package, CheckCircle, XCircle } from 'lucide-react'
 import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
@@ -533,6 +534,7 @@ export default function InstagramTab({ agentConfig }) {
               : 'Qidiruv bo\'yicha natija topilmadi.'}
           </div>
         ) : (
+          <TableView id="ai_ig_customers" optional={['Avtomobil', 'Xaridlar']}>
           <div className="rounded-2xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -585,6 +587,7 @@ export default function InstagramTab({ agentConfig }) {
             </table>
             <Pagination page={custPage} total={filtered.length} onPage={setCustPage} />
           </div>
+          </TableView>
         )}
       </div>
 

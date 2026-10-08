@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import TableView from '../../../components/ui/TableView'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, BarChart3, Copy, Handshake, Megaphone, Plus, Power, Search, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -143,6 +144,7 @@ const ReportView = () => {
   return (
     <div className="space-y-4">
       <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
+      <TableView id="mkt_codes_report" optional={[t('mkt_rep_customers'), t('mkt_rep_avg')]}>
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -182,6 +184,7 @@ const ReportView = () => {
           </tbody>
         </table>
       </div>
+      </TableView>
     </div>
   )
 }
