@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import DateMaskInput from '../../components/DateMaskInput'
@@ -42,7 +42,7 @@ const Income = () => {
   const som = t('unit_som')
   const { user, hasPermission } = useAuthStore()
   const { productCategories, usdRate, productAttributeDefs, productImages } = useSettingsStore()
-  const { bump } = useDataStore()
+  const { version, bump } = useDataStore()
   const { selectedShopId, shops } = useShopStore()
   const isPrivileged = user?.role === 'admin' || user?.role === 'manager'
 
@@ -132,10 +132,21 @@ const Income = () => {
       .catch((e) => { console.error('Supplier ops load error:', e?.response?.data || e?.message || e) })
   }, [])
 
+  // Kirim, tahrir, import va boshqa sahifadagi o'zgarishlardan keyin partiyalar bilan birga donalar ham yangilanadi
+  // (aks holda yangi kirim donalari "omborda 0" bo'lib, inventar tafovuti chiqadi)
+  const firstLoad = useRef(true)
+  useEffect(() => {
+    if (firstLoad.current) { firstLoad.current = false; return }
+    Promise.all([getIncomeBatches(), getProducts(), getItems()]).then(([b, prods, items]) => {
+      setMockProducts(prods)
+      setMockItems(items)
+      setBatches(normalizeBatches(b))
+    }).catch((e) => { console.error('Income reload error:', e?.response?.data || e?.message || e) })
+  }, [version])
+
   const refreshAll = async () => {
     try {
-      const [b, o, r] = await Promise.all([getIncomeBatches(), getPurchaseOrders(), getSupplierReturns()])
-      setBatches(normalizeBatches(b))
+      const [o, r] = await Promise.all([getPurchaseOrders(), getSupplierReturns()])
       setOrders(o)
       setReturns(r)
     } catch (e) { console.error('Income refresh error:', e?.response?.data || e?.message || e) }
@@ -972,6 +983,8 @@ const Income = () => {
                     alert(err?.response?.data?.error || err?.message || 'Saqlashda xato')
                     return
                   }
+                  // Miqdor o'zgarsa serverda donalar qo'shiladi/o'chiriladi — ro'yxatlar qayta yuklanadi
+                  if (Number(quantity) !== Number(editingBatch.quantity)) bump()
                   setEditingBatch(null)
                 }}
                 className="w-full py-4 bg-accent-blue text-white rounded-2xl font-syne font-extrabold text-lg hover:opacity-90 transition-all"

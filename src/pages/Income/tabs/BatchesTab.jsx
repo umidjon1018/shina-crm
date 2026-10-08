@@ -8,6 +8,7 @@ import { getCategoryColor } from '../../../utils/categoryColors'
 import { formatPrice, formatUSD, statusConfig, getDueDays, calcRateDiff, calcPaymentRateDiff } from '../components/incHelpers'
 import IncomeImportModal from '../../../components/IncomeImportModal'
 import ProductImageViewer from '../../../components/ProductImageViewer'
+import { productTitle } from '../../../utils/format'
 
 const BatchesTab = ({ ctx }) => {
   const { t } = useTranslation()
@@ -655,7 +656,7 @@ const BatchesTab = ({ ctx }) => {
                   <div key={c.product.id} className={`px-4 py-3 rounded-2xl border ${c.isMatch ? 'border-border bg-bg-secondary' : 'border-accent-red bg-accent-red/10'
                     }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-bold text-text-primary">{c.product.brand} {c.product.name}</span>
+                      <span className="text-sm font-bold text-text-primary">{productTitle(c.product.brand, c.product.name)}</span>
                       {c.isMatch
                         ? <span className="text-accent-green text-xs font-bold">{t('inc_inv_ok')}</span>
                         : <span className="text-accent-red text-xs font-bold">{t('inc_inv_diff')}</span>
