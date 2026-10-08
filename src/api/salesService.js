@@ -2,7 +2,7 @@ import api from './client'
 
 const mapItem = (i) => ({
   id: String(i.id),
-  itemId: String(i.item_id),
+  itemId: i.item_id != null ? String(i.item_id) : null,
   productId: String(i.product_id),
   name: i.product_name || '',
   productName: i.product_name || '',
@@ -11,7 +11,10 @@ const mapItem = (i) => ({
   price: Number(i.price) || 0,
   salePrice: Number(i.price) || 0,
   purchasePrice: Number(i.purchase_price) || 0,
-  qty: Number(i.qty) || 1,
+  qty: 1,
+  measureQty: i.qty != null ? Number(i.qty) : null,
+  unit: i.unit || null,
+  unitPrice: i.unit_price != null ? Number(i.unit_price) : null,
   barcode: i.barcode || null,
   attributes: i.item_attributes || {},
   saleId: String(i.sale_id),
@@ -86,6 +89,13 @@ export const getSales = async (shopId) => {
   }))
 }
 
+// Kassa: do'konda qoldig'i bor miqdorli (kg, litr) tovarlar
+export const getBulkStock = async (shopId) => {
+  if (!shopId || shopId === 'all') return []
+  const { data } = await api.get('/api/sales/bulk-stock', { params: { shop_id: shopId } })
+  return data
+}
+
 export const createSale = async (saleData) => {
   const { data } = await api.post('/api/sales', {
     customer_id: saleData.customerId ? Number(saleData.customerId) : null,
@@ -97,6 +107,7 @@ export const createSale = async (saleData) => {
       price: i.price ?? i.salePrice,
       base_price: i.basePrice ?? null,
     })),
+    bulk_items: (saleData.bulkItems || []).map(b => ({ product_id: Number(b.productId), qty: b.qty, price: b.price })),
     loyalty_applied: !!saleData.loyaltyDiscountApplied,
     discount_request_id: saleData.discountRequestId || null,
     notes: saleData.notes,

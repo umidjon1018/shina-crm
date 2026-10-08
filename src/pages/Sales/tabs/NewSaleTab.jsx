@@ -2,11 +2,12 @@ import { useMemo, useRef, useState, useEffect } from 'react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import ProductImageViewer from '../../../components/ProductImageViewer'
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CheckCircle2, CreditCard, Gift, Minus, Plus, QrCode, Search, ShoppingBag, ShoppingCart, Star, Tag, Ticket, Trash2, UserPlus, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, Banknote, Barcode, Calendar, CheckCircle2, CreditCard, Gift, Minus, Plus, QrCode, Scale, Search, ShoppingBag, ShoppingCart, Star, Tag, Ticket, Trash2, UserPlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 import ProductSearch from '../../../components/sales/ProductSearch'
 import MobileSellBar from '../../../components/sales/MobileSellBar'
+import BulkSalePicker, { BulkLineForm } from '../../../components/sales/BulkSalePicker'
 import OnlinePaymentModal from '../../../components/OnlinePaymentModal'
 import { AnimatePresence } from 'framer-motion'
 
@@ -17,6 +18,7 @@ const NewSaleTab = ({ ctx }) => {
   const som = t('unit_som')
   const {
     user, addToCart, cartItems, clearCart, removeFromCart, updateSalePrice,
+    bulkLines = [], setBulkLine, removeBulkLine, bulkStock = [],
     barcodeSelectClass, addNotification, notificationSettings,
     selectedCustomer, setSelectedCustomer, customerSearch, setCustomerSearch,
     filteredCustomers, setShowNewCustomerModal,
@@ -60,7 +62,10 @@ const NewSaleTab = ({ ctx }) => {
   const submitCode = async () => { if (await applyCode(codeInput)) setCodeInput('') }
 
   const sellBtnRef = useRef(null)
-  const sellDisabled = isSubmitting || cartItems.length === 0 || (paymentType === 'installment' && !installmentOrgId)
+  const [editBulk, setEditBulk] = useState(null)
+  const canBelowMin = ['admin', 'manager'].includes(user?.role)
+  const cartCount = cartItems.length + bulkLines.length
+  const sellDisabled = isSubmitting || cartCount === 0 || (paymentType === 'installment' && !installmentOrgId)
   const payLabel = { cash: t('pay_cash'), card: t('pay_card'), installment: t('pay_installment'), transfer: t('sl_hist_pay_bank') }[paymentType] || paymentType
 
   // Savatni bundle va oddiy guruhlarga ajratish
@@ -120,15 +125,20 @@ const NewSaleTab = ({ ctx }) => {
             </h4>
             <ProductSearch onAdd={addToCart} onBundleAdd={addBundleToCart} cartItems={cartItems} user={user} addNotification={addNotification} notificationSettings={notificationSettings} />
           </div>
+          {bulkStock.length > 0 && (
+            <div className="pt-4 sm:pt-6 border-t border-border/50">
+              <BulkSalePicker stock={bulkStock} bulkLines={bulkLines} onSave={setBulkLine} canBelowMin={canBelowMin} />
+            </div>
+          )}
         </div>
 
         {/* SAVAT — bundle + oddiy */}
-        {(bundleGroups.length > 0 || cartGroups.length > 0) && (
+        {(bundleGroups.length > 0 || cartGroups.length > 0 || bulkLines.length > 0) && (
           <div className="bg-bg-primary border border-border rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="text-text-primary font-syne font-bold flex items-center gap-2">
                 <ShoppingCart size={18} className="text-accent-red" />
-                Savat tarkibi ({cartItems.length} ta)
+                Savat tarkibi ({cartCount} ta)
               </h4>
               <button onClick={clearCart} className="text-text-muted hover:text-accent-red transition-colors">
                 <Trash2 size={16} />
@@ -303,9 +313,28 @@ const NewSaleTab = ({ ctx }) => {
                   </motion.div>
                 )
               })}
+              {/* Miqdorli (kg, litr) tovarlar — bosilsa miqdor/narxni o'zgartirish */}
+              {bulkLines.map(l => (
+                <div key={'bulk_' + l.productId} className="flex items-start gap-3 p-3 rounded-2xl border border-accent-blue/20 bg-accent-blue/5">
+                  <div className="w-9 h-9 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center shrink-0"><Scale size={17} /></div>
+                  <button type="button" onClick={() => setEditBulk(l)} className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-bold text-text-primary truncate">{l.name}</p>
+                    <p className="text-xs text-text-secondary">{String(l.qty).replace('.', ',')} {l.unit} × {formatPrice(l.unitPrice, som)}</p>
+                    <p className="text-sm font-bold text-accent-red">{formatPrice(l.qty * l.unitPrice, som)}</p>
+                  </button>
+                  <button onClick={() => removeBulkLine(l.productId)} className="p-1.5 text-text-muted hover:text-accent-red transition-all flex-shrink-0">
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
+        {editBulk && (() => {
+          const st = bulkStock.find(x => x.productId === editBulk.productId)
+          const item = st || { productId: editBulk.productId, name: editBulk.name, unit: editBulk.unit, qty: editBulk.available, cashPrice: editBulk.unitPrice, minSalePrice: editBulk.minSalePrice, installmentBasePrice: editBulk.installmentBasePrice }
+          return <BulkLineForm item={item} line={editBulk} canBelowMin={canBelowMin} onClose={() => setEditBulk(null)} onSave={(line) => { setBulkLine(line); setEditBulk(null) }} />
+        })()}
       </div>
 
       {/* RIGHT PANEL */}
@@ -422,7 +451,7 @@ const NewSaleTab = ({ ctx }) => {
             </>
           )}
 
-          {cartItems.length > 0 && (
+          {cartCount > 0 && (
             <div className="rounded-2xl border border-border bg-bg-tertiary p-3 space-y-2">
               <div className="flex gap-2">
                 <div className="relative flex-1 min-w-0">
@@ -474,7 +503,7 @@ const NewSaleTab = ({ ctx }) => {
             </div>
           )}
 
-          {customerBalance > 0 && paymentType !== 'installment' && cartItems.length > 0 && (
+          {customerBalance > 0 && paymentType !== 'installment' && cartCount > 0 && (
             <div className={`rounded-2xl border p-3 space-y-2 ${useBalance ? 'border-accent-orange bg-accent-orange/5' : 'border-border bg-bg-tertiary'}`}>
               <label className="flex items-center justify-between gap-2 cursor-pointer">
                 <span className="flex items-center gap-2 text-sm font-bold text-text-primary">
@@ -510,7 +539,7 @@ const NewSaleTab = ({ ctx }) => {
               ))}
             </div>
 
-            {onlineProviders?.length > 0 && paymentType !== 'installment' && cartItems.length > 0 && (
+            {onlineProviders?.length > 0 && paymentType !== 'installment' && cartCount > 0 && (
               onlinePayment ? (
                 <div className="flex items-center gap-2 text-xs font-bold text-accent-green bg-accent-green/10 rounded-xl px-3 py-2">
                   <CheckCircle2 size={14} /> {t('int_pos_paid', { provider: onlinePayment.provider })}
@@ -762,8 +791,8 @@ const NewSaleTab = ({ ctx }) => {
         )}
       </AnimatePresence>
 
-      <MobileSellBar targetRef={sellBtnRef} count={cartItems.length} payLabel={payLabel} total={payable}
-        onSell={handleSubmitSale} disabled={sellDisabled} submitting={isSubmitting} label={t('sl_ns_sell_btn')} resetKey={cartItems.length > 0} />
+      <MobileSellBar targetRef={sellBtnRef} count={cartCount} payLabel={payLabel} total={payable}
+        onSell={handleSubmitSale} disabled={sellDisabled} submitting={isSubmitting} label={t('sl_ns_sell_btn')} resetKey={cartCount > 0} />
     </motion.div>
   )
 }

@@ -185,6 +185,7 @@ const Sales = () => {
           requireShop: state.requireShop, setActiveTab: goTab,
           // new_sale
           addToCart, cartItems, clearCart, removeFromCart, updateSalePrice,
+          bulkLines: state.bulkLines, setBulkLine: state.setBulkLine, removeBulkLine: state.removeBulkLine, bulkStock: state.bulkStock,
           selectedCustomer, setSelectedCustomer, customerSearch, setCustomerSearch,
           filteredCustomers, setShowNewCustomerModal,
           loyaltyMinAmount, loyaltyVisitsRequired, loyaltyDiscountPercent,

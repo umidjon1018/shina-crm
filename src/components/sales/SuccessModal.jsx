@@ -36,6 +36,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
             <td style="padding:3px 0;font-size:11px;">
               ${i.productName ? `<div style="font-weight:600;">${i.productName}</div>` : ''}
               ${i.barcode ? `<div style="font-size:9px;color:#777;font-family:monospace;">${i.barcode}</div>` : ''}
+              ${i.measureQty != null ? `<div style="font-size:10px;color:#555;">${String(i.measureQty).replace('.', ',')} ${i.unit || ''} × ${(i.unitPrice || 0).toLocaleString('uz-UZ')} ${som}</div>` : ''}
             </td>
             <td style="padding:3px 0;font-size:11px;text-align:right;white-space:nowrap;">${(i.salePrice || 0).toLocaleString('uz-UZ')} ${som}</td>
           </tr>

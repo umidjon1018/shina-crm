@@ -7,6 +7,15 @@ export const useCartStore = create(
     (set, get) => ({
       cartItems: [],
       isBundleSale: false,
+      // Miqdorli (kg, litr) tovar qatorlari: { productId, name, unit, qty, unitPrice, available, minSalePrice, installmentBasePrice }
+      bulkLines: [],
+
+      setBulkLine: (line) => set(state => ({
+        bulkLines: state.bulkLines.some(l => l.productId === line.productId)
+          ? state.bulkLines.map(l => l.productId === line.productId ? { ...l, ...line } : l)
+          : [...state.bulkLines, line],
+      })),
+      removeBulkLine: (productId) => set(state => ({ bulkLines: state.bulkLines.filter(l => l.productId !== productId) })),
 
       addToCart: ({ item, product, warning = null, bundleId = null, bundleName = null }) => {
         const exists = get().cartItems.some(c => c.item.id === item.id)
@@ -37,7 +46,7 @@ export const useCartStore = create(
       },
 
       setIsBundleSale: (v) => set({ isBundleSale: v }),
-      clearCart: () => set({ cartItems: [], isBundleSale: false }),
+      clearCart: () => set({ cartItems: [], isBundleSale: false, bulkLines: [] }),
     }),
     {
       name: 'goodtires-cart', // localStorage key

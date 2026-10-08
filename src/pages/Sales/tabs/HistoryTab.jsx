@@ -123,7 +123,7 @@ const HistoryTab = ({ ctx }) => {
                     {img ? <img src={img} alt="" className="w-12 h-12 rounded-xl object-cover border border-border shrink-0" /> : null}
                     <div className="flex-1 min-w-0">
                       <p className="text-[15px] font-semibold text-text-primary truncate">{it.name || 'Tovar'}</p>
-                      <p className="text-sm text-text-muted font-mono">{barcodeOf(it) || '—'}{(it.qty || 1) > 1 ? ` · ${it.qty} ${t('unit_pcs')}` : ''}</p>
+                      <p className="text-sm text-text-muted font-mono">{it.measureQty != null ? `${String(it.measureQty).replace('.', ',')} ${it.unit || ''} × ${money(it.unitPrice)}` : <>{barcodeOf(it) || '—'}{(it.qty || 1) > 1 ? ` · ${it.qty} ${t('unit_pcs')}` : ''}</>}</p>
                     </div>
                     <p className="text-[15px] font-bold whitespace-nowrap">{money((it.price ?? it.salePrice ?? 0) * (it.qty || 1))}</p>
                   </div>

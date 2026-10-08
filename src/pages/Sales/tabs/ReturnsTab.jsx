@@ -246,6 +246,15 @@ const ReturnsTab = ({ ctx }) => {
                     {t('sl_ret_items_label', { n: returnSale.items?.length || 0, total: formatPrice(returnSale.total, som) })}
                   </span>
                   {returnSale.items.map((it, idx) => {
+                    if (it.measureQty != null) return (
+                      <div key={idx} className="flex items-center justify-between gap-3 bg-bg-tertiary px-3 py-2 rounded-xl border border-border text-xs text-text-primary">
+                        <div className="min-w-0">
+                          <p className="font-bold truncate">{it.name || 'Tovar'}</p>
+                          <p className="text-[10px] text-text-muted">{String(it.measureQty).replace('.', ',')} {it.unit} · {t('bulk_return_hint')}</p>
+                        </div>
+                        <span className="font-bold whitespace-nowrap">{formatPrice(it.price, som)}</span>
+                      </div>
+                    )
                     const isChecked = returnItems.some(item => item.barcode === it.barcode)
                     const qty = returnQtyMap[it.barcode] || 1
                     return (

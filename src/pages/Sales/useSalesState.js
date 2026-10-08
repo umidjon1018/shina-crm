@@ -19,7 +19,7 @@ import {
 } from '../../api/usedService'
 import { getSaleProfit, getUsedSaleProfit } from '../../utils/profitHelpers'
 import {
-  getSales, createSale as apiCreateSale, cancelSale as apiCancelSale, makeInstallmentPayment
+  getSales, createSale as apiCreateSale, cancelSale as apiCancelSale, makeInstallmentPayment, getBulkStock
 } from '../../api/salesService'
 import { makeUsedInstallmentPayment } from '../../api/usedService'
 import { enqueueAction } from '../../utils/offlineQueue'
@@ -67,7 +67,7 @@ export const useSalesState = () => {
   const thisMonth = new Date().toISOString().substring(0, 7)
   
   // Cart Store (Zustand)
-  const { cartItems, addToCart, removeFromCart, clearCart, updateSalePrice, isBundleSale: cartIsBundleSale, setIsBundleSale: setCartIsBundleSale } = useCartStore()
+  const { cartItems, addToCart, removeFromCart, clearCart, updateSalePrice, isBundleSale: cartIsBundleSale, setIsBundleSale: setCartIsBundleSale, bulkLines, setBulkLine, removeBulkLine } = useCartStore()
 
   // Sale Form Store — navigatsiyadan keyin ham saqlanadi (localStorage)
   const {
@@ -108,6 +108,13 @@ export const useSalesState = () => {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Miqdorli (kg, litr) tovarlar — tanlangan do'kon qoldig'i
+  const { version: dataVersion } = useDataStore()
+  const [bulkStock, setBulkStock] = useState([])
+  useEffect(() => {
+    getBulkStock(selectedShopId).then(setBulkStock).catch(() => setBulkStock([]))
+  }, [selectedShopId, dataVersion])
 
   // Faol aksiyalar
   const [activePromos, setActivePromos] = useState([])
@@ -369,12 +376,13 @@ export const useSalesState = () => {
   const customerHasLoyalty = loyaltyTierPercent > 0
 
   // Calculations
+  const bulkSubtotal = bulkLines.reduce((acc, l) => acc + Math.round(l.qty * l.unitPrice), 0)
   const subtotal = cartItems.reduce((acc, c) => {
     const price = (c.salePrice !== null && c.salePrice !== undefined)
       ? c.salePrice
       : c.product.cashPrice
     return acc + price
-  }, 0)
+  }, 0) + bulkSubtotal
 
   const afterPromo = subtotal - promoDiscount
   const discountAmount = afterPromo * effectiveDiscount / 100
@@ -493,7 +501,7 @@ export const useSalesState = () => {
   const tradeInTotal = tradeInItems.reduce((acc, ti) => acc + (Number(ti.price) || 0) * (Number(ti.qty) || 1), 0)
 
   const handleSubmitSale = async () => {
-    if (cartItems.length === 0) return
+    if (cartItems.length === 0 && bulkLines.length === 0) return
     if (paymentType === 'installment' && !installmentOrgId) return
     if (tradeInItems.length > 0) {
       const incomplete = tradeInItems.some(ti =>
@@ -550,6 +558,7 @@ export const useSalesState = () => {
         bundleId: c.bundleId ?? null,
         bundleName: c.bundleName ?? null,
       })),
+      bulkItems: bulkLines.map(l => ({ productId: l.productId, qty: l.qty, price: l.unitPrice })),
       customerId: selectedCustomer?.id || null,
       customerName: selectedCustomer?.name || 'Noma\'lum',
       paymentType: onlinePayment ? 'card' : paymentType,
@@ -1788,6 +1797,7 @@ export const useSalesState = () => {
     selectedShopId, activeTab, setActiveTab, shopPickCallback, setShopPickCallback, requireShop,
     thisMonth,
     cartItems, addToCart, removeFromCart, clearCart, updateSalePrice,
+    bulkLines, setBulkLine, removeBulkLine, bulkStock,
     selectedCustomer, setSelectedCustomer, discountPercent, setDiscountPercent,
     loyaltyDiscountApplied, setLoyaltyDiscountApplied,
     paymentType, setPaymentType, cardType, setCardType, source, setSource,
