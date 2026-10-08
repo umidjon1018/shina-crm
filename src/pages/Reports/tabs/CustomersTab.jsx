@@ -241,7 +241,7 @@ const CustomersTab = ({ ctx }) => {
                 </div>
                 <div className="px-0 py-3 border-t border-border/50 mt-3 flex items-center justify-between gap-3">
                   <button
-                    onClick={() => navigate('/management?tab=discounts')}
+                    onClick={() => navigate('/marketing?tab=loyalty')}
                     className="text-xs text-accent-blue hover:underline">
                     {t('rep_btn_go_discounts')}
                   </button>
@@ -837,7 +837,7 @@ const CustomersTab = ({ ctx }) => {
                     onClick={() => {
                       closeModal()
                       // Boshqaruv sahifasi → Sozlamalar tab → Mijoz manbalari kartasiga
-                      navigate('/management?tab=settings')
+                      navigate('/settings?section=sales_rules')
                     }}
                     className="px-4 py-2 rounded-xl text-sm font-bold bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 border border-accent-blue/30 transition-colors">
                     {t('rep_btn_go_management')}

@@ -129,7 +129,7 @@ function DevicesTab() {
           <ShieldAlert size={18} className="text-accent-orange" />
           <h3 className="font-syne font-bold text-text-primary">{t('adm_dev_login_history')}</h3>
           <span className="ml-auto text-xs text-text-muted">{attempts.length} {t('adm_dev_records')}</span>
-          {attempts.length > 0 && (
+          {attempts.length > 0 && me?.role === 'admin' && (
             <button onClick={() => setShowClearAttempts(true)} className="px-3 py-1 bg-accent-red/10 text-accent-red text-xs font-bold rounded-lg hover:bg-accent-red/20 border border-accent-red/20">
               {t('adm_dev_clear')}
             </button>

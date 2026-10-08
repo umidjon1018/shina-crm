@@ -2,9 +2,9 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, BarChart2, Bell, BellOff, CheckCircle, ChevronRight, DollarSign, Eye, EyeOff, KeyRound, MapPin, Package, Pencil, Percent, Plus, Settings, ShieldAlert, Store, Target, ToggleLeft, ToggleRight, Trash2, TrendingUp, User, X } from 'lucide-react'
-import { getRolePriority } from '../components/mgmtHelpers'
+import { getRolePriority } from './salesHelpers'
 
-const SettingsTab = ({ ctx }) => {
+const SalesRulesSection = ({ ctx, show = {} }) => {
   const { t, i18n } = useTranslation()
   const {
     // auth & stores
@@ -87,6 +87,7 @@ const SettingsTab = ({ ctx }) => {
     <>
           <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4 sm:space-y-6 max-w-2xl">
             
+            {show.usd !== false && (<>
             {/* BLOK 1 — USD kursi */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
@@ -125,6 +126,8 @@ const SettingsTab = ({ ctx }) => {
               </div>
             </div>
 
+            </>)}
+            {show.targets !== false && (<>
             {/* BLOK 2 — Do'kon oylik maqsadi */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
@@ -393,6 +396,8 @@ const SettingsTab = ({ ctx }) => {
               )}
             </div>
 
+            </>)}
+            {show.sources !== false && (<>
             {/* BLOK 4 — Manbalar */}
             <div id="customer-sources" className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -488,6 +493,8 @@ const SettingsTab = ({ ctx }) => {
               </div>
             </div>
 
+            </>)}
+            {show.orgs !== false && (<>
             {/* BLOK 5 — Nasiya tashkilotlari */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -622,6 +629,8 @@ const SettingsTab = ({ ctx }) => {
               </div>
             </div>
 
+            </>)}
+            {show.notifications !== false && (<>
             {/* BLOK 6 — Ogohlantirish sozlamalari */}
             <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-3">
@@ -668,10 +677,11 @@ const SettingsTab = ({ ctx }) => {
               </div>
             </div>
 
+            </>)}
           </motion.div>
 
     </>
   )
 }
 
-export default SettingsTab
+export default SalesRulesSection

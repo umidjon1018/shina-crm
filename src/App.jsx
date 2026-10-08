@@ -18,11 +18,9 @@ const Customers = lazy(() => import('./pages/Customers'))
 const Income = lazy(() => import('./pages/Income'))
 const Expenses = lazy(() => import('./pages/Expenses'))
 const Marketing = lazy(() => import('./pages/Marketing'))
-const Integrations = lazy(() => import('./pages/Integrations'))
 const Reports = lazy(() => import('./pages/Reports'))
 const AIAgent = lazy(() => import('./pages/AIAgent'))
-const AdminPanel = lazy(() => import('./pages/AdminPanel'))
-const Management = lazy(() => import('./pages/Management'))
+const Settings = lazy(() => import('./pages/Settings'))
 
 function App() {
   const { initTheme } = useThemeStore()
@@ -88,11 +86,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/integrations" element={
-            <ProtectedRoute permission="integrations">
-              <Integrations />
-            </ProtectedRoute>
-          } />
+          <Route path="/integrations" element={<Navigate to="/settings?section=integrations" replace />} />
 
           <Route path="/reports" element={
             <ProtectedRoute permission="reports">
@@ -106,17 +100,14 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/admin" element={
-            <ProtectedRoute permission="all">
-              <AdminPanel />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           } />
-          
-          <Route path="/management" element={
-            <ProtectedRoute permission="management">
-              <Management />
-            </ProtectedRoute>
-          } />
+          {/* Eski sahifalar Sozlamalarga birlashdi */}
+          <Route path="/admin" element={<Navigate to="/settings" replace />} />
+          <Route path="/management" element={<Navigate to="/settings" replace />} />
         </Route>
 
         {/* 404 Redirect */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getUdsSettings, saveUdsSettings, findUdsCustomer } from '../../../api/integrationService'
-import { Card, Label, Msg, Spinner, errText, inputCls } from '../components/ui'
+import { Card, Label, Msg, Spinner, errText, inputCls } from './ui'
 
 const MODES = ['off', 'test', 'live']
 

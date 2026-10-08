@@ -3,7 +3,7 @@ import { Bot } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getBotStock, saveBotStock } from '../../../api/integrationService'
 import { getTgSettings } from '../../../api/marketingService'
-import { Card, Msg, Spinner, Toggle, errText } from '../components/ui'
+import { Card, Msg, Spinner, Toggle, errText } from './ui'
 
 const BotTab = () => {
   const { t } = useTranslation()

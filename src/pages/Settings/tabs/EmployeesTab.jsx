@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Archive, ArchiveRestore, CheckSquare, Eye, EyeOff, History, Lock, Pencil, Plus, RotateCcw, Search, Shield, ShieldAlert, Trash2, Unlock, X, XSquare } from 'lucide-react'
+import { AlertTriangle, Archive, ArchiveRestore, CheckSquare, Eye, EyeOff, Lock, Pencil, Plus, Search, Shield, ShieldAlert, Trash2, Unlock, X, XSquare } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useAuthStore } from '../../../store/authStore'
 import { useAuditStore } from '../../../store/auditStore'
@@ -21,13 +21,15 @@ function EmployeesTab() {
     employees, addEmployee, updateEmployee, removeEmployee,
     restoreEmployee, permanentlyDeleteEmployee,
     employeeEditLocked, toggleEmployeeEditLocked,
-    employeeEditHistory, undoEmployeeEdit,
-    approveEmployeeDeletion, cancelEmployeeDeletion,
+    approveEmployeeDeletion, cancelEmployeeDeletion, requestEmployeeDeletion,
     customRoles, roleAccessTrees, roleDeniedNodes,
   } = useSettingsStore()
   const ROLE_LABELS = Object.fromEntries(Object.entries(ROLE_LABELS_KEYS).map(([k, v]) => [k, t(v)]))
   const roleLabels = { ...ROLE_LABELS, ...Object.fromEntries((customRoles||[]).map(r => [r.id, r.label])) }
   const { user: me, updateAdminProfile } = useAuthStore()
+  const isAdmin = me?.role === 'admin'
+  // Boshqaruvchi admin va boshqaruvchilarni o'zgartira olmaydi; admin qulflagan bo'lsa — hech kimni
+  const canEditEmp = (emp) => isAdmin || (!employeeEditLocked && !['admin', 'manager'].includes(emp.role))
   const { addLog } = useAuditStore()
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -50,18 +52,7 @@ function EmployeesTab() {
     (e.phone||'').includes(search)
   )
 
-  const FIELD_LABELS = {
-    name: t('adm_field_name'), phone: t('col_phone'), role: t('adm_field_role'),
-    hiredAt: t('adm_field_hired_at'), salary: t('adm_field_salary'),
-    username: t('adm_field_username'), password: t('password')
-  }
-  const fmtVal = (key, val) => {
-    if (key === 'role') return roleLabels[val] || val
-    if (key === 'salary') return Number(val||0).toLocaleString('uz-UZ') + " " + t('unit_som')
-    if (key === 'hiredAt') return val ? formatDate(val) : '—'
-    if (key === 'password') return '••••••••'
-    return val || '—'
-  }
+
   const restore = (emp) => {
     restoreEmployee(emp.id)
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Xodim qaytarildi', actionKey: 'audit_emp_restored', entity: 'employee', details: emp.name })
@@ -126,13 +117,14 @@ function EmployeesTab() {
     setShowModal(false)
   }
   const deactivate = (emp) => {
+    if (!isAdmin) { requestEmployeeDeletion(emp.id); setDeleteTarget(null); return }
     removeEmployee(emp.id)
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Xodim deaktivlandi', actionKey: 'audit_emp_deactivated', entity: 'employee', details: emp.name })
     setDeleteTarget(null)
   }
   const toggleBlock = (emp) => {
     const willBlock = !emp.isBlocked
-    updateEmployee(emp.id, { isBlocked: willBlock, blockedByAdmin: willBlock })
+    updateEmployee(emp.id, { isBlocked: willBlock })
     addLog({
       userId: me?.id, userName: me?.fullName || me?.username,
       action: willBlock ? 'Xodim Admin tomonidan bloklandi' : 'Xodim blokdan chiqarildi (Admin)',
@@ -145,14 +137,14 @@ function EmployeesTab() {
 
   return (
     <div className="space-y-3 sm:space-y-5">
-      <RoleAccessSection />
+      {isAdmin && <RoleAccessSection />}
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('adm_emp_search_placeholder')}
             className="w-full bg-bg-secondary border border-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red" />
         </div>
-        <button
+        {isAdmin && <button
           onClick={() => {
             toggleEmployeeEditLocked()
             addLog({
@@ -167,10 +159,10 @@ function EmployeesTab() {
         >
           {employeeEditLocked ? <Lock size={16} /> : <Unlock size={16} />}
           {employeeEditLocked ? t('adm_emp_edit_locked') : t('adm_emp_edit_allowed')}
-        </button>
-        <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2.5 bg-accent-red text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-glow-red">
+        </button>}
+        {(isAdmin || !employeeEditLocked) && <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2.5 bg-accent-red text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-glow-red">
           <Plus size={16} /> {t('adm_emp_add')}
-        </button>
+        </button>}
       </div>
       {employeeEditLocked && (
         <p className="text-xs text-accent-red font-medium -mt-2">
@@ -212,15 +204,15 @@ function EmployeesTab() {
                 </td>
                 <td className="px-3 sm:px-4 py-2 sm:py-3">
                   <div className="flex items-center gap-1">
-                    {emp.role !== 'admin' && (
+                    {emp.role !== 'admin' && canEditEmp(emp) && !(emp.blockedByAdmin && !isAdmin) && (
                       <button onClick={() => toggleBlock(emp)}
                         className={`p-1.5 rounded-lg transition-colors ${emp.isBlocked ? 'bg-accent-red/10 text-accent-red hover:bg-accent-red/20' : 'text-text-muted hover:bg-bg-tertiary hover:text-accent-orange'}`}
                         title={emp.isBlocked ? t('adm_emp_unblock') : t('adm_emp_block')}>
                         {emp.isBlocked ? <ShieldAlert size={14} /> : <Shield size={14} />}
                       </button>
                     )}
-                    <button onClick={() => openEdit(emp)} className="p-1.5 hover:bg-bg-tertiary rounded-lg text-text-muted hover:text-text-primary transition-colors"><Pencil size={14} /></button>
-                    {emp.role !== 'admin' && emp.isActive !== false && (
+                    {canEditEmp(emp) && <button onClick={() => openEdit(emp)} className="p-1.5 hover:bg-bg-tertiary rounded-lg text-text-muted hover:text-text-primary transition-colors"><Pencil size={14} /></button>}
+                    {emp.role !== 'admin' && emp.isActive !== false && !emp.pendingDelete && canEditEmp(emp) && (
                       <button onClick={() => setDeleteTarget(emp)} className="p-1.5 hover:bg-accent-red/10 rounded-lg text-text-muted hover:text-accent-red transition-colors"><Trash2 size={14} /></button>
                     )}
                   </div>
@@ -250,7 +242,7 @@ function EmployeesTab() {
                     {roleLabels[emp.role] || emp.role} • {emp.phone || '—'} • {t('col_time')}: {emp.pendingDeleteAt ? formatDateTime(emp.pendingDeleteAt) : '—'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                {isAdmin && <div className="flex items-center gap-2 flex-shrink-0">
                   <button onClick={() => {
                     approveEmployeeDeletion(emp.id)
                     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: "Boshqaruvchi o'chirish so'rovi tasdiqlandi", actionKey: 'audit_emp_delete_approved', entity: 'employee', details: emp.name })
@@ -263,55 +255,14 @@ function EmployeesTab() {
                   }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-border text-text-secondary hover:bg-bg-tertiary transition-colors">
                     <XSquare size={13} /> {t('adm_delete_cancel')}
                   </button>
-                </div>
+                </div>}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {employeeEditHistory.filter(h => h.editedByRole !== 'admin').length > 0 && (
-        <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-            <History size={16} className="text-accent-orange" />
-            <h3 className="font-syne font-bold text-text-primary text-sm">{t('adm_edit_history')}</h3>
-          </div>
-          <div className="divide-y divide-border">
-            {employeeEditHistory.filter(h => h.editedByRole !== 'admin').slice(0, 30).map(h => (
-              <div key={h.id} className="px-5 py-3 flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-text-primary font-semibold">
-                    {h.employeeName} <span className="text-text-muted font-normal text-xs">— {h.editedBy} ({roleLabels[h.editedByRole] || h.editedByRole}) {t('adm_edit_by')}, {formatDateTime(h.timestamp)}</span>
-                  </p>
-                  <div className="mt-1.5 space-y-1">
-                    {Object.keys(h.after).map(key => (
-                      <p key={key} className="text-xs text-text-secondary">
-                        <span className="text-text-muted">{FIELD_LABELS[key] || key}:</span>{' '}
-                        <span className="text-accent-red line-through">{fmtVal(key, h.before[key])}</span>
-                        {' → '}
-                        <span className="text-accent-green">{fmtVal(key, h.after[key])}</span>
-                      </p>
-                    ))}
-                  </div>
-                </div>
-                {h.undone ? (
-                  <Badge color="bg-bg-tertiary text-text-muted">{t('adm_edit_undone')}</Badge>
-                ) : (
-                  <button onClick={() => {
-                    undoEmployeeEdit(h.id)
-                    addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: "Xodim tahriri bekor qilindi", actionKey: 'audit_emp_edit_undone', entity: 'employee', details: h.employeeName })
-                  }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/10 transition-colors flex-shrink-0">
-                    <RotateCcw size={13} /> {t('adm_edit_undo')}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {deletedEmployees.length > 0 && (
+      {isAdmin && deletedEmployees.length > 0 && (
         <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
           <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
             <Archive size={16} className="text-text-muted" />
@@ -367,7 +318,7 @@ function EmployeesTab() {
                       <label className="text-xs text-text-muted mb-1 block">{t('adm_field_role')}</label>
                       <select value={form.role} onChange={e => { const r = e.target.value; setForm(f=>({...f, role:r, permissions: ROLE_PERMISSIONS[r]||[]})) }}
                         className="w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red">
-                        {Object.entries(roleLabels).filter(([k])=>k!=='admin').map(([k,v])=>(
+                        {Object.entries(roleLabels).filter(([k])=>k!=='admin' && (isAdmin || k!=='manager')).map(([k,v])=>(
                           <option key={k} value={k}>{v}</option>
                         ))}
                       </select>
@@ -440,7 +391,7 @@ function EmployeesTab() {
                   </div>
                 </div>
               </div>
-              {editing?.role !== 'admin' && (
+              {isAdmin && editing?.role !== 'admin' && (
                 <div className="space-y-2">
                   <label className="text-xs text-text-muted block font-semibold">{t('adm_field_permissions')}</label>
                   <div className="grid grid-cols-2 gap-2">

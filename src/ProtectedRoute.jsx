@@ -4,7 +4,7 @@ import { useAuthStore } from './store/authStore'
 // Bosh sahifaga ruxsati yo'q xodim uchun — ruxsati bor birinchi sahifa
 const HOME_ORDER = [['dashboard', '/dashboard'], ['sales', '/sales'], ['warehouse', '/warehouse'], ['customers', '/customers'],
   ['income', '/income'], ['expenses', '/expenses'], ['reports', '/reports'], ['marketing', '/marketing'],
-  ['integrations', '/integrations'], ['ai_agent', '/ai-agent'], ['management', '/management']]
+  ['ai_agent', '/ai-agent'], ['settings', '/settings']]
 export const homePath = (hasPermission) => (HOME_ORDER.find(([perm]) => hasPermission(perm)) || HOME_ORDER[0])[1]
 
 export const DashboardGate = ({ children }) => {

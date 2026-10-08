@@ -1,6 +1,6 @@
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 
-const TABS = ['stock', 'used_stock', 'income', 'barcode', 'stocktake', 'writeoff']
+const TABS = ['stock', 'products', 'used_stock', 'income', 'barcode', 'stocktake', 'writeoff']
 
 const USED_STOCK_STATUS_CONFIG = {
   in_stock: { key: 'col_in_stock',   cls: 'text-accent-green bg-accent-green/10' },

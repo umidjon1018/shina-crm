@@ -15,6 +15,7 @@ export const PERMISSION_TREE = [
           { id: 'warehouse.income.financial', label: "Moliyaviy ma'lumotlar", denyable: true },
         ]
       },
+      { id: 'warehouse.products', label: 'Tovarlar (katalog, narx, kategoriya)' },
       { id: 'warehouse.barcode', label: 'Barkod' },
       { id: 'warehouse.stocktake', label: 'Inventarizatsiya' },
       { id: 'warehouse.writeoff', label: 'Hisobdan chiqarish' },
@@ -85,26 +86,17 @@ export const PERMISSION_TREE = [
       { id: 'marketing.gift_cards', label: "Sovg'a sertifikatlari" },
       { id: 'marketing.messages', label: 'Telegram xabarlar' },
       { id: 'marketing.birthdays', label: "Tug'ilgan kunlar" },
+      { id: 'marketing.loyalty', label: "Sodiqlik (jamg'arma chegirma, keshbek)" },
       { id: 'marketing.settings', label: 'Telegram bot sozlamalari' },
     ]
   },
+  { id: 'notifications', label: "Bildirishnomalar (chegirma so'rovlarini tasdiqlash)" },
   {
-    id: 'integrations', label: 'Integratsiyalar', children: [
-      { id: 'integrations.api', label: "Internet-do'kon (API)" },
-      { id: 'integrations.bot', label: 'Telegram botda qoldiq' },
-      { id: 'integrations.uds', label: 'UDS' },
-      { id: 'integrations.payments', label: 'Payme, Click, Uzum Bank' },
-    ]
-  },
-  {
-    id: 'management', label: 'Boshqaruv', children: [
-      { id: 'management.notifications', label: 'Ogohlantirishlar' },
-      { id: 'management.products', label: 'Tovarlar' },
-      { id: 'management.employees', label: 'Xodimlar' },
-      { id: 'management.discounts', label: 'Chegirmalar' },
-      { id: 'management.bundles', label: 'Komplektlar' },
-      { id: 'management.shops', label: "Do'konlar" },
-      { id: 'management.settings', label: 'Sozlamalar' },
+    id: 'settings', label: 'Sozlamalar', children: [
+      { id: 'settings.employees', label: 'Xodimlar' },
+      { id: 'settings.devices', label: 'Qurilmalar' },
+      { id: 'settings.sales_rules', label: "Savdo qoidalari (kurs, nasiya, chegirma chegarasi, rejalar)" },
+      { id: 'settings.notifications', label: 'Bildirishnoma sozlamalari' },
     ]
   },
 ]

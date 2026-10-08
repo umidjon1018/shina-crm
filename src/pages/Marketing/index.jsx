@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertCircle, Cake, Gift, Send, Settings2, Tag, Ticket } from 'lucide-react'
+import { AlertCircle, Award, Cake, Gift, Send, Settings2, Tag, Ticket } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import PromotionsTab from './tabs/PromotionsTab'
@@ -9,6 +9,7 @@ import GiftCardsTab from './tabs/GiftCardsTab'
 import MessagesTab from './tabs/MessagesTab'
 import BirthdaysTab from './tabs/BirthdaysTab'
 import SettingsTab from './tabs/SettingsTab'
+import LoyaltyProgramCard from './components/LoyaltyProgramCard'
 
 const Marketing = () => {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ const Marketing = () => {
     { id: 'gift_cards', perm: 'marketing.gift_cards', icon: Gift },
     { id: 'messages', perm: 'marketing.messages', icon: Send },
     { id: 'birthdays', perm: 'marketing.birthdays', icon: Cake },
+    { id: 'loyalty', perm: 'marketing.loyalty', icon: Award },
     { id: 'settings', perm: 'marketing.settings', icon: Settings2 },
   ].filter(tab => hasPermission(tab.perm))
 
@@ -64,6 +66,7 @@ const Marketing = () => {
           {activeTab === 'gift_cards' && <GiftCardsTab />}
           {activeTab === 'messages' && <MessagesTab goSettings={goSettings} />}
           {activeTab === 'birthdays' && <BirthdaysTab goSettings={goSettings} />}
+          {activeTab === 'loyalty' && <div className="max-w-2xl"><LoyaltyProgramCard canEdit={hasPermission('marketing.loyalty')} /></div>}
           {activeTab === 'settings' && <SettingsTab />}
         </motion.div>
       </AnimatePresence>

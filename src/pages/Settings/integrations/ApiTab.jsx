@@ -3,7 +3,7 @@ import { KeyRound, Plus, Store, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getApiKeys, createApiKey, updateApiKey, deleteApiKey, API_BASE } from '../../../api/integrationService'
 import { useShopStore } from '../../../store/shopStore'
-import { Card, CopyField, Label, Msg, Spinner, Toggle, errText, inputCls } from '../components/ui'
+import { Card, CopyField, Label, Msg, Spinner, Toggle, errText, inputCls } from './ui'
 
 const ApiTab = () => {
   const { t } = useTranslation()

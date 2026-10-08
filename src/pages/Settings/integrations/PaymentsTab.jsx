@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { getPaymentsSettings, savePaymentsSettings, getPaymentProviders, getOnlinePayments, API_BASE } from '../../../api/integrationService'
 import { useShopStore } from '../../../store/shopStore'
 import OnlinePaymentModal from '../../../components/OnlinePaymentModal'
-import { Card, CopyField, Label, Msg, Spinner, Toggle, errText, inputCls } from '../components/ui'
+import { Card, CopyField, Label, Msg, Spinner, Toggle, errText, inputCls } from './ui'
 
 const NAMES = { payme: 'Payme', click: 'Click', uzum: 'Uzum Bank' }
 const FIELDS = {

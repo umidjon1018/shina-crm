@@ -15,16 +15,13 @@ import {
   ChevronRight,
   Menu,
   Users,
-  Truck,
-  MessageSquare,
   WifiOff,
   X,
   Globe,
-  BarChart2,
   Pencil,
   Eye,
   EyeOff,
-  Megaphone, Plug
+  Megaphone
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -34,6 +31,8 @@ import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
 import UpdateBanner from '../components/UpdateBanner'
 import Toaster, { toast } from '../components/ui/Toast'
+import NotificationsPanel from '../components/NotificationsPanel'
+import { visibleSettingsSections } from '../pages/Settings'
 import { useShopStore } from '../store/shopStore'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
@@ -45,7 +44,6 @@ import { useTranslation } from 'react-i18next'
 import { useNotificationStore } from '../store/notificationStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { useAuditStore } from '../store/auditStore'
-import { NavLink } from 'react-router-dom'
 
 const PAGE_KEYS = {
   '/dashboard': 'dashboard',
@@ -55,11 +53,9 @@ const PAGE_KEYS = {
   '/income': 'income',
   '/expenses': 'expenses',
   '/marketing': 'marketing',
-  '/integrations': 'integrations',
   '/reports': 'reports',
   '/ai-agent': 'ai_agent',
-  '/management': 'management',
-  '/admin': 'admin',
+  '/settings': 'nav_settings',
 }
 
 const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => (
@@ -129,8 +125,6 @@ export const MainLayout = () => {
   }, [bump, addNotification, t])
   const { isOnline, pendingCount, isSyncing } = useOfflineSync(syncHandler, onSyncResult)
   const { areaRef, contentRef, zoom, resetZoom } = usePinchZoom()
-  const { getUnreadCount } = useNotificationStore()
-  const unreadCount = getUnreadCount()
   const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages, loadBranding, loadBusiness } = useSettingsStore()
   const { shops, selectedShopId, setSelectedShop, loadShops } = useShopStore()
   const activeShops = shops.filter(s => s.isActive)
@@ -248,10 +242,11 @@ export const MainLayout = () => {
                 <Package size={16} className="text-white" />
               </div>
           }
-          <div>
+          <div className="min-w-0">
             <h1 className="text-base font-syne font-bold text-white leading-tight">{companyName}</h1>
             <p className="text-[9px] text-text-muted uppercase tracking-widest">CRM</p>
           </div>
+          <NotificationsPanel className="ml-auto hidden lg:block" />
         </div>
 
         {/* Offline badge */}
@@ -349,31 +344,11 @@ export const MainLayout = () => {
 
           {/* Other */}
           <SidebarSection label={t('nav_other')}>
-            {hasPermission('integrations') && !hidden.includes('integrations') && (
-              <SidebarItem to="/integrations" icon={Plug} label={getSlLabel('integrations') || t('int_page_title')} isActive={isActive('/integrations')} onClick={closeSidebar} replace={isSidebarOpen} />
-            )}
             {hasPermission('ai_agent') && !hidden.includes('aiAgent') && (
               <SidebarItem to="/ai-agent" icon={Bot} label={getSlLabel('aiAgent') || t('ai_agent')} isActive={isActive('/ai-agent')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}
-            {isPrivileged(user?.role) && !hidden.includes('management') && (
-              <NavLink to="/management" onClick={closeSidebar} replace={isSidebarOpen} className={({ isActive }) =>
-                `flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${
-                  isActive ? 'bg-accent-red text-white shadow-glow-red' : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
-                }`
-              }>
-                <div className="flex items-center gap-3">
-                  <BarChart2 size={20} />
-                  <span className="font-medium text-sm">{getSlLabel('management') || t('management')}</span>
-                </div>
-                {unreadCount > 0 && (
-                  <span className="bg-accent-red text-white text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[20px] text-center border border-white/20">
-                    {unreadCount}
-                  </span>
-                )}
-              </NavLink>
-            )}
-            {user?.role === 'admin' && (
-              <SidebarItem to="/admin" icon={Settings} label={t('admin')} isActive={isActive('/admin')} onClick={closeSidebar} replace={isSidebarOpen} />
+            {visibleSettingsSections(user, hasPermission).length > 0 && (
+              <SidebarItem to="/settings" icon={Settings} label={t('nav_settings')} isActive={isActive('/settings')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}
           </SidebarSection>
 
@@ -441,7 +416,10 @@ export const MainLayout = () => {
             <Menu size={22} />
           </button>
           <span className="font-syne font-bold text-sm">{companyName}</span>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <NotificationsPanel />
+            <ThemeToggle />
+          </div>
         </header>
 
         {/* Page Content */}
