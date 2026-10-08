@@ -277,3 +277,88 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - **UI to'plami** (`src/components/ui/`): `Modal` (ichma-ich, telefonda pastdan chiqadi, "orqaga"/Esc faqat yuqoridagisini yopadi), `DataTable` (saralash, sahifalash, telefonda karta, qator bosish), `Kit.jsx` (PageHeader, KpiCard, KpiStrip — telefonda gorizontal, Segmented, DetailGrid, Badge), `Toast`, `utils/format.js`.
 - **Mijozlar — namuna sahifa** ✅: ro'yxat 14 ustun → 5 (mijoz, jami summa+xaridlar soni, qarz, daraja, oxirgi tashrif); qator bosilsa profil; birlashtirish rejimi banneri. Profil modali: yuqorida asosiy ko'rsatkichlar (xaridlar, summa, qarz, balans) va tezkor tugmalar (tahrirlash, birlashtirish, o'chirish); 5 tab — Umumiy, Xaridlar [Yangi|B/U], Moliya [Nasiya|Balans], Izohlar, Telegram; xarid bosilsa chek oynasi ichma-ich ochiladi. Commit 432bf775.
 - **Kutilmoqda:** foydalanuvchi namuna uslubini tasdiqlashi → keyin Sotuv, Ombor, Kirim, Moliya (yangi Foyda, Qarzlar), Marketing, Hisobotlar shu uslubga.
+
+---
+
+## 16. Foydalanuvchi fikri va yangi talablar (2026-10-08, 3-versiya)
+
+### 16.1 UI — "asosiy ko'rinish + bo'limlar modalda" (hub)
+Namunadan keyin fikr: eski ko'rinish deyarli saqlangan; rasm (CRM dashboard) uslubida jiddiy qayta ishlash, diagrammalar, yirik yozuv, barcha sahifalar bir xil ko'rinishda, tablar o'rniga bitta asosiy sahifa va bo'limlar modalda.
+
+**Dizayn tizimi:** to'q ko'k fon (#141726), panellar (#1c1f33), gradient asosiy kartalar (binafsha-pushti, moviy-ko'k, qizil-to'q sariq, yashil), kichik ko'rsatkich kartalari (ikonka doirasi + o'zgarish foizi), diagrammalar: gradient to'ldirilgan maydon/chiziq, qalin halqa (donut), gradient ustunlar. Yozuvlar: asosiy 15px, kichik 13px, 9–11px yozuvlar 11–13px ga ko'tariladi. Sarlavhalar Syne o'rniga DM Sans (rasmdagidek toza).
+
+**Sahifa tuzilmasi (har sahifa bir xil):**
+1. Sarlavha + asosiy tugmalar
+2. 2 ta gradient asosiy karta + 2–4 kichik ko'rsatkich
+3. 1–2 diagramma (mantiqan, ekranni to'ldirmasdan)
+4. **Bo'limlar** — kartochkalar (ikonka, nomi, qisqa izoh); bosilsa bo'lim katta modalda ochiladi (telefonda to'liq ekran), modal ichida modal mumkin
+5. Asosiy ro'yxat (kerak bo'lsa)
+
+| Sahifa | Asosiy ko'rinish | Modalda ochiladigan bo'limlar |
+|---|---|---|
+| Bosh sahifa | KPI, tushum/foyda diagrammasi, to'lov turlari va kategoriyalar donut, hafta kunlari ustunlari, top tovarlar, oxirgi sotuvlar, kam qolganlar | — |
+| Sotuv | Kassa (asosiy ish oynasi) | Bronlar, Qaytarish, Tarix, Bekorlar, Nasiyalar, Foyda |
+| Ombor | Qoldiq KPI + diagramma + qoldiq ro'yxati | Tovarlar, B/U, Kirim, Barkod, Inventarizatsiya, Hisobdan chiqarish |
+| Kirim | Kirimlar KPI + diagramma + kirimlar | Yetkazib beruvchilar, Qarzlar, Buyurtmalar, Hisob-kitob, To'lovlar, Qaytarish |
+| Moliya | Daromad/xarajat KPI + diagramma | Xarajatlar, Daromadlar, Pul harakati, Foyda va zarar, Kapital, Kategoriyalar |
+| Mijozlar | KPI + diagramma + ro'yxat | Profil (ichma-ich) |
+| Marketing | KPI + aksiyalar natijasi | Aksiyalar, Kodlar, Sertifikatlar, Xabarlar, Tug'ilgan kunlar, Sodiqlik, Sozlamalar |
+| Hisobotlar | Umumiy diagrammalar | Har hisobot — modal |
+| AI | Kunlik tahlil | Yordamchi, Statistika, Mijozlar boti |
+| Sozlamalar | Chapda bo'limlar (o'zgarmaydi) | — |
+
+### 16.2 Touch ekran (7-band)
+- Barcha tugma/maydon kamida 44px balandlik, hover'ga bog'liq amal yo'q
+- touch-action: manipulation (300ms kechikish va ikki marta bosib kattalashtirish yo'q), telefonda kiritish maydonlari 16px (iOS avtomatik kattalashtirmaydi)
+- Kassa uchun ekran klaviaturasi (soni, narx, to'lov summasi), katta SOTISH tugmasi, planshet gorizontal joylashuvi (chapda tovarlar, o'ngda savat)
+- Ro'yxatda uzun bosish → amallar menyusi; modal "orqaga" bilan yopiladi (bajarildi)
+- PWA to'liq ekran (kiosk) rejimi
+
+### 16.3 Ulgurji savdo — javoblar bilan (U1–U4)
+- **U1 Konsignatsiya — ha:** "Konsignatsiya hujjati" — tovar dilerga beriladi ("dilerda turgan tovar"); diler davriy hisobot beradi (sotilgan soni) → shu qism hisob-faktura (qarz) bo'ladi; sotilmagani qaytariladi; dilerdagi qoldiq va muddat nazorati.
+- **U2 Har mijozga alohida narx:** narx guruhlari (masalan "Diler A −5%") + mijozga individual narx (tovar × mijoz) + standart ulgurji narx; hujjatda qaysi narx qo'llangani ko'rinadi.
+- **U3 Ruxsat:** wholesale.* tugunlari standartda faqat boshqaruvchi va adminga.
+- **U4 Alohida ulgurji ombor:** do'konlar jadvalida tur — chakana do'kon / ulgurji ombor / ishlab chiqarish sexi; omborlar orasida ko'chirish mavjud mexanizm bilan.
+
+### 16.4 Ishlab chiqarish moduli (U5 — yangi)
+Misollar: kafel kleyi (qum, sement, qo'shimchalar tonnalab → qop-qop klei), shirinlik sexi (un, shakar → tortlar, yaroqlilik muddati bilan).
+1. **Miqdor bo'yicha hisob** (eng katta o'zgarish): hozir har dona alohida item (barkod) — shina uchun to'g'ri, "5,2 tonna qum" uchun emas. Yangi: stock_lots (tovar, ombor, o'nlik miqdor, birlik, tannarx, muddat). Tovarda hisob turi: serial (dona, barkod — hozirgidek) yoki bulk (miqdor).
+2. **Tovar turlari:** qayta sotiladigan / xomashyo / tayyor mahsulot / yarim tayyor.
+3. **Retseptura:** tayyor mahsulot birligi uchun xomashyolar va miqdori (masalan 1 qop klei 25 kg = 20 kg qum + 4,5 kg sement + 0,5 kg qo'shimcha), chiqit %, bir nechta versiya.
+4. **Ishlab chiqarish buyurtmasi:** reja → xomashyo yechiladi (FIFO partiyalardan, tannarx bilan) → tayyor mahsulot partiyasi kiradi (miqdor, partiya raqami, ishlab chiqarilgan va yaroqlilik sanasi); holatlar reja/jarayonda/tugadi; qisman bajarish; chiqit va brak.
+5. **Tannarx:** xomashyo + qo'shimcha xarajatlar (ish haqi, elektr, qadoq) → birlik tannarxi; Moliya → Foyda ga ulanadi.
+6. Tayyor mahsulot ulgurji omborga → Ulgurji savdo (16.3) orqali do'konlarga.
+7. **Hisobotlar:** xomashyo sarfi (reja/fakt), ishlab chiqarish hajmi, birlik tannarxi dinamikasi, muddati o'tayotgan mahsulot.
+8. **Biznes profili:** har mijozda modullar yoqiladi/o'chiriladi (chakana kassa, shina atributlari, B/U, ulgurji, ishlab chiqarish) — kafel kleyi korxonasida shina maydonlari ko'rinmaydi.
+
+### 16.5 Fiskal chek (soliq kassasi) — 8-band
+**Talab:** sotuv yakunlanishi bilan chek avtomatik fiskallashtiriladi (fiskal belgi, FM raqami, QR — xaridor Soliq ilovasida skanerlab keshbek oladi); yoqish/o'chirish mumkin; ikkala holatda ham qolgan ishga ta'sir qilmaydi.
+
+**Topilgan ma'lumot:** naqd tushumli tadbirkor onlayn-NKM yoki virtual kassadan foydalanishi shart; faqat Davlat reyestridagi qurilma/dastur; fiskal ma'lumotlar operatori — "Yangi texnologiyalar" IAM. Chekda fiskal modul raqami, fiskal belgi va kamida 30×30 mm QR bo'lishi kerak. Rasmiy ochiq API hujjati topilmadi — integratsiya akkreditlangan provayder orqali.
+
+**Ulanish variantlari:**
+1. **Virtual kassa provayderi (bulut API)** — masalan REGOS VCR, Rahmat, ERA POS, E-POS, Multikassa: chek ma'lumoti API ga → fiskal belgi va QR qaytadi; do'konda qurilma shart emas. *Tavsiya etiladi.*
+2. **Do'kondagi fiskal modul + lokal dastur** (kassa kompyuterida lokal REST); brauzer lokal manzilga murojaat qiladi; telefonlarda ishlamaydi.
+
+**Bizdagi yechim (provayderdan qat'i nazar):**
+- Sozlamalar → Integratsiyalar → Fiskal chek: yoqish/o'chirish, provayder, kalitlar, sinov rejimi.
+- Sotuv saqlanadi → fiskal so'rov navbatga (sotuvni to'xtatmaydi) → fiskal belgi va QR sotuvga yoziladi → chek QR bilan chiqadi. Xato/internet yo'q — oddiy chek, fiskallashtirish keyin avtomatik qayta urinadi; holat kutilmoqda/bajarildi/xato.
+- Qaytarish — qaytarish cheki; smena ochish/yopish (Z-hisobot) provayder talab qilsa.
+- Tovarlarda IKPU (MXIK), qadoq kodi, QQS stavkasi maydonlari; kodsiz tovar ogohlantiriladi. Ba'zi tovar guruhlari uchun raqamli markirovka talabi bo'lishi mumkin — provayder bilan aniqlash.
+- O'chirilganda hech narsa o'zgarmaydi.
+
+**Kerak:** provayder tanlash va shartnoma (sinov kalitlari), kassa ro'yxatdan o'tishi. Bungacha faqat tayyorlov qismi qilinadi.
+
+**Manbalar:** [943-son VMQ](https://lex.uz/docs/-4603329?ONDATE=10.01.2024), [norma.uz](https://www.norma.uz/oz/qonunchilikda_yangi/onlayn-nkm_va_virtual_kassa_qanday_urnatiladi_va_ruyhatdan_utkaziladi), [REGOS VCR](https://regos.uz/uz/product/regos-vcr/info), [Rahmat](https://rhmt.uz/uz/pos/virtual-kassa/), [Biznex fiskal modul](https://docs.biznex.uz/tax-modul/fiscal-module/), [Biznex soliq integratsiyasi](https://docs.biznex.uz/tax-modul/overview/), [ERA POS](https://pos.era.uz/en), [E-POS](http://epos.uz/en), [Payze OFD](https://docs.payze.io/docs/uzbekistan-fiscalization-ofd), [1% keshbek](https://www.gazeta.uz/oz/2022/01/07/cashback/), [keshbek holati 2026](https://uza.uz/en/posts/keshbek-tizimi-bekor-qilinmaydi-soliq-qomitasi_879966).
+
+### 16.6 Bosqichlar (yangilangan)
+| Bosqich | Nima |
+|---|---|
+| 2A | Dizayn tizimi + diagramma to'plami + hub tuzilmasi; Bosh sahifa diagrammalari; barcha sahifalar hub ko'rinishiga |
+| 2B | Bo'limlar ichini yangi komponentlarga (DataTable, Modal, yirik yozuv) — sahifama-sahifa |
+| 2C | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
+| 3 | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi + Moliya → Qarzlar |
+| 4 | Omborlar turlari + Ulgurji savdo (konsignatsiya, narx guruhlari) |
+| 5 | Ishlab chiqarish: miqdor bo'yicha hisob, retseptura, ishlab chiqarish buyurtmalari, tannarx |
+| 6 | Fiskal chek: tayyorlov → provayder tanlangach ulanish |
+| 7 | Tozalash, biznes profili (modullarni yoqish), multi-tenant |
