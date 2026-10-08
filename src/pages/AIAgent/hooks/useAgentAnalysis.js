@@ -3,6 +3,8 @@ import { streamChat } from '../../../api/aiService'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { useDataStore } from '../../../store/dataStore'
 import { getAgentInsights, getAgentStatus, triggerAgentRun } from '../../../api/agentRunService'
+import { useAuthStore } from '../../../store/authStore'
+import { localYmd } from '../aiHelpers'
 
 // Max 8 KPI, 5 alert, 3 insight, 4 recommendation
 const JSON_INSTRUCTION = `
@@ -17,8 +19,7 @@ function getCache(agentId, autoRunHour = 23) {
     const raw = localStorage.getItem(CACHE_PREFIX + agentId)
     if (!raw) return null
     const { analysis, date, cachedAt } = JSON.parse(raw)
-    const today = new Date().toISOString().slice(0, 10)
-    if (date !== today) return null
+    if (date !== localYmd(new Date())) return null
     const currentHour = new Date().getHours()
     if (cachedAt) {
       const cacheHour = new Date(cachedAt).getHours()
@@ -32,7 +33,7 @@ function setCache(agentId, analysis) {
   try {
     localStorage.setItem(CACHE_PREFIX + agentId, JSON.stringify({
       analysis,
-      date: new Date().toISOString().slice(0, 10),
+      date: localYmd(new Date()),
       cachedAt: Date.now(),
     }))
   } catch {}
@@ -148,6 +149,9 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
   const runIdRef = useRef(0)
   const didRunRef = useRef(!!cached)
   const pollingRef = useRef(null)
+  // Agentni qo'lda ishga tushirish backendda faqat adminga ruxsat etilgan
+  const isAdmin = useAuthStore(s => s.user?.role === 'admin')
+  useEffect(() => () => { if (pollingRef.current) clearInterval(pollingRef.current) }, [])
   // Refs so that closures always see the latest buildPrompt/systemPrompt
   const buildPromptRef = useRef(buildPrompt)
   const systemPromptRef = useRef(systemPrompt)
@@ -278,5 +282,5 @@ export function useAgentAnalysis({ agentId, systemPrompt, buildPrompt, enabled =
     else setLoading(false)
   }
 
-  return { loading, analysis, error, source, lastRun, triggering, triggerRun, refresh }
+  return { loading, analysis, error, source, lastRun, triggering, triggerRun: isAdmin ? triggerRun : null, refresh }
 }

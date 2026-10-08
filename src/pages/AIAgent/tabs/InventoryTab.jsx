@@ -5,6 +5,7 @@ import { useShopStore } from '../../../store/shopStore'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
+import { seasonLabelOf } from '../aiHelpers'
 
 function InventoryTab({ aiData = {}, agentConfig = null }) {
   const { addActivity } = useAgentActivityStore()
@@ -42,8 +43,7 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
 
   // --- BARKODLAR ---
   const barcodeStats = useMemo(() => {
-    const shopBatchIds = new Set(MOCK_BATCHES.map(b => b.id))
-    const relevant = selectedShopId === 'all' ? MOCK_ITEMS : MOCK_ITEMS.filter(i => shopBatchIds.has(i.batchId))
+    const relevant = selectedShopId === 'all' ? MOCK_ITEMS : MOCK_ITEMS.filter(i => String(i.shopId) === String(selectedShopId))
     return {
       total:      relevant.length,
       inStock:    relevant.filter(i => i.status === 'in_stock').length,
@@ -53,18 +53,17 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
       downloaded: relevant.filter(i => i.barcodeStatus === 'downloaded').length,
       active:     relevant.filter(i => i.barcodeStatus === 'active').length,
     }
-  }, [MOCK_ITEMS, MOCK_BATCHES, selectedShopId])
+  }, [MOCK_ITEMS, selectedShopId])
 
   // --- OMBOR HOLATI (mahsulot bo'yicha) ---
   const stockByProduct = useMemo(() => {
-    const shopBatchIds = new Set(MOCK_BATCHES.map(b => b.id))
     return MOCK_PRODUCTS
       .filter(p => p.isActive)
       .map(p => {
         const inStock = MOCK_ITEMS.filter(i =>
           i.productId === p.id &&
           i.status === 'in_stock' &&
-          (selectedShopId === 'all' || shopBatchIds.has(i.batchId))
+          (selectedShopId === 'all' || String(i.shopId) === String(selectedShopId))
         ).length
         return { name: p.name, brand: p.brand || '—', category: p.category, season: p.season || '—', stock: inStock, minLimit: p.lowStockThreshold || 3 }
       })
@@ -117,8 +116,7 @@ function InventoryTab({ aiData = {}, agentConfig = null }) {
     agentId: 'product-agent',
     enabled,
     buildPrompt: () => {
-      const season = new Date().getMonth() + 1
-      const seasonLabel = season >= 3 && season <= 8 ? 'YOZ' : 'QIŠ'
+      const seasonLabel = seasonLabelOf(new Date().getMonth() + 1)
       const shopLines = batchByShop.length > 1 ? `\nHAR BIR DO'KON OMBORI:\n${batchByShop.map((s, i) => `${i+1}. ${s.name}: ${s.count} ta partiya, ${s.remaining} ta qoldi`).join('\n')}` : ''
       const usedShopLines = usedByShop.length > 1 ? `\nB/U DO'KON BO'YICHA:\n${usedByShop.map(s => `Do'kon ${s.sid}: ${s.inStock} ta zaxirada, ${s.sold} ta sotilgan`).join('\n')}` : ''
       const role = agentConfig?.systemPrompt || "Sen GoodTires do'konining OMBOR VA TOVAR AGENTISAN."

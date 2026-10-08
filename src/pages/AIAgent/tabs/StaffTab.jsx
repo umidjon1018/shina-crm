@@ -4,7 +4,7 @@ import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
 import { useSettingsStore } from '../../../store/settingsStore'
-import { fmtNum } from '../aiHelpers'
+import { fmtNum, monthKey, inMonth } from '../aiHelpers'
 import { getNetSaleProfit, getUsedSaleProfit, isExchangeCancel } from '../../../utils/profitHelpers'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
@@ -22,6 +22,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
     usedSales: _allUsedSales = [],
     batches: _allBatches = [],
     expenses: _allExpenses = [],
+    products: _allProducts = [],
   } = aiData
 
   const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(x => String(x.shopId) === String(selectedShopId))
@@ -31,8 +32,13 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
   const MOCK_BATCHES  = filterShop(_allBatches)
   const MOCK_EXPENSES = filterShop(_allExpenses)
 
-  const thisMonth = new Date().toISOString().slice(0, 7)
-  const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7)
+  const thisMonth = monthKey(0)
+  const lastMonth = monthKey(-1)
+  const minPriceOf = useMemo(() => {
+    const m = {}
+    _allProducts.forEach(p => { m[String(p.id)] = p.minSalePrice || 0 })
+    return m
+  }, [_allProducts])
 
   // Per-xodim statistika
   const staffStats = useMemo(() => {
@@ -60,10 +66,12 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
     }
 
     // Yangi sotuvlar
+    // Kalit — sotuvchi nomi: admin (users) va xodim (employees) ID lari to'qnashishi mumkin
+    const keyOf = (name, id) => (name ? 'n:' + name.trim().toLowerCase() : 'id:' + (id || 'unknown'))
+
     MOCK_SALES.forEach(s => {
-      const id = s.soldBy || 'unknown'
       const name = s.soldByName || s.cashierName || 'Noma\'lum'
-      const e = ensureEntry(id, name)
+      const e = ensureEntry(keyOf(s.soldByName, s.soldBy), name)
 
       if (s.status === 'cancelled' && !isExchangeCancel(s)) {
         e.cancelled++
@@ -75,11 +83,11 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
       e.revenue += s.total || 0
       e.profit  += getNetSaleProfit(s)
 
-      if (s.soldAt?.startsWith(thisMonth)) {
+      if (inMonth(s.soldAt, thisMonth)) {
         e.thisMonthSales++
         e.thisMonthRevenue += s.total || 0
       }
-      if (s.soldAt?.startsWith(lastMonth)) {
+      if (inMonth(s.soldAt, lastMonth)) {
         e.lastMonthSales++
         e.lastMonthRevenue += s.total || 0
       }
@@ -99,9 +107,11 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
 
       // Qoida buzilishi: minSalePrice dan past sotuv
       if (s.items) {
+        const k = 1 - (s.discount || 0) / 100
         const hasViolation = s.items.some(item => {
-          if (!item.minSalePrice || !item.price) return false
-          return item.price < item.minSalePrice
+          const min = minPriceOf[String(item.productId)]
+          if (!min || !item.price) return false
+          return item.price * k < min
         })
         if (hasViolation) e.belowMinPrice++
       }
@@ -110,33 +120,34 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
     // B/U sotuvlar
     MOCK_USED.forEach(s => {
       if (s.status === 'cancelled') return
-      const id = s.soldBy || s.cashierId || 'unknown'
       const name = s.soldByName || s.cashierName || 'Noma\'lum'
-      const e = ensureEntry(id, name)
+      const e = ensureEntry(keyOf(s.soldByName, s.soldBy || s.cashierId), name)
       e.usedSales++
       e.revenue += s.total || 0
       e.profit  += getUsedSaleProfit(s) - (s.paymentType === 'installment' ? (s.installmentCommissionAmount ?? 0) : 0)
-      if (s.soldAt?.startsWith(thisMonth)) {
+      if (inMonth(s.soldAt, thisMonth)) {
         e.thisMonthSales++
         e.thisMonthRevenue += s.total || 0
+      }
+      if (inMonth(s.soldAt, lastMonth)) {
+        e.lastMonthSales++
+        e.lastMonthRevenue += s.total || 0
       }
     })
 
     // Kirim partiyalar
     MOCK_BATCHES.forEach(b => {
-      const id = b.addedBy || b.createdBy || b.userId || null
-      if (!id) return
-      const name = b.addedByName || b.createdByName || 'Noma\'lum'
-      const e = ensureEntry(id, name)
+      const name = b.receivedByName
+      if (!name) return
+      const e = ensureEntry(keyOf(name), name)
       e.incomeEntries++
     })
 
     // Xarajatlar
     MOCK_EXPENSES.forEach(ex => {
-      const id = ex.createdBy || ex.addedBy || null
-      if (!id) return
-      const name = ex.createdByName || ex.addedByName || 'Noma\'lum'
-      const e = ensureEntry(id, name)
+      const name = ex.responsibleName
+      if (!name) return
+      const e = ensureEntry(keyOf(name), name)
       e.expenseEntries++
     })
 
@@ -148,7 +159,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
     })
 
     return Object.values(map).sort((a, b) => b.revenue - a.revenue)
-  }, [MOCK_SALES, MOCK_USED, MOCK_BATCHES, MOCK_EXPENSES, version])
+  }, [MOCK_SALES, MOCK_USED, MOCK_BATCHES, MOCK_EXPENSES, minPriceOf, thisMonth, lastMonth, version])
 
   const empList = useMemo(() => storeEmployees.filter(e => e.isActive !== false), [storeEmployees])
 
@@ -184,7 +195,7 @@ function StaffTab({ aiData = {}, agentConfig = null }) {
   const salaryLines = empList
     .filter(e => e.salary)
     .map(e => {
-      const stat = staffStats.find(s => String(s.id) === String(e.id))
+      const stat = staffStats.find(s => s.name?.trim().toLowerCase() === e.name?.trim().toLowerCase())
       const revenue = stat?.revenue || 0
       const roi = revenue > 0 && e.salary > 0
         ? `tushum/maosh nisbati: ${(revenue / e.salary).toFixed(1)}x`
@@ -255,7 +266,7 @@ VAZIFALAR:
         .slice(0, 3)
         .map(c => `${c.name} (${c.count} marta, ${fmtNum(c.total, t)} so'm)`)
 
-      return `${i + 1}. ${e.name} (ID: ${e.id}):
+      return `${i + 1}. ${e.name}:
   Sotuv: ${e.sales} yangi + ${e.usedSales} B/U = ${e.sales + e.usedSales} ta
   Tushum: ${fmtNum(e.revenue, t)} so'm (barcha tushumning ${share}%)
   Foyda: ${fmtNum(e.profit, t)} so'm
@@ -270,7 +281,7 @@ VAZIFALAR:
     }).join('\n\n')
 
     const empLines = empList.map(e => {
-      const stat = staffStats.find(s => String(s.id) === String(e.id))
+      const stat = staffStats.find(s => s.name?.trim().toLowerCase() === e.name?.trim().toLowerCase())
       return `${e.name}: rol=${e.role || '?'}, maosh=${e.salary ? e.salary.toLocaleString() + ' so\'m/oy' : 'kiritilmagan'}, ishga kirgan=${e.hiredAt || '?'}, tushum=${stat ? fmtNum(stat.revenue, t) : '0'} so'm`
     }).join('\n')
 

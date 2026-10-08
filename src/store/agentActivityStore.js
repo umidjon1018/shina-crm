@@ -26,7 +26,7 @@ export const useAgentActivityStore = create(
               ...activity,
             },
             ...state.activities,
-          ],
+          ].slice(0, 200),
         }
       }),
 

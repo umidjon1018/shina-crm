@@ -172,8 +172,8 @@ export default function AgentAnalysisPanel({
           {kpis.map((kpi, i) => (
             <div key={i} className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col">
               <p className="text-text-secondary text-xs mb-2 leading-tight line-clamp-2">{kpi.label}</p>
-              <p className={`font-syne font-bold ${kpi.value.length > 12 ? 'text-lg' : 'text-2xl'} ${STATUS_STYLES[kpi.status] || 'text-text-primary'} leading-tight`}>
-                {kpi.value}
+              <p className={`font-syne font-bold ${String(kpi.value ?? '').length > 12 ? 'text-lg' : 'text-2xl'} ${STATUS_STYLES[kpi.status] || 'text-text-primary'} leading-tight`}>
+                {String(kpi.value ?? '—')}
               </p>
               {kpi.sub && <p className="text-text-secondary text-xs mt-1.5 line-clamp-2 leading-snug">{kpi.sub}</p>}
             </div>

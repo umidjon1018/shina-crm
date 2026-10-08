@@ -73,3 +73,32 @@ export function fmtTime(iso, t) {
   if (diff < 1440) return Math.floor(diff / 60) + ' ' + t('ai_time_hour_ago')
   return Math.floor(diff / 1440) + ' ' + t('ai_time_day_ago')
 }
+
+// Mahalliy (Toshkent) sana kalitlari — toISOString() UTC beradi va oy chegarasida 5 soat siljiydi
+const pad2 = (n) => String(n).padStart(2, '0')
+export const localYm = (d) => { const x = d instanceof Date ? d : new Date(d); return isNaN(x) ? '' : `${x.getFullYear()}-${pad2(x.getMonth() + 1)}` }
+export const localYmd = (d) => { const x = d instanceof Date ? d : new Date(d); return isNaN(x) ? '' : `${localYm(x)}-${pad2(x.getDate())}` }
+export const monthKey = (offset = 0) => { const n = new Date(); return localYm(new Date(n.getFullYear(), n.getMonth() + offset, 1)) }
+export const inMonth = (iso, key) => !!iso && localYm(iso) === key
+
+// Sotuvdagi chegirma summasi (Hisobotlar bilan bir xil): foizli → subtotal−total, aks holda komplekt; + aksiya
+export const saleDiscountAmount = (s) =>
+  (s.discount > 0 ? Math.max(0, (s.subtotal || s.total || 0) - (s.total || 0)) : (Number(s.bundleDiscountAmount) || 0))
+  + (Number(s.promoDiscountAmount) || 0)
+
+// Mijoz darajasi xaridlar soniga qarab (bazada alohida daraja maydoni yo'q)
+export const customerLevel = (orders) => (orders >= 3 ? 'gold' : orders === 2 ? 'silver' : orders === 1 ? 'none' : 'zero')
+
+export const seasonLabelOf = (month) => (month >= 3 && month <= 8 ? 'YOZ' : 'QISH')
+
+// Tug'ilgan kungacha kunlar (bugun = 0)
+export function daysUntilBirthday(birthDate) {
+  if (!birthDate) return 999
+  const b = new Date(birthDate)
+  if (isNaN(b)) return 999
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let next = new Date(today.getFullYear(), b.getMonth(), b.getDate())
+  if (next < today) next = new Date(today.getFullYear() + 1, b.getMonth(), b.getDate())
+  return Math.round((next - today) / 86400000)
+}

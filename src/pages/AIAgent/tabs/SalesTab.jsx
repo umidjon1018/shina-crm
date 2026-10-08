@@ -4,7 +4,7 @@ import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useShopStore } from '../../../store/shopStore'
 import { getNetSaleProfit, getUsedSaleProfit, isExchangeCancel } from '../../../utils/profitHelpers'
-import { fmtNum } from '../aiHelpers'
+import { fmtNum, monthKey, inMonth, saleDiscountAmount } from '../aiHelpers'
 import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
@@ -55,15 +55,15 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
 
   // To'lov turi
   const payStats = useMemo(() => {
-    const map = { cash: 0, card: 0, installment: 0 }
+    const map = { cash: 0, card: 0, transfer: 0, installment: 0 }
     ;[...completedSales, ...usedCompleted].forEach(s => { if (map[s.paymentType] !== undefined) map[s.paymentType]++ })
     return map
   }, [completedSales, usedCompleted])
 
   // Nasiya qarzlari (sotuv)
   const installmentSales    = completedSales.filter(s => s.paymentType === 'installment')
-  const installmentDebt     = installmentSales.reduce((s, x) => s + (x.remainingDebt ?? 0), 0)
-  const installmentReceived = installmentSales.reduce((s, x) => s + ((x.total || 0) - (x.remainingDebt ?? 0)), 0)
+  const installmentDebt     = installmentSales.reduce((s, x) => s + (x.installmentDebt ?? 0), 0)
+  const installmentReceived = installmentSales.reduce((s, x) => s + ((x.total || 0) - (x.installmentDebt ?? 0)), 0)
 
   // ---- KIRIM (Batches) ----
   const totalIncomeUSD     = MOCK_BATCHES.reduce((s, b) => s + (b.totalUSD || 0), 0)
@@ -85,33 +85,23 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
 
   // ---- XARAJATLAR ----
   const totalExpenses   = MOCK_EXPENSES.reduce((s, e) => s + (e.amountUZS || 0), 0)
-  const salaryExp       = MOCK_EXPENSES.filter(e => e.categoryId === '1' || (e.note || '').toLowerCase().includes('oylik')).reduce((s, e) => s + (e.amountUZS || 0), 0)
-  const rentExp         = MOCK_EXPENSES.filter(e => e.categoryId === '2' || (e.note || '').toLowerCase().includes('ijara')).reduce((s, e) => s + (e.amountUZS || 0), 0)
+  // finance_categories: cat3 = Ish haqi, cat1 = Ijara
+  const salaryExp       = MOCK_EXPENSES.filter(e => e.categoryId === 'cat3').reduce((s, e) => s + (e.amountUZS || 0), 0)
+  const rentExp         = MOCK_EXPENSES.filter(e => e.categoryId === 'cat1').reduce((s, e) => s + (e.amountUZS || 0), 0)
   const otherExp        = totalExpenses - salaryExp - rentExp
 
   // ---- KAPITAL / JALB QILINGAN PULLAR ----
-  const invested   = MOCK_CAPITAL.filter(c => c.type === 'invested').reduce((s, c) => s + (c.amountUZS || 0), 0)
-  const withdrawn  = MOCK_CAPITAL.filter(c => c.type === 'withdrawn').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  // capital.type: 'inject' (jalb) / 'return' (qaytarish); eski yozuvlarda invested/withdrawn
+  const invested   = MOCK_CAPITAL.filter(c => c.type === 'inject' || c.type === 'invested').reduce((s, c) => s + (c.amountUZS || 0), 0)
+  const withdrawn  = MOCK_CAPITAL.filter(c => c.type === 'return' || c.type === 'withdrawn').reduce((s, c) => s + (c.amountUZS || 0), 0)
   const loan       = MOCK_CAPITAL.filter(c => c.type === 'loan').reduce((s, c) => s + (c.amountUZS || 0), 0)
   const loanRepaid = MOCK_CAPITAL.filter(c => c.type === 'loan_repaid').reduce((s, c) => s + (c.amountUZS || 0), 0)
   const netCapital = invested - withdrawn + loan - loanRepaid
 
   // ---- CHEGIRMALAR / AKSIYALAR ----
-  const discountLoss = useMemo(() => {
-    let loss = 0
-    completedSales.forEach(s => s.items?.forEach(i => {
-      if (i.discountAmount) loss += i.discountAmount
-    }))
-    return loss
-  }, [completedSales])
-
-  const loyaltyDiscountLoss = useMemo(() => {
-    let loss = 0
-    completedSales.forEach(s => {
-      if (s.loyaltyDiscount) loss += s.loyaltyDiscount
-    })
-    return loss
-  }, [completedSales])
+  const discountLoss = completedSales.reduce((sum, s) => sum + saleDiscountAmount(s), 0)
+  // Sodiqlik: mijoz balansidan (keshbek/jamg'arma) to'langan summa
+  const loyaltyDiscountLoss = completedSales.reduce((sum, s) => sum + (s.balanceUsed || 0), 0)
 
   // Filiallar bo'yicha
   const shopBreakdown = useMemo(() => {
@@ -129,8 +119,8 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
   }, [_allSales, _allUsedSales, selectedShopId])
 
   // Shu oy
-  const thisMonth     = new Date().toISOString().slice(0, 7)
-  const thisMonthSales = completedSales.filter(s => s.soldAt?.startsWith(thisMonth))
+  const thisMonth     = monthKey(0)
+  const thisMonthSales = [...completedSales, ...usedCompleted].filter(s => inMonth(s.soldAt, thisMonth))
   const thisMonthRev   = thisMonthSales.reduce((s, x) => s + x.total, 0)
 
   const enabled = MOCK_SALES.length > 0 || MOCK_BATCHES.length > 0 || MOCK_EXPENSES.length > 0
@@ -146,11 +136,11 @@ function SalesTab({ aiData = {}, agentConfig = null }) {
         : ''
       const parts = [role, '']
       if (hasTool('get_supplier_debts'))   parts.push(`📦 KIRIM (YETKAZIB BERUVCHILAR):\n- Jami kirim: $${totalIncomeUSD.toFixed(0)} USD\n- To'langan: $${totalPaidUSD.toFixed(0)} | Qarz: $${totalDebtUSD.toFixed(0)}\n- To'lanmagan partiyalar: ${unpaidBatches.length} ta\n${supplierMap.slice(0, 4).map((s, i) => `  ${i+1}. ${s.name}: $${s.totalUSD.toFixed(0)} (qarz: $${s.debtUSD.toFixed(0)})`).join('\n')}`)
-      if (hasTool('get_sales_summary'))    parts.push(`💰 SOTUV:\n- Tugallangan: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta\n- Bekor (pul qaytarilgan): ${realCancelled.length} ta | Almashtirish: ${exchanged.length} ta\n- Bekor foizi: ${returnRate}%\n- Tushum: ${fmtNum(totalRevenue, t)} so'm | Sof foyda: ${fmtNum(totalProfit, t)} so'm | Marja: ${avgMargin}%\n- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, nasiya ${payStats.installment} ta\n- Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)${shopLines}`)
+      if (hasTool('get_sales_summary'))    parts.push(`💰 SOTUV:\n- Tugallangan: ${completedSales.length} ta yangi + ${usedCompleted.length} ta B/U = ${completedSales.length + usedCompleted.length} ta\n- Bekor (pul qaytarilgan): ${realCancelled.length} ta | Almashtirish: ${exchanged.length} ta\n- Bekor foizi: ${returnRate}%\n- Tushum: ${fmtNum(totalRevenue, t)} so'm | Sof foyda: ${fmtNum(totalProfit, t)} so'm | Marja: ${avgMargin}%\n- To'lov: naqd ${payStats.cash} ta, karta ${payStats.card} ta, o'tkazma ${payStats.transfer} ta, nasiya ${payStats.installment} ta\n- Shu oy: ${fmtNum(thisMonthRev, t)} so'm (${thisMonthSales.length} ta)${shopLines}`)
       if (hasTool('get_customer_debts'))   parts.push(`📋 NASIYA QARZLARI:\n- Nasiya savdolar: ${installmentSales.length} ta\n- Qabul qilingan: ${fmtNum(installmentReceived, t)} so'm | Qolgan qarz: ${fmtNum(installmentDebt, t)} so'm`)
       if (hasTool('get_expenses_summary')) parts.push(`💸 XARAJATLAR:\n- Jami: ${fmtNum(totalExpenses, t)} so'm\n- Oyliklar: ${fmtNum(salaryExp, t)} | Ijara: ${fmtNum(rentExp, t)} | Boshqa: ${fmtNum(otherExp, t)}\n- Sof pul oqimi: ${fmtNum(totalProfit - totalExpenses, t)} so'm`)
       if (hasTool('get_capital_summary'))  parts.push(`🏦 KAPITAL:\n- Kiritilgan: ${fmtNum(invested, t)} | Chiqarilgan: ${fmtNum(withdrawn, t)} | Qarz: ${fmtNum(loan, t)} | Sof: ${fmtNum(netCapital, t)} so'm`)
-      if (hasTool('get_discounts_summary'))parts.push(`🎁 CHEGIRMALAR:\n- Yo'qotish: ${fmtNum(discountLoss, t)} so'm | Sodiqlik bonus: ${fmtNum(loyaltyDiscountLoss, t)} so'm\n- Aksiyalar: ${MOCK_PROMOTIONS.length} ta | Mijozlar: ${MOCK_CUSTOMERS.length} ta (VIP: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length}, sodiq: ${MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length})`)
+      if (hasTool('get_discounts_summary'))parts.push(`🎁 CHEGIRMALAR:\n- Yo'qotish: ${fmtNum(discountLoss, t)} so'm | Balansdan (keshbek) to'langan: ${fmtNum(loyaltyDiscountLoss, t)} so'm\n- Faol aksiyalar: ${MOCK_PROMOTIONS.filter(p => p.isActive).length} ta | Mijozlar: ${MOCK_CUSTOMERS.length} ta`)
       return parts.join('\n')
     },
     deps: [version, selectedShopId, completedSales.length, totalRevenue, totalExpenses, MOCK_BATCHES.length, agentConfig?.tools?.join()],

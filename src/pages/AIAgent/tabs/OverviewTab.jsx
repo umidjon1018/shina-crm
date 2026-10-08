@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { TrendingUp, Megaphone, Users, Package, Activity, UserCheck, Globe, Play, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { useAgentActivityStore } from '../../../store/agentActivityStore'
 import { useDataStore } from '../../../store/dataStore'
-import { TAB_COLORS } from '../aiHelpers'
+import { TAB_COLORS, localYmd } from '../aiHelpers'
+import { useAuthStore } from '../../../store/authStore'
 import AgentActivityFeed from '../components/ActivityFeed'
 import { getAllAgentsStatus, triggerAgentRun } from '../../../api/agentRunService'
 
@@ -21,7 +22,7 @@ function getLocalCache(slug) {
     const raw = localStorage.getItem('ai_analysis_v4_' + slug)
     if (!raw) return null
     const { analysis, date } = JSON.parse(raw)
-    if (date !== new Date().toISOString().slice(0, 10)) return null
+    if (date !== localYmd(new Date())) return null
     return analysis
   } catch { return null }
 }
@@ -42,7 +43,7 @@ function StatusDot({ status }) {
   return <div className="w-2 h-2 rounded-full bg-text-muted" />
 }
 
-function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
+function AgentCard({ def, runInfo, onTabChange, onRun, isRunning, canRun }) {
   const { id, slug, label, Icon, emptyLabel } = def
   const color = TAB_COLORS[id]
   const hasRun = !!runInfo
@@ -59,14 +60,14 @@ function AgentCard({ def, runInfo, onTabChange, onRun, isRunning }) {
         >
           <Icon size={16} className={color.text} />
         </button>
-        <button
+        {canRun && <button
           onClick={() => onRun(slug)}
           disabled={isRunning}
           title="Agentni ishga tushirish"
           className={`p-1.5 rounded-lg transition-colors ${isRunning ? 'text-text-muted cursor-not-allowed' : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'}`}
         >
           {isRunning ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
-        </button>
+        </button>}
       </div>
 
       <button onClick={() => onTabChange(id)} className="text-left flex-1">
@@ -112,6 +113,7 @@ function OverviewTab({ onTabChange }) {
   const [statusMap, setStatusMap] = useState({})
   const [loadingStatus, setLoadingStatus] = useState(true)
   const [runningSet, setRunningSet] = useState(new Set())
+  const canRun = useAuthStore(s => s.user?.role === 'admin')
 
   const fetchStatus = async () => {
     try {
@@ -180,6 +182,7 @@ function OverviewTab({ onTabChange }) {
             onTabChange={onTabChange}
             onRun={handleRun}
             isRunning={runningSet.has(def.slug) || statusMap[def.slug]?.status === 'running'}
+            canRun={canRun}
           />
         ))}
       </div>

@@ -16,6 +16,7 @@ import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
 import { useMarketingStore } from '../../../store/marketingStore'
 import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
 import AiChat from '../components/AiChat'
+import { monthKey, inMonth, localYm, seasonLabelOf, customerLevel } from '../aiHelpers'
 
 function MarketingTab({ aiData = {}, agentConfig = null }) {
   const { addActivity, getActivitiesByAgent } = useAgentActivityStore()
@@ -44,20 +45,30 @@ function MarketingTab({ aiData = {}, agentConfig = null }) {
   const MOCK_BATCHES    = filterShop(_allBatches)
 
   const currentMonth  = new Date().getMonth() + 1
-  const thisMonthKey  = new Date().toISOString().slice(0, 7)
-  const lastMonthKey  = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7)
-  const seasonLabel   = currentMonth >= 3 && currentMonth <= 8 ? 'YOZ' : 'QIŠ'
+  const thisMonthKey  = monthKey(0)
+  const lastMonthKey  = monthKey(-1)
+  const seasonLabel   = seasonLabelOf(currentMonth)
 
   const allCompleted   = [...MOCK_SALES, ...MOCK_USED_SALES]
-  const thisMonthSales = allCompleted.filter(s => (s.soldAt || s.createdAt || '').startsWith(thisMonthKey))
-  const lastMonthSales = allCompleted.filter(s => (s.soldAt || s.createdAt || '').startsWith(lastMonthKey))
+  const thisMonthSales = allCompleted.filter(s => inMonth(s.soldAt || s.createdAt, thisMonthKey))
+  const lastMonthSales = allCompleted.filter(s => inMonth(s.soldAt || s.createdAt, lastMonthKey))
   const lastMonthCount = lastMonthSales.length
   const revGrowth      = lastMonthCount > 0 ? (((thisMonthSales.length - lastMonthCount) / lastMonthCount) * 100).toFixed(1) : 'n/a'
 
-  const vipCount    = MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'gold').length
-  const loyalCount  = MOCK_CUSTOMERS.filter(c => c.loyaltyLevel === 'silver').length
-  const newCount    = MOCK_CUSTOMERS.filter(c => !c.loyaltyLevel || c.loyaltyLevel === 'none').length
-  const debtors     = MOCK_CUSTOMERS.filter(c => (c.installmentDebt || 0) > 0).length
+  // Mijoz darajasi xaridlar soniga qarab: VIP 3+, sodiq 2, bir martalik 1
+  const ordersByCustomer = {}
+  const debtByCustomer = {}
+  allCompleted.forEach(s => {
+    if (!s.customerId) return
+    ordersByCustomer[s.customerId] = (ordersByCustomer[s.customerId] || 0) + 1
+    if ((s.installmentDebt || 0) > 0) debtByCustomer[s.customerId] = true
+  })
+  const levels      = Object.values(ordersByCustomer).map(customerLevel)
+  const vipCount    = levels.filter(l => l === 'gold').length
+  const loyalCount  = levels.filter(l => l === 'silver').length
+  const newCount    = levels.filter(l => l === 'none').length
+  const buyersCount = levels.length
+  const debtors     = Object.keys(debtByCustomer).length
 
   // Tovar tezligi
   const productVelocity = useMemo(() => {
@@ -67,17 +78,16 @@ function MarketingTab({ aiData = {}, agentConfig = null }) {
       const name = p?.name || i.name || '?'
       if (!counts[name]) counts[name] = { name, brand: p?.brand || '', total: 0, thisMonth: 0, lastMonth: 0 }
       counts[name].total += (i.qty || 1)
-      if ((s.soldAt || '').startsWith(thisMonthKey)) counts[name].thisMonth += (i.qty || 1)
-      if ((s.soldAt || '').startsWith(lastMonthKey)) counts[name].lastMonth += (i.qty || 1)
+      if (inMonth(s.soldAt, thisMonthKey)) counts[name].thisMonth += (i.qty || 1)
+      if (inMonth(s.soldAt, lastMonthKey)) counts[name].lastMonth += (i.qty || 1)
     }))
     return Object.values(counts).sort((a, b) => b.total - a.total)
   }, [MOCK_SALES, MOCK_PRODUCTS])
 
   const topFast    = productVelocity.slice(0, 5)
   const topSlow    = [...productVelocity].sort((a, b) => a.total - b.total).filter(p => p.total > 0).slice(0, 5)
-  const shopBatchIds = new Set(MOCK_BATCHES.map(b => b.id))
   const unsoldProducts = MOCK_PRODUCTS.filter(p => {
-    const hasStock = MOCK_ITEMS.some(i => i.productId === p.id && i.status === 'in_stock' && (selectedShopId === 'all' || shopBatchIds.has(i.batchId)))
+    const hasStock = MOCK_ITEMS.some(i => i.productId === p.id && i.status === 'in_stock' && (selectedShopId === 'all' || String(i.shopId) === String(selectedShopId)))
     return hasStock && !productVelocity.find(pv => pv.name === p.name)
   }).slice(0, 5)
 
@@ -105,10 +115,10 @@ function MarketingTab({ aiData = {}, agentConfig = null }) {
   const monthTrend = useMemo(() => {
     const months = []
     for (let i = 2; i >= 0; i--) {
-      const d = new Date(); d.setMonth(d.getMonth() - i)
-      const key = d.toISOString().slice(0, 7)
+      const n = new Date(); const d = new Date(n.getFullYear(), n.getMonth() - i, 1)
+      const key = localYm(d)
       const label = `${d.getMonth() + 1}-oy`
-      const count = [...MOCK_SALES, ...MOCK_USED_SALES].filter(s => (s.soldAt || s.createdAt || '').startsWith(key) && s.status !== 'cancelled').length
+      const count = [...MOCK_SALES, ...MOCK_USED_SALES].filter(s => inMonth(s.soldAt || s.createdAt, key)).length
       months.push({ label, count })
     }
     return months
@@ -143,11 +153,12 @@ ${monthTrend.map(m => `${m.label}: ${m.count} ta sotuv`).join(' → ')}
 Bu oy o'sish: ${revGrowth}%
 
 ━━━ MIJOZLAR SEGMENTI ━━━
-VIP (oltin): ${vipCount} ta — ushlab qolish, maxsus taklif kerak
-Sodiq (kumush): ${loyalCount} ta — VIP ga ko'tarish imkoni bor
-Yangi / bir martalik: ${newCount} ta — qayta jalb qilish kerak
+VIP (3+ xarid): ${vipCount} ta — ushlab qolish, maxsus taklif kerak
+Sodiq (2 xarid): ${loyalCount} ta — VIP ga ko'tarish imkoni bor
+Bir martalik: ${newCount} ta — qayta jalb qilish kerak
+Hech xarid qilmagan: ${Math.max(0, MOCK_CUSTOMERS.length - buyersCount)} ta
 Nasiyadorlar: ${debtors} ta — aktiv muloqot va eslatma zarur
-Qayta kelgan mijozlar: ${repeatCustomers} ta (${MOCK_CUSTOMERS.length ? Math.round(repeatCustomers / MOCK_CUSTOMERS.length * 100) : 0}% retention)
+Qayta kelgan mijozlar: ${repeatCustomers} ta (xaridorlarning ${buyersCount ? Math.round(repeatCustomers / buyersCount * 100) : 0}%)
 
 ━━━ MIJOZLAR MANBALARI ━━━
 ${sourceCounts.slice(0, 5).map(([src, cnt]) => `${src}: ${cnt} ta (${Math.round(cnt / Math.max(MOCK_SALES.length, 1) * 100)}%)`).join('\n') || 'ma\'lumot yo\'q'}
@@ -194,8 +205,8 @@ ${activePromos.length ? activePromos.map(p => `- ${p.name}`).join('\n') : 'Hozir
 === JORIY HOLAT ===
 Fasl: ${seasonLabel} (${currentMonth}-oy)
 3 oylik trend: ${monthTrend.map(m => `${m.label}: ${m.count} ta`).join(' → ')} | Bu oy o'sish: ${revGrowth}%
-Mijozlar: ${MOCK_CUSTOMERS.length} ta jami (VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount} | Nasiyador: ${debtors})
-Retention: ${repeatCustomers} ta qayta kelgan (${MOCK_CUSTOMERS.length ? Math.round(repeatCustomers / MOCK_CUSTOMERS.length * 100) : 0}%)
+Mijozlar: ${MOCK_CUSTOMERS.length} ta jami (VIP 3+ xarid: ${vipCount} | Sodiq 2 xarid: ${loyalCount} | Bir martalik: ${newCount} | Nasiyador: ${debtors})
+Retention: ${repeatCustomers} ta qayta kelgan (xaridorlarning ${buyersCount ? Math.round(repeatCustomers / buyersCount * 100) : 0}%)
 Eng yaxshi manbalar: ${sourceCounts.slice(0, 3).map(([s, c]) => `${s}(${c})`).join(', ') || 'yo\'q'}
 Eng tez sotiladigan: ${topFast.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}
 Eng sekin sotiladigan: ${topSlow.slice(0,3).map(p => p.name).join(', ') || 'yo\'q'}

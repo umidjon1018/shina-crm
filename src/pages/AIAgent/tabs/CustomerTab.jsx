@@ -19,21 +19,16 @@ import AiChat from '../components/AiChat'
 import { createReservation, cancelReservation, getReservations } from '../../../api/reservationService'
 import { getProducts } from '../../../api/productService'
 import { getItems } from '../../../api/itemService'
+import { customerLevel, daysUntilBirthday as getDaysUntilBirthday, saleDiscountAmount } from '../aiHelpers'
 
-function getDaysUntilBirthday(birthDate) {
-  if (!birthDate) return 999
-  const today = new Date()
-  const b = new Date(birthDate)
-  const next = new Date(today.getFullYear(), b.getMonth(), b.getDate())
-  if (next <= today) next.setFullYear(today.getFullYear() + 1)
-  return Math.ceil((next - today) / 86400000)
-}
-
+// Daraja xaridlar soniga qarab: VIP 3+, sodiq 2, yangi 1, xarid yo'q 0
 const LOYALTY_BADGE = {
   gold:   { label: 'VIP',   cls: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
   silver: { label: 'Sodiq', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
   none:   { label: 'Yangi', cls: 'bg-bg-secondary text-text-muted border-border' },
+  zero:   { label: "Xarid yo'q", cls: 'bg-bg-secondary text-text-muted border-border' },
 }
+const PAY_LABEL = { cash: 'Naqd', card: 'Karta', transfer: "O'tkazma", installment: 'Nasiya' }
 
 const SOURCE_LABELS = {
   instagram: 'Instagram',
@@ -44,15 +39,16 @@ const SOURCE_LABELS = {
 }
 
 // ── Bron modali ──────────────────────────────────────────────────────────────
-function ReservationModal({ customer, products, items, onClose, onDone }) {
+function ReservationModal({ customer, products, items, reservedItemIds, onClose, onDone }) {
   const [productId, setProductId] = useState('')
   const [hours, setHours] = useState('4')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const availableItems = items.filter(i => i.status === 'in_stock' && (productId ? i.productId === Number(productId) : true))
-  const selectedProduct = products.find(p => p.id === Number(productId))
+  const isFree = (i) => i.status === 'in_stock' && !reservedItemIds.has(String(i.id))
+  const availableItems = productId ? items.filter(i => isFree(i) && i.productId === String(productId)) : []
+  const selectedProduct = products.find(p => p.id === String(productId))
 
   const handleSubmit = async () => {
     if (!productId || !availableItems.length) return setError('Tovar tanlang')
@@ -64,6 +60,7 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
       await createReservation({
         itemId: item.id,
         productId: item.productId,
+        shopId: item.shopId,
         customerName: customer.name,
         customerPhone: customer.phone,
         reservedUntil,
@@ -98,7 +95,7 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
             <select value={productId} onChange={e => setProductId(e.target.value)}
               className="w-full bg-bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-blue">
               <option value="">— tanlang —</option>
-              {products.filter(p => p.isActive && items.some(i => i.productId === p.id && i.status === 'in_stock')).map(p => (
+              {products.filter(p => p.isActive && items.some(i => i.productId === p.id && isFree(i))).map(p => (
                 <option key={p.id} value={p.id}>{p.name} {p.brand ? `(${p.brand})` : ''}</option>
               ))}
             </select>
@@ -141,8 +138,8 @@ function ReservationModal({ customer, products, items, onClose, onDone }) {
 
 // ── Mijoz profil modali ───────────────────────────────────────────────────────
 function CustomerProfileModal({ customer, sales, reservations, onClose, onReserve }) {
-  const badge = LOYALTY_BADGE[customer.loyaltyLevel || 'none'] || LOYALTY_BADGE.none
   const customerSales = sales.filter(s => s.customerId === customer.id && s.status !== 'cancelled')
+  const badge = LOYALTY_BADGE[customerLevel(customerSales.length)] || LOYALTY_BADGE.none
   const cancelledSales = sales.filter(s => s.customerId === customer.id && s.status === 'cancelled' && !isExchangeCancel(s))
   const customerReservations = reservations.filter(r => r.customer_phone === customer.phone || r.customer_name === customer.name)
   const totalSpend = customerSales.reduce((s, x) => s + (x.total || 0), 0)
@@ -208,7 +205,7 @@ function CustomerProfileModal({ customer, sales, reservations, onClose, onReserv
             {[
               { label: 'Jami xarid', value: customerSales.length + ' ta', color: 'text-accent-green' },
               { label: 'Jami summa', value: totalSpend > 0 ? (totalSpend / 1000000).toFixed(1) + ' mln' : '—', color: 'text-text-primary' },
-              { label: 'Qarz', value: (customer.installmentDebt || 0) > 0 ? (customer.installmentDebt / 1000000).toFixed(1) + ' mln' : '—', color: (customer.installmentDebt || 0) > 0 ? 'text-accent-red' : 'text-text-muted' },
+              { label: 'Qarz', value: (customer.debt || 0) > 0 ? (customer.debt / 1000000).toFixed(1) + ' mln' : '—', color: (customer.debt || 0) > 0 ? 'text-accent-red' : 'text-text-muted' },
             ].map(({ label, value, color }) => (
               <div key={label} className="p-3 rounded-xl bg-bg-secondary border border-border text-center">
                 <p className={`text-base font-bold ${color}`}>{value}</p>
@@ -253,7 +250,7 @@ function CustomerProfileModal({ customer, sales, reservations, onClose, onReserv
                   <div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-secondary border border-border text-sm">
                     <div>
                       <p className="text-text-primary font-medium">{s.total?.toLocaleString()} so'm</p>
-                      <p className="text-xs text-text-muted">{s.soldAt?.slice(0, 10)} · {s.paymentType === 'cash' ? 'Naqd' : s.paymentType === 'card' ? 'Karta' : 'Nasiya'}</p>
+                      <p className="text-xs text-text-muted">{s.soldAt?.slice(0, 10)} · {PAY_LABEL[s.paymentType] || s.paymentType}{s.isUsedSale ? ' · B/U' : ''}</p>
                     </div>
                     <div className="text-right">
                       {s.items?.slice(0, 2).map((item, i) => (
@@ -287,6 +284,7 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
     sales: _allSales = [],
     products: _allProducts = [],
     items: _allItems = [],
+    usedSales: _allUsedSales = [],
     promotions: MOCK_PROMOTIONS = [],
   } = aiData
 
@@ -311,7 +309,9 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
 
   const filterShop = arr => selectedShopId === 'all' ? arr : arr.filter(s => String(s.shopId) === String(selectedShopId))
   const shopCustomers = selectedShopId === 'all' ? MOCK_CUSTOMERS : MOCK_CUSTOMERS.filter(c => !c.shopId || String(c.shopId) === String(selectedShopId))
-  const completedSales = filterShop(_allSales).filter(s => s.status !== 'cancelled')
+  const completedSales = [...filterShop(_allSales), ...filterShop(_allUsedSales)].filter(s => s.status !== 'cancelled')
+  const allCustomerSales = useMemo(() => [..._allSales, ..._allUsedSales], [_allSales, _allUsedSales])
+  const reservedItemIds = useMemo(() => new Set(reservations.map(r => String(r.item_id))), [reservations])
   const cancelledSales = filterShop(_allSales).filter(s => s.status === 'cancelled' && !isExchangeCancel(s))
   const exchangedSales = filterShop(_allSales).filter(s => s._isExchange)
 
@@ -333,24 +333,27 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
   const customerProfiles = useMemo(() => {
     const map = {}
     shopCustomers.forEach(c => {
-      map[c.id] = { ...c, totalSpend: 0, totalOrders: 0, cancelCount: 0, discountUsed: 0, lastSaleDate: null }
+      map[c.id] = { ...c, totalSpend: 0, totalOrders: 0, cancelCount: 0, discountUsed: 0, debt: 0, lastSaleDate: null, firstSale: null }
     })
     completedSales.forEach(s => {
       if (!s.customerId || !map[s.customerId]) return
       const p = map[s.customerId]
       p.totalSpend  += s.total || 0
       p.totalOrders += 1
-      p.discountUsed += s.discountAmount || 0
+      p.discountUsed += s.isUsedSale ? 0 : saleDiscountAmount(s)
+      p.debt += s.installmentDebt || 0
       if (!p.lastSaleDate || s.soldAt > p.lastSaleDate) p.lastSaleDate = s.soldAt
+      if (!p.firstSale || s.soldAt < p.firstSale.soldAt) p.firstSale = s
     })
     cancelledSales.forEach(s => { if (s.customerId && map[s.customerId]) map[s.customerId].cancelCount++ })
-    return Object.values(map)
+    // Manba — mijozning birinchi xaridi qayerdan kelgani (mijoz kartasida manba maydoni yo'q)
+    return Object.values(map).map(p => ({ ...p, level: customerLevel(p.totalOrders), source: p.firstSale?.source || 'other', firstSale: undefined }))
   }, [shopCustomers, completedSales, cancelledSales])
 
   // Filtr
   const filtered = useMemo(() => {
     let list = customerProfiles
-    if (filterLoyalty !== 'all') list = list.filter(c => (c.loyaltyLevel || 'none') === filterLoyalty)
+    if (filterLoyalty !== 'all') list = list.filter(c => c.level === filterLoyalty)
     if (filterSource !== 'all') list = list.filter(c => (c.source || 'other') === filterSource)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -360,11 +363,11 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
   }, [customerProfiles, search, filterLoyalty, filterSource])
 
   // Tahlil ko'rsatkichlari
-  const vipCount       = shopCustomers.filter(c => c.loyaltyLevel === 'gold').length
-  const loyalCount     = shopCustomers.filter(c => c.loyaltyLevel === 'silver').length
-  const newCount       = shopCustomers.filter(c => !c.loyaltyLevel || c.loyaltyLevel === 'none').length
-  const debtors        = shopCustomers.filter(c => (c.installmentDebt || 0) > 0)
-  const totalDebt      = debtors.reduce((s, c) => s + (c.installmentDebt || 0), 0)
+  const vipCount       = customerProfiles.filter(c => c.level === 'gold').length
+  const loyalCount     = customerProfiles.filter(c => c.level === 'silver').length
+  const newCount       = customerProfiles.filter(c => c.level === 'none').length
+  const debtors        = customerProfiles.filter(c => c.debt > 0)
+  const totalDebt      = debtors.reduce((s, c) => s + c.debt, 0)
   const birthdaySoon7  = shopCustomers.filter(c => getDaysUntilBirthday(c.birthDate) <= 7)
   const birthdaySoon30 = shopCustomers.filter(c => getDaysUntilBirthday(c.birthDate) <= 30)
   const sixMonthsAgo   = new Date(Date.now() - 180 * 86400000).toISOString()
@@ -377,9 +380,9 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
   // Manba statistikasi
   const sourceCounts = useMemo(() => {
     const m = {}
-    shopCustomers.forEach(c => { const s = c.source || 'other'; m[s] = (m[s] || 0) + 1 })
+    customerProfiles.forEach(c => { if (c.totalOrders) m[c.source] = (m[c.source] || 0) + 1 })
     return m
-  }, [shopCustomers])
+  }, [customerProfiles])
 
   // Zaxiradagi tovarlar (agent uchun)
   const stockInfo = useMemo(() => {
@@ -399,7 +402,7 @@ function CustomerTab({ aiData = {}, agentConfig = null }) {
       return role + `\n\nMIJOZLAR TAHLILI — TO'LIQ MA'LUMOT:
 
 👥 UMUMIY:
-- Jami: ${shopCustomers.length} ta | VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount}
+- Jami: ${shopCustomers.length} ta | VIP (3+ xarid): ${vipCount} | Sodiq (2 xarid): ${loyalCount} | Bir martalik: ${newCount}
 - Nasiya qarzdor: ${debtors.length} ta, jami qarz: ${totalDebt.toLocaleString()} so'm
 - 7 kun ichida tug'ilgan kun: ${birthdaySoon7.length} ta (30 kun: ${birthdaySoon30.length} ta)
 
@@ -454,7 +457,7 @@ ${stockInfo.slice(0, 20).map(p => `- ${p.name}${p.brand ? ` (${p.brand})` : ''}:
 
     const customersSection = `
 === MIJOZLAR HOLATI ===
-Jami: ${shopCustomers.length} ta | VIP: ${vipCount} | Sodiq: ${loyalCount} | Yangi: ${newCount}
+Jami: ${shopCustomers.length} ta | VIP (3+ xarid): ${vipCount} | Sodiq (2 xarid): ${loyalCount} | Bir martalik: ${newCount}
 Nasiya qarz: ${totalDebt.toLocaleString()} so'm (${debtors.length} ta mijoz)
 Faol bronlar: ${reservations.length} ta`
 
@@ -495,9 +498,9 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
       {/* Statistika kartochkalari */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'VIP mijozlar',  value: vipCount,       sub: 'Oltin daraja',           color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
-          { label: 'Sodiq',         value: loyalCount,     sub: 'Kumush daraja',           color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
-          { label: 'Yangi',         value: newCount,       sub: 'Jalb qilish imkoni',      color: 'text-accent-green', bg: 'bg-accent-green/10', border: 'border-accent-green/20' },
+          { label: 'VIP mijozlar',  value: vipCount,       sub: '3 va undan ko\'p xarid', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
+          { label: 'Sodiq',         value: loyalCount,     sub: '2 ta xarid',              color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
+          { label: 'Yangi',         value: newCount,       sub: '1 ta xarid',              color: 'text-accent-green', bg: 'bg-accent-green/10', border: 'border-accent-green/20' },
           { label: 'Qarzdorlar',    value: debtors.length, sub: totalDebt > 0 ? (totalDebt/1000000).toFixed(1)+' mln so\'m' : '—', color: 'text-accent-red', bg: 'bg-accent-red/10', border: 'border-accent-red/20' },
         ].map(({ label, value, sub, color, bg, border }) => (
           <div key={label} className={`p-4 rounded-2xl border ${border} ${bg}`}>
@@ -533,10 +536,10 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
 
               {/* Daraja filtri */}
               <div className="flex gap-1">
-                {['all', 'gold', 'silver', 'none'].map(lv => (
+                {['all', 'gold', 'silver', 'none', 'zero'].map(lv => (
                   <button key={lv} onClick={() => setFilterLoyalty(lv)}
                     className={`px-3 py-2 rounded-xl text-xs border transition-colors ${filterLoyalty === lv ? 'bg-accent-blue/10 text-accent-blue border-accent-blue/30' : 'border-border text-text-muted hover:bg-bg-secondary'}`}>
-                    {lv === 'all' ? 'Barchasi' : lv === 'gold' ? 'VIP' : lv === 'silver' ? 'Sodiq' : 'Yangi'}
+                    {lv === 'all' ? 'Barchasi' : LOYALTY_BADGE[lv].label}
                   </button>
                 ))}
               </div>
@@ -569,14 +572,14 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
                   </thead>
                   <tbody>
                     {filtered.slice(0, 50).map(c => {
-                      const badge = LOYALTY_BADGE[c.loyaltyLevel || 'none'] || LOYALTY_BADGE.none
+                      const badge = LOYALTY_BADGE[c.level] || LOYALTY_BADGE.none
                       const daysSinceLast = c.lastSaleDate ? Math.floor((Date.now() - new Date(c.lastSaleDate)) / 86400000) : null
                       const isAtRisk = daysSinceLast !== null && daysSinceLast > 180
                       const hasBirthday = getDaysUntilBirthday(c.birthDate) <= 7
                       return (
                         <tr key={c.id}
                           onClick={() => setProfileModal(c)}
-                          className={`border-b border-border/50 hover:bg-bg-secondary/50 transition-colors cursor-pointer ${isAtRisk ? 'bg-red-500/3' : ''}`}>
+                          className={`border-b border-border/50 hover:bg-bg-secondary/50 transition-colors cursor-pointer ${isAtRisk ? 'bg-red-500/5' : ''}`}>
                           <td className="px-3 sm:px-4 py-2 sm:py-3">
                             <div className="flex items-center gap-2">
                               <div>
@@ -594,8 +597,8 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
                           <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-primary">{c.totalOrders}</td>
                           <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-text-primary">{c.totalSpend > 0 ? c.totalSpend.toLocaleString() + " so'm" : '—'}</td>
                           <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
-                            {(c.installmentDebt || 0) > 0
-                              ? <span className="text-accent-red">{c.installmentDebt.toLocaleString()} so'm</span>
+                            {c.debt > 0
+                              ? <span className="text-accent-red">{c.debt.toLocaleString()} so'm</span>
                               : <span className="text-text-muted">—</span>}
                           </td>
                           <td className="px-3 sm:px-4 py-2 sm:py-3 text-text-muted">{c.lastSaleDate ? c.lastSaleDate.slice(0, 10) : '—'}</td>
@@ -629,7 +632,7 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
             {reservations.length === 0 ? (
               <div className="py-12 text-center text-text-muted text-sm border border-border rounded-2xl">Faol bron yo'q</div>
             ) : reservations.map(rv => {
-              const prod = products.find(p => p.id === rv.product_id)
+              const prod = products.find(p => p.id === String(rv.product_id))
               const until = new Date(rv.reserved_until)
               const minutesLeft = Math.round((until - Date.now()) / 60000)
               return (
@@ -752,7 +755,7 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
       {profileModal && (
         <CustomerProfileModal
           customer={profileModal}
-          sales={_allSales}
+          sales={allCustomerSales}
           reservations={reservations}
           onClose={() => setProfileModal(null)}
           onReserve={() => { setReserveModal(profileModal); setProfileModal(null) }}
@@ -764,7 +767,8 @@ ${igHandle ? `- Instagram: ${igHandle}` : ''}`
         <ReservationModal
           customer={reserveModal}
           products={products}
-          items={items}
+          items={selectedShopId === 'all' ? items : items.filter(i => String(i.shopId) === String(selectedShopId))}
+          reservedItemIds={reservedItemIds}
           onClose={() => setReserveModal(null)}
           onDone={() => { setReserveModal(null); loadReservations(); setActiveSection('reservations') }}
         />

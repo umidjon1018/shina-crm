@@ -133,6 +133,8 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
     'accent-blue':   { btn: 'bg-accent-blue/20 hover:bg-accent-blue/30 text-accent-blue',   border: 'focus:border-accent-blue',  user: 'bg-accent-blue/15' },
     'accent-orange': { btn: 'bg-accent-orange/20 hover:bg-accent-orange/30 text-accent-orange', border: 'focus:border-accent-orange', user: 'bg-accent-orange/15' },
     'accent-red':    { btn: 'bg-accent-red/20 hover:bg-accent-red/30 text-accent-red',       border: 'focus:border-accent-red',   user: 'bg-accent-red/15' },
+    'accent-purple': { btn: 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400',      border: 'focus:border-purple-400',   user: 'bg-purple-500/15' },
+    'accent-pink':   { btn: 'bg-pink-500/20 hover:bg-pink-500/30 text-pink-400',            border: 'focus:border-pink-400',     user: 'bg-pink-500/15' },
   }
   const c = colorMap[colorClass] || colorMap['accent-green']
 
