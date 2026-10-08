@@ -192,7 +192,23 @@ const CashflowTab = () => {
           <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
             {paginated.length === 0 ? (
               <div className="p-12 text-center text-text-secondary text-sm">{t('fin_cf_empty')}</div>
-            ) : (
+            ) : (<>
+              {/* Telefon: kartochkalar */}
+              <div className="sm:hidden divide-y divide-border/60">
+                {paginated.map((r, i) => (
+                  <div key={`${r.kind}-${r.ref}-${r.ts}-${i}`} className="p-3.5 space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold ${r.dir === 'in' ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
+                        {r.dir === 'in' ? <ArrowDownLeft size={11} /> : <ArrowUpRight size={11} />} {kindLabel(r.kind)}
+                      </span>
+                      <span className={`text-[15px] font-bold whitespace-nowrap ${r.dir === 'in' ? 'text-accent-green' : 'text-accent-red'}`}>{r.dir === 'in' ? '+' : '−'}{fmtUZS(r.amount)}</span>
+                    </div>
+                    <p className="text-sm text-text-primary truncate">{rowNote(r) || '—'}</p>
+                    <p className="text-xs text-text-muted">{fmtTs(r.ts)} · {pmLabel(r.method, t)}{r.who ? ` · ${r.who}` : ''}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden sm:block">
               <TableView id="exp_cashflow" optional={[t('fin_cf_account'), t('exp_col_responsible')]}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -227,7 +243,8 @@ const CashflowTab = () => {
                 </table>
               </div>
               </TableView>
-            )}
+              </div>
+            </>)}
             <Pagination page={page} totalPages={totalPages} total={rows.length} setPage={setPage} />
           </div>
         </>

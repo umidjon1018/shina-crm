@@ -176,7 +176,43 @@ const ShopExpensesTab = ({ currentUser }) => {
             <Wallet size={36} className="text-text-secondary opacity-40" />
             <p className="text-text-secondary text-sm">{t('exp_not_found')}</p>
           </div>
-        ) : (
+        ) : (<>
+          {/* Telefon: kartochkalar (bosilsa — tahrirlash) */}
+          <div className="sm:hidden divide-y divide-border/60">
+            {paginated.map(exp => {
+              const cat = getCat(exp.categoryId)
+              const Icon = cat ? (ICON_MAP[cat.icon] || MoreHorizontal) : MoreHorizontal
+              const note = (i18n.language === 'ru' ? exp.noteRu || exp.note : exp.note) || ''
+              return (
+                <div key={exp.id} onClick={() => { setEditTarget(exp); setShowForm(true) }} className="p-3.5 space-y-1.5 active:bg-bg-tertiary/50">
+                  <div className="flex items-start justify-between gap-2">
+                    {cat ? (
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colorCls(cat.color)}`}><Icon size={12} /> {getCatLabel(cat, t)}</span>
+                    ) : <span className="text-text-muted">—</span>}
+                    <span className="text-[15px] font-bold text-text-primary whitespace-nowrap">{exp.currency === 'USD' ? `$${fmtNum(exp.amount)}` : fmtUZS(exp.amount)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-sm text-text-muted">
+                    <span>{fmtDate(exp.date)} · {exp.responsibleName}</span>
+                    <span className="flex items-center gap-1.5 text-xs">
+                      {exp.source === 'cashbox' && <span className="px-1.5 py-0.5 rounded font-bold bg-accent-orange/10 text-accent-orange">{t('fin_cashbox_badge')}</span>}
+                      {pmLabel(exp.paymentMethod, t)}
+                    </span>
+                  </div>
+                  {(note || exp.currency === 'USD') && (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm text-text-secondary truncate">{note}</p>
+                      {exp.currency === 'USD' && <span className="text-xs text-text-muted shrink-0">{fmtUZS(exp.amountUZS)}</span>}
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(exp) }}
+                      className="p-2 -m-1 text-text-muted hover:text-accent-red rounded-lg"><Trash2 size={15} /></button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="hidden sm:block">
           <TableView id="exp_shop" optional={[t('exp_col_period'), t('col_type'), t('exp_col_responsible'), t('col_uzs')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -251,7 +287,8 @@ const ShopExpensesTab = ({ currentUser }) => {
             </table>
           </div>
           </TableView>
-        )}
+          </div>
+        </>)}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>
 

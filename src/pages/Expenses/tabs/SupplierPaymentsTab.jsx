@@ -114,7 +114,34 @@ const SupplierPaymentsTab = () => {
             <Package size={36} className="text-text-secondary opacity-40" />
             <p className="text-text-secondary text-sm">{t('exp_sup_not_found')}</p>
           </div>
-        ) : (
+        ) : (<>
+          {/* Telefon: yetkazib beruvchi bo'yicha guruhlangan kartochkalar */}
+          <div className="sm:hidden divide-y divide-border">
+            {paginatedPayments.map(group => (
+              <div key={group.supplierId} className="p-3.5 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <Truck size={14} className="text-purple-400 shrink-0" />
+                    <span className="font-bold text-accent-orange truncate">{group.supplierName}</span>
+                  </span>
+                  <span className="text-right shrink-0">
+                    <span className="block font-bold text-text-primary">${fmtNum(group.totalUSD)}</span>
+                    <span className="block text-xs text-text-muted">{fmtUZS(group.totalUZS)}</span>
+                  </span>
+                </div>
+                {group.payments.map(pay => (
+                  <div key={pay.id} className="flex items-start justify-between gap-2 pl-6 text-sm">
+                    <span className="min-w-0">
+                      <span className="block text-text-primary truncate">{pay.productName}</span>
+                      <span className="block text-xs text-text-muted">{fmtDate(pay.date)} · {pay.type === 'cash_uzs' ? t('exp_pay_cash_uzs') : pay.type === 'cash_usd' ? t('exp_pay_cash_usd') : pay.type === 'transfer' ? t('exp_pay_bank') : pay.type}</span>
+                    </span>
+                    <span className="font-semibold text-text-primary whitespace-nowrap">${fmtNum(pay.amountUSD)}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="hidden sm:block">
           <TableView id="exp_sup_pay" optional={[t('exp_sup_col_pay_type'), t('col_note'), 'UZS']}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -177,7 +204,8 @@ const SupplierPaymentsTab = () => {
             </table>
           </div>
           </TableView>
-        )}
+          </div>
+        </>)}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>
     </div>

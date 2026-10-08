@@ -173,7 +173,25 @@ const MessagesTab = ({ goSettings }) => {
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
         <div className="px-4 py-3 border-b border-border font-syne font-bold text-text-primary">{t('mkt_tg_history')}</div>
-        <table className="w-full text-sm">
+        {/* Telefon: kartochkalar */}
+        <div className="sm:hidden divide-y divide-border/60">
+          {campaigns.length === 0 && <p className="py-8 text-center text-text-muted text-sm">{t('mkt_tg_no_campaigns')}</p>}
+          {campaigns.map(c => (
+            <div key={c.id} className="p-3.5 space-y-1">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-semibold text-text-primary">{c.name || '—'}</span>
+                <span className="text-xs whitespace-nowrap">
+                  <span className="text-accent-green font-bold">{c.sent}</span>
+                  {c.failed > 0 && <span className="text-accent-red font-bold"> / {c.failed}</span>}
+                  <span className="text-text-muted"> / {c.total}</span>
+                </span>
+              </div>
+              <p className="text-sm text-text-secondary line-clamp-2">{c.has_image ? '🖼 ' : ''}{c.text}</p>
+              <p className="text-xs text-text-muted">{fmtDT(c.created_at)}{c.created_by_name ? ` · ${c.created_by_name}` : ''}{c.status === 'sending' && <span className="ml-1.5 text-accent-orange">{t('mkt_tg_sending')}</span>}</p>
+            </div>
+          ))}
+        </div>
+        <table className="hidden sm:table w-full text-sm">
           <thead>
             <tr className="border-b border-border text-xs">
               <th className="text-left px-3 sm:px-4 py-2.5 text-text-secondary font-medium">{t('col_date')}</th>

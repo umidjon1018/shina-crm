@@ -131,7 +131,31 @@ const IncomesTab = ({ currentUser }) => {
             <TrendingUp size={36} className="text-text-secondary opacity-40" />
             <p className="text-text-secondary text-sm">{t('fin_inc_empty')}</p>
           </div>
-        ) : (
+        ) : (<>
+          {/* Telefon: kartochkalar (bosilsa — tahrirlash) */}
+          <div className="sm:hidden divide-y divide-border/60">
+            {paginated.map(inc => {
+              const cat = getCat(inc.categoryId)
+              const Icon = cat ? (ICON_MAP[cat.icon] || MoreHorizontal) : MoreHorizontal
+              return (
+                <div key={inc.id} onClick={() => setForm({ edit: inc })} className="p-3.5 space-y-1.5 active:bg-bg-tertiary/50">
+                  <div className="flex items-start justify-between gap-2">
+                    {cat ? <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colorCls(cat.color)}`}><Icon size={12} /> {getCatLabel(cat, t)}</span> : <span className="text-text-muted">—</span>}
+                    <span className="text-[15px] font-bold text-accent-green whitespace-nowrap">+{fmtUZS(inc.amountUZS)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-sm text-text-muted">
+                    <span>{fmtDate(inc.date)}{inc.responsibleName ? ` · ${inc.responsibleName}` : ''}</span>
+                    <span className="text-xs">{pmLabel(inc.paymentMethod, t)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-text-secondary truncate">{inc.note || ''}{inc.currency === 'USD' ? `${inc.note ? ' · ' : ''}$${fmtNum(inc.amount)} @ ${fmtNum(inc.usdRate)}` : ''}</p>
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(inc) }} className="p-2 -m-1 shrink-0 text-text-muted hover:text-accent-red rounded-lg"><Trash2 size={15} /></button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="hidden sm:block">
           <TableView id="exp_incomes" optional={[t('exp_col_responsible'), t('fin_payment_method')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -189,7 +213,8 @@ const IncomesTab = ({ currentUser }) => {
             </table>
           </div>
           </TableView>
-        )}
+          </div>
+        </>)}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>
 

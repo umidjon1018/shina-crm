@@ -124,7 +124,33 @@ const GiftCardsTab = () => {
       </div>
 
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
-        {loading ? <div className="p-12 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div> : (
+        {loading ? <div className="p-12 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div> : (<>
+          {/* Telefon: kartochkalar */}
+          <div className="sm:hidden divide-y divide-border/60">
+            {paginated.length === 0 && <p className="py-10 text-center text-text-muted text-sm">{t('mkt_gc_empty')}</p>}
+            {paginated.map(c => (
+              <div key={c.id} className="p-3.5 space-y-1.5">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-mono font-bold text-text-primary">{c.code}</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${STATUS[c.status]}`}>{t('mkt_gc_st_' + c.status)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="text-text-muted truncate">{c.customerName || '—'} · {c.expiresAt ? fmtD(c.expiresAt) : '∞'}</span>
+                  <span className="whitespace-nowrap"><span className="font-bold text-accent-green">{fmtMoney(c.balance)}</span><span className="text-xs text-text-muted"> / {fmtMoney(c.nominal)}</span></span>
+                </div>
+                <div className="flex items-center justify-end gap-1">
+                  {c.status === 'inactive' && (
+                    <button onClick={() => openSell(c.code)} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-accent-red/10 text-accent-red">{t('mkt_gc_sell_btn')}</button>
+                  )}
+                  <button onClick={() => openTx(c)} className="p-2 rounded-lg text-text-secondary hover:bg-bg-tertiary"><History size={15} /></button>
+                  {c.status !== 'cancelled' && c.status !== 'used' && (
+                    <button onClick={() => { setCancelCard(c); setCancelRefund(c.status !== 'inactive'); setError('') }} className="p-2 rounded-lg text-text-secondary hover:text-accent-red"><Ban size={15} /></button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden sm:block">
           <TableView id="mkt_giftcards" optional={[t('mkt_gc_nominal'), t('mkt_gc_sold_at')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -168,7 +194,8 @@ const GiftCardsTab = () => {
             </table>
           </div>
           </TableView>
-        )}
+          </div>
+        </>)}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>
 

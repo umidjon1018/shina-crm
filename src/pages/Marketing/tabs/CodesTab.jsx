@@ -146,6 +146,27 @@ const ReportView = () => {
   return (
     <div className="space-y-4">
       <PeriodPicker preset={preset} range={range} onChange={(p, r) => { setPreset(p); setRange(r) }} />
+      {/* Telefon: kartochkalar */}
+      <div className="sm:hidden space-y-2">
+        {rows.length === 0 && <p className="bg-bg-secondary border border-border rounded-2xl py-8 text-center text-text-muted text-sm">{t('mkt_rep_empty')}</p>}
+        {rows.map((r, i) => (
+          <div key={i} className="bg-bg-secondary border border-border rounded-2xl p-3.5 space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-text-primary">{r.kind === 'voucher' ? <Handshake size={13} className="text-purple-500" /> : <Megaphone size={13} className="text-accent-blue" />}{r.name}</span>
+              <span className="font-bold text-accent-green whitespace-nowrap">{fmtMoney(r.revenue)}</span>
+            </div>
+            <p className="text-xs text-text-muted">{t('mkt_rep_codes')}: {r.codes} · {t('mkt_rep_uses')}: {r.uses} · {t('mkt_rep_customers')}: {r.customers}</p>
+            <p className="text-xs"><span className="text-accent-orange">{t('mkt_rep_discount')}: {fmtMoney(r.discount)}</span>{r.uses ? <span className="text-text-muted"> · {t('mkt_rep_avg')}: {fmtMoney(r.revenue / r.uses)}</span> : null}</p>
+          </div>
+        ))}
+        {rows.length > 0 && (
+          <div className="bg-bg-tertiary/60 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2 text-sm font-bold">
+            <span className="text-text-primary">{t('fin_cf_total')} · {total.uses}</span>
+            <span><span className="text-accent-green">{fmtMoney(total.revenue)}</span> <span className="text-accent-orange text-xs">−{fmtMoney(total.discount)}</span></span>
+          </div>
+        )}
+      </div>
+      <div className="hidden sm:block">
       <TableView id="mkt_codes_report" optional={[t('mkt_rep_customers'), t('mkt_rep_avg')]}>
       <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
         <table className="w-full text-sm">
@@ -187,6 +208,7 @@ const ReportView = () => {
         </table>
       </div>
       </TableView>
+      </div>
     </div>
   )
 }
@@ -261,8 +283,30 @@ const CodesTab = () => {
 
       {view === 'report' ? <ReportView /> : loading ? (
         <div className="p-12 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
-      ) : view === 'channel' ? (
-        <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
+      ) : view === 'channel' ? (<>
+        {/* Telefon: kartochkalar */}
+        <div className="sm:hidden space-y-2">
+          {list.length === 0 && <p className="bg-bg-secondary border border-border rounded-2xl py-10 text-center text-text-muted text-sm">{t('mkt_code_empty')}</p>}
+          {list.map(c => (
+            <div key={c.id} className="bg-bg-secondary border border-border rounded-2xl p-3.5 space-y-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-mono font-bold text-text-primary">{c.code}
+                  {!c.isActive && <span className="ml-1.5 font-sans px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-500/10 text-gray-500">{t('mkt_status_off')}</span>}
+                </span>
+                <span className="font-semibold text-accent-green whitespace-nowrap">{fmtMoney(c.revenue)}</span>
+              </div>
+              <p className="text-sm text-text-secondary truncate">{c.channel || '—'} · {c.promotionName || '—'}</p>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-text-muted">{t('mkt_rep_uses')}: {c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''} · {c.expiresAt ? fmtD(c.expiresAt) : '∞'}</span>
+                <span className="flex items-center gap-1">
+                  <button onClick={() => toggle(c)} className={`p-2 rounded-lg ${c.isActive ? 'text-accent-green' : 'text-text-muted'}`}><Power size={15} /></button>
+                  <button onClick={() => remove(c)} className="p-2 rounded-lg text-text-secondary hover:text-accent-red"><Trash2 size={15} /></button>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden sm:block bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-xs">
@@ -298,7 +342,7 @@ const CodesTab = () => {
             </tbody>
           </table>
         </div>
-      ) : (
+      </>) : (
         <div className="space-y-3">
           {batches.length === 0 && <div className="bg-bg-secondary border border-border rounded-2xl p-10 text-center text-text-muted text-sm">{t('mkt_code_empty')}</div>}
           {batches.map(b => {

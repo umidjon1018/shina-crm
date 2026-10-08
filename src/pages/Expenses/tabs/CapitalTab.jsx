@@ -117,7 +117,33 @@ const CapitalTabWithHeader = () => {
             <Landmark size={36} className="text-text-secondary opacity-40" />
             <p className="text-text-secondary text-sm">{t('exp_cap_not_found')}</p>
           </div>
-        ) : (
+        ) : (<>
+          {/* Telefon: kartochkalar (bosilsa — tahrirlash) */}
+          <div className="sm:hidden divide-y divide-border/60">
+            {paginated.map(cap => {
+              const note = (i18n.language === 'ru' ? cap.noteRu || cap.note : cap.note) || ''
+              return (
+                <div key={cap.id} onClick={() => { setEditTarget(cap); setShowForm(true) }} className="p-3.5 space-y-1.5 active:bg-bg-tertiary/50">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${cap.type === 'inject' ? 'bg-green-500/10 text-green-500' : 'bg-accent-red/10 text-accent-red'}`}>
+                      {cap.type === 'inject' ? <ArrowDownCircle size={11} /> : <ArrowUpCircle size={11} />}
+                      {cap.type === 'inject' ? t('exp_cap_inject') : t('exp_cap_return')}
+                    </span>
+                    <span className="text-[15px] font-bold text-text-primary whitespace-nowrap">{cap.currency === 'USD' ? `$${fmtNum(cap.amount)}` : fmtUZS(cap.amount)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-sm text-text-muted">
+                    <span className="truncate">{fmtDate(cap.date)} · {(i18n.language === 'ru' ? cap.sourceRu || cap.source : cap.source)}</span>
+                    {cap.currency === 'USD' && <span className="text-xs shrink-0">{fmtUZS(cap.amountUZS)}</span>}
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-text-secondary truncate">{note}</p>
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(cap) }} className="p-2 -m-1 shrink-0 text-text-muted hover:text-accent-red rounded-lg"><Trash2 size={15} /></button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="hidden sm:block">
           <TableView id="exp_capital" optional={[t('col_source'), t('col_uzs')]}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -162,7 +188,8 @@ const CapitalTabWithHeader = () => {
             </table>
           </div>
           </TableView>
-        )}
+          </div>
+        </>)}
         <Pagination page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
       </div>
 
