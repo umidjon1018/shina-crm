@@ -12,6 +12,8 @@ import { inputCls, labelCls, SourceBadge, MethodPicker, som, sizeOf } from './wh
 import BarcodeScanner from '../../../components/sales/BarcodeScanner'
 
 const n = (v) => Number(v) || 0
+// Miqdorli (kg, litr) tovar qoldig'i birligi bilan
+const stockText = (p) => (p.bulk ? `${String(p.stock).replace('.', ',')} ${p.unit}` : p.stock)
 
 // Yangi ulgurji sotuv yoki konsignatsiya (tovar dilerga sotish uchun beriladi)
 const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, onSaved }) => {
@@ -60,14 +62,15 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
   const found = useMemo(() => {
     const s = q.trim().toLowerCase()
     if (!s) return []
-    return products.filter(p => p.stock > 0 && `${p.name} ${p.size}`.toLowerCase().includes(s)).slice(0, 8)
-  }, [q, products])
+    // Miqdorli tovar konsignatsiyaga berilmaydi
+    return products.filter(p => p.stock > 0 && (isSale || !p.bulk) && `${p.name} ${p.size}`.toLowerCase().includes(s)).slice(0, 8)
+  }, [q, products, isSale])
 
   const addLine = (p) => {
     setLines(ls => {
       const ex = ls.find(l => l.productId === p.id)
       if (ex) return ls.map(l => (l.productId === p.id ? { ...l, qty: Math.min(p.stock, l.qty + 1) } : l))
-      return [...ls, { productId: p.id, name: p.name, size: p.size, unit: p.unit, stock: p.stock, qty: 1, price: p.price, source: p.priceSource, manual: false }]
+      return [...ls, { productId: p.id, name: p.name, size: p.size, unit: p.unit, bulk: !!p.bulk, stock: p.stock, qty: 1, price: p.price, source: p.priceSource, manual: false }]
     })
     setQ('')
   }
@@ -79,7 +82,8 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
   const paidNow = isSale ? Math.min(total, Math.max(0, n(paid))) : 0
   const debtAfter = client ? client.debt + total - paidNow : 0
   const overLimit = isSale && client && client.creditLimit > 0 && debtAfter > client.creditLimit
-  const badQty = lines.some(l => n(l.qty) < 1 || n(l.qty) > l.stock)
+  const qtyBad = (l) => (l.bulk ? !(n(l.qty) > 0) || n(l.qty) > l.stock + 0.0005 : n(l.qty) < 1 || n(l.qty) > l.stock)
+  const badQty = lines.some(qtyBad)
 
   const submit = async (force = false) => {
     setErr('')
@@ -190,7 +194,7 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-bg-tertiary text-left">
                       <span className="flex-1 min-w-0">
                         <span className="block text-[15px] font-semibold text-text-primary truncate">{p.name}</span>
-                        <span className="block text-sm text-text-muted">{[sizeOf(p.name, p.size), t('wh_in_stock_n', { n: p.stock })].filter(Boolean).join(' · ')}</span>
+                        <span className="block text-sm text-text-muted">{[sizeOf(p.name, p.size), t('wh_in_stock_n', { n: stockText(p) })].filter(Boolean).join(' · ')}</span>
                       </span>
                       <span className="text-right shrink-0">
                         <span className="block text-[15px] font-bold text-text-primary">{formatNumber(p.price)}</span>
@@ -210,13 +214,15 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
                 <div key={l.productId} className="p-3 sm:px-4 flex flex-wrap items-center gap-x-3 gap-y-2">
                   <div className="flex-1 min-w-[180px]">
                     <p className="text-[15px] font-semibold text-text-primary">{l.name}</p>
-                    <p className="text-sm text-text-muted flex items-center gap-2">{[sizeOf(l.name, l.size), t('wh_in_stock_n', { n: l.stock })].filter(Boolean).join(' · ')} <SourceBadge source={l.source} t={t} /></p>
+                    <p className="text-sm text-text-muted flex items-center gap-2">{[sizeOf(l.name, l.size), t('wh_in_stock_n', { n: stockText(l) })].filter(Boolean).join(' · ')} <SourceBadge source={l.source} t={t} /></p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => patch(l.productId, { qty: Math.max(1, n(l.qty) - 1) })} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-bg-tertiary"><Minus size={16} /></button>
-                    <input type="number" min="1" max={l.stock} value={l.qty} onChange={e => patch(l.productId, { qty: e.target.value })}
-                      className={`w-16 text-center bg-bg-tertiary border rounded-lg py-1.5 text-[15px] font-semibold ${n(l.qty) > l.stock || n(l.qty) < 1 ? 'border-accent-red text-accent-red' : 'border-border text-text-primary'}`} />
+                    <button type="button" onClick={() => patch(l.productId, { qty: Math.max(l.bulk ? 0 : 1, n(l.qty) - 1) })} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-bg-tertiary"><Minus size={16} /></button>
+                    <input type="number" min={l.bulk ? '0' : '1'} step={l.bulk ? '0.001' : '1'} max={l.stock} value={l.qty} onChange={e => patch(l.productId, { qty: e.target.value })}
+                      aria-label={l.bulk ? `${t('wh_col_qty')}, ${l.unit}` : t('wh_col_qty')}
+                      className={`${l.bulk ? 'w-20' : 'w-16'} text-center bg-bg-tertiary border rounded-lg py-1.5 text-[15px] font-semibold ${qtyBad(l) ? 'border-accent-red text-accent-red' : 'border-border text-text-primary'}`} />
                     <button type="button" onClick={() => patch(l.productId, { qty: Math.min(l.stock, n(l.qty) + 1) })} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-bg-tertiary"><Plus size={16} /></button>
+                    {l.bulk && <span className="ml-1 text-sm text-text-muted">{l.unit}</span>}
                   </div>
                   <input type="number" min="0" value={l.price} onChange={e => patch(l.productId, { price: e.target.value, manual: true, source: 'manual' })}
                     className="w-32 text-right bg-bg-tertiary border border-border rounded-lg px-2.5 py-1.5 text-[15px] text-text-primary" title={t('wh_col_price')} />
@@ -226,7 +232,7 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
                 </div>
               ))}
               <div className="px-3 sm:px-4 py-2.5 flex justify-between text-[15px]">
-                <span className="text-text-muted">{t('wh_subtotal')} · {t('wh_qty_n', { n: lines.reduce((s, l) => s + n(l.qty), 0) })}</span>
+                <span className="text-text-muted">{[t('wh_subtotal'), lines.some(l => !l.bulk) && t('wh_qty_n', { n: lines.filter(l => !l.bulk).reduce((s, l) => s + n(l.qty), 0) }), ...lines.filter(l => l.bulk).map(l => `${String(n(l.qty)).replace('.', ',')} ${l.unit}`)].filter(Boolean).join(' · ')}</span>
                 <span className="font-bold text-text-primary">{som(t, subtotal)}</span>
               </div>
             </div>

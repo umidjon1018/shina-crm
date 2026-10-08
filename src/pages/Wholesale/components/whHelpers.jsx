@@ -61,7 +61,7 @@ export const sizeOf = (name, size) => (size && !String(name || '').includes(size
 export const printDoc = (t, doc, company) => {
   const isCons = doc.kind === 'consignment'
   const rows = doc.lines.map((l, i) => `<tr><td>${i + 1}</td><td>${esc(l.name)}</td><td>${esc(l.size)}</td>
-    <td class="n">${l.qty}</td><td class="n">${formatNumber(l.price)}</td><td class="n">${formatNumber(l.price * l.qty)}</td></tr>`).join('')
+    <td class="n">${l.bulk ? `${String(l.qty).replace('.', ',')} ${esc(l.unit)}` : l.qty}</td><td class="n">${formatNumber(l.price)}</td><td class="n">${formatNumber(l.price * l.qty)}</td></tr>`).join('')
   printHtml(doc.no, `
     <h2>${esc(isCons ? t('wh_print_cons_title') : t('wh_print_title'))} № ${esc(doc.no)}</h2>
     <div class="muted">${formatDate(doc.createdAt)}${doc.parentNo ? ' · ' + esc(doc.parentNo) : ''}</div>

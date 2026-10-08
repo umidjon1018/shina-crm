@@ -12,6 +12,7 @@ import { formatNumber, formatDate, formatDateTime } from '../../../utils/format'
 import { KindBadge, PayBadge, SourceBadge, MethodPicker, Spinner, inputCls, labelCls, som, sizeOf, methodLabel, printDoc, useWh } from './whHelpers'
 
 const n = (v) => Number(v) || 0
+const qtyText = (l, q) => (l.bulk ? `${String(q).replace('.', ',')} ${l.unit}` : q)
 
 // Konsignatsiyadan sotildi / qaytib keldi yoki sotuvdan qaytarish — qaysi tovardan nechta
 const LineActionModal = ({ doc, mode, onClose, onDone }) => {
@@ -54,7 +55,7 @@ const LineActionModal = ({ doc, mode, onClose, onDone }) => {
         <div className="space-y-2">
           {err && <div className="text-sm text-accent-red bg-accent-red/10 px-3 py-2.5 rounded-xl">{err}</div>}
           <div className="flex items-center gap-3">
-            <div className="flex-1"><p className="text-sm text-text-muted">{t('wh_qty_n', { n: count })}</p><p className="text-lg font-bold">{som(t, sum)}</p></div>
+            <div className="flex-1"><p className="text-sm text-text-muted">{[avail.some(l => !l.bulk && n(qty[key(l)]) > 0) && t('wh_qty_n', { n: avail.filter(l => !l.bulk).reduce((s, l) => s + n(qty[key(l)]), 0) }), ...avail.filter(l => l.bulk && n(qty[key(l)]) > 0).map(l => qtyText(l, n(qty[key(l)])))].filter(Boolean).join(' · ') || t('wh_qty_n', { n: 0 })}</p><p className="text-lg font-bold">{som(t, sum)}</p></div>
             <button onClick={submit} disabled={saving || !count} className="px-6 py-3 rounded-xl g-brand text-white font-bold disabled:opacity-50">{saving ? '...' : t('wh_confirm')}</button>
           </div>
         </div>
@@ -69,11 +70,12 @@ const LineActionModal = ({ doc, mode, onClose, onDone }) => {
               <div key={k} className="p-3 flex flex-wrap items-center gap-3">
                 <div className="flex-1 min-w-[160px]">
                   <p className="text-[15px] font-semibold text-text-primary">{l.name}</p>
-                  <p className="text-sm text-text-muted">{[sizeOf(l.name, l.size), formatNumber(l.price), t('wh_available_n', { n: max })].filter(Boolean).join(' · ')}</p>
+                  <p className="text-sm text-text-muted">{[sizeOf(l.name, l.size), formatNumber(l.price) + (l.bulk ? ` / ${l.unit}` : ''), t('wh_available_n', { n: qtyText(l, max) })].filter(Boolean).join(' · ')}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <button type="button" onClick={() => set(v - 1)} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-bg-tertiary"><Minus size={16} /></button>
-                  <input type="number" min="0" max={max} value={qty[k] ?? ''} placeholder="0" onChange={e => set(n(e.target.value))}
+                  <input type="number" min="0" step={l.bulk ? '0.001' : '1'} max={max} value={qty[k] ?? ''} placeholder="0" onChange={e => set(n(e.target.value))}
+                    aria-label={l.bulk ? `${t('wh_col_qty')}, ${l.unit}` : t('wh_col_qty')}
                     className="w-16 text-center bg-bg-tertiary border border-border rounded-lg py-1.5 text-[15px] font-semibold text-text-primary" />
                   <button type="button" onClick={() => set(v + 1)} className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-bg-tertiary"><Plus size={16} /></button>
                   <button type="button" onClick={() => set(max)} className="ml-1 px-2.5 h-9 rounded-lg border border-border text-sm font-semibold text-text-secondary hover:bg-bg-tertiary">{t('wh_all')}</button>
@@ -171,8 +173,8 @@ const DocDetailModal = ({ docId, onClose }) => {
                       <p className="text-[15px] font-semibold text-text-primary">{l.name}</p>
                       <p className="text-sm text-text-muted flex flex-wrap items-center gap-2">{sizeOf(l.name, l.size)} <SourceBadge source={l.priceSource} t={t} /></p>
                     </td>
-                    <td className="px-4 py-3 text-right text-[15px] whitespace-nowrap">{l.qty}{!isCons && isDebit && l.returned > 0 && <span className="block text-xs text-accent-red">−{l.returned} {t('wh_returned_short')}</span>}</td>
-                    <td className="px-4 py-3 text-right text-[15px] whitespace-nowrap">{formatNumber(l.price)}</td>
+                    <td className="px-4 py-3 text-right text-[15px] whitespace-nowrap">{qtyText(l, l.qty)}{!isCons && isDebit && l.returned > 0 && <span className="block text-xs text-accent-red">−{qtyText(l, l.returned)} {t('wh_returned_short')}</span>}</td>
+                    <td className="px-4 py-3 text-right text-[15px] whitespace-nowrap">{formatNumber(l.price)}{l.bulk && <span className="text-text-muted text-sm"> / {l.unit}</span>}</td>
                     <td className="px-4 py-3 text-right text-[15px] font-semibold whitespace-nowrap">{formatNumber(l.price * l.qty)}</td>
                     {isCons && (
                       <td className="px-4 py-3 text-right text-sm whitespace-nowrap">
