@@ -283,7 +283,7 @@ const Sales = () => {
       <AnimatePresence>
         {showNewCustomerModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={() => setShowNewCustomerModal(false)}
           >
             <motion.div
@@ -371,7 +371,7 @@ const Sales = () => {
 
         {buShowNewCustomerModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={() => setBuShowNewCustomerModal(false)}
           >
             <motion.div
@@ -487,7 +487,7 @@ const Sales = () => {
       {/* CANCEL SALE MODAL */}
       <AnimatePresence>
         {cancelModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

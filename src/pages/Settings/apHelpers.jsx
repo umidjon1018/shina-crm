@@ -51,7 +51,7 @@ const Badge = ({ color, children }) => (
   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${color}`}>{children}</span>
 )
 const ModalWrap = ({ onClose, children, maxW = 'max-w-md' }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
     <motion.div
       initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}

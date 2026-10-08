@@ -293,7 +293,7 @@ const HistoryTab = ({ ctx }) => {
         )}
       </div>
       {peekProduct && (
-        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
+        <div className="fixed inset-0 bg-black/50 z-[360] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
           <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>

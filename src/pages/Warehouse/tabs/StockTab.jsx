@@ -873,7 +873,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       {/* Transfer modal */}
       <AnimatePresence>
         {transferModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => !trSaving && setTransferModal(false)}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => !trSaving && setTransferModal(false)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -971,7 +971,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       {/* Transfer tarixi modali */}
       <AnimatePresence>
         {historyModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setHistoryModal(false)}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setHistoryModal(false)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

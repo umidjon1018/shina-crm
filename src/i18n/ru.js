@@ -408,6 +408,11 @@ export default {
   // Income
   inc_title: 'Приход',
   inc_subtitle: 'Поступления товаров и финансовый контроль',
+  inc_ov_month: 'Приход за месяц',
+  inc_ov_batches: 'партий',
+  inc_ov_suppliers: 'поставщиков',
+  inc_ov_overdue: 'Просрочено',
+  inc_ov_6m: 'Приход за 6 месяцев',
   inc_tab_batches: 'Поступления',
   inc_tab_debts: 'Долги',
   inc_stat_total: 'Всего приходов',

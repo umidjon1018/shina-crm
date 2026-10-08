@@ -147,7 +147,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
   const newProductCount = rows.filter((r, i) => !isSkippedRow(r).skip).length // approx
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-bg-secondary border border-border rounded-[2rem] w-full max-w-7xl max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 sm:px-8 py-5 border-b border-border shrink-0">

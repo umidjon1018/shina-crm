@@ -242,7 +242,7 @@ const InstallmentTab = ({ ctx }) => {
         const monthPaidPercent = monthSalesAmount > 0 ? Math.round((monthSalesPaid / monthSalesAmount) * 100) : 0
 
         return (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] flex items-center justify-center p-4" onClick={() => setDetailedOrg(null)}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[340] flex items-center justify-center p-4" onClick={() => setDetailedOrg(null)}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
               className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto no-scrollbar space-y-4 sm:space-y-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -399,7 +399,7 @@ const InstallmentTab = ({ ctx }) => {
         const custSales = [...salesList, ...(usedSalesList || [])].filter(s => s.paymentType === 'installment' && s.status !== 'cancelled' && s.customerId === customerPayModal.customerId)
         const totalDebt = custSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? (s.installmentDebt ?? s.total)), 0)
         return (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[130] flex items-center justify-center p-4"
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[350] flex items-center justify-center p-4"
             onClick={() => { setCustomerPayModal(null); setCustomerPaySaleId(null); setCustomerPayAmount('') }}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
               className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto no-scrollbar space-y-4 shadow-2xl">

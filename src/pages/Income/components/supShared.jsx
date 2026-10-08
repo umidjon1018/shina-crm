@@ -8,7 +8,7 @@ export const labelCls = 'text-[10px] font-extrabold uppercase tracking-widest te
 
 export const SupModal = ({ title, subtitle, onClose, children, maxW = 'max-w-lg', footer }) => createPortal(
   <div
-    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] flex items-end sm:items-center justify-center sm:p-4"
+    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[340] flex items-end sm:items-center justify-center sm:p-4"
     onClick={e => { if (e.target === e.currentTarget) onClose() }}
   >
     <motion.div

@@ -369,7 +369,7 @@ const StocktakeTab = () => {
       {/* Delete confirmation */}
       <AnimatePresence>
         {deleting && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setDeleting(null)}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setDeleting(null)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

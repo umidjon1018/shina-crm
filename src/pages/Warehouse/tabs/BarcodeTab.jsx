@@ -484,7 +484,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
           return (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
               onClick={() => !isGenerating && setDeleteGroupModal(null)}
             >
               <motion.div
@@ -570,7 +570,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         {mergeDialog && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
             onClick={() => { setMergeDialog(null); pendingGenerate.current = null }}
           >
             <motion.div
@@ -618,7 +618,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         {attrEditModal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
             onClick={() => setAttrEditModal(null)}
           >
             <motion.div
@@ -699,7 +699,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
         {detailModal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/70 z-[310] flex items-center justify-center p-4"
             onClick={() => setDetailModal(null)}
           >
             <motion.div

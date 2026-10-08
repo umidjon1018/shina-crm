@@ -31,9 +31,13 @@ import PaymentsHistoryTab from './tabs/PaymentsHistoryTab'
 import SupplierReturnsTab from './tabs/SupplierReturnsTab'
 import { getPurchaseOrders, getSupplierReturns } from '../../api/supplierOpsService'
 import UnitInput from '../../components/UnitInput'
+import SectionHub from '../../components/ui/SectionHub'
+import { monthShort } from '../../utils/format'
+import { PageHeader } from '../../components/ui/Kit'
+import { HeroStat, MiniStat, ChartCard, GradientBars } from '../../components/charts/Charts'
 
 const Income = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const som = t('unit_som')
   const { user, hasPermission } = useAuthStore()
   const { productCategories, usdRate, productAttributeDefs, productImages } = useSettingsStore()
@@ -190,6 +194,36 @@ const Income = () => {
   useEffect(() => { setPage1(1) }, [filter1Supplier, filter1Status, search1])
   useEffect(() => { setPage2(1) }, [filter2Supplier, filter2Status, search2])
 
+  const incOverview = useMemo(() => {
+    const now = new Date()
+    const ym = (d) => (d || '').slice(0, 7)
+    const thisYm = now.toISOString().slice(0, 7)
+    const months = []
+    for (let k = 5; k >= 0; k--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - k, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      months.push({ key, label: monthShort(d.getMonth(), i18n.language), value: 0 })
+    }
+    let monthUSD = 0, monthCount = 0, debt = 0, due = 0, overdue = 0
+    const debtSup = new Set()
+    for (const b of shopBatches) {
+      if (b.batchType === 'transfer_in') continue
+      const m = ym(b.receivedAt)
+      const usd = b.totalUSD || (b.purchasePriceUSD || 0) * (b.quantityIn || 0)
+      const slot = months.find(x => x.key === m)
+      if (slot) slot.value += usd
+      if (m === thisYm) { monthUSD += usd; monthCount++ }
+      if ((b.debtUSD || 0) > 0) {
+        debt += b.debtUSD
+        debtSup.add(b.supplierId || '—')
+        const dd = getDueDays(b.dueDate)
+        if (dd !== null && dd < 0) overdue++
+        else if (dd !== null && dd <= 3) due++
+      }
+    }
+    return { monthUSD, monthCount, debt, debtSuppliers: debtSup.size, due, overdue, months: months.map(x => ({ ...x, value: Math.round(x.value) })) }
+  }, [shopBatches, i18n.language])
+
   const getSupplierName = (supplierId) =>
     suppliers.find(s => s.id === supplierId)?.name || t('inc_not_assigned')
 
@@ -247,6 +281,15 @@ const Income = () => {
     }
   }
 
+  const INC_SECTIONS = [
+    { id: 'suppliers', label: t('suppliers'), icon: Truck, tone: 'violet', render: () => <SuppliersTab ctx={ctx} /> },
+    { id: 'debts', label: t('inc_tab_debts'), icon: AlertCircle, tone: 'red', render: () => <DebtsTab ctx={ctx} /> },
+    { id: 'orders', label: t('sup_tab_orders'), icon: ClipboardList, tone: 'cyan', render: () => <OrdersTab ctx={ctx} /> },
+    { id: 'settlements', label: t('sup_tab_settlements'), icon: Scale, tone: 'blue', render: () => <SettlementsTab ctx={ctx} /> },
+    { id: 'payments', label: t('sup_tab_payments'), icon: History, tone: 'green', render: () => <PaymentsHistoryTab ctx={ctx} /> },
+    { id: 'returns', label: t('sup_tab_returns'), icon: Undo2, tone: 'orange', render: () => <SupplierReturnsTab ctx={ctx} /> },
+  ].filter(x => INC_TABS.includes(x.id))
+
   const ctx = {
     user, isPrivileged, som,
     batches, setBatches, suppliers, setSuppliers, loading, selectedShopId,
@@ -287,80 +330,34 @@ const Income = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4 sm:space-y-6 pb-12"
     >
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight">{t('inc_title')}</h1>
-          <p className="text-text-secondary text-sm">{t('inc_subtitle')}</p>
+      <PageHeader title={t('inc_title')} subtitle={t('inc_subtitle')} />
+
+      {/* Umumiy ko'rinish: kirim, qarz, muddat, oylik dinamika */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        <HeroStat gradient="cyan" icon={Package} label={t('inc_ov_month')} value={formatUSD(incOverview.monthUSD)}
+          sub={`${incOverview.monthCount} ${t('inc_ov_batches')}`} />
+        <HeroStat gradient="violet" icon={DollarSign} label={t('inc_stat_debt')} value={formatUSD(incOverview.debt)}
+          sub={`${incOverview.debtSuppliers} ${t('inc_ov_suppliers')}`} />
+        <div className="grid grid-cols-1 gap-3">
+          <MiniStat icon={Clock} tone="orange" label={t('inc_stat_due')} value={incOverview.due} />
+          <MiniStat icon={AlertCircle} tone="pink" label={t('inc_ov_overdue')} value={incOverview.overdue} />
         </div>
-        <div className="flex flex-wrap gap-4">
-          {[
-            {
-              label: t('inc_stat_total'),
-              value: shopBatches.length + ' ' + t('unit_pcs'),
-              color: 'text-accent-blue',
-              icon: Package
-            },
-            {
-              label: t('inc_stat_debt'),
-              value: formatUSD(shopBatches.reduce((s, b) => s + (b.debtUSD || 0), 0)),
-              color: 'text-accent-red',
-              icon: DollarSign
-            },
-            {
-              label: t('inc_stat_due'),
-              value: shopBatches.filter(b => {
-                const d = getDueDays(b.dueDate)
-                return d !== null && d <= 3 && d >= 0 && b.debtUSD > 0
-              }).length + ' ' + t('unit_pcs'),
-              color: 'text-accent-orange',
-              icon: Clock
-            },
-          ].map((s, i) => (
-            <div key={i} className="bg-bg-secondary border border-border rounded-2xl px-5 py-3 flex items-center gap-3">
-              <s.icon size={20} className={s.color} />
-              <div>
-                <p className={`text-lg font-extrabold font-syne ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-text-muted">{s.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ChartCard title={t('inc_ov_6m')}>
+          <GradientBars height={150} valueFormatter={formatUSD} name={t('inc_title')} data={incOverview.months} />
+        </ChartCard>
       </div>
 
-      {/* TABS NAVIGATION */}
-      <div className="flex gap-2 p-1 bg-bg-secondary border border-border rounded-2xl w-fit max-w-full overflow-x-auto no-scrollbar">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            title={tab.label}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shrink-0 ${activeTab === tab.id
-              ? 'bg-bg-tertiary text-text-primary shadow-sm'
-              : 'text-text-muted hover:text-text-primary'
-              }`}
-          >
-            <tab.icon size={18} />
-            <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
-          </button>
-        ))}
-      </div>
+      {INC_SECTIONS.length > 0 && <SectionHub variant={INC_TABS.includes('batches') ? 'bar' : 'tiles'} sections={INC_SECTIONS} />}
 
-      {/* TAB CONTENT */}
+      {/* Asosiy ko'rinish: kirim partiyalari */}
       <div className="min-h-[500px]">
-        {activeTab === 'batches'   && <BatchesTab   ctx={ctx} />}
-        {activeTab === 'suppliers' && <SuppliersTab ctx={ctx} />}
-        {activeTab === 'debts'     && <DebtsTab     ctx={ctx} />}
-        {activeTab === 'orders'    && <OrdersTab    ctx={ctx} />}
-        {activeTab === 'settlements' && <SettlementsTab ctx={ctx} />}
-        {activeTab === 'payments'  && <PaymentsHistoryTab ctx={ctx} />}
-        {activeTab === 'returns'   && <SupplierReturnsTab ctx={ctx} />}
+        {INC_TABS.includes('batches') && <BatchesTab ctx={ctx} />}
       {/* MODALS */}
       <AnimatePresence>
         {/* Payment Modal */}
         {showPaymentModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowPaymentModal(null) }}
           >
             <motion.div
@@ -465,7 +462,7 @@ const Income = () => {
 
         {/* Supplier o'chirish tasdiqlash modali */}
         {deleteSupplierConfirm && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4">
             <div className="bg-bg-secondary border border-border rounded-[2rem] p-5 sm:p-8 w-full max-w-sm shadow-glow-red">
               <h3 className="text-lg font-syne font-extrabold text-text-primary mb-2">O'chirishni tasdiqlang</h3>
               <p className="text-sm text-text-secondary mb-4 sm:mb-6">
@@ -492,7 +489,7 @@ const Income = () => {
         {/* Supplier Modal */}
         {showSupplierModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) { setShowSupplierModal(false); setSupplierModalError('') } }}
           >
             <motion.div
@@ -719,7 +716,7 @@ const Income = () => {
         {/* Link Supplier Modal */}
         {showLinkModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowLinkModal(null) }}
           >
             <motion.div
@@ -763,7 +760,7 @@ const Income = () => {
 
         {showNewBatchModal && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) { setShowNewBatchModal(false); setNewBatchForm(f => ({ ...f, unit: '' })) } }}
           >
             <motion.div
@@ -1077,7 +1074,7 @@ const Income = () => {
 
         {editingBatch && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setEditingBatch(null) }}
           >
             <motion.div
@@ -1295,7 +1292,7 @@ const Income = () => {
 
         {editingPayment && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setEditingPayment(null) }}
           >
             <motion.div
@@ -1372,7 +1369,7 @@ const Income = () => {
 
         {showSupplierDetail && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowSupplierDetail(null) }}
           >
             <motion.div
@@ -1668,7 +1665,7 @@ const Income = () => {
           </div>
         )}
         {contractDialog && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[360] flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

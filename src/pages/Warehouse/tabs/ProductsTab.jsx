@@ -542,7 +542,7 @@ const ProductsTab = ({ ctx }) => {
               {/* Delete confirmation modal */}
               <AnimatePresence>
                 {deletingAttrDef && (
-                  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setDeletingAttrDef(null)}>
+                  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setDeletingAttrDef(null)}>
                     <motion.div
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -1340,7 +1340,7 @@ const ProductsTab = ({ ctx }) => {
                 {/* Ommaviy narx o'zgartirish modal */}
                 <AnimatePresence>
                   {bulkPriceModal && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4" onClick={() => setBulkPriceModal(false)}>
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4" onClick={() => setBulkPriceModal(false)}>
                       <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -1524,7 +1524,7 @@ const ProductsTab = ({ ctx }) => {
                 <AnimatePresence>
                   {editingProduct && editingProduct.isModal && (
                     <div
-                      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4"
+                      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4"
                       onClick={e => { if (e.target === e.currentTarget) setEditingProduct(null) }}
                     >
                       <motion.div
@@ -1841,7 +1841,7 @@ const ProductsTab = ({ ctx }) => {
                 {/* Delete Product Modal */}
                 {deleteProductConfirm && (
                   <div
-                    className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[120] flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[340] flex items-center justify-center p-4"
                     onClick={e => { if (e.target === e.currentTarget) setDeleteProductConfirm(null) }}
                   >
                     <motion.div

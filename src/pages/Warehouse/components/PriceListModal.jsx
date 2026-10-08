@@ -66,7 +66,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-lg flex flex-col"
         style={{ maxHeight: '90vh' }}

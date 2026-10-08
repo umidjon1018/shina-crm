@@ -8,7 +8,7 @@ const DiscountRequestModal = ({ discount, requiredRole, cartItems, cartTotal, on
   const som = i18n.t('unit_som')
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[360] flex items-center justify-center p-4">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

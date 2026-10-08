@@ -412,6 +412,11 @@ export default {
   // Income
   inc_title: 'Kirim',
   inc_subtitle: 'Tovar kirim va moliyaviy nazorat',
+  inc_ov_month: 'Shu oy kirim',
+  inc_ov_batches: 'ta partiya',
+  inc_ov_suppliers: 'ta yetkazib beruvchi',
+  inc_ov_overdue: "Muddati o'tgan",
+  inc_ov_6m: 'Oxirgi 6 oy kirim',
   inc_tab_batches: 'Kirimlar',
   inc_tab_debts: 'Qarzlar',
   inc_stat_total: 'Jami kirim',

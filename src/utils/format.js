@@ -23,3 +23,10 @@ export const formatDateTime = (v) => {
   if (Number.isNaN(dt.getTime())) return '—'
   return `${dt.toLocaleDateString('ru-RU')} ${dt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
 }
+
+const MONTHS_SHORT = {
+  uz: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'],
+  ru: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+}
+// Oy qisqa nomi (brauzer uz lokalini to'liq bilmaydi — "M05" chiqaradi)
+export const monthShort = (monthIndex, lang = 'uz') => (MONTHS_SHORT[lang] || MONTHS_SHORT.uz)[monthIndex]
