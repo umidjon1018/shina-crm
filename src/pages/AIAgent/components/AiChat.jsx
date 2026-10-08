@@ -48,7 +48,7 @@ const renderMarkdown = (text) => {
 }
 
 // chatKey — suhbat tarixi kaliti (bitta agent turli bo'limlarda alohida suhbat); section — backendga bo'lim konteksti
-const AiChat = ({ agentId, chatKey, section, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt, suggestions }) => {
+const AiChat = ({ agentId, chatKey, section, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt, suggestions, heightClass = 'h-[600px]' }) => {
   const historyKey = chatKey || agentId
   const { chats, createChat, addMessage, updateLastMessage, deleteChat } = useAiStore()
   const [chatId, setChatId] = useState(null)
@@ -142,7 +142,7 @@ const AiChat = ({ agentId, chatKey, section, systemPrompt, placeholder, colorCla
   const c = colorMap[colorClass] || colorMap['accent-green']
 
   return (
-    <div className="flex flex-col h-[600px] bg-bg-secondary rounded-xl border border-border overflow-hidden">
+    <div className={`flex flex-col ${heightClass} bg-bg-secondary rounded-xl border border-border overflow-hidden`}>
       {/* header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -169,12 +169,20 @@ const AiChat = ({ agentId, chatKey, section, systemPrompt, placeholder, colorCla
           </p>
         )}
         {messages.length === 0 && suggestions?.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2">
-            {suggestions.map(q => (
-              <button key={q} onClick={() => sendText(q)} disabled={streaming}
-                className={`text-xs px-3 py-1.5 rounded-full border border-border ${c.user} text-text-primary hover:opacity-80 disabled:opacity-40`}>
-                {q}
-              </button>
+          // suggestions: ['savol', ...] yoki guruhlangan [{ group, items: ['savol', ...] }]
+          <div className="space-y-3">
+            {(suggestions[0]?.items ? suggestions : [{ group: null, items: suggestions }]).map((g, gi) => (
+              <div key={gi} className="space-y-1.5">
+                {g.group && <p className="text-[11px] font-semibold text-text-muted text-center">{g.group}</p>}
+                <div className="flex flex-wrap justify-center gap-2">
+                  {g.items.map(q => (
+                    <button key={q} onClick={() => sendText(q)} disabled={streaming}
+                      className={`text-xs px-3 py-1.5 rounded-full border border-border ${c.user} text-text-primary hover:opacity-80 disabled:opacity-40`}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

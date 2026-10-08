@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TrendingUp, TrendingDown, RefreshCw, Loader2, MessageSquare } from 'lucide-react'
+import { TrendingUp, TrendingDown, RefreshCw, Loader2 } from 'lucide-react'
 import { getAiSection } from '../../../api/aiStatsService'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
-import DigestCard from './DigestCard'
-import AiChat from './AiChat'
 
 const num = (v) => Math.round(Number(v) || 0).toLocaleString('uz-UZ')
 const pct = (cur, prev) => (prev > 0 ? Math.round((cur - prev) / prev * 1000) / 10 : null)
@@ -42,7 +40,7 @@ const Change = ({ cur, prev, invert }) => {
   )
 }
 
-const KpiCard = ({ k, t }) => (
+export const KpiCard = ({ k, t }) => (
   <div className="bg-bg-secondary border border-border rounded-xl p-3 sm:p-4 min-w-0">
     <p className="text-[11px] sm:text-xs text-text-muted leading-tight line-clamp-2">{t(`aisec_kpi_${k.key}`, { defaultValue: k.label, ...(k.params || {}) })}</p>
     <p className="text-base sm:text-xl font-bold text-text-primary mt-1.5 leading-tight break-words">{fmtValue(k.value, k.unit, t)}</p>
@@ -55,7 +53,13 @@ const KpiCard = ({ k, t }) => (
   </div>
 )
 
-const ListTable = ({ list, t }) => {
+export const KpiGrid = ({ kpis, t }) => (
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+    {kpis.map(k => <KpiCard key={k.key} k={k} t={t} />)}
+  </div>
+)
+
+export const ListTable = ({ list, t }) => {
   if (!list.rows.length) return null
   return (
     <div className="bg-bg-secondary border border-border rounded-xl overflow-hidden">
@@ -88,8 +92,8 @@ const ListTable = ({ list, t }) => {
   )
 }
 
-// Bo'lim: KPI (SQL) → bugungi AI xulosa → jadvallar → AI yordamchi chati
-export default function SectionView({ section, questions = [], colorClass = 'accent-blue', extra = null }) {
+// Bo'lim raqamlari (SQL): KPI kartalar + ro'yxatlar. Do'kon tanloviga bog'liq
+export default function SectionData({ section, onLoaded, hideLists = [] }) {
   const { t } = useTranslation()
   const { selectedShopId } = useShopStore()
   const { version } = useDataStore()
@@ -101,51 +105,28 @@ export default function SectionView({ section, questions = [], colorClass = 'acc
     setLoading(true)
     setError(null)
     getAiSection(section, { shop: selectedShopId })
-      .then(setData)
+      .then(d => { setData(d); onLoaded?.(d) })
       .catch(err => setError(err?.response?.data?.error || err.message))
       .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, selectedShopId])
 
   useEffect(() => { load() }, [load, version])
 
+  if (error) return <p className="text-xs text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-lg px-3 py-2">{error}</p>
+  if (!data) return loading ? <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-text-muted" /></div> : null
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-text-muted">
-          {data ? t('aisec_period', { from: fmtValue(data.period.from, 'date', t), to: fmtValue(data.period.to, 'date', t) }) : ''}
-        </p>
-        <button onClick={load} disabled={loading} className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-muted hover:text-text-primary disabled:opacity-50">
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+        <p className="text-[11px] text-text-muted">{t('aisec_period', { from: fmtValue(data.period.from, 'date', t), to: fmtValue(data.period.to, 'date', t) })}</p>
+        <button onClick={load} disabled={loading} className="p-1 rounded-lg hover:bg-bg-secondary text-text-muted hover:text-text-primary disabled:opacity-50">
+          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
-
-      {error && <p className="text-xs text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-lg px-3 py-2">{error}</p>}
-
-      {!data && loading ? (
-        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-text-muted" /></div>
-      ) : data && (
-        <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-            {data.kpis.map(k => <KpiCard key={k.key} k={k} t={t} />)}
-          </div>
-
-          <DigestCard section={section} digest={data.digest} onDone={load} />
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-            {data.lists.map(l => <ListTable key={l.key} list={l} t={t} />)}
-          </div>
-        </>
-      )}
-
-      {typeof extra === 'function' ? (data ? extra(data) : null) : extra}
-
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <MessageSquare size={15} className="text-accent-blue" />
-          <p className="text-sm font-semibold text-text-primary">{t('ais_ask_title')}</p>
-        </div>
-        <AiChat agentId="ai-assistant" chatKey={`ai-assistant:${section}`} section={section} colorClass={colorClass}
-          placeholder={t('aisec_ask_ph')} suggestions={questions} />
+      <KpiGrid kpis={data.kpis} t={t} />
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+        {data.lists.filter(l => !hideLists.includes(l.key)).map(l => <ListTable key={l.key} list={l} t={t} />)}
       </div>
     </div>
   )

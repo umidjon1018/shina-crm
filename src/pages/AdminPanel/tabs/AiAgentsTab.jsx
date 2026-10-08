@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Bot, TrendingUp, Package, Megaphone, MessageSquare, MessageCircle, UserCheck, Globe, Send, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
-import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
 import { AssistantCard, AnalystCard, ScheduleCard } from '../components/AiAnalysisAgents'
 
 const AGENT_ICONS = {
@@ -169,7 +168,6 @@ function AgentCard({ agent, onSave }) {
       if (agent.slug === 'instagram-agent') {
         try { localStorage.setItem('goodtires-instagram-integrations', JSON.stringify(form.integrations)) } catch {}
       }
-      clearAnalysisCache(agent.slug)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {

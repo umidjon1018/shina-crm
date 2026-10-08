@@ -1,10 +1,12 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Globe, Users, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, BarChart2, Send, Loader2, Clock, Phone, Package, CheckCircle, XCircle } from 'lucide-react'
 import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
-import { useAgentAnalysis } from '../hooks/useAgentAnalysis'
-import AgentAnalysisPanel from '../components/AgentAnalysisPanel'
+import { getAiSection } from '../../../api/aiStatsService'
+import { useShopStore } from '../../../store/shopStore'
+import { useDataStore } from '../../../store/dataStore'
 import AiChat from '../components/AiChat'
-import { useAgentActivityStore } from '../../../store/agentActivityStore'
+import { KpiGrid } from '../components/SectionData'
 
 // ─────────── helpers ───────────
 function fmtMoney(n) {
@@ -45,73 +47,42 @@ function Pagination({ page, total, onPage }) {
   )
 }
 
-// ─────────── Per-customer stats ───────────
-function buildCustomerStats(customers, sales) {
-  const byId = {}
-  sales.forEach(s => {
-    if (!s.customerId) return
-    if (!byId[s.customerId]) byId[s.customerId] = { spent: 0, count: 0, debt: 0, last: null, purchases: [] }
-    const row = byId[s.customerId]
-    if (s.status === 'cancelled') return
-    row.spent += s.total || 0
-    row.count++
-    if (!row.last || s.createdAt > row.last) row.last = s.createdAt
-    row.purchases.unshift(s)
-    if (s.installmentDebt) row.debt += s.installmentDebt
-  })
-  // Daraja xaridlar soniga qarab: VIP 3+, sodiq 2, yangi 0-1
-  return customers.map(c => {
-    const st = byId[c.id] || { spent: 0, count: 0, debt: 0, last: null, purchases: [] }
-    return { ...c, ...st, loyaltyLevel: st.count >= 3 ? 'gold' : st.count === 2 ? 'silver' : 'none' }
-  })
-}
+// Daraja xaridlar soniga qarab: VIP 3+, sodiq 2, yangi 0-1
+const levelOf = (visits) => (visits >= 3 ? 'gold' : visits === 2 ? 'silver' : 'none')
+const handleOf = (h) => String(h || '').replace(/^@+/, '')
 
 // ─────────── Monthly chart ───────────
-function MonthlyChart({ sales, socialIds }) {
-  const months = useMemo(() => {
-    const now = new Date()
-    const result = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key = d.toISOString().slice(0, 7)
-      result.push({ key, label: d.toLocaleDateString('uz-UZ', { month: 'short' }), count: 0, amount: 0 })
-    }
-    sales.forEach(s => {
-      if (!s.customerId || !socialIds.has(s.customerId) || s.status !== 'completed') return
-      const mo = (s.createdAt || '').slice(0, 7)
-      const bucket = result.find(r => r.key === mo)
-      if (bucket) { bucket.count++; bucket.amount += s.total || 0 }
-    })
-    return result
-  }, [sales, socialIds])
-
-  const maxCount = Math.max(...months.map(m => m.count), 1)
-
+const MONTHS = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek']
+function MonthlyChart({ rows }) {
+  const maxCount = Math.max(...rows.map(m => m.cnt), 1)
   return (
     <div className="p-4 rounded-2xl border border-border bg-bg-secondary">
       <p className="text-sm font-medium text-text-primary mb-4 flex items-center gap-2">
         <BarChart2 size={14} className="text-pink-400" />
-        So'nggi 6 oy — ijtimoiy tarmoq xaridlari
+        So'nggi 6 oy — Instagram mijozlari xaridlari
       </p>
       <div className="flex items-end gap-2 h-24">
-        {months.map(m => (
-          <div key={m.key} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-xs text-text-muted">{m.count || ''}</span>
-            <div
-              className="w-full rounded-t bg-pink-500/60 hover:bg-pink-500 transition-colors min-h-[4px]"
-              style={{ height: `${Math.max((m.count / maxCount) * 80, 4)}px` }}
-              title={`${m.count} ta xarid — ${fmtMoney(m.amount)} so'm`}
-            />
-            <span className="text-xs text-text-muted">{m.label}</span>
-          </div>
-        ))}
+        {rows.map(m => {
+          const mo = Number(m.month.split('-')[1])
+          return (
+            <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-xs text-text-muted">{m.cnt || ''}</span>
+              <div
+                className="w-full rounded-t bg-pink-500/60 hover:bg-pink-500 transition-colors min-h-[4px]"
+                style={{ height: `${Math.max((m.cnt / maxCount) * 80, 4)}px` }}
+                title={`${m.cnt} ta xarid — ${fmtMoney(m.rev)} so'm`}
+              />
+              <span className="text-xs text-text-muted">{MONTHS[mo - 1]}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
 // ─────────── AI tahlil panel ───────────
-function AiAnalysisPanel({ customer, customerAgentId }) {
+function AiAnalysisPanel({ customer }) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [started, setStarted] = useState(false)
@@ -123,35 +94,20 @@ function AiAnalysisPanel({ customer, customerAgentId }) {
     setStarted(true)
     setText('')
 
-    const purchases = (customer.purchases || []).slice(0, 5)
-      .map(s => `- ${fmtDate(s.createdAt)}: ${fmtMoney(s.total)} so'm${s.installmentDebt ? ' (nasiya)' : ''}`)
-      .join('\n')
+    const userMsg = `Mijozni tahlil qil (customer_id: ${customer.id}). Avval get_customer_purchase_history bilan xaridlarini ol.
 
-    const userMsg = `Bu mijoz haqida chuqur tahlil qil:
+MIJOZ: ${customer.name}, telefon: ${customer.phone || "yo'q"}, Instagram: @${handleOf(customer.instagram)}, avtomobil: ${customer.car || "noma'lum"}.
+Jami: ${customer.visits} ta xarid, ${customer.spent} so'm; nasiya qarzi: ${customer.debt || 0} so'm; oxirgi xarid: ${customer.last || "yo'q"}.
 
-MIJOZ MA'LUMOTI:
-- Ism: ${customer.name}
-- Telefon: ${customer.phone || "yo'q"}
-- Instagram: ${customer.instagram ? '@' + customer.instagram : "yo'q"}
-- Avtomobil: ${customer.carModel || "noma'lum"}
-- Sodiqlik: ${LOYALTY_LABEL[customer.loyaltyLevel || 'none']?.label || 'Yangi'}
-
-XARIDLAR:
-- Jami: ${customer.count} ta xarid, ${fmtMoney(customer.spent)} so'm sarflagan
-- Qarz: ${customer.debt ? fmtMoney(customer.debt) + " so'm" : "yo'q"}
-- So'nggi xarid: ${fmtDate(customer.last)}
-${purchases ? `\nSo'nggi xaridlar:\n` + purchases : ''}
-
-Quyidagilarni tahlil qil va strukturalangan javob ber:
-1. XARAKTER PROFILI: Qanday mijoz? Xarid qilish odati, xulq-atvori
-2. AVTOMOBIL EHTIYOJI: ${customer.carModel || 'noma\'lum'} uchun qanday shina/disk kerak bo'lishi mumkin? Qachon almashtirishi mumkin?
-3. AKSIYA/CHEGIRMA: U chegirmalarni qanday kutadi va qabul qiladi? Qaysi turdagi aksiyalar ta'sirchan?
-4. MULOQOT USLUBI: U bilan qanday suhbat qurish kerak? Nima deb murojaat qilish, nima taklif qilish?
-5. KEYINGI QADAM: Hozir nima qilish kerak? Qo'ng'iroq/SMS matni yozib ber.`
+Qisqa javob ber:
+1. Qanday mijoz (xarid odati).
+2. Avtomobiliga qanday shina/disk kerak bo'lishi mumkin va qachon.
+3. Hozir nima qilish kerak — Instagram DM yoki SMS uchun tayyor qisqa matn yozib ber.`
 
     streamChat({
       messages: [{ role: 'user', content: userMsg }],
-      agentId: customerAgentId,
+      agentId: 'ai-assistant',
+      section: 'instagram',
       onToken: (tok) => { if (!abortRef.current) setText(p => p + tok) },
       onDone: () => { if (!abortRef.current) setLoading(false) },
       onError: (err) => { if (!abortRef.current) { setText('Xato: ' + err); setLoading(false) } },
@@ -166,7 +122,7 @@ Quyidagilarni tahlil qil va strukturalangan javob ber:
       className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 text-sm font-medium hover:bg-pink-500/20 transition-colors"
     >
       <Zap size={14} />
-      Mijozlar agenti bilan tahlil qilish
+      AI yordamchi bilan tahlil qilish
     </button>
   )
 
@@ -174,7 +130,7 @@ Quyidagilarni tahlil qil va strukturalangan javob ber:
     <div className="rounded-xl border border-border bg-bg-primary p-3">
       <div className="flex items-center gap-2 mb-2">
         <Zap size={12} className="text-pink-400" />
-        <span className="text-xs font-medium text-pink-400">Mijozlar agenti tahlili</span>
+        <span className="text-xs font-medium text-pink-400">AI yordamchi tahlili</span>
         {loading && <Loader2 size={12} className="text-text-muted animate-spin ml-auto" />}
       </div>
       <div className="text-xs text-text-secondary leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
@@ -185,8 +141,8 @@ Quyidagilarni tahlil qil va strukturalangan javob ber:
 }
 
 // ─────────── Mijoz profil modali ───────────
-function CustomerModal({ customer, onClose, customerAgentId }) {
-  const loyaltyInfo = LOYALTY_LABEL[customer.loyaltyLevel || 'none'] || LOYALTY_LABEL.none
+function CustomerModal({ customer, onClose }) {
+  const loyaltyInfo = LOYALTY_LABEL[levelOf(customer.visits)] || LOYALTY_LABEL.none
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -205,7 +161,7 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
               <div className="flex items-center gap-2 mt-0.5">
                 {customer.instagram && (
                   <span className="text-xs text-pink-400 flex items-center gap-1">
-                    <Globe size={10} /> @{customer.instagram}
+                    <Globe size={10} /> @{handleOf(customer.instagram)}
                   </span>
                 )}
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${loyaltyInfo.color}`}>{loyaltyInfo.label}</span>
@@ -221,7 +177,7 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
           {/* Asosiy info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Xaridlar', value: customer.count, color: 'text-accent-green' },
+              { label: 'Xaridlar', value: customer.visits, color: 'text-accent-green' },
               { label: 'Sarflagan', value: fmtMoney(customer.spent) + ' so\'m', color: 'text-text-primary' },
               { label: 'Qarz', value: customer.debt ? fmtMoney(customer.debt) + ' so\'m' : '—', color: customer.debt ? 'text-accent-red' : 'text-text-muted' },
               { label: "So'nggi xarid", value: fmtDate(customer.last), color: 'text-text-secondary' },
@@ -238,35 +194,18 @@ function CustomerModal({ customer, onClose, customerAgentId }) {
             <div className="p-3 rounded-xl bg-bg-secondary border border-border">
               <p className="text-xs text-text-muted mb-1">Telefon</p>
               <p className="text-sm text-text-primary">{customer.phone || '—'}</p>
-              {customer.phone2 && <p className="text-xs text-text-muted">{customer.phone2}</p>}
             </div>
             <div className="p-3 rounded-xl bg-bg-secondary border border-border flex items-center gap-2">
               <Car size={14} className="text-pink-400 flex-shrink-0" />
               <div>
                 <p className="text-xs text-text-muted">Avtomobil</p>
-                <p className="text-sm text-text-primary">{customer.carModel || "Noma'lum"}</p>
+                <p className="text-sm text-text-primary">{customer.car || "Noma'lum"}</p>
               </div>
             </div>
           </div>
 
-          {/* Xaridlar tarixi */}
-          {(customer.purchases || []).length > 0 && (
-            <div>
-              <p className="text-xs text-text-muted mb-2 font-medium">So'nggi xaridlar</p>
-              <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                {(customer.purchases || []).slice(0, 6).map((s, i) => (
-                  <div key={i} className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-bg-secondary text-xs">
-                    <span className="text-text-muted">{fmtDate(s.createdAt)}</span>
-                    <span className="text-text-primary font-medium">{fmtMoney(s.total)} so'm</span>
-                    {s.installmentDebt ? <span className="text-amber-400">nasiya</span> : <span className="text-accent-green">naqd</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* AI Tahlil */}
-          <AiAnalysisPanel customer={customer} customerAgentId={customerAgentId} />
+          <AiAnalysisPanel customer={customer} />
         </div>
       </div>
     </div>
@@ -519,124 +458,45 @@ function BotStatsPanel() {
 }
 
 // ─────────── Asosiy tab ───────────
-export default function InstagramTab({ aiData, agentConfig, customerAgentConfig }) {
+// Raqamlar serverdan (aiSections 'instagram'); bot sozlamalari va webhooklarga tegilmaydi
+export default function InstagramTab({ agentConfig }) {
+  const { t } = useTranslation()
+  const { selectedShopId } = useShopStore()
+  const { version } = useDataStore()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [custPage, setCustPage] = useState(1)
-  const [botStats, setBotStats] = useState(null)
+  const [report, setReport] = useState(null)
+  const [loadError, setLoadError] = useState(null)
 
-  useEffect(() => {
-    getInstagramStats().then(setBotStats).catch(() => {})
-  }, [])
-
-  const customers = aiData?.customers || []
-  const sales = aiData?.sales || []
+  const load = useCallback(() => {
+    getAiSection('instagram', { shop: selectedShopId })
+      .then(setReport)
+      .catch(err => setLoadError(err?.response?.data?.error || err.message))
+  }, [selectedShopId])
+  useEffect(() => { load() }, [load, version])
 
   const igEnabled = agentConfig?.integrations?.instagram?.enabled || false
-  const igHandle  = agentConfig?.integrations?.instagram?.handle || ''
 
-  // Social media customers (instagram bor)
-  const socialCustomers = useMemo(() => {
-    const enriched = buildCustomerStats(customers, sales)
-    return enriched.filter(c => c.instagram)
-  }, [customers, sales])
-
-  const socialIds = useMemo(() => new Set(socialCustomers.map(c => c.id)), [socialCustomers])
-
-  // Stats
-  const totalSpent = socialCustomers.reduce((s, c) => s + c.spent, 0)
-  const totalDebt  = socialCustomers.reduce((s, c) => s + c.debt, 0)
-  const thisMonth  = useMemo(() => {
-    const mo = new Date().toISOString().slice(0, 7)
-    return sales.filter(s => socialIds.has(s.customerId) && s.status === 'completed' && (s.createdAt || '').startsWith(mo)).length
-  }, [sales, socialIds])
+  const socialCustomers = useMemo(() => report?.lists?.find(l => l.key === 'ig_customers')?.rows || [], [report])
+  const monthly = useMemo(() => report?.lists?.find(l => l.key === 'ig_monthly')?.rows || [], [report])
 
   const filtered = useMemo(() => {
-    setCustPage(1)
     const q = search.toLowerCase()
     return socialCustomers.filter(c =>
-      !q || c.name.toLowerCase().includes(q) || c.instagram.toLowerCase().includes(q) || (c.carModel || '').toLowerCase().includes(q)
+      !q || c.name.toLowerCase().includes(q) || handleOf(c.instagram).toLowerCase().includes(q) || (c.car || '').toLowerCase().includes(q)
     )
   }, [socialCustomers, search])
+  useEffect(() => { setCustPage(1) }, [search])
 
   const pagedCustomers = useMemo(() => filtered.slice((custPage - 1) * PS, custPage * PS), [filtered, custPage])
 
-  const customerAgentId = customerAgentConfig?.id
-  const { addActivity } = useAgentActivityStore()
-
-  const { loading: agLoading, analysis: agAnalysis, error: agError, refresh: agRefresh,
-          triggerRun, triggering, source, lastRun } = useAgentAnalysis({
-    agentId: 'instagram-agent',
-    enabled: socialCustomers.length > 0,
-    systemPrompt: agentConfig?.systemPrompt || "Sen GoodTires do'konining INSTAGRAM AGENTISAN.",
-    buildPrompt: () => {
-      const topBySpend = [...socialCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5)
-      const noSaleCustomers = socialCustomers.filter(c => c.count === 0)
-      return `Instagram orqali kelgan mijozlarni tahlil qil.
-
-INSTAGRAM MIJOZLAR HOLATI:
-- Jami: ${socialCustomers.length} ta (instagram handle bor mijozlar)
-- Jami xaridlar: ${fmtMoney(totalSpent)} so'm (${socialCustomers.reduce((s,c)=>s+c.count,0)} ta sotuv)
-- Bu oy sotuvlar: ${thisMonth} ta
-- Nasiya qarz: ${fmtMoney(totalDebt)} so'm
-
-TOP 5 INSTAGRAM MIJOZLAR:
-${topBySpend.map((c, i) => `${i+1}. @${c.instagram} — ${c.count} ta xarid, ${fmtMoney(c.spent)} so'm, qarz: ${fmtMoney(c.debt)} so'm`).join('\n') || 'yo\'q'}
-
-XARID QILMAGAN INSTAGRAM MIJOZLAR: ${noSaleCustomers.length} ta
-${noSaleCustomers.slice(0, 5).map(c => `- @${c.instagram} (${c.name})`).join('\n') || 'yo\'q'}
-
-VAZIFALAR:
-1. Instagram mijozlar segmentatsiyasi (aktiv/passiv/yangi) — KPI qilib saqlа
-2. Xarid qilmagan Instagram follower'lar uchun jalb strategiyasi — tavsiya saqlа
-3. Top Instagram mijozlar holati — KPI saqlа
-4. Agar instagram integratsiya ulangan bo'lsa — bot samaradorligi bo'yicha tahlil`
-    },
-    deps: [socialCustomers.length, totalSpent, thisMonth],
-  })
-
-  useEffect(() => {
-    if (agAnalysis && !agAnalysis.raw) {
-      agAnalysis.alerts?.forEach(a => addActivity({ agentId: 'instagram', type: 'ALERT', message: a.message }))
-      agAnalysis.recommendations?.slice(0, 2).forEach(r => addActivity({ agentId: 'instagram', type: 'RECOMMENDATION', message: r.action }))
-      agAnalysis.insights?.slice(0, 1).forEach(i => addActivity({ agentId: 'instagram', type: 'INSIGHT', message: i.description || i.title }))
-    }
-  }, [agAnalysis])
-
-  const igSystemPrompt = useMemo(() => {
-    const cs = botStats?.commentSummary || {}
-    const dm = botStats?.dmSummary || {}
-    const reservations = botStats?.reservations || []
-    return `Sen GoodTires Instagram agentlari tizimining yordamchisissan. Ikki agent ishlaydi:
-1. Komment-agent: Instagram kommentlarga avtomatik javob beradi (tovar qidirish, narx, bron)
-2. DM-agent: Direct Message orqali kelgan xabarlarga javob beradi
-
-Instagram holati: handle=${igHandle || 'ulanmagan'}, DM bot=${igEnabled ? 'faol' : "o'chiq"}
-
-BOT STATISTIKASI:
-- DM suhbatlar: ${dm.unique_senders || 0} ta odamdan ${dm.total_messages || 0} ta xabar
-- Kommentlar: ${cs.total || 0} ta (${cs.unique_users || 0} ta foydalanuvchi)
-- Narx so'rovlari: ${cs.price_inquiries || 0} ta
-- Ijobiy kommentlar: ${cs.positive_feedback || 0} ta
-- Bot bronlar: ${reservations.length} ta
-
-Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida aniq va qisqa javob ber.`
-  }, [igHandle, igEnabled, botStats])
-
   return (
     <div className="space-y-3 sm:space-y-5">
-      {/* Instagram agent tahlili */}
-      <AgentAnalysisPanel
-        loading={agLoading}
-        analysis={agAnalysis}
-        error={agError}
-        refresh={agRefresh}
-        accentColor="text-pink-400"
-        onTriggerRun={triggerRun}
-        triggering={triggering}
-        source={source}
-        lastRun={lastRun}
-      />
+      {loadError && <p className="text-xs text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-lg px-3 py-2">{loadError}</p>}
+
+      {/* Instagram mijozlari va bot statistikasi (oxirgi 30 kun) */}
+      {report && <KpiGrid kpis={report.kpis} t={t} />}
 
       {/* Bot holati banner */}
       {!igEnabled && (
@@ -647,11 +507,11 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
       )}
 
       {/* Oylik grafik */}
-      <MonthlyChart sales={sales} socialIds={socialIds} />
+      {monthly.length > 0 && <MonthlyChart rows={monthly} />}
 
       {/* Mijozlar jadvali */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <p className="text-sm font-semibold text-text-primary flex items-center gap-2">
             <Users size={14} className="text-pink-400" />
             Instagram mijozlar jadvali
@@ -687,7 +547,7 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
               </thead>
               <tbody>
                 {pagedCustomers.map((c, i) => {
-                  const li = LOYALTY_LABEL[c.loyaltyLevel || 'none'] || LOYALTY_LABEL.none
+                  const li = LOYALTY_LABEL[levelOf(c.visits)] || LOYALTY_LABEL.none
                   return (
                     <tr
                       key={c.id}
@@ -706,10 +566,10 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
                         </div>
                       </td>
                       <td className="px-3 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
-                        <span className="text-xs text-pink-400">@{c.instagram}</span>
+                        <span className="text-xs text-pink-400">@{handleOf(c.instagram)}</span>
                       </td>
-                      <td className="px-3 sm:px-4 py-2 sm:py-3 hidden md:table-cell text-xs text-text-secondary">{c.carModel || '—'}</td>
-                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-text-primary">{c.count}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 hidden md:table-cell text-xs text-text-secondary">{c.car || '—'}</td>
+                      <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-text-primary">{c.visits}</td>
                       <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden md:table-cell text-xs text-accent-green">{fmtMoney(c.spent)} so'm</td>
                       <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden lg:table-cell text-xs">
                         {c.debt ? <span className="text-accent-red">{fmtMoney(c.debt)} so'm</span> : <span className="text-text-muted">—</span>}
@@ -728,13 +588,7 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
       </div>
 
       {/* Profil modali */}
-      {selected && (
-        <CustomerModal
-          customer={selected}
-          customerAgentId={customerAgentId}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      {selected && <CustomerModal customer={selected} onClose={() => setSelected(null)} />}
 
       {/* DM suhbatlar arxivi */}
       <div className="pt-2 border-t border-border">
@@ -746,12 +600,13 @@ Admin savol bersa — agent ishlash tartibi, statistika yoki natijalar haqida an
         <BotStatsPanel />
       </div>
 
-      {/* Agent bilan suhbat */}
+      {/* AI yordamchi — Instagram bo'limi konteksti bilan */}
       <div className="pt-2 border-t border-border">
         <AiChat
-          agentId="instagram-agent"
-          colorClass="text-pink-400"
-          systemPrompt={igSystemPrompt}
+          agentId="ai-assistant"
+          chatKey="ai-assistant:instagram"
+          section="instagram"
+          colorClass="accent-pink"
           placeholder="Instagram mijozlar, DM, bot statistika haqida so'rang..."
         />
       </div>
