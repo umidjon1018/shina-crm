@@ -10,7 +10,7 @@ import {
   addPurchaseOrderPayment, deletePurchaseOrderPayment,
 } from '../../../api/supplierOpsService'
 import {
-  SupModal, Field, ErrorBox, Pager, inputCls, labelCls, ORDER_STATUS, PAY_TYPES, payTypeLabel,
+  SupModal, Field, ErrorBox, Pager, inputCls, labelCls, ORDER_STATUS, PAY_TYPES, payTypeLabel, QuickSupplierAdd,
   usd, fmtDate, todayISO, orderTotals, printHtml, esc,
 } from '../components/supShared'
 
@@ -42,7 +42,8 @@ const ProductPicker = ({ products, onPick, t }) => {
   )
 }
 
-const OrderFormModal = ({ initial, suppliers, products, shops, defaultShopId, onClose, onSaved, t }) => {
+const OrderFormModal = ({ initial, suppliers: initialSuppliers, products, shops, defaultShopId, onClose, onSaved, onSupplierAdded, t }) => {
+  const [suppliers, setSuppliers] = useState(initialSuppliers)
   const [form, setForm] = useState(() => initial ? {
     supplierId: initial.supplierId, shopId: initial.shopId, expectedDate: initial.expectedDate, notes: initial.notes,
     items: initial.items.map(i => ({ productId: i.productId, productName: i.productName, quantity: i.quantity, priceUSD: i.priceUSD, unit: i.unit, attributes: i.attributes })),
@@ -88,6 +89,8 @@ const OrderFormModal = ({ initial, suppliers, products, shops, defaultShopId, on
               <option value="">{t('sup_select')}</option>
               {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
+            {!suppliers.length && <p className="text-xs text-accent-orange mt-1">{t('sup_no_suppliers_yet')}</p>}
+            <QuickSupplierAdd t={t} onCreated={(s) => { setSuppliers(list => [...list, s]); set('supplierId', s.id); onSupplierAdded?.(s) }} />
           </Field>
           <Field label={t('sup_shop') + ' *'}>
             <select value={form.shopId} onChange={e => set('shopId', e.target.value)} className={inputCls}>
@@ -391,7 +394,7 @@ const OrderDetailModal = ({ order, usdRate, onClose, onChanged, onEdit, t }) => 
 
 const OrdersTab = ({ ctx }) => {
   const { t } = useTranslation()
-  const { orders, setOrders, suppliers, MOCK_PRODUCTS, selectedShopId, usdRate, refreshAll } = ctx
+  const { orders, setOrders, suppliers, setSuppliers, MOCK_PRODUCTS, selectedShopId, usdRate, refreshAll } = ctx
   const { shops } = useShopStore()
   const [search, setSearch] = useState('')
   const [fStatus, setFStatus] = useState('open')
@@ -489,6 +492,7 @@ const OrdersTab = ({ ctx }) => {
       {form && (
         <OrderFormModal
           initial={form.order || null} suppliers={suppliers.filter(s => s.isActive !== false)} products={MOCK_PRODUCTS}
+          onSupplierAdded={(s) => setSuppliers(list => [...list, s])}
           shops={shops} defaultShopId={selectedShopId} t={t}
           onClose={() => setForm(null)}
           onSaved={o => { upsert(o); setForm(null); setDetailId(o.id) }}

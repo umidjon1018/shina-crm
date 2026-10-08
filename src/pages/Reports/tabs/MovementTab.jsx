@@ -65,6 +65,7 @@ const MovementTab = () => {
     { key: 'sold', label: t('rpt_col_sold'), align: 'right', sum: true, className: 'text-accent-red' },
     { optional: true, key: 'writtenOff', label: t('rpt_col_written_off'), align: 'right', sum: true },
     { optional: true, key: 'toSupplier', label: t('rpt_col_to_supplier'), align: 'right', sum: true },
+    { optional: true, key: 'toDealer', label: t('rpt_col_to_dealer'), align: 'right', sum: true },
     { key: 'closing', label: t('rpt_col_closing'), align: 'right', sum: true, className: 'text-text-primary font-bold' },
     { optional: true, key: 'customerReturns', label: t('rpt_col_customer_returns'), align: 'right', sum: true, className: 'text-text-secondary' },
     ...(shopSelected ? [
@@ -109,7 +110,7 @@ const MovementTab = () => {
               <StatCard icon={Boxes} label={t('rpt_col_opening')} value={sum('opening')} color="bg-gray-500/10 text-gray-500" />
               <StatCard icon={ArrowDownToLine} label={t('rpt_col_received')} value={`+${sum('received')}`} color="bg-green-500/10 text-green-500" />
               <StatCard icon={ArrowUpFromLine} label={t('rpt_col_sold')} value={`−${sum('sold')}`} color="bg-accent-red/10 text-accent-red" />
-              <StatCard icon={PackageX} label={t('rpt_col_out_other')} value={`−${sum('writtenOff') + sum('toSupplier')}`} color="bg-orange-500/10 text-orange-500" />
+              <StatCard icon={PackageX} label={t('rpt_col_out_other')} value={`−${sum('writtenOff') + sum('toSupplier') + sum('toDealer')}`} color="bg-orange-500/10 text-orange-500" />
               <StatCard icon={CalendarCheck} label={t('rpt_col_closing')} value={sum('closing')} color="bg-blue-500/10 text-blue-500" />
             </div>
           ) : (

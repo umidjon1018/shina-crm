@@ -11,6 +11,7 @@ import { getCustomers, updateCustomer } from '../../../api/customerService'
 import { useDataStore } from '../../../store/dataStore'
 import AiChat from '../components/AiChat'
 import { KpiGrid } from '../components/SectionData'
+import { productTitle } from '../../../utils/format'
 
 // ─────────── helpers ───────────
 function fmtMoney(n) {
@@ -507,8 +508,7 @@ function BotStatsPanel() {
                       {r.customerPhone && <p className="text-text-muted flex items-center gap-1"><Phone size={10} />{r.customerPhone}</p>}
                     </td>
                     <td className="px-3 sm:px-4 py-2 sm:py-3 hidden sm:table-cell text-text-secondary">
-                      {r.brand && <span className="text-pink-400 mr-1">{r.brand}</span>}
-                      {r.productName || '—'}
+                      {r.productName ? productTitle(r.brand, r.productName) : '—'}
                       {r.size && <span className="text-text-muted ml-1">({r.size})</span>}
                     </td>
                     <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden md:table-cell text-accent-green">

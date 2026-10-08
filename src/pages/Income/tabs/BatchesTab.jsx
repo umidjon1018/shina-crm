@@ -226,13 +226,13 @@ const BatchesTab = ({ ctx }) => {
                               {batch.returnedUSD > 0 && <p className="text-[11px] text-violet-500 mt-1 whitespace-nowrap">↩ {formatUSD(batch.returnedUSD)}</p>}
                             </td>
                             <td className="px-3 sm:px-4 py-2.5 sm:py-4 text-right">
-                              <button
+                              {!['bulk', 'production'].includes(batch.batchType) && <button
                                 onClick={() => setEditingBatch(batch)}
                                 className="p-2 text-text-muted hover:text-accent-orange rounded-xl transition-colors"
                                 title={t('edit')}
                               >
                                 <Edit3 size={18} />
-                              </button>
+                              </button>}
                             </td>
                           </tr>
                         )
@@ -418,13 +418,15 @@ const BatchesTab = ({ ctx }) => {
                               </td>
                               <td className="px-3 sm:px-4 py-2.5 sm:py-4 text-right">
                                 <div className="flex items-center justify-end gap-1">
+                                  {!['transfer', 'production', 'returned'].includes(batch.paymentStatus) && (
                                   <button
-                                    onClick={() => setShowPaymentModal(batch)}
-                                    className="p-2 text-accent-blue hover:bg-accent-blue/10 rounded-xl transition-colors"
-                                    title={t('inc_add_payment')}
-                                  >
-                                    <Wallet size={16} />
-                                  </button>
+                                      onClick={() => setShowPaymentModal(batch)}
+                                      className="p-2 text-accent-blue hover:bg-accent-blue/10 rounded-xl transition-colors"
+                                      title={t('inc_add_payment')}
+                                    >
+                                      <Wallet size={16} />
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => setExpandedBatch(isExpanded ? null : batch.id)}
                                     className="p-2 text-text-muted hover:bg-bg-tertiary rounded-xl transition-colors"

@@ -165,6 +165,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
                       <Th right>{t('wh_th_in_qty')}</Th>
                       <Th right>{t('sold')}</Th>
                       <Th right>{t('wh_th_remaining')}</Th>
+                      <Th right>{t('wh_th_other_out')}</Th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -175,6 +176,14 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
                       const batchItems = items.filter(i => i.batchId === b.id)
                       const realRemaining = batchItems.filter(i => i.status === 'in_stock').length
                       const realSold = batchItems.filter(i => i.status === 'sold').length
+                      // Yetkazib beruvchiga qaytarilgan, hisobdan chiqarilgan, dilerda, boshqa do'konga ko'chirilgan
+                      const otherOut = Math.max(0, (b.quantityIn || 0) - realSold - realRemaining)
+                      const otherTitle = [
+                        [t('inc_inv_returned'), batchItems.filter(i => i.status === 'returned_supplier').length],
+                        [t('inc_inv_written_off'), batchItems.filter(i => i.status === 'written_off').length],
+                        [t('inc_inv_consigned'), batchItems.filter(i => i.status === 'consigned').length],
+                        [t('inc_inv_moved'), Math.max(0, (b.quantityIn || 0) - batchItems.length)],
+                      ].filter(x => x[1] > 0).map(x => `${x[0]}: ${x[1]}`).join(', ')
                       return (
                         <tr key={b.id} className="hover:bg-bg-tertiary/50">
                           <Td muted>{b.batchNumber}</Td>
@@ -183,6 +192,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
                           <Td right>{b.quantityIn}</Td>
                           <Td right><span className="text-accent-red font-bold">{realSold}</span></Td>
                           <Td right><span className="text-accent-green font-bold">{realRemaining}</span></Td>
+                          <Td right><span className="text-text-secondary" title={otherTitle}>{otherOut || '—'}</span>{otherTitle && <span className="block text-[10px] text-text-muted">{otherTitle}</span>}</Td>
                         </tr>
                       )
                     })}

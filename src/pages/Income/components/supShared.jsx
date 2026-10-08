@@ -1,7 +1,9 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { addSupplier } from '../../../api/incomeService'
 
 export const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-blue'
 export const labelCls = 'text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1.5 block'
@@ -29,6 +31,32 @@ export const SupModal = ({ title, subtitle, onClose, children, maxW = 'max-w-lg'
   </div>,
   document.body
 )
+
+// Yetkazib beruvchi ro'yxatda bo'lmasa — formadan chiqmasdan qo'shish (nomi va telefoni)
+export const QuickSupplierAdd = ({ t, onCreated }) => {
+  const [f, setF] = useState(null)
+  const [err, setErr] = useState('')
+  const save = async () => {
+    setErr('')
+    if (!f.name.trim()) return setErr(t('sup_err_name'))
+    try { const s = await addSupplier({ name: f.name.trim(), phone: f.phone.trim() }); setF(null); onCreated(s) }
+    catch (e) { setErr(e?.response?.data?.error || e?.message || 'Xato') }
+  }
+  if (!f) return <button type="button" onClick={() => setF({ name: '', phone: '' })} className="mt-1.5 text-xs font-bold text-accent-blue hover:underline">+ {t('sup_new_supplier_inline')}</button>
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex gap-2">
+        <input value={f.name} onChange={e => setF(s => ({ ...s, name: e.target.value }))} placeholder={t('sup_name_ph')} autoFocus className={inputCls + ' flex-1'} />
+        <input value={f.phone} onChange={e => setF(s => ({ ...s, phone: e.target.value }))} placeholder="+998" className={inputCls + ' w-32'} />
+      </div>
+      <div className="flex gap-2">
+        <button type="button" onClick={save} className="px-3 py-1.5 rounded-lg bg-accent-blue text-white text-xs font-bold">{t('sup_add_short')}</button>
+        <button type="button" onClick={() => setF(null)} className="px-3 py-1.5 rounded-lg border border-border text-xs font-bold text-text-secondary">{t('sup_cancel_short')}</button>
+      </div>
+      <ErrorBox text={err} />
+    </div>
+  )
+}
 
 export const Field = ({ label, children, className = '' }) => (
   <div className={className}>

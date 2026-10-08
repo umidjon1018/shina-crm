@@ -551,6 +551,7 @@ const NewSaleTab = ({ ctx }) => {
                 className="bg-bg-tertiary border border-border rounded-2xl p-4 space-y-4 overflow-hidden">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-text-muted block">{t('sl_ns_org_label')}</label>
+                  {!installmentOrganizations.some(o => o.isActive !== false) && <p className="text-xs text-accent-orange">{t('sl_no_orgs_hint')}</p>}
                   <div className="grid grid-cols-2 gap-2">
                     {installmentOrganizations.filter(o => o.isActive !== false).map(o => (
                       <button key={o.id} type="button" onClick={() => setInstallmentOrgId(o.id)}

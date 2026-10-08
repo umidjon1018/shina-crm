@@ -12,6 +12,7 @@ import { renameAttributeKey } from '../../../api/itemService'
 import { bulkUpdatePrices } from '../../../api/productService'
 import { compressImage } from '../../../api/productImageService'
 import DualPriceInput from '../components/DualPriceInput'
+import { productTitle } from '../../../utils/format'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -1542,7 +1543,7 @@ const ProductsTab = ({ ctx }) => {
                               {editingProduct.isNew ? t('mgmt_add_product_title') : t('mgmt_edit_product_title')}
                             </h3>
                             {!editingProduct.isNew && (
-                              <p className="text-xs text-text-muted mt-1">{editingProduct.brand} • {editingProduct.name}</p>
+                              <p className="text-xs text-text-muted mt-1">{productTitle(editingProduct.brand, editingProduct.name)}</p>
                             )}
                           </div>
                           <button onClick={() => setEditingProduct(null)} className="p-2 text-text-muted hover:text-text-primary transition-colors">
@@ -1860,7 +1861,7 @@ const ProductsTab = ({ ctx }) => {
                         <div>
                           <h3 className="text-lg font-syne font-extrabold text-text-primary">{t('mgmt_delete_product_title')}</h3>
                           <p className="text-sm text-text-secondary mt-1">
-                            <span className="font-bold text-text-primary">{deleteProductConfirm.brand} {deleteProductConfirm.name}</span> {t('mgmt_delete_product_confirm')}
+                            <span className="font-bold text-text-primary">{productTitle(deleteProductConfirm.brand, deleteProductConfirm.name)}</span> {t('mgmt_delete_product_confirm')}
                           </p>
                           <p className="text-xs text-accent-orange mt-2">
                             {t('mgmt_delete_irreversible')}

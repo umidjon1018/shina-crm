@@ -13,9 +13,11 @@ import { getExpenses, deleteExpense } from '../../../api/expenseService'
 import { fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, sortedCategories, getCatLabel, PAGE_SIZE, StatCard, MonthFilterBar, Pagination, ICON_MAP, monthLabel, colorCls, pmLabel } from '../components/expHelpers'
 import ExpenseFormModal from '../components/ExpenseFormModal'
 import DeleteModal from '../components/DeleteModal'
+import { useDataStore } from '../../../store/dataStore'
 
 const ShopExpensesTab = ({ currentUser }) => {
   const { t, i18n } = useTranslation()
+  const { bump } = useDataStore()
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -91,12 +93,14 @@ const ShopExpensesTab = ({ currentUser }) => {
       if (idx >= 0) { const next = [...prev]; next[idx] = exp; return next }
       return [exp, ...prev]
     })
+    bump()
   }
 
   const handleDelete = async () => {
     await deleteExpense(deleteTarget.id)
     setExpenses(prev => prev.filter(e => e.id !== deleteTarget.id))
     setDeleteTarget(null)
+    bump()
   }
 
   return (

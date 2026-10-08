@@ -10,6 +10,8 @@ const statusConfig = {
   credit: { key: 'inc_status_credit', color: 'text-accent-blue', bg: 'bg-accent-blue/10' },
   unpaid: { key: 'inc_status_unpaid', color: 'text-accent-red', bg: 'bg-accent-red/10' },
   returned: { key: 'inc_status_returned', color: 'text-violet-500', bg: 'bg-violet-500/10' },
+  transfer: { key: 'inc_status_transfer', color: 'text-accent-blue', bg: 'bg-accent-blue/10' },
+  production: { key: 'inc_status_production', color: 'text-accent-green', bg: 'bg-accent-green/10' },
 }
 
 const getDueDays = (dueDate) => {

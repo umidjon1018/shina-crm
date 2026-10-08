@@ -60,6 +60,7 @@ const PaymentModal = ({ open, clientId: presetClient, docId, amount: presetAmoun
             <option value="">{t('wh_choose')}</option>
             {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.debt > 0 ? ` · ${formatNumber(c.debt)}` : ''}</option>)}
           </select>
+          {!clients.length && <p className="text-xs text-accent-orange mt-1">{t('wh_no_clients_hint')}</p>}
           {client && <p className="text-sm text-text-muted mt-1.5">{t('wh_col_debt')}: <b className={client.debt > 0 ? 'text-accent-red' : 'text-text-primary'}>{som(t, client.debt)}</b></p>}
         </div>
         <div>

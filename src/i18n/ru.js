@@ -4643,4 +4643,12 @@ export default {
   inc_inv_missing: "не хватает",
   inc_inv_extra: "лишние",
   inc_inv_diff_n: "{{n}} шт {{sign}}",
+  inc_status_transfer: "Перемещение",
+  inc_status_production: "Произведено",
+  wh_th_other_out: "Прочий расход",
+  wh_no_clients_hint: "Дилеров нет — сначала добавьте дилера в разделе «Дилеры»",
+  sl_no_orgs_hint: "Организации рассрочки не добавлены — добавьте в Настройки → Правила продаж",
+  sup_new_supplier_inline: "Добавить нового поставщика",
+  sup_add_short: "Добавить",
+  rpt_col_to_dealer: "Дилеру (консигнация)",
 }

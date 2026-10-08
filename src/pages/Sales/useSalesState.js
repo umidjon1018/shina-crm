@@ -30,6 +30,7 @@ import { evaluatePromotions } from '../../utils/promoEngine'
 import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
 import { getReservedItemIds } from '../../api/reservationService'
+import { productTitle } from '../../utils/format'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -627,12 +628,12 @@ export const useSalesState = () => {
                 type: 'BARCODE_NOT_PRINTED',
                 severity: 'warning',
                 title: `${(user?.fullName || user?.name || user?.username || 'Xodim')} tomonidan: Barkod chop etilmagan`,
-                message: `"${ci.product?.brand || ''} ${ci.product?.name || ''}" (${ci.item.barcode}) barkodi chop etilmagan holda sotuvga qo'shildi`,
+                message: `"${productTitle(ci.product?.brand, ci.product?.name)}" (${ci.item.barcode}) barkodi chop etilmagan holda sotuvga qo'shildi`,
                 titleKey: 'notif_title_barcode_not_printed',
                 messageKey: 'notif_msg_barcode_not_printed',
-                messageParams: { name: `${ci.product?.brand || ''} ${ci.product?.name || ''}`, barcode: ci.item.barcode },
+                messageParams: { name: productTitle(ci.product?.brand, ci.product?.name), barcode: ci.item.barcode },
                 productId: ci.product?.id,
-                productName: `${ci.product?.brand || ''} ${ci.product?.name || ''}`,
+                productName: productTitle(ci.product?.brand, ci.product?.name),
                 barcode: ci.item.barcode,
                 itemId: ci.item.id,
                 sellerId: user?.id,

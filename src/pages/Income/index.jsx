@@ -112,6 +112,9 @@ const Income = () => {
   const [deletePaymentConfirm, setDeletePaymentConfirm] = useState(null)
 
   const normalizeBatches = (b) => b.map(x => {
+    // Ko'chirish va ishlab chiqarish — xarid emas, to'lov holati yo'q
+    if (x.batchType === 'transfer_in') return { ...x, paymentStatus: 'transfer' }
+    if (x.batchType === 'production') return { ...x, paymentStatus: 'production' }
     // Hech narsa to'lanmagan, qarz qaytarish bilan yopilgan — "to'langan" emas
     if ((x.debtUSD || 0) <= 0 && (x.returnedUSD || 0) > 0 && (x.paidUSD || 0) < 0.01)
       return { ...x, paymentStatus: 'returned' }
@@ -601,7 +604,7 @@ const Income = () => {
                       const contractUsed = supplierBatches.reduce((sum, b) =>
                         sum + (b.payments?.reduce((ps, p) => ps + p.amountUZS, 0) || 0), 0)
                       const contractRemaining = (editingSupplier.contractAmount || 0) - contractUsed
-                      return contractRemaining < 5000000 ? (
+                      return (editingSupplier.contractAmount || 0) > 0 && contractRemaining < 5000000 ? (
                         <span className="text-xs bg-accent-red/10 text-accent-red px-2 py-1 rounded-full font-bold">
                           {t('inc_supplier_contract_warning')}
                         </span>
@@ -1101,6 +1104,9 @@ const Income = () => {
                   }
                   return (showSupplierDetail.contractAmount || 0) - contractUsed
                 })()
+                // Shartnoma summasi kiritilmagan bo'lsa — qoldiq va ogohlantirish ko'rsatilmaydi
+                const hasContract = (showSupplierDetail.contractAmount || 0) > 0 || (showSupplierDetail.contractStatus === 'pending_completion' && ((showSupplierDetail.newContractAmount || 0) > 0 || (showSupplierDetail.pendingRemaining || 0) > 0))
+                const contractLow = hasContract && contractRemaining < 5000000
                 const contractPct = showSupplierDetail.contractAmount
                   ? Math.min(100, (contractUsed / showSupplierDetail.contractAmount) * 100)
                   : 0
@@ -1117,10 +1123,10 @@ const Income = () => {
                         <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1">{t('inc_supplier_used')}</p>
                         <p className="text-lg font-syne font-extrabold text-accent-orange">{formatPrice(contractUsed)} {som}</p>
                       </div>
-                      <div className={`rounded-2xl p-4 text-center ${contractRemaining < 5000000 ? 'bg-accent-red/10' : 'bg-bg-tertiary'}`}>
+                      <div className={`rounded-2xl p-4 text-center ${contractLow ? 'bg-accent-red/10' : 'bg-bg-tertiary'}`}>
                         <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1">{t('inc_contract_rem_label')}</p>
-                        <p className={`text-lg font-syne font-extrabold ${contractRemaining < 5000000 ? 'text-accent-red' : 'text-accent-green'}`}>
-                          {formatPrice(contractRemaining)} {som}
+                        <p className={`text-lg font-syne font-extrabold ${!hasContract ? 'text-text-muted' : contractLow ? 'text-accent-red' : 'text-accent-green'}`}>
+                          {hasContract ? `${formatPrice(contractRemaining)} ${som}` : t('inc_supplier_no_contract')}
                         </p>
                       </div>
                     </div>

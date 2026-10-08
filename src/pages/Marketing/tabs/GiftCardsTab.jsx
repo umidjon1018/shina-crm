@@ -10,6 +10,7 @@ import GiftCardSellModal from '../../../components/marketing/GiftCardSellModal'
 import { getGiftCards, getGiftCardTx, createGiftCards, cancelGiftCard } from '../../../api/marketingService'
 import { StatCard, PaymentMethodPicker, pmLabel, Pagination, PAGE_SIZE } from '../../Expenses/components/expHelpers'
 import { fmtMoney, fmtD, fmtDT } from '../components/mkHelpers'
+import { useDataStore } from '../../../store/dataStore'
 
 const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
 const STATUS = {
@@ -38,6 +39,7 @@ const Modal = ({ title, onClose, children, footer }) => (
 const GiftCardsTab = () => {
   const { t } = useTranslation()
   const { selectedShopId } = useShopStore()
+  const { bump } = useDataStore()
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState('all')
@@ -80,7 +82,7 @@ const GiftCardsTab = () => {
     setError('')
     try {
       const r = await createGiftCards({ nominal: Number(batch.nominal), count: Number(batch.count), prefix: batch.prefix, expires_at: batch.expires || null })
-      setCreated(r); setBatch(null); load()
+      setCreated(r); setBatch(null); load(); bump()
     } catch (e) { setError(e?.response?.data?.error || t('exp_err_generic')) }
   }
   const openTx = async (c) => { setTxCard(c); setTx(await getGiftCardTx(c.id).catch(() => [])) }
@@ -88,7 +90,7 @@ const GiftCardsTab = () => {
     setError('')
     try {
       await cancelGiftCard(cancelCard.id, { refund: cancelRefund, payment_method: cancelMethod })
-      setCancelCard(null); load()
+      setCancelCard(null); load(); bump()
     } catch (e) { setError(e?.response?.data?.error || t('exp_err_generic')) }
   }
 
@@ -172,7 +174,7 @@ const GiftCardsTab = () => {
         {pickShop && (
           <ShopPickerModal onConfirm={(id) => { const code = pickShop.code; setPickShop(null); setSell({ shopId: id, code }) }} onCancel={() => setPickShop(null)} />
         )}
-        {sell && <GiftCardSellModal shopId={sell.shopId} presetCode={sell.code} onClose={() => setSell(null)} onSold={() => load()} />}
+        {sell && <GiftCardSellModal shopId={sell.shopId} presetCode={sell.code} onClose={() => setSell(null)} onSold={() => { load(); bump() }} />}
         {batch && (
           <Modal title={t('mkt_gc_batch')} onClose={() => setBatch(null)} footer={<>
             <button onClick={() => setBatch(null)} className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary text-sm">{t('cancel')}</button>

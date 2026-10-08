@@ -140,6 +140,7 @@ const DocFormModal = ({ open, kind = 'sale', clientId: presetClient, onClose, on
                 <option value="">{t('wh_choose')}</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.debt > 0 ? ` · ${formatNumber(c.debt)}` : ''}</option>)}
               </select>
+              {!clients.length && <p className="text-xs text-accent-orange mt-1">{t('wh_no_clients_hint')}</p>}
             </div>
             <div>
               <label className={labelCls}>{t('wh_f_warehouse')} *</label>

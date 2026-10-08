@@ -4517,4 +4517,12 @@ export default {
   inc_inv_missing: "yetishmaydi",
   inc_inv_extra: "ortiqcha",
   inc_inv_diff_n: "{{n}} dona {{sign}}",
+  inc_status_transfer: "Ko'chirilgan",
+  inc_status_production: "Ishlab chiqarilgan",
+  wh_th_other_out: "Boshqa chiqim",
+  wh_no_clients_hint: "Dilerlar yo'q — avval \"Dilerlar\" bo'limida diler qo'shing",
+  sl_no_orgs_hint: "Nasiya tashkilotlari kiritilmagan — Sozlamalar → Savdo qoidalari bo'limida qo'shing",
+  sup_new_supplier_inline: "Yangi yetkazib beruvchi qo'shish",
+  sup_add_short: "Qo'shish",
+  rpt_col_to_dealer: "Dilerga (konsignatsiya)",
 }

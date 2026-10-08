@@ -9,9 +9,11 @@ import { getCapital, deleteCapital } from '../../../api/capitalService'
 import { fmtUZS, fmtNum, fmtDate, today, CURRENT_MONTH, PAGE_SIZE, StatCard, MonthFilterBar, Pagination } from '../components/expHelpers'
 import CapitalFormModal from '../components/CapitalFormModal'
 import DeleteModal from '../components/DeleteModal'
+import { useDataStore } from '../../../store/dataStore'
 
 const CapitalTabWithHeader = () => {
   const { t, i18n } = useTranslation()
+  const { bump } = useDataStore()
   const [capital, setCapital] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -57,11 +59,13 @@ const CapitalTabWithHeader = () => {
       if (idx >= 0) { const n = [...prev]; n[idx] = entry; return n }
       return [entry, ...prev]
     })
+    bump()
   }
   const handleDelete = async () => {
     await deleteCapital(deleteTarget.id)
     setCapital(prev => prev.filter(c => c.id !== deleteTarget.id))
     setDeleteTarget(null)
+    bump()
   }
 
   return (
