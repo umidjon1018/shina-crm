@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { History } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useSettingsStore } from '../../../store/settingsStore'
@@ -53,20 +52,6 @@ export const useLabels = () => {
 
 export const Spinner = () => <div className="py-16 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
 export const ErrorBox = ({ error }) => (error ? <div className="text-sm text-accent-red bg-accent-red/10 px-4 py-3 rounded-xl">{error}</div> : null)
-
-// Eski (batafsil, klientda hisoblanadigan) ko'rinishga o'tish
-export const LegacyLink = ({ onClick }) => {
-  const { t } = useTranslation()
-  if (!onClick) return null
-  return (
-    <div className="flex justify-center pt-2">
-      <button type="button" onClick={onClick}
-        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-tertiary">
-        <History size={16} /> {t('ov_legacy_open')}
-      </button>
-    </div>
-  )
-}
 
 // Ro'yxatdan bitta ko'rsatkich bo'yicha kichik reyting (nomi — qiymat — ulush)
 export const RankList = ({ rows, valueKey = 'value', labelKey = 'label', fmt = money, sub }) => {

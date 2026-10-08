@@ -6,11 +6,11 @@ import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, GradientBars, PALETTE } from '../../../components/charts/Charts'
 import { useSettingsStore } from '../../../store/settingsStore'
-import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox, LegacyLink } from './ovKit'
+import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox } from './ovKit'
 
 
 // Xodimlar hisoboti — server hisoblaydi (sotuv, chegirma, bekor qilish, ish soatlari, reja)
-const StaffOverview = ({ onLegacy }) => {
+const StaffOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const { preset, range, setPeriod, data, error } = useOverview(getStaffOverview)
@@ -128,7 +128,6 @@ const StaffOverview = ({ onLegacy }) => {
       )}
       {(data.cancellations || []).length > 0 && <ReportTable title={t('ov_cancellations')} fileName={`bekorlar_${range.from}_${range.to}`} columns={cancelCols} rows={data.cancellations} searchKeys={['seller', 'customer']} tableId="ov_staff_cancel" />}
       {(data.discounts || []).length > 0 && <ReportTable title={t('ov_discount_control')} fileName={`chegirmalar_${range.from}_${range.to}`} columns={discCols} rows={data.discounts} searchKeys={['seller', 'customer']} tableId="ov_staff_disc" />}
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

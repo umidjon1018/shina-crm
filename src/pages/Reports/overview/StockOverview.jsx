@@ -4,14 +4,14 @@ import { Boxes, Wallet, TrendingUp, AlertTriangle, PackageX, Snail, Clock } from
 import { getStockOverview } from '../../../api/reportService'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, GradientBars, DonutChart } from '../../../components/charts/Charts'
-import { useOverview, money, qtyFmt, daysAgo, dmy, useLabels, Spinner, ErrorBox, LegacyLink, Chips } from './ovKit'
+import { useOverview, money, qtyFmt, daysAgo, dmy, useLabels, Spinner, ErrorBox, Chips } from './ovKit'
 import { localToday } from '../../../utils/tz'
 
 const TURN = { fast: 'bg-accent-green/10 text-accent-green', normal: 'bg-accent-blue/10 text-accent-blue', slow: 'bg-accent-red/10 text-accent-red', out: 'bg-bg-tertiary text-text-muted', unknown: 'bg-bg-tertiary text-text-muted' }
 const ST = { ok: 'bg-accent-green/10 text-accent-green', low: 'bg-accent-orange/10 text-accent-orange', out: 'bg-accent-red/10 text-accent-red' }
 
 // Qoldiq hisoboti — hozirgi holat (server): aylanish, muzlagan kapital, tugayotganlar
-const StockOverview = ({ onLegacy }) => {
+const StockOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const { data, error } = useOverview(getStockOverview, { period: false })
@@ -115,7 +115,6 @@ const StockOverview = ({ onLegacy }) => {
         {view !== 'all' && <button type="button" onClick={() => setView('all')} className="text-accent-red font-semibold">{t('ov_clear_filter')}</button>}
       </div>
       <ReportTable title={t('ov_stock_list')} fileName={`qoldiq_${today}`} columns={cols} rows={shown} searchKeys={['name']} tableId="ov_stock_list" />
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

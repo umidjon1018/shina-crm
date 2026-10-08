@@ -5,10 +5,10 @@ import { getUsedOverview } from '../../../api/reportService'
 import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, GradientBars, PALETTE } from '../../../components/charts/Charts'
-import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox, LegacyLink } from './ovKit'
+import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox } from './ovKit'
 
 // B/U (ishlatilgan tovar) hisoboti — server hisoblaydi
-const UsedOverview = ({ onLegacy }) => {
+const UsedOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const { preset, range, setPeriod, data, error } = useOverview(getUsedOverview)
@@ -71,7 +71,6 @@ const UsedOverview = ({ onLegacy }) => {
       </div>
       <ReportTable title={t('ov_used_sales_list')} fileName={`bu_sotuvlar_${range.from}_${range.to}`} columns={listCols} rows={data.list || []} searchKeys={['customer', 'items', 'seller']} tableId="ov_used_list" />
       <ReportTable title={t('ov_used_stock_list')} fileName="bu_qoldiq" columns={stockCols} rows={data.stock || []} searchKeys={['name', 'fromCustomer']} tableId="ov_used_stock" />
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

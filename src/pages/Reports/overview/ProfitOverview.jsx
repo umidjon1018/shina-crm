@@ -5,10 +5,10 @@ import { getProfitOverview } from '../../../api/reportService'
 import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, DonutChart, PALETTE } from '../../../components/charts/Charts'
-import { useOverview, money, delta, useLabels, Spinner, ErrorBox, LegacyLink } from './ovKit'
+import { useOverview, money, delta, useLabels, Spinner, ErrorBox } from './ovKit'
 
 // Foyda hisoboti — Moliya → Foyda va zarar bilan bir xil formula (server): kanallar, xarajatlar, 12 oy dinamikasi
-const ProfitOverview = ({ onLegacy }) => {
+const ProfitOverview = () => {
   const { t, i18n } = useTranslation()
   const L = useLabels()
   const { preset, range, setPeriod, data, error } = useOverview(getProfitOverview)
@@ -70,7 +70,6 @@ const ProfitOverview = ({ onLegacy }) => {
         </ChartCard>
       </div>
       <ReportTable title={t('ov_monthly_table')} fileName={`foyda_12oy_${range.to}`} columns={cols} rows={[...monthly].reverse()} tableId="ov_profit_months" />
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

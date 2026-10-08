@@ -6,13 +6,13 @@ import { getFinanceOverview } from '../../../api/reportService'
 import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, PALETTE } from '../../../components/charts/Charts'
-import { useOverview, money, dmy, useLabels, Spinner, ErrorBox, LegacyLink } from './ovKit'
+import { useOverview, money, dmy, useLabels, Spinner, ErrorBox } from './ovKit'
 
 const DST = { overdue: 'bg-accent-red/10 text-accent-red', soon: 'bg-accent-orange/10 text-accent-orange', ok: 'bg-accent-green/10 text-accent-green', none: 'bg-bg-tertiary text-text-muted' }
 const usd = (v) => '$' + (Math.round((Number(v) || 0) * 100) / 100).toLocaleString('en-US')
 
 // Moliya hisoboti — server: yetkazib beruvchi qarzi, nasiya tashkilotlari, kapital, pul oqimi
-const FinanceOverview = ({ onLegacy }) => {
+const FinanceOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const navigate = useNavigate()
@@ -91,7 +91,6 @@ const FinanceOverview = ({ onLegacy }) => {
       {data.installmentOrgs.length > 0 && <ReportTable title={t('ov_inst_orgs')} fileName="nasiya_tashkilotlar" columns={orgCols} rows={data.installmentOrgs} tableId="ov_fin_orgs" />}
       {data.supplierDebts.length > 0 && <ReportTable title={t('ov_supplier_debts')} fileName="yetkazib_beruvchi_qarzi" columns={debtCols} rows={data.supplierDebts} searchKeys={['supplier', 'product']} tableId="ov_fin_debts" />}
       {data.capital.list.length > 0 && <ReportTable title={t('ov_capital_moves')} fileName="kapital" columns={capCols} rows={data.capital.list} tableId="ov_fin_cap" />}
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

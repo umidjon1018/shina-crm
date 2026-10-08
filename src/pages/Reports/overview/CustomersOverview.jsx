@@ -5,12 +5,12 @@ import { getCustomersOverview } from '../../../api/reportService'
 import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, PALETTE } from '../../../components/charts/Charts'
-import { useOverview, money, dmy, useLabels, Spinner, ErrorBox, LegacyLink, RankList, Chips } from './ovKit'
+import { useOverview, money, dmy, useLabels, Spinner, ErrorBox, RankList, Chips } from './ovKit'
 
 const RISK = { high: 'bg-accent-red/10 text-accent-red', medium: 'bg-accent-orange/10 text-accent-orange', low: 'bg-accent-blue/10 text-accent-blue' }
 
 // Mijozlar tahlili — server hisoblaydi (LTV, qaytish, xavf, sodiqlik darajalari)
-const CustomersOverview = ({ onLegacy }) => {
+const CustomersOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const { preset, range, setPeriod, data, error } = useOverview(getCustomersOverview)
@@ -85,7 +85,6 @@ const CustomersOverview = ({ onLegacy }) => {
       ]} />
       <ReportTable title={t('ov_customers_list')} fileName={`mijozlar_${range.from}_${range.to}`} columns={cols} rows={shown}
         searchKeys={['name', 'phone', 'instagram']} initialSort={{ key: 'spent', dir: 'desc' }} tableId="ov_customers" />
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }

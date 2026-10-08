@@ -6,12 +6,12 @@ import PeriodPicker from '../../Expenses/components/PeriodPicker'
 import ReportTable from '../components/ReportTable'
 import { HeroStat, MiniStat, ChartCard, TrendArea, GradientBars, DonutChart, PALETTE } from '../../../components/charts/Charts'
 import { useSettingsStore } from '../../../store/settingsStore'
-import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox, LegacyLink, RankList } from './ovKit'
+import { useOverview, money, delta, dmy, useLabels, Spinner, ErrorBox, RankList } from './ovKit'
 
 const WD = [1, 2, 3, 4, 5, 6, 7]
 
 // Savdo hisoboti — server hisoblaydi (davr va oldingi teng davr bilan solishtirma)
-const SalesOverview = ({ onLegacy }) => {
+const SalesOverview = () => {
   const { t } = useTranslation()
   const L = useLabels()
   const { preset, range, setPeriod, data, error } = useOverview(getSalesOverview)
@@ -110,7 +110,6 @@ const SalesOverview = ({ onLegacy }) => {
       <ReportTable title={t('ov_top_products')} fileName={`top_tovarlar_${range.from}_${range.to}`} columns={topCols} rows={data.topProducts || []} />
       <ReportTable title={t('ov_sales_list')} fileName={`sotuvlar_${range.from}_${range.to}`} columns={cols} rows={data.list || []}
         searchKeys={['customer', 'items', 'seller', 'id']} tableId="ov_sales_list" />
-      <LegacyLink onClick={onLegacy} />
     </div>
   )
 }
