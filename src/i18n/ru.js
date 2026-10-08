@@ -4725,4 +4725,5 @@ export default {
   pr_src_transfer: "Перемещение",
   audit_prod_material_transfer: "Перемещение сырья",
   wh_scan_not_in_wh: "{{name}} — нет на этом оптовом складе",
+  inc_no_payments_yet: "Оплат пока нет",
 }

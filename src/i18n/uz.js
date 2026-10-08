@@ -4599,4 +4599,5 @@ export default {
   pr_src_transfer: "Ko'chirish",
   audit_prod_material_transfer: "Xomashyo ko'chirildi",
   wh_scan_not_in_wh: "{{name}} — bu ulgurji omborda yo'q",
+  inc_no_payments_yet: "To'lovlar hali yo'q",
 }

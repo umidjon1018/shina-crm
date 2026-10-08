@@ -129,8 +129,31 @@ const BatchesTab = ({ ctx }) => {
                 </select>
               </div>
 
+              {/* Jadval 1 — telefonda kartochkalar */}
+              <div className="sm:hidden space-y-2">
+                {paged1.map(batch => {
+                  const status = statusConfig[batch.paymentStatus] || statusConfig.unpaid
+                  const canEdit = !['bulk', 'production'].includes(batch.batchType)
+                  return (
+                    <div key={batch.id} onClick={() => canEdit && setEditingBatch(batch)}
+                      className={`bg-bg-secondary border border-border rounded-2xl p-3.5 space-y-1.5 active:scale-[0.99] transition-transform ${batch.hasMissingPrice ? 'border-l-4 border-l-accent-red' : ''}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-[15px] font-bold text-text-primary">{batch.productName}</p>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${status.bg} ${status.color}`}>{t(status.key)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 text-sm">
+                        <span className="text-text-muted">{new Date(batch.receivedAt).toLocaleDateString('uz-UZ')} · {batch.supplierId ? getSupplierName(batch.supplierId) : t('inc_not_assigned')}</span>
+                        <span className="font-bold text-text-primary whitespace-nowrap">{formatUSD(batch.totalUSD)}</span>
+                      </div>
+                      <p className="text-sm text-text-secondary">{batch.quantity} {batch.unit || 'dona'}{returnedQty(batch.id) > 0 && <span className="text-violet-500"> · ↩ {t('inc_returned_n', { n: returnedQty(batch.id) })}</span>}{!batch.purchasePriceUSD && <span className="text-accent-orange"> · ⚠️ {t('inc_no_price')}</span>}</p>
+                    </div>
+                  )
+                })}
+                {paged1.length === 0 && <p className="text-center text-text-muted text-sm py-10">{t('inc_no_batches')}</p>}
+              </div>
+
               {/* Jadval 1 */}
-              <div className="bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
+              <div className="hidden sm:block bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
                 <TableView id="inc_batches" optional={[t('col_category'), t('inc_th_unit_price'), t('inc_th_entry_rate')]}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
@@ -308,8 +331,53 @@ const BatchesTab = ({ ctx }) => {
                 </select>
               </div>
 
+              {/* Jadval 2 — telefonda kartochkalar (bosilsa to'lovlar ochiladi) */}
+              <div className="sm:hidden space-y-2">
+                {paged2.map(batch => {
+                  const s2 = statusConfig[batch.paymentStatus] || statusConfig.unpaid
+                  const open = expandedBatch === batch.id
+                  const dd = getDueDays(batch.dueDate)
+                  return (
+                    <div key={batch.id} className="bg-bg-secondary border border-border rounded-2xl p-3.5 space-y-2">
+                      <div onClick={() => setExpandedBatch(open ? null : batch.id)} className="space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[15px] font-bold text-text-primary">{batch.productName}</p>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${s2.bg} ${s2.color}`}>{t(s2.key)}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span className="text-text-muted">{batch.supplierId ? getSupplierName(batch.supplierId) : '—'}</span>
+                          <span className="whitespace-nowrap">
+                            {batch.paidUSD > 0 && <span className="text-accent-green font-semibold">{formatUSD(batch.paidUSD)}</span>}
+                            {batch.debtUSD > 0 && <span className="text-accent-red font-bold"> · {formatUSD(batch.debtUSD)}</span>}
+                          </span>
+                        </div>
+                        {batch.debtUSD > 0 && dd !== null && (
+                          <p className={`text-xs font-bold ${dd <= 0 ? 'text-accent-red' : dd <= 3 ? 'text-accent-orange' : 'text-text-muted'}`}>{dd <= 0 ? t('inc_overdue') : t('inc_days_left', { n: dd })}</p>
+                        )}
+                        {batch.returnedUSD > 0 && <p className="text-xs text-violet-500">↩ {t('inc_returned_usd', { v: formatUSD(batch.returnedUSD) })}</p>}
+                      </div>
+                      {open && (
+                        <div className="border-t border-border pt-2 space-y-1.5">
+                          {(batch.payments || []).map(p => (
+                            <div key={p.id} className="flex items-center justify-between text-sm">
+                              <span className="text-text-muted">{new Date(p.date).toLocaleDateString('uz-UZ')}</span>
+                              <span className="font-semibold text-text-primary">{formatUSD(p.amountUSD)} <span className="text-text-muted font-normal">· {formatPrice(p.amountUZS)} {som}</span></span>
+                            </div>
+                          ))}
+                          {!(batch.payments || []).length && <p className="text-xs text-text-muted">{t('inc_no_payments_yet')}</p>}
+                          {!['transfer', 'production', 'returned'].includes(batch.paymentStatus) && batch.debtUSD > 0 && (
+                            <button onClick={() => setShowPaymentModal(batch)} className="w-full mt-1 py-2.5 rounded-xl bg-accent-blue text-white text-sm font-bold flex items-center justify-center gap-2"><Wallet size={16} />{t('inc_add_payment')}</button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {paged2.length === 0 && <p className="text-center text-text-muted text-sm py-10">{t('inc_no_batches')}</p>}
+              </div>
+
               {/* Jadval 2 */}
-              <div className="bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
+              <div className="hidden sm:block bg-bg-secondary border border-border rounded-[2rem] overflow-hidden">
                 <TableView id="inc_batches_pay" optional={[t('col_category'), t('col_uzs'), t('inc_pay_col_rate_diff')]}>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left" style={{ tableLayout: 'fixed' }}>
