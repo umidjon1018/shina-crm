@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import i18n from '../../i18n'
+import { toast, errorText } from '../../components/ui/Toast'
 import { useAuthStore } from '../../store/authStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useNotificationStore } from '../../store/notificationStore'
@@ -44,7 +46,7 @@ export const useSalesState = () => {
   const { user } = useAuthStore()
   const barcodeSelectClass = user?.role === 'admin' ? '' : 'select-none'
   const { t } = useTranslation()
-  const { addNotification, notifications, updateNotification } = useNotificationStore()
+  const { addNotification, notifications, updateNotification, sendDiscountRequest } = useNotificationStore()
   const { bump } = useDataStore()
 
   const getItemBarcode = useCallback(() => '—', [])
@@ -126,6 +128,8 @@ export const useSalesState = () => {
   // Permission & Cancel Modals
   const [pinModal, setPinModal] = useState(null) // { discount, requiredRole }
   const [pendingDiscountReqId, setPendingDiscountReqId] = useState(null) // kutayotgan so'rov ID
+  // Boshqaruvchi tasdiqlagan so'rov — sotuv bilan serverga yuboriladi (server chegarani shu bilan o'tkazadi)
+  const [approvedDiscountReq, setApprovedDiscountReq] = useState(null)
 
   // Pending chegirma so'rovini kuzatish — approved yoki rejected bo'lsa react qilish
   useEffect(() => {
@@ -134,10 +138,13 @@ export const useSalesState = () => {
     if (!req) return
     if (req.status === 'approved') {
       setDiscountPercent(req.requestedDiscount)
+      setApprovedDiscountReq({ id: req.serverId, discount: req.requestedDiscount })
       setPendingDiscountReqId(null)
+      toast(i18n.t('sl_dreq_approved', { discount: req.requestedDiscount }))
     } else if (req.status === 'rejected') {
       setDiscountPercent(discountSmallMax || 0)
       setPendingDiscountReqId(null)
+      toast(i18n.t('sl_dreq_rejected'), 'error')
     }
   }, [notifications, pendingDiscountReqId, discountSmallMax])
   const [cancelModal, setCancelModal] = useState(null)
@@ -727,31 +734,38 @@ export const useSalesState = () => {
     setPinModal({ discount: v, requiredRole })
   }
 
-  const handleSendDiscountRequest = () => {
+  const handleSendDiscountRequest = async () => {
     if (!pinModal) return
     const subtotal = cartItems.reduce((s, c) => s + (c.product?.cashPrice || 0) * (c.quantity || 1), 0)
-    const reqId = addNotification({
-      type: 'DISCOUNT_REQUEST',
-      status: 'pending',
-      title: `${pinModal.discount}% chegirma so'rovi`,
-      message: `${(user?.fullName || user?.name || user?.username || 'Xodim')} ${pinModal.discount}% chegirma so'radi`,
-      titleKey: 'notif_title_discount_request',
-      titleParams: { discount: pinModal.discount },
-      messageKey: 'notif_msg_discount_request',
-      messageParams: { seller: (user?.fullName || user?.name || user?.username || 'Xodim'), discount: pinModal.discount },
-      sellerName: user?.fullName || user?.name || user?.username,
-      sellerId: user?.id,
-      requestedDiscount: pinModal.discount,
-      requiredRole: pinModal.requiredRole,
-      cartSummary: {
-        items: cartItems.map(c => ({ name: c.product?.name, qty: c.quantity || 1, price: c.product?.cashPrice })),
-        subtotal,
-        afterDiscount: Math.round(subtotal * (1 - pinModal.discount / 100)),
-      },
-      severity: pinModal.requiredRole === 'admin' ? 'error' : 'warning',
-    })
-    setPendingDiscountReqId(reqId.id)
+    const seller = user?.fullName || user?.name || user?.username || 'Xodim'
+    const { discount, requiredRole } = pinModal
     setPinModal(null)
+    try {
+      const req = await sendDiscountRequest({
+        status: 'pending',
+        title: `${discount}% chegirma so'rovi`,
+        message: `${seller} ${discount}% chegirma so'radi`,
+        titleKey: 'notif_title_discount_request',
+        titleParams: { discount },
+        messageKey: 'notif_msg_discount_request',
+        messageParams: { seller, discount },
+        sellerName: seller,
+        sellerId: user?.id,
+        requestedDiscount: discount,
+        requiredRole,
+        shopId: selectedShopId !== 'all' ? selectedShopId : undefined,
+        cartSummary: {
+          items: cartItems.map(c => ({ name: c.product?.name, qty: c.quantity || 1, price: c.product?.cashPrice })),
+          subtotal,
+          afterDiscount: Math.round(subtotal * (1 - discount / 100)),
+        },
+        severity: requiredRole === 'admin' ? 'error' : 'warning',
+      })
+      setPendingDiscountReqId(req.id)
+      toast(i18n.t('sl_dreq_sent'))
+    } catch (e) {
+      toast(errorText(e), 'error')
+    }
   }
 
   const handleCancelSale = (sale) => {
