@@ -3,8 +3,8 @@
 export const PageHeader = ({ title, subtitle, actions }) => (
   <div className="flex flex-wrap items-end justify-between gap-3">
     <div className="min-w-0">
-      <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{title}</h1>
-      {subtitle && <p className="text-text-secondary text-sm mt-0.5">{subtitle}</p>}
+      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">{title}</h1>
+      {subtitle && <p className="text-text-secondary text-[15px] mt-0.5">{subtitle}</p>}
     </div>
     {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
   </div>
@@ -13,7 +13,7 @@ export const PageHeader = ({ title, subtitle, actions }) => (
 // Bosiladigan KPI karta (masalan, filtr sifatida)
 export const KpiCard = ({ icon: Icon, label, value, sub, color = 'bg-accent-blue/10 text-accent-blue', active, onClick, className = '' }) => (
   <div onClick={onClick}
-    className={`bg-bg-secondary border rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 min-w-0 transition-all ${onClick ? 'cursor-pointer' : ''} ${className}
+    className={`bg-bg-secondary border rounded-[1.25rem] p-3.5 sm:p-4 flex items-center gap-3 min-w-0 transition-all ${onClick ? 'cursor-pointer active:scale-[0.99]' : ''} ${className}
       ${active ? 'border-accent-red ring-2 ring-accent-red/20' : 'border-border hover:border-text-muted'}`}>
     {Icon && <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${color}`}><Icon size={20} /></div>}
     <div className="min-w-0">
@@ -33,14 +33,14 @@ export const KpiStrip = ({ children, cols = 4 }) => (
 
 // [A | B] — tab ichidagi ko'rinish almashtirgichi
 export const Segmented = ({ value, onChange, options }) => (
-  <div className="inline-flex items-center gap-1 bg-bg-secondary border border-border rounded-2xl p-1 max-w-full overflow-x-auto no-scrollbar">
+  <div className="inline-flex items-center gap-1 panel !rounded-2xl p-1 max-w-full overflow-x-auto no-scrollbar">
     {options.map(o => {
       const Icon = o.icon
       return (
         <button key={o.id} type="button" onClick={() => onChange(o.id)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all
-            ${value === o.id ? 'bg-accent-red text-white' : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
-          {Icon && <Icon size={15} />} {o.label}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-[15px] font-semibold whitespace-nowrap transition-all
+            ${value === o.id ? 'g-brand text-white shadow-md' : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'}`}>
+          {Icon && <Icon size={17} />} {o.label}
           {o.count !== undefined && <span className={`text-xs ${value === o.id ? 'opacity-80' : 'text-text-muted'}`}>{o.count}</span>}
         </button>
       )

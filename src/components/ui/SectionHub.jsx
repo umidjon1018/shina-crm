@@ -21,8 +21,9 @@ const setSectionParam = (id) => {
 const SectionHub = ({ sections, title, variant = 'tiles', openId: controlledId, onOpenChange }) => {
   const [openId, setOpenId] = useState(() => new URLSearchParams(window.location.search).get('section'))
   const current = controlledId !== undefined ? controlledId : openId
-  const open = (id) => { setSectionParam(id); setOpenId(id); onOpenChange?.(id) }
-  const close = () => { setSectionParam(null); setOpenId(null); onOpenChange?.(null) }
+  const open = (id) => { setOpenId(id); onOpenChange?.(id) }
+  const close = () => { setOpenId(null); onOpenChange?.(null) }
+  useEffect(() => { setSectionParam(current || null) }, [current])
   useEffect(() => { if (current && !sections.some(s => s.id === current)) close() }, [sections.length])
   const sec = sections.find(s => s.id === current)
 
@@ -34,8 +35,8 @@ const SectionHub = ({ sections, title, variant = 'tiles', openId: controlledId, 
             const Icon = s.icon
             return (
               <button key={s.id} onClick={() => open(s.id)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl panel hover:border-border-bright text-[15px] font-semibold text-text-primary whitespace-nowrap shrink-0">
-                {Icon && <span className={`w-7 h-7 rounded-full bg-gradient-to-br ${toneClass(s.tone)} text-white flex items-center justify-center`}><Icon size={15} /></span>}
+                className="flex items-center gap-2 pl-2 pr-4 py-2 rounded-2xl panel hover:border-border-bright text-[15px] font-semibold text-text-primary whitespace-nowrap shrink-0 active:scale-[0.98] transition-transform">
+                {Icon && <span className={`w-8 h-8 rounded-xl bg-gradient-to-br ${toneClass(s.tone)} text-white flex items-center justify-center`}><Icon size={17} /></span>}
                 {s.label}
                 {s.badge ? <span className="ml-0.5 px-2 py-0.5 rounded-full bg-accent-red text-white text-xs font-bold">{s.badge}</span> : null}
               </button>

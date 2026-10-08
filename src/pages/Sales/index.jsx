@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import DateMaskInput from '../../components/DateMaskInput'
 import { Bookmark,
-  Trash2, RotateCcw, History, ShoppingBag, Calendar,
-  TrendingUp, XCircle, X, Recycle, Banknote, Gift
+  Trash2, RotateCcw, History, Calendar,
+  TrendingUp, XCircle, X, Banknote, Gift
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
@@ -14,6 +14,8 @@ import DiscountRequestModal from '../../components/sales/DiscountRequestModal'
 import CashExpenseModal from '../../components/sales/CashExpenseModal'
 import GiftCardSellModal from '../../components/marketing/GiftCardSellModal'
 import { useAuthStore } from '../../store/authStore'
+import SectionHub from '../../components/ui/SectionHub'
+import { Segmented } from '../../components/ui/Kit'
 import NewSaleTab from './tabs/NewSaleTab'
 import UsedSaleTab from './tabs/UsedSaleTab'
 import HistoryTab from './tabs/HistoryTab'
@@ -114,73 +116,63 @@ const Sales = () => {
     profitSearch, setProfitSearch, profitPage, setProfitPage,
     profitSortField, profitSortOrder, handleProfitSort,
   } = state
-  const SALES_TABS = ['new_sale', 'used_sale', 'reservations', 'returns', 'history', 'returns_history', 'installment', 'profit']
-    .filter(id => hasPermission('sales.' + id))
-  const activeTab = SALES_TABS.includes(pickedTab) ? pickedTab : SALES_TABS[0]
+  const KASSA_TABS = ['new_sale', 'used_sale'].filter(id => hasPermission('sales.' + id))
+  const SECTION_IDS = ['reservations', 'returns', 'history', 'returns_history', 'installment', 'profit'].filter(id => hasPermission('sales.' + id))
+  const kassaTab = KASSA_TABS.includes(pickedTab) ? pickedTab : KASSA_TABS[0]
+  const [section, setSection] = useState(() => {
+    const q = new URLSearchParams(window.location.search)
+    const id = q.get('section') || q.get('tab')
+    return SECTION_IDS.includes(id) ? id : null
+  })
+  // Bo'limlar orasida o'tish: kassa — asosiy oyna, qolganlari modalda
+  const goTab = (id) => {
+    if (KASSA_TABS.includes(id)) { setSection(null); setActiveTab(id) }
+    else if (SECTION_IDS.includes(id)) setSection(id)
+  }
 
   return (
-    <div className="min-h-[calc(100vh-120px)] space-y-4 sm:space-y-6">
+    <div className="min-h-[calc(100vh-120px)] space-y-4 sm:space-y-5">
       {shopPickCallback && (
         <ShopPickerModal
           onConfirm={(shopId) => { const cb = shopPickCallback; setShopPickCallback(null); cb(shopId) }}
           onCancel={() => setShopPickCallback(null)}
         />
       )}
-      {/* Header Navigation Tab Buttons */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-1.5 p-1.5 bg-bg-secondary border border-border rounded-2xl overflow-x-auto no-scrollbar max-w-full">
-          {[
-            { id: 'new_sale', label: t('sl_tab_new_sale'), icon: ShoppingBag },
-            { id: 'used_sale', label: t('sl_tab_used_sale'), icon: Recycle },
-            { id: 'reservations', label: t('sl_tab_reservations'), icon: Bookmark },
-            { id: 'returns', label: t('sl_tab_returns'), icon: RotateCcw },
-            { id: 'history', label: t('sl_tab_history'), icon: History },
-            { id: 'returns_history', label: t('sl_tab_returns_history'), icon: XCircle },
-            { id: 'installment', label: t('sl_tab_installment'), icon: Calendar },
-            { id: 'profit', label: t('sl_tab_profit'), icon: TrendingUp },
-          ].filter(tab => SALES_TABS.includes(tab.id)).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              title={tab.label}
-              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-accent-red text-white shadow-glow-red'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              <tab.icon size={16} />
-              <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
+      {/* Sarlavha: kassa turi + tezkor amallar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">{t('sales')}</h1>
+          {KASSA_TABS.length > 1 && (
+            <Segmented value={kassaTab} onChange={goTab}
+              options={[{ id: 'new_sale', label: t('sl_tab_new_sale') }, { id: 'used_sale', label: t('sl_tab_used_sale') }]} />
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {cartItems.length > 0 && kassaTab === 'new_sale' && (
+            <button onClick={clearCart}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[15px] font-semibold text-text-secondary hover:text-accent-red transition-colors">
+              <Trash2 size={17} /> {t('sl_clear_cart')} ({cartItems.length})
             </button>
-          ))}
-          {cartItems.length > 0 && activeTab === 'new_sale' && (
-            <button
-              onClick={clearCart}
-              className="px-3 py-2.5 text-xs font-bold text-text-muted hover:text-accent-red transition-colors flex items-center gap-1 shrink-0"
-            >
-              <Trash2 size={14} /> {t('sl_clear_cart')} ({cartItems.length})
+          )}
+          {hasPermission('sales.gift_cards') && (
+            <button onClick={() => state.requireShop(id => setGiftShopId(id))}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl panel text-[15px] font-semibold text-text-secondary hover:text-accent-pink hover:border-accent-pink/50 transition-colors shrink-0">
+              <Gift size={18} /> {t('mkt_gc_sell_short')}
+            </button>
+          )}
+          {hasPermission('sales.cash_expense') && (
+            <button onClick={() => state.requireShop(id => setCashShopId(id))}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl panel text-[15px] font-semibold text-text-secondary hover:text-accent-orange hover:border-accent-orange/50 transition-colors shrink-0">
+              <Banknote size={18} /> {t('fin_cash_btn')}
             </button>
           )}
         </div>
-        {hasPermission('sales.gift_cards') && (
-          <button onClick={() => state.requireShop(id => setGiftShopId(id))}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-secondary text-sm font-semibold text-text-secondary hover:text-accent-red hover:border-accent-red/50 transition-colors shrink-0">
-            <Gift size={16} /> {t('mkt_gc_sell_short')}
-          </button>
-        )}
-        {hasPermission('sales.cash_expense') && (
-          <button onClick={() => state.requireShop(id => setCashShopId(id))}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-bg-secondary text-sm font-semibold text-text-secondary hover:text-accent-orange hover:border-accent-orange/50 transition-colors shrink-0">
-            <Banknote size={16} /> {t('fin_cash_btn')}
-          </button>
-        )}
       </div>
       <AnimatePresence>
         {cashShopId && <CashExpenseModal shopId={cashShopId} onClose={() => setCashShopId(null)} />}
         {giftShopId && <GiftCardSellModal shopId={giftShopId} onClose={() => setGiftShopId(null)} />}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
       {(() => {
         const ctx = {
           // shared
@@ -188,7 +180,7 @@ const Sales = () => {
           barcodeSelectClass, getItemBarcode, formatMonthValue,
           salesList, allCustomers, selectedShopId,
           fetchData, bump, addCustomer,
-          requireShop: state.requireShop, setActiveTab,
+          requireShop: state.requireShop, setActiveTab: goTab,
           // new_sale
           addToCart, cartItems, clearCart, removeFromCart, updateSalePrice,
           selectedCustomer, setSelectedCustomer, customerSearch, setCustomerSearch,
@@ -268,20 +260,24 @@ const Sales = () => {
           profitSearch, setProfitSearch, profitPage, setProfitPage,
           profitSortField, profitSortOrder, handleProfitSort,
         }
+        const SECTIONS = [
+          { id: 'history', label: t('sl_tab_history'), icon: History, tone: 'violet', render: () => <HistoryTab ctx={ctx} /> },
+          { id: 'returns', label: t('sl_tab_returns'), icon: RotateCcw, tone: 'orange', render: () => <ShopRequiredGuard><ReturnsTab ctx={ctx} /></ShopRequiredGuard> },
+          { id: 'returns_history', label: t('sl_tab_returns_history'), icon: XCircle, tone: 'red', render: () => <ReturnsHistoryTab ctx={ctx} /> },
+          { id: 'installment', label: t('sl_tab_installment'), icon: Calendar, tone: 'pink', render: () => <InstallmentTab ctx={ctx} /> },
+          { id: 'reservations', label: t('sl_tab_reservations'), icon: Bookmark, tone: 'cyan', render: () => <ReservationsTab ctx={ctx} /> },
+          { id: 'profit', label: t('sl_tab_profit'), icon: TrendingUp, tone: 'green', render: () => <ProfitTab ctx={ctx} /> },
+        ].filter(x => SECTION_IDS.includes(x.id))
         return (
           <>
-            {activeTab === 'new_sale' && <ShopRequiredGuard><NewSaleTab ctx={ctx} /></ShopRequiredGuard>}
-            {activeTab === 'used_sale' && <ShopRequiredGuard><UsedSaleTab ctx={ctx} /></ShopRequiredGuard>}
-            {activeTab === 'reservations' && <ReservationsTab ctx={ctx} />}
-            {activeTab === 'history' && <HistoryTab ctx={ctx} />}
-            {activeTab === 'returns' && <ShopRequiredGuard><ReturnsTab ctx={ctx} /></ShopRequiredGuard>}
-            {activeTab === 'returns_history' && <ReturnsHistoryTab ctx={ctx} />}
-            {activeTab === 'installment' && <InstallmentTab ctx={ctx} />}
-            {activeTab === 'profit' && <ProfitTab ctx={ctx} />}
+            {SECTIONS.length > 0 && (
+              <SectionHub variant={kassaTab ? 'bar' : 'tiles'} sections={SECTIONS} openId={section} onOpenChange={setSection} />
+            )}
+            {kassaTab === 'new_sale' && <ShopRequiredGuard><NewSaleTab ctx={ctx} /></ShopRequiredGuard>}
+            {kassaTab === 'used_sale' && <ShopRequiredGuard><UsedSaleTab ctx={ctx} /></ShopRequiredGuard>}
           </>
         )
       })()}
-      </AnimatePresence>
 
       {/* NEW CUSTOMER MODAL */}
       <AnimatePresence>
