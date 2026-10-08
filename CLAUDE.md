@@ -60,6 +60,12 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 - [ ] **Mijozlar boti modeli** — Sonnet 5.5 qo'yilgan (foydalanuvchi: "qimmat bo'lsa qaytaraman"); bot yoqilgach xarajatni kuzat, kerak bo'lsa Haiku.
 - [ ] **Showroom ish vaqti** — bot bilimlar bazasida "kuz-qish mavsumida 24 soat"; bahorda o'zgarishi mumkin (Admin → Mijozlar boti → Bilimlar bazasi).
 
+**Foydalanuvchi bergan keyingi ishlar (2026-10-09 — yangi sessiya boshida AYT, qaysidan boshlashni so'ra):**
+1. [ ] Obuna bo'limi — oylik to'lov dastur ichidan (Click, Payme, Uzcard/Humo)
+2. [ ] Mobil va kompyuter ilovalari (hozir faqat Chrome yorlig'i / PWA)
+3. [ ] Kod sifati va xavfsizlik auditi
+4. [ ] Ulgurji savdo uchun bot
+
 **Navbatdagi ishlar (tartib bilan):**
 1. [ ] Telegram kanali — token kelganda.
 2. [ ] **~2026-10-21: eski login yo'lini yopish** — `authController` da `flow` yo'q login → 7 kunlik token beradi (FaceID'ni chetlab o'tadigan oxirgi yo'l). Avval hamma xodim yangi yo'lga o'tganini `refresh_tokens` orqali tekshir.
