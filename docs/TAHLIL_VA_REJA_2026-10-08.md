@@ -316,6 +316,14 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - Sinov: API to'liq oqim + brauzerda (yakunlash, xomashyo kirimi, bo'limlar) — lokal bazada, keyin faqat SINOV yozuvlari tozalandi. Commitlar: backend 46812c4, e6d1c43; frontend 0c9edb41.
 - **Keyinroq (kerak bo'lsa):** miqdor bo'yicha tovarni sotish (kassa/ulgurji kg bilan), xomashyoni omborlar orasida ko'chirish, dona bo'yicha xomashyo (qadoq) sarfi, biznes profili (modullarni yoqish — Bosqich 7).
 
+### Yakuniy ishlar (2026-10-08 kech)
+- Eski 69 oyna umumiy stekda (StackGuard): Esc / telefon "orqaga" ustki oynani yopadi.
+- Bosqich 3: serverda yagona savdo formulasi (`utils/salesTotals`) — Moliya, Bosh sahifa, Hisobotlar bir xil; Hisobotlar tepasida "Savdo kanallari" (chakana / B/U / ulgurji); eski hisobotlar ma'lumoti faqat ochilganda yuklanadi; frontendda foyda formulasi birlashtirildi (komissiya, tovar bo'yicha foyda, o'ylab topilgan 80% tannarx va 3% komissiya olib tashlandi). **Qoldi:** 7 ta eski hisobotni to'liq serverga ko'chirish.
+- Bosqich 6 (tayyorlov): Sozlamalar → Integratsiyalar → Fiskal chek, tovarlarda IKPU/qadoq/QQS, sotuv fiskal navbati va adapter interfeysi. **Qoldi:** provayder tanlash va adapter.
+- Bosqich 7: biznes profili (B/U, shina maydonlari). **Qoldi:** multi-tenant (ikkinchi mijoz, domen/SSL qarorlari bilan).
+- Xomashyoni ko'chirish, ulgurji hujjatda barkod skaneri, Kirim ro'yxatlari telefonda kartochka.
+- **Qoldi (ixtiyoriy):** AI tahlilda ulgurji/ishlab chiqarish bo'limi, kg bilan sotish, Moliya/Marketing ichki jadvallarini yangi uslubga o'tkazish.
+
 ---
 
 ## 16. Foydalanuvchi fikri va yangi talablar (2026-10-08, 3-versiya)
