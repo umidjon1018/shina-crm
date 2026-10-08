@@ -36,6 +36,13 @@ import MovementTab from './tabs/MovementTab'
 import SupplyTab from './tabs/SupplyTab'
 import ShopsReportTab from './tabs/ShopsReportTab'
 import SegmentsTab from './tabs/SegmentsTab'
+import SalesOverview from './overview/SalesOverview'
+import StockOverview from './overview/StockOverview'
+import UsedOverview from './overview/UsedOverview'
+import CustomersOverview from './overview/CustomersOverview'
+import StaffOverview from './overview/StaffOverview'
+import ProfitOverview from './overview/ProfitOverview'
+import FinanceOverview from './overview/FinanceOverview'
 import TelegramStatsButton from './components/TelegramStatsButton'
 import SectionHub from '../../components/ui/SectionHub'
 import { PageHeader } from '../../components/ui/Kit'
@@ -127,7 +134,9 @@ export const Reports = () => {
   const [_allUsedStock, setUsedStock] = useState([])
   const [MOCK_RETURNS, setReturns] = useState([])
   // Eski (brauzerda hisoblanadigan) hisobotlar uchun barcha ma'lumot faqat shunday bo'lim ochilganda yuklanadi
-  const [needLegacy, setNeedLegacy] = useState(() => LEGACY_TABS.includes(new URLSearchParams(window.location.search).get('section')))
+  // Eski (klientda hisoblanadigan) batafsil ko'rinish — faqat foydalanuvchi so'raganda yuklanadi
+  const [needLegacy, setNeedLegacy] = useState(false)
+  const [legacyOn, setLegacyOn] = useState({})
   const [legacyLoaded, setLegacyLoaded] = useState(false)
 
   useEffect(() => {
@@ -1886,6 +1895,9 @@ export const Reports = () => {
     used: <UsedTab ctx={ctx} />, products: <ProductsReportTab />, movement: <MovementTab />, supply: <SupplyTab />,
     segments: <SegmentsTab />, shops: <ShopsReportTab />,
   }
+  // Server hisoblaydigan asosiy ko'rinishlar (eski 7 hisobot o'rniga)
+  const OVERVIEW = { sales: SalesOverview, stock: StockOverview, used: UsedOverview, customers: CustomersOverview,
+    employees: StaffOverview, profit: ProfitOverview, finance: FinanceOverview }
   const GROUP = { sales: 'sales', products: 'sales', profit: 'sales', stock: 'stock', movement: 'stock', supply: 'stock', used: 'stock',
     customers: 'customers', segments: 'customers', employees: 'team', shops: 'team', finance: 'team' }
   const TONE = { sales: 'cyan', products: 'violet', profit: 'green', stock: 'blue', movement: 'orange', supply: 'pink', used: 'green',
@@ -1894,21 +1906,33 @@ export const Reports = () => {
   const SECTIONS = [...tabs].sort((x, y) => ORDER.indexOf(x.id) - ORDER.indexOf(y.id)).map(tab => ({
     id: tab.id, label: tab.label, icon: tab.icon, tone: TONE[tab.id], desc: t('rep_desc_' + tab.id),
     group: t('rep_group_' + GROUP[tab.id]),
-    render: () => (
-      <div className="space-y-4 sm:space-y-6">
-        {!NEW_TABS.includes(tab.id) && legacyToolbar(tab.id)}
-        {!NEW_TABS.includes(tab.id) && !legacyLoaded
-          ? <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
-          : REPORT_VIEW[tab.id]}
-      </div>
-    ),
+    render: () => {
+      const Overview = OVERVIEW[tab.id]
+      if (Overview && !legacyOn[tab.id]) {
+        return <Overview onLegacy={() => { setLegacyOn(s => ({ ...s, [tab.id]: true })); setNeedLegacy(true) }} />
+      }
+      return (
+        <div className="space-y-4 sm:space-y-6">
+          {Overview && (
+            <button type="button" onClick={() => setLegacyOn(s => ({ ...s, [tab.id]: false }))}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:bg-bg-tertiary">
+              <ArrowLeftRight size={16} /> {t('ov_back_to_new')}
+            </button>
+          )}
+          {!NEW_TABS.includes(tab.id) && legacyToolbar(tab.id)}
+          {!NEW_TABS.includes(tab.id) && !legacyLoaded
+            ? <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-accent-red border-t-transparent rounded-full animate-spin" /></div>
+            : REPORT_VIEW[tab.id]}
+        </div>
+      )
+    },
   }))
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
       <PageHeader title={t('reports')} subtitle={t('rep_subtitle')} actions={<TelegramStatsButton />} />
       <SectionHub sections={SECTIONS} openId={section}
-        onOpenChange={(id) => { setSection(id); setShowExportMenu(false); if (id) setActiveTab(id); if (LEGACY_TABS.includes(id)) setNeedLegacy(true) }} />
+        onOpenChange={(id) => { setSection(id); setShowExportMenu(false); if (id) setActiveTab(id) }} />
       <ReportsOverview />
     </motion.div>
   )

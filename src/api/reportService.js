@@ -21,3 +21,12 @@ export const getStaffMe = async () => (await api.get('/api/marketing/tg/staff-me
 export const getTgStaff = async () => (await api.get('/api/marketing/tg/staff')).data
 export const saveTgStaff = async (d) => (await api.put('/api/marketing/tg/staff', d)).data
 export const removeTgStaff = async (chatId) => (await api.delete(`/api/marketing/tg/staff/${chatId}`)).data
+
+// Server tomonda hisoblanadigan hisobotlar (eski klient hisob-kitoblari o'rniga)
+export const getSalesOverview = async (p) => (await api.get('/api/reports/sales-overview', { params: params(p) })).data
+export const getStockOverview = async (p) => (await api.get('/api/reports/stock-overview', { params: params(p) })).data
+export const getUsedOverview = async (p) => (await api.get('/api/reports/used-overview', { params: params(p) })).data
+export const getCustomersOverview = async (p) => (await api.get('/api/reports/customers-overview', { params: params(p) })).data
+export const getStaffOverview = async (p) => (await api.get('/api/reports/staff-overview', { params: params(p) })).data
+export const getProfitOverview = async (p) => (await api.get('/api/reports/profit-overview', { params: params(p) })).data
+export const getFinanceOverview = async (p) => (await api.get('/api/reports/finance-overview', { params: params(p) })).data
