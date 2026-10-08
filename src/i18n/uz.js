@@ -4525,4 +4525,5 @@ export default {
   sup_new_supplier_inline: "Yangi yetkazib beruvchi qo'shish",
   sup_add_short: "Qo'shish",
   rpt_col_to_dealer: "Dilerga (konsignatsiya)",
+  rep_cost_missing: "Kirim narxi kiritilmagan",
 }

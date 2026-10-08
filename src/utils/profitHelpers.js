@@ -22,3 +22,20 @@ export const getUsedSaleProfit = (s, usedStock = []) => {
   }, 0)
   return (s.total || 0) - totalCost
 }
+
+// Sotuvdagi har tovarning foydasi: o'z sotuv narxi (foizli chegirma ulushi bilan) − o'z kirim narxi − nasiya komissiyasi ulushi.
+// Sotuv foydasini tovarlar soniga teng bo'lish noto'g'ri (shina va qopqoq bir xil foyda olib qolardi)
+export const getSaleItemProfits = (s) => {
+  const items = s?.items || []
+  const gross = items.reduce((a, it) => a + (it.price || it.salePrice || 0) * (it.qty || 1), 0)
+  const ratio = gross > 0 ? (s.total || 0) / gross : 1
+  const commission = s?.paymentType === 'installment' ? (s.installmentCommissionAmount ?? 0) : 0
+  return items.map(it => {
+    const qty = it.qty || 1
+    const revenue = (it.price || it.salePrice || 0) * qty * ratio
+    const cost = (it.purchasePrice || 0) * qty
+    const commissionShare = s.total > 0 ? commission * revenue / s.total : 0
+    return { name: it.name || it.productName || '', productId: it.productId, qty, revenue, cost,
+      profit: revenue - cost - commissionShare, missingCost: !it.purchasePrice }
+  })
+}

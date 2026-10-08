@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 import { ShoppingCart, Award, TrendingUp, Target, Recycle, ArrowDownRight, X } from 'lucide-react'
 import { C, DetailButton, GrowthBadge, Modal, ModalTable, MonthYearFilter, MonthlyDynamicsChart, fmtItems, fmtNum, fmtSoldAt, fmtUZS } from '../components/shared'
-import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit } from '../../../utils/profitHelpers'
+import { getSaleProfit, getNetSaleProfit, getUsedSaleProfit, getSaleItemProfits } from '../../../utils/profitHelpers'
 
 const ProfitTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -319,7 +319,7 @@ const ProfitTab = ({ ctx }) => {
                     <div className="flex items-center justify-between mb-5">
                       <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
                       <span className="text-text-muted text-xs">
-                        {t('wh_in_total')}: {(() => { const total = filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0); return <span className={`font-bold ${total >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(total)}</span> })()}
+                        {t('wh_in_total')}: {(() => { const total = filtered.reduce((s,x) => s+getNetSaleProfit(x), 0); return <span className={`font-bold ${total >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(total)}</span> })()}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mb-4 sm:mb-6">
@@ -342,11 +342,10 @@ const ProfitTab = ({ ctx }) => {
                     {(() => {
                       const prodMap = {}
                       filtered.forEach(s => {
-                        s.items.forEach(item => {
-                          const name = typeof item === 'object' ? (item.name || '') : item.split(' x')[0]
-                          if (!prodMap[name]) prodMap[name] = { profit: 0, count: 0 }
-                          prodMap[name].profit += getSaleProfit(s) / (s.items?.length || 1)
-                          prodMap[name].count  += typeof item === 'object' ? (item.qty || 1) : parseInt(item.split(' x')[1] || '1')
+                        getSaleItemProfits(s).forEach(it => {
+                          if (!prodMap[it.name]) prodMap[it.name] = { profit: 0, count: 0 }
+                          prodMap[it.name].profit += it.profit
+                          prodMap[it.name].count += it.qty
                         })
                       })
                       const top5 = Object.entries(prodMap).sort((a,b) => b[1].profit-a[1].profit).slice(0,5)
@@ -404,7 +403,7 @@ const ProfitTab = ({ ctx }) => {
                             )}
                           </div>
                         )},
-                        { key:'profit',       label:t('col_net_profit'),          align:'right', render: r => { const p = getSaleProfit(r); return <span className={`font-bold ${p >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(p)}</span> } },
+                        { key:'profit',       label:t('col_net_profit'),          align:'right', render: r => { const p = getNetSaleProfit(r); return <span className={`font-bold ${p >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(p)}</span> } },
                       ]}
                     />
                   </Modal>

@@ -4651,4 +4651,5 @@ export default {
   sup_new_supplier_inline: "Добавить нового поставщика",
   sup_add_short: "Добавить",
   rpt_col_to_dealer: "Дилеру (консигнация)",
+  rep_cost_missing: "Не указана закупочная цена",
 }

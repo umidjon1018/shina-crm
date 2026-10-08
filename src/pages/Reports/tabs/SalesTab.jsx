@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 import { Activity, Award, BarChart3, ChevronDown, CircleX, Clock, CreditCard, DollarSign, Eye, MapPin, RefreshCw, Repeat, ShoppingCart, Star, Target, TrendingUp, UserX, Users } from 'lucide-react'
 import { C, SOURCE_LABELS, DetailButton, GrowthBadge, Modal, ModalTable, MonthYearFilter, MonthlyDynamicsChart, Pagination, TODAY, fmtItems, fmtNum, fmtSoldAt, fmtUSD, fmtUZS } from '../components/shared'
-import { getSaleProfit } from '../../../utils/profitHelpers'
+import { getSaleProfit, getNetSaleProfit, getSaleItemProfits } from '../../../utils/profitHelpers'
 
 const SalesTab = ({ ctx }) => {
   const { t } = useTranslation()
@@ -560,7 +560,7 @@ const SalesTab = ({ ctx }) => {
             <div className="flex items-center justify-between mb-5">
               <MonthYearFilter value={modalFilter} onChange={setModalFilter} />
               <span className="text-text-muted text-xs">
-                {t('wh_in_total')}: {fmtUZS(filtered.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0))}
+                {t('wh_in_total')}: {fmtUZS(filtered.reduce((s,x) => s+getNetSaleProfit(x), 0))}
               </span>
             </div>
 
@@ -591,11 +591,10 @@ const SalesTab = ({ ctx }) => {
                 {(() => {
                   const prodMap = {}
                   filtered.forEach(s => {
-                    s.items.forEach(item => {
-                      const name = typeof item === 'object' ? (item.name || '') : item.split(' x')[0]
-                      if (!prodMap[name]) prodMap[name] = { profit: 0, count: 0 }
-                      prodMap[name].profit += getSaleProfit(s) / (s.items?.length || 1)
-                      prodMap[name].count  += typeof item === 'object' ? (item.qty || 1) : parseInt(item.split(' x')[1] || '1')
+                    getSaleItemProfits(s).forEach(it => {
+                      if (!prodMap[it.name]) prodMap[it.name] = { profit: 0, count: 0 }
+                      prodMap[it.name].profit += it.profit
+                      prodMap[it.name].count += it.qty
                     })
                   })
                   return Object.entries(prodMap)
@@ -637,15 +636,13 @@ const SalesTab = ({ ctx }) => {
                 { key:'customerName', label:t('col_customer'),       render: r => <span className="font-medium text-text-primary text-xs">{r.customerName}</span> },
                 { key:'soldByName',   label:t('col_employee'),       render: r => <span className="text-xs text-text-secondary">{r.soldByName || '—'}</span> },
                 { key:'purchasePrice',label:t('rep_col_purchase_price'), align:'right', render: r => {
-                  const total = r.items?.reduce((s,i) => {
-                    const pp = i.purchasePrice || Math.round((i.price || i.salePrice || 0) * 0.8)
-                    return s + pp * (i.qty||1)
-                  }, 0) || 0
+                  if (r.items?.some(i => !i.purchasePrice)) return <span className="text-accent-orange text-xs font-semibold">{t('rep_cost_missing')}</span>
+                  const total = r.items?.reduce((s,i) => s + i.purchasePrice * (i.qty||1), 0) || 0
                   return <span className="text-text-secondary text-xs">{fmtUZS(total)}</span>
                 }},
                 { key:'total',        label:t('rep_col_sale_price'),     align:'right', render: r => <span className="text-text-primary text-xs">{fmtUZS(r.total)}</span> },
                 { key:'qty',          label:t('rep_col_qty'),            align:'center', render: r => <span className="font-bold">{r.items?.reduce((s,i)=>s+(i.qty||1),0) || 1}</span> },
-                { key:'profit',       label:t('rep_col_total_profit'),   align:'right', render: r => <span className="font-bold text-accent-green">{fmtUZS(getSaleProfit(r))}</span> },
+                { key:'profit',       label:t('rep_col_total_profit'),   align:'right', render: r => { const p = getNetSaleProfit(r); return <span className={`font-bold ${p >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>{fmtUZS(p)}</span> } },
               ]}
             />
           </Modal>

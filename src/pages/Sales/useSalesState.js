@@ -1708,6 +1708,8 @@ export const useSalesState = () => {
       })
   }, [salesList, usedSalesList, installmentMonthFilter, installmentSearch, installmentTypeFilter, selectedShopId]);
 
+  // Saqlangan komissiya bo'lmasa — sotuvdagi tashkilotning foizi (tashkilot topilmasa 0)
+  const orgPercent = (s) => installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0
   const enrichedInstallmentSales = useMemo(() => {
     return filteredInstallmentSales.map(s => {
       const firstItem = s.items?.[0];
@@ -1729,8 +1731,8 @@ export const useSalesState = () => {
         qty,
         installmentOrgName: s.installmentOrgName || 'Oddiy Nasiya',
         installmentStatus: statusLabel,
-        installmentCommissionPercent: s.installmentCommissionPercent ?? 3,
-        installmentCommissionAmount: s.installmentCommissionAmount ?? Math.round(s.total * 0.03)
+        installmentCommissionPercent: s.installmentCommissionPercent ?? orgPercent(s),
+        installmentCommissionAmount: s.installmentCommissionAmount ?? Math.round(s.total * orgPercent(s) / 100)
       };
     });
   }, [filteredInstallmentSales, getInstallmentStatusMap, productCategories]);

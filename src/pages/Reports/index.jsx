@@ -336,7 +336,7 @@ export const Reports = () => {
     const completed = filtered.filter(s => s.status !== 'cancelled')
     const cancelled = filtered.filter(s => s.status === 'cancelled')
     const totalSales = completed.reduce((s, x) => s + x.total, 0)
-    const totalProfit = completed.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+    const totalProfit = completed.reduce((s, x) => s + getNetSaleProfit(x), 0)
     const avgCheck = totalSales / (completed.length || 1)
     const salesCount = completed.length
     const cancelledCount  = cancelled.filter(s => s.cancelReason !== 'exchange' && s.cancelReason !== 'almashtirish').length
@@ -745,7 +745,7 @@ export const Reports = () => {
     const newSalesAmt      = filteredSales.reduce((s, x) => s + x.total, 0)
     const usedSalesAmt     = filteredUsed.reduce((s, x) => s + (x.total || 0), 0)
     const totalSalesAmt    = newSalesAmt + usedSalesAmt
-    const totalProfit      = filteredSales.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+    const totalProfit      = filteredSales.reduce((s, x) => s + getNetSaleProfit(x), 0)
     const totalExpenses    = filteredExpenses.reduce((s, x) => s + x.amountUZS, 0)
     const netProfit        = totalProfit - totalExpenses
     const profitMargin     = totalSalesAmt > 0 ? Math.round((totalProfit / totalSalesAmt) * 100) : 0
@@ -776,7 +776,7 @@ export const Reports = () => {
       const mSales  = MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(m) && s.status !== 'cancelled')
       const mExp    = MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(m))
       const sotuv   = mSales.reduce((s,x) => s+x.total, 0)
-      const foyda   = mSales.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0)
+      const foyda   = mSales.reduce((s,x) => s+getNetSaleProfit(x), 0)
       const xarajat = mExp.reduce((s,x) => s+x.amountUZS, 0)
       const sof     = foyda - xarajat
       const target  = MONTHLY_TARGETS_LIVE[m] || 0
@@ -784,7 +784,7 @@ export const Reports = () => {
       const prevSales = prev ? MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(prev) && s.status !== 'cancelled') : []
       const prevExp   = prev ? MOCK_EXPENSES.filter(e => e.date && e.date.startsWith(prev)) : []
       const prevSotuv   = prevSales.reduce((s,x) => s+x.total, 0)
-      const prevFoyda   = prevSales.reduce((s,x) => s+getSaleProfit(x)-(x.paymentType==='installment'?(x.installmentCommissionAmount??0):0), 0)
+      const prevFoyda   = prevSales.reduce((s,x) => s+getNetSaleProfit(x), 0)
       const prevXarajat = prevExp.reduce((s,x) => s+x.amountUZS, 0)
       const prevSof     = prevFoyda - prevXarajat
 
@@ -828,7 +828,7 @@ export const Reports = () => {
         const d = s.soldAt.slice(0,10)
         if (!map[d]) map[d] = { date: d, revenue: 0, profit: 0, usedProfit: 0, expenses: 0 }
         map[d].revenue += s.total
-        map[d].profit  += getSaleProfit(s) - (s.paymentType === 'installment' ? (s.installmentCommissionAmount ?? 0) : 0)
+        map[d].profit  += getNetSaleProfit(s)
       })
       MOCK_USED_SALES.filter(s => s.status !== 'cancelled').forEach(s => {
         if (!s.soldAt) return
@@ -1067,10 +1067,10 @@ export const Reports = () => {
     const cur  = MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(m) && s.status !== 'cancelled')
     const prv  = prev ? MOCK_SALES.filter(s => s.soldAt && s.soldAt.startsWith(prev) && s.status !== 'cancelled') : []
     const total   = cur.reduce((s, x) => s + x.total, 0)
-    const profit  = cur.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+    const profit  = cur.reduce((s, x) => s + getNetSaleProfit(x), 0)
     const count   = cur.length
     const prevTotal  = prv.reduce((s, x) => s + x.total, 0)
-    const prevProfit = prv.reduce((s, x) => s + getSaleProfit(x) - (x.paymentType === 'installment' ? (x.installmentCommissionAmount ?? 0) : 0), 0)
+    const prevProfit = prv.reduce((s, x) => s + getNetSaleProfit(x), 0)
     const prevCount  = prv.length
     const MONTHLY_TARGETS_LIVE = (storeMonthlyTargets && Object.keys(storeMonthlyTargets).length > 0)
       ? storeMonthlyTargets
