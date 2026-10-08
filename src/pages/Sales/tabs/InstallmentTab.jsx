@@ -1,5 +1,10 @@
+import { useState } from 'react'
 import { useAuthStore } from '../../../store/authStore'
 import { motion } from 'framer-motion'
+import Modal from '../../../components/ui/Modal'
+import DataTable from '../../../components/ui/DataTable'
+import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
+import { formatNumber, formatDateTime } from '../../../utils/format'
 import { Calendar, TrendingUp, Search, X, CheckCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getCategoryColor } from '../../../utils/categoryColors'
@@ -29,197 +34,123 @@ const InstallmentTab = ({ ctx }) => {
     customerPaySuccess, handleCustomerPaySubmit,
   } = ctx
 
+  const [openSale, setOpenSale] = useState(null)
+  const money = (v) => `${formatNumber(Math.round(v || 0))} ${som}`
+  const orgOf = (s) => installmentOrganizations.find(o => o.id === s.installmentOrgId)
+  const commPct = (s) => s.installmentCommissionPercent ?? orgOf(s)?.commissionPercent ?? 0
+  const commAmt = (s) => s.installmentCommissionAmount ?? Math.round(s.total * (commPct(s) / 100))
+  const info = (s) => getInstallmentStatusMap[s.id] || { status: 'pending', debtAmount: s.total, paidAmount: 0 }
+  const statusBadge = (s) => {
+    const st = info(s)
+    return <Badge color={st.status === 'paid' ? 'bg-accent-green/10 text-accent-green' : st.paidAmount > 0 ? 'bg-accent-orange/10 text-accent-orange' : 'bg-accent-red/10 text-accent-red'}>{s.installmentStatus}</Badge>
+  }
+  const barcodesOf = (s) => s.items?.map(it => { const b = it.barcode || getItemBarcode(it.itemId); return (b && b !== '—') ? b : null }).filter(Boolean) || []
+  const openPay = (s) => { setCustomerPayModal({ customerId: s.customerId, customerName: s.customerName }); setCustomerPaySaleId(null); setCustomerPayAmount('') }
+  const payButton = (s) => info(s).status !== 'paid' && (
+    <button onClick={(e) => { e.stopPropagation(); openPay(s) }}
+      className="px-3 py-1.5 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-xl text-sm font-bold hover:bg-accent-green/20 transition-colors whitespace-nowrap">
+      {t('sl_inst_pay_btn')}
+    </button>
+  )
+  const orgStats = installmentOrganizations.map(org => {
+    const orgSales = filteredInstallmentSales.filter(s => s.paymentType === 'installment' && s.status !== 'cancelled' && (s.installmentOrgId === org.id || (!s.installmentOrgId && org.id === 'oddiy_nasiya')))
+    const getComm = (s) => s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? org.commissionPercent) / 100))
+    return {
+      org, count: orgSales.length, monthCount: orgSales.filter(s => s.soldAt?.startsWith(thisMonth)).length,
+      paid: orgSales.reduce((sum, s) => sum + (s.installmentPaidAmount || 0), 0),
+      comm: orgSales.reduce((sum, s) => sum + getComm(s), 0),
+      debt: orgSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? s.total), 0),
+    }
+  })
+
   return (
-    <motion.div
-      key="installment"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      className="space-y-4 sm:space-y-6"
-    >
-      {/* A) Muddatli sotuvlar jadvali */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
-        <h3 className="font-syne font-bold text-text-primary text-base mb-4 flex items-center gap-2">
-          <Calendar size={18} className="text-accent-red" /> {t('sl_inst_list_title')}
-        </h3>
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
+      {/* Nasiya tashkilotlari — kartochkalar, bosilsa batafsil */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {orgStats.map(o => (
+          <button key={o.org.id} onClick={() => { setDetailedOrg(o.org); setOrgMonthFilter('all') }}
+            className="panel p-4 text-left hover:border-border-bright transition-colors active:scale-[0.99]">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-base font-bold text-text-primary truncate">{o.org.name}</p>
+              {canOrgComm && <Badge>{o.org.commissionPercent}%</Badge>}
+            </div>
+            <p className="mt-2 text-2xl font-bold text-accent-red">{money(o.debt)}</p>
+            <p className="text-sm text-text-muted">{t('sl_inst_org_th_debt')}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <span className="text-text-secondary">{t('sl_inst_org_th_total_paid')}: <b className="text-accent-green">{money(o.paid)}</b></span>
+              <span className="text-text-secondary text-right">{t('sl_inst_org_count', { n: o.count })} · {t('sl_inst_org_th_month_sales')}: {o.monthCount}</span>
+              {canOrgComm && <span className="text-text-muted col-span-2">{t('sl_inst_org_th_total_comm')}: {money(o.comm)}</span>}
+            </div>
+          </button>
+        ))}
+      </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-secondary font-bold">{t('exp_month_label')}</span>
-              <select value={installmentMonthFilter} onChange={(e) => { setInstallmentMonthFilter(e.target.value); setInstallmentSalesPage(1) }}
-                className="bg-bg-tertiary border border-border text-text-primary px-3 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-accent-red cursor-pointer">
-                {installmentMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
-              </select>
-            </div>
-            <div className="relative">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-              <input type="text" value={installmentSearch} onChange={e => { setInstallmentSearch(e.target.value); setInstallmentSalesPage(1) }}
-                placeholder={t('sl_inst_search_ph')}
-                className="pl-8 pr-3 py-1.5 bg-bg-tertiary border border-border text-text-primary rounded-xl text-xs font-medium focus:outline-none focus:border-accent-red w-52" />
-            </div>
-            <div className="flex items-center gap-1 bg-bg-tertiary border border-border rounded-xl p-1">
-              {[['all', 'Barchasi'], ['new', 'Yangi'], ['used', 'Eski']].map(([val, label]) => (
-                <button key={val} onClick={() => { setInstallmentTypeFilter(val); setInstallmentSalesPage(1) }}
-                  className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${installmentTypeFilter === val ? 'bg-accent-red text-white' : 'text-text-muted hover:text-text-primary'}`}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="text-xs text-text-muted">{t('sl_inst_total', { n: filteredInstallmentSales.length })}</div>
+      {/* Filtrlar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Segmented value={installmentTypeFilter} onChange={(v) => { setInstallmentTypeFilter(v); setInstallmentSalesPage(1) }}
+          options={[{ id: 'all', label: t('filter_all') }, { id: 'new', label: t('sl_profit_type_new') }, { id: 'used', label: t('sl_profit_used_badge') }]} />
+        <select value={installmentMonthFilter} onChange={(e) => { setInstallmentMonthFilter(e.target.value); setInstallmentSalesPage(1) }}
+          className="bg-bg-secondary border border-border text-text-primary px-3 py-2.5 rounded-xl text-[15px] focus:outline-none focus:border-accent-red cursor-pointer">
+          {installmentMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
+        </select>
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <input type="text" value={installmentSearch} onChange={e => { setInstallmentSearch(e.target.value); setInstallmentSalesPage(1) }}
+            placeholder={t('sl_inst_search_ph')}
+            className="w-full pl-10 pr-3 py-2.5 bg-bg-secondary border border-border text-text-primary rounded-xl text-[15px] focus:outline-none focus:border-accent-red" />
         </div>
+      </div>
 
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left text-xs min-w-[1270px]" style={{ tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '130px' }} /><col style={{ width: '160px' }} /><col style={{ width: '150px' }} />
-              <col style={{ width: '85px' }} /><col style={{ width: '100px' }} /><col style={{ width: '110px' }} />
-              <col style={{ width: '45px' }} /><col style={{ width: '105px' }} /><col style={{ width: '95px' }} />
-              <col style={{ width: '65px' }} /><col style={{ width: '85px' }} /><col style={{ width: '45px' }} />
-              <col style={{ width: '95px' }} /><col style={{ width: '90px' }} />
-            </colgroup>
-            <thead className="bg-bg-tertiary text-text-muted">
-              <tr>
-                {[
-                  ['soldAt', t('col_sold_date')], ['itemsNames', t('col_product_name')], ['barcode', t('sl_inst_th_barcode')],
-                  ['category', t('col_category')], ['soldByName', t('col_employee')], ['customerName', t('col_customer')],
-                  ['qty', t('sl_inst_th_qty')], ['total', t('col_total_sum')], ['installmentOrgName', t('sl_inst_th_org')],
-                  ['installmentTermMonths', t('sl_inst_th_term')], ['installmentStatus', t('col_status')],
-                  ...(canPercent ? [['installmentCommissionPercent', t('sl_inst_th_percent')], ['installmentCommissionAmount', t('sl_inst_th_commission')]] : []),
-                ].map(([key, label]) => (
-                  <th key={key} onClick={() => handleInstallmentSort(key)}
-                    className="px-4 py-3 font-bold uppercase cursor-pointer hover:text-text-primary select-none transition-colors">
-                    <div className="flex items-center gap-1">{label} {installmentSortField === key && (installmentSortOrder === 'asc' ? '▲' : '▼')}</div>
-                  </th>
-                ))}
-                <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase text-center">{t('sl_inst_th_payment')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {sortedInstallmentSales.slice((installmentSalesPage - 1) * 20, installmentSalesPage * 20).map(s => {
-                const statusInfo = getInstallmentStatusMap[s.id] || { status: 'pending', debtAmount: s.total, paidAmount: 0 }
-                const isFullyPaid = statusInfo.status === 'paid'
-                const paid = statusInfo.paidAmount
-                return (
-                  <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary" title={s.itemsNames}>{s.itemsNames}</td>
-                    {s.isUsedSale ? (
-                      <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 truncate ${barcodeSelectClass}`}>
-                        <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-accent-orange/10 text-accent-orange whitespace-nowrap">{t('sl_inst_used_badge')}</span>
-                      </td>
-                    ) : (() => {
-                      const barcodes = s.items?.map(it => { const b = it.barcode || getItemBarcode(it.itemId); return (b && b !== '—') ? b : null }).filter(Boolean) || []
-                      const visible = barcodes.slice(0, 2); const hidden = barcodes.slice(2)
-                      return (
-                        <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
-                          <div className="flex flex-col gap-0.5">
-                            {visible.map((b, i) => <span key={i} className="text-[10px] truncate">{b}</span>)}
-                            {hidden.length > 0 && (
-                              <details className="cursor-pointer select-none">
-                                <summary className="text-[10px] text-accent-blue font-bold list-none">+{hidden.length} ta</summary>
-                                {hidden.map((b, i) => <span key={i} className="text-[10px] block truncate">{b}</span>)}
-                              </details>
-                            )}
-                            {barcodes.length === 0 && <span>—</span>}
-                          </div>
-                        </td>
-                      )
-                    })()}
-                    {(() => {
-                      const catLabel = s.category ? t('cat_' + s.category, { defaultValue: s.category }) : '—'
-                      const catObj = productCategories.find(c => c.label === catLabel || c.id === catLabel)
-                      const catColor = getCategoryColor(catObj?.id, productCategories)
-                      return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
-                    })()}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-medium truncate">{s.customerName}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.qty}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-accent-blue font-bold truncate">{s.installmentOrgName}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.installmentTermMonths ? t('sl_inst_term_months', { n: s.installmentTermMonths }) : '—'}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${isFullyPaid ? 'bg-accent-green/10 text-accent-green' : paid > 0 ? 'bg-accent-orange/10 text-accent-orange' : 'bg-accent-red/10 text-accent-red'}`}>
-                        {s.installmentStatus}
-                      </span>
-                    </td>
-                    {canPercent && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.installmentCommissionPercent ?? installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0}%</td>}
-                    {canPercent && <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted font-mono ${barcodeSelectClass}`}>{formatPrice(s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? 0) / 100)), som)}</td>}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center">
-                      {!isFullyPaid ? (
-                        <button onClick={() => { setCustomerPayModal({ customerId: s.customerId, customerName: s.customerName }); setCustomerPaySaleId(null); setCustomerPayAmount('') }}
-                          className="px-2.5 py-1 bg-accent-green/10 text-accent-green border border-accent-green/30 rounded-lg text-[10px] font-bold hover:bg-accent-green/20 transition-colors">
-                          {t('sl_inst_pay_btn')}
-                        </button>
-                      ) : <span className="text-text-muted text-[10px]">—</span>}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+      <DataTable rows={sortedInstallmentSales} rowKey={s => (s.isUsedSale ? 'u' : 'n') + s.id} onRowClick={setOpenSale}
+        initialSort={{ key: 'date', dir: 'desc' }} resetKey={`${installmentSearch}|${installmentMonthFilter}|${installmentTypeFilter}`}
+        empty={t('sl_profit_empty')}
+        columns={[
+          { key: 'date', label: t('col_sold_date'), sortValue: s => s.soldAt || '', render: s => <span className="whitespace-nowrap text-text-secondary">{formatDateTime(s.soldAt)}</span> },
+          { key: 'customer', label: t('col_customer'), sortValue: s => s.customerName || '', render: s => (
+            <div className="min-w-0">
+              <p className="font-semibold text-text-primary truncate">{s.customerName}</p>
+              <p className="text-sm text-text-muted truncate max-w-[260px]">{s.itemsNames}</p>
+            </div>
+          ) },
+          { key: 'total', label: t('col_total_sum'), align: 'right', sortValue: s => s.total, render: s => (
+            <div className="whitespace-nowrap">
+              <p className="font-bold text-text-primary">{money(s.total)}</p>
+              <p className="text-sm text-accent-blue">{s.installmentOrgName}</p>
+            </div>
+          ) },
+          { key: 'status', label: t('col_status'), sortValue: s => info(s).debtAmount, render: s => (
+            <div className="space-y-0.5">{statusBadge(s)}{info(s).status !== 'paid' && <p className="text-sm text-accent-red whitespace-nowrap">{money(info(s).debtAmount)}</p>}</div>
+          ) },
+          { key: 'pay', label: '', sortable: false, align: 'right', render: payButton },
+        ]} />
 
-        {sortedInstallmentSales.length > 20 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-text-muted">{Math.min(installmentSalesPage * 20, sortedInstallmentSales.length)} / {sortedInstallmentSales.length} ta</p>
-            <div className="flex gap-2">
-              <button disabled={installmentSalesPage === 1} onClick={() => setInstallmentSalesPage(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_prev')}</button>
-              <button disabled={installmentSalesPage >= Math.ceil(sortedInstallmentSales.length / 20)} onClick={() => setInstallmentSalesPage(p => p + 1)}
-                className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_next')}</button>
+      {/* Bitta nasiya sotuv — barcha ustunlar */}
+      <Modal open={!!openSale} onClose={() => setOpenSale(null)} size="lg" icon={Calendar}
+        title={openSale?.customerName} subtitle={openSale && formatDateTime(openSale.soldAt)}
+        footer={openSale && info(openSale).status !== 'paid' && (
+          <button onClick={() => { const s = openSale; setOpenSale(null); openPay(s) }} className="w-full py-3 rounded-xl g-green text-white font-bold">{t('sl_inst_pay_btn')}</button>
+        )}>
+        {openSale && (
+          <div className="space-y-4">
+            <DetailGrid cols={3} items={[
+              { label: t('col_status'), value: statusBadge(openSale) },
+              { label: t('col_total_sum'), value: <b>{money(openSale.total)}</b> },
+              { label: t('sl_inst_org_th_debt'), value: <span className="text-accent-red font-bold">{money(info(openSale).debtAmount)}</span> },
+              { label: t('sl_inst_org_th_total_paid'), value: <span className="text-accent-green">{money(info(openSale).paidAmount)}</span> },
+              { label: t('sl_inst_th_org'), value: openSale.installmentOrgName || '—' },
+              { label: t('sl_inst_th_term'), value: openSale.installmentTermMonths ? t('sl_inst_term_months', { n: openSale.installmentTermMonths }) : '—' },
+              { label: t('col_employee'), value: openSale.soldByName || '—' },
+              { label: t('col_category'), value: openSale.category ? t('cat_' + openSale.category, { defaultValue: openSale.category }) : '—' },
+              { label: t('sl_inst_th_qty'), value: openSale.qty },
+              ...(canPercent ? [{ label: t('sl_inst_th_percent'), value: `${commPct(openSale)}%` }, { label: t('sl_inst_th_commission'), value: money(commAmt(openSale)) }] : []),
+            ]} />
+            <div className="panel px-4 py-3">
+              <p className="text-[15px] font-semibold text-text-primary">{openSale.itemsNames}</p>
+              <p className="text-sm text-text-muted font-mono mt-1">{openSale.isUsedSale ? t('sl_inst_used_badge') : (barcodesOf(openSale).join(', ') || '—')}</p>
             </div>
           </div>
         )}
-      </div>
-
-      {/* B) Nasiya tashkilotlari */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden animate-fade-in">
-        <h3 className="font-syne font-bold text-text-primary text-base mb-4 flex items-center gap-2">
-          <TrendingUp size={18} className="text-accent-green" /> {t('sl_inst_orgs_title')}
-        </h3>
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left text-xs min-w-[900px]">
-            <thead className="bg-bg-tertiary text-text-muted">
-              <tr>
-                {[t('sl_inst_org_th_name'), t('sl_inst_org_th_percent'), t('sl_inst_org_th_total_sales'), t('sl_inst_org_th_month_sales'), t('sl_inst_org_th_total_paid'), t('sl_inst_org_th_month_paid'), t('sl_inst_org_th_total_comm'), t('sl_inst_org_th_month_comm'), t('sl_inst_org_th_debt'), t('sl_inst_org_detail_btn')].map((label, i) => (
-                  (canOrgComm || ![1, 6, 7].includes(i)) && <th key={i} className={`px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase ${[2,3].includes(i) ? 'text-center' : ''}`}>{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60 text-text-primary">
-              {installmentOrganizations.map(org => {
-                const orgSales = filteredInstallmentSales.filter(s => s.paymentType === 'installment' && s.status !== 'cancelled' && (s.installmentOrgId === org.id || (!s.installmentOrgId && org.id === 'oddiy_nasiya')))
-                const thisMonthSales = orgSales.filter(s => s.soldAt?.startsWith(thisMonth))
-                const totalPaid = orgSales.reduce((sum, s) => sum + (s.installmentPaidAmount || 0), 0)
-                const thisMonthPaid = thisMonthSales.reduce((sum, s) => sum + (s.installmentPaidAmount || 0), 0)
-                const getComm = (s) => s.installmentCommissionAmount ?? Math.round(s.total * ((installmentOrganizations.find(o => o.id === s.installmentOrgId)?.commissionPercent ?? org.commissionPercent) / 100))
-                const totalComm = orgSales.reduce((sum, s) => sum + getComm(s), 0)
-                const thisMonthComm = thisMonthSales.reduce((sum, s) => sum + getComm(s), 0)
-                const totalDebt = orgSales.reduce((sum, s) => sum + (getInstallmentStatusMap[s.id]?.debtAmount ?? s.total), 0)
-                return (
-                  <tr key={org.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-bold">{org.name}</td>
-                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{org.commissionPercent}%</td>}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center text-text-secondary">{t('sl_inst_org_count', { n: orgSales.length })}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center text-accent-blue">{t('sl_inst_org_count', { n: thisMonthSales.length })}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-accent-green">{formatPrice(totalPaid, som)}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{formatPrice(thisMonthPaid, som)}</td>
-                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted">{formatPrice(totalComm, som)}</td>}
-                    {canOrgComm && <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-muted">{formatPrice(thisMonthComm, som)}</td>}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 font-bold text-accent-red">{formatPrice(totalDebt, som)}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-center">
-                      <button onClick={() => { setDetailedOrg(org); setOrgMonthFilter('all') }}
-                        className="px-3 py-1 bg-accent-blue text-white rounded-lg font-bold text-[10px]">{t('sl_inst_org_detail_btn')}</button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </Modal>
 
       {/* Batafsil modal */}
       {detailedOrg && (() => {
