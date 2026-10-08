@@ -50,7 +50,7 @@ Katta faylni bo'lishdan oldin **majburiy qadamlar**:
 
 ## JORIY HOLAT VA KEYINGI ISHLAR (har sessiyada BIRINCHI o'qi — yangilangan: 2026-10-08)
 
-**Holat:** server = 24-deploy; **lokal serverdan ancha oldinda (deploy qilinmagan)** — katta qayta tuzish: yagona Sozlamalar, server sozlamalari/bildirishnomalar/audit, yangi UI (to'q ko'k, diagrammalar, har sahifada asosiy ko'rinish + bo'limlar modalda), yangi Foyda, Qarzlar, touch numpad, **Ulgurji savdo** (`/wholesale`, backend `/api/wholesale`, do'kon turi `shops.kind`), **Ishlab chiqarish** (`/production`, backend `/api/production`, miqdor bo'yicha qoldiq `stock_lots`; menyuda faqat sex/ulgurji ombor bo'lsa). **kg tovar sotish** (kassa + ulgurji, `utils/bulkSale.js`), **hisobotlar serverda** (`analyticsController`, `/api/reports/*-overview`; eski klient hisobotlari faqat "Eski batafsil ko'rinish" tugmasida). Reja va bajarilganlar: `docs/TAHLIL_VA_REJA_2026-10-08.md` (15–16-bo'limlar). Ilova real sinovda (test oyi): server DB — haqiqiy ma'lumot.
+**Holat:** server = 25-deploy (2026-10-09), **lokal va server bir xil** — katta qayta tuzish deploy qilindi: yagona Sozlamalar, server sozlamalari/bildirishnomalar/audit, yangi UI (to'q ko'k, diagrammalar, har sahifada asosiy ko'rinish + bo'limlar modalda), yangi Foyda, Qarzlar, touch numpad, **Ulgurji savdo** (`/wholesale`, backend `/api/wholesale`, do'kon turi `shops.kind`), **Ishlab chiqarish** (`/production`, backend `/api/production`, miqdor bo'yicha qoldiq `stock_lots`; menyuda faqat sex/ulgurji ombor bo'lsa). **kg tovar sotish** (kassa + ulgurji, `utils/bulkSale.js`), **hisobotlar serverda** (`analyticsController`, `/api/reports/*-overview`; eski klient hisobotlari faqat "Eski batafsil ko'rinish" tugmasida). Reja va bajarilganlar: `docs/TAHLIL_VA_REJA_2026-10-08.md` (15–16-bo'limlar). Ilova real sinovda (test oyi): server DB — haqiqiy ma'lumot.
 BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI agentlar arxitekturasi" bo'limi).
 
 **Foydalanuvchidan kutilmoqda (o'zing boshlama, u aytganda tekshir):**
@@ -429,9 +429,11 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ---
 
-## SERVER DEPLOY (holat: 2026-10-08 — lokal va server BIR XIL)
+## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-08 (24-deploy)** — backend `910a99b`, frontend `95f92b03` (AI qayta qurildi: 3 ta AI — AI yordamchi, Kundalik tahlilchi, Mijozlar boti; AI sahifasi 4 tab; tafsilot "AI agentlar arxitekturasi" bo'limida). Mijozlar boti modeli Sonnet 5.5 (foydalanuvchi qarori, qimmat bo'lsa Haiku'ga qaytaradi), Instagram kanallari o'chiq (keyin yoqiladi, yangi Meta token kerak). Zaxira `/root/backups/2026-10-08c`. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
+**Oxirgi deploy: 2026-10-09 (25-deploy)** — backend `c3444b3`, frontend `380b3eea` (yangi UI, ulgurji, ishlab chiqarish, kg sotish, server hisobotlari, ekran klaviaturasi, menyu ixcham rejimi, fiskal tayyorlov, biznes profili; eski 7 klient hisobot o'chirilgan). Zaxira `/root/backups/2026-10-09a`. Migratsiyalar xatosiz, 18 asosiy endpoint 200.
+
+**Oldingi deploy: 2026-10-08 (24-deploy)** — backend `910a99b`, frontend `95f92b03` (AI qayta qurildi: 3 ta AI — AI yordamchi, Kundalik tahlilchi, Mijozlar boti; AI sahifasi 4 tab; tafsilot "AI agentlar arxitekturasi" bo'limida). Mijozlar boti modeli Sonnet 5.5 (foydalanuvchi qarori, qimmat bo'lsa Haiku'ga qaytaradi), Instagram kanallari o'chiq (keyin yoqiladi, yangi Meta token kerak). Zaxira `/root/backups/2026-10-08c`. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
 Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
 
 ### Xavfsiz deploy tartibi (har safar)
