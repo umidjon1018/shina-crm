@@ -1,3 +1,4 @@
+import { productTitle } from '../../../utils/format'
 import React, { useState, useEffect, useMemo } from 'react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 import { BarChart3, Boxes, Package, Percent, TrendingUp } from 'lucide-react'
@@ -32,7 +33,7 @@ const ProductsReportTab = () => {
   const rows = useMemo(() => (data?.rows || []).filter(r => category === 'all' || r.category === category), [data, category])
   const categories = useMemo(() => [...new Set((data?.rows || []).map(r => r.category))], [data])
   const sp = data?.showProfit
-  const name = (r) => [r.brand, r.name].filter(Boolean).join(' ') + (r.size ? ` (${r.size})` : '')
+  const name = (r) => productTitle(r.brand, r.name) + (r.size ? ` (${r.size})` : '')
   const tot = rows.reduce((a, r) => ({ qty: a.qty + r.soldQty, rev: a.rev + r.revenue, profit: a.profit + (r.profit || 0) }), { qty: 0, rev: 0, profit: 0 })
   const abcCount = (k) => rows.filter(r => r.abc === k).length
   const top = [...rows].filter(r => r.revenue > 0).slice(0, 10).map(r => ({ name: name(r).slice(0, 22), revenue: r.revenue }))

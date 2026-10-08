@@ -1,3 +1,4 @@
+import { productTitle } from '../../../utils/format'
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { AlertCircle, Gift, Package, Plus, Receipt, Repeat, Tag, Trash2, X } from 'lucide-react'
@@ -23,7 +24,7 @@ const Label = ({ children }) => <label className="text-text-secondary text-xs fo
 // Komplekt tarkibi: tovar + soni (masalan, 4 ta shina + 4 ta disk)
 const BundleItemsEditor = ({ items, products, onChange, t }) => {
   const [q, setQ] = useState('')
-  const name = (id) => { const p = products.find(x => String(x.id) === String(id)); return p ? [p.brand, p.name].filter(Boolean).join(' ') : id }
+  const name = (id) => { const p = products.find(x => String(x.id) === String(id)); return p ? productTitle(p.brand, p.name) : id }
   const found = q.trim().length < 2 ? [] : products
     .filter(p => p.isActive !== false && !items.some(i => String(i.productId) === String(p.id)))
     .filter(p => [p.name, p.brand, p.size].filter(Boolean).join(' ').toLowerCase().includes(q.trim().toLowerCase()))
@@ -48,7 +49,7 @@ const BundleItemsEditor = ({ items, products, onChange, t }) => {
             {found.map(p => (
               <button key={p.id} type="button" onClick={() => { onChange([...items, { productId: String(p.id), qty: 1 }]); setQ('') }}
                 className="w-full text-left px-3 py-2 text-sm text-text-primary hover:bg-bg-tertiary border-b border-border/50 last:border-0">
-                {[p.brand, p.name].filter(Boolean).join(' ')} {p.size && <span className="text-text-muted text-xs">· {p.size}</span>}
+                {productTitle(p.brand, p.name)} {p.size && <span className="text-text-muted text-xs">· {p.size}</span>}
               </button>
             ))}
           </div>

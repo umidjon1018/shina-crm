@@ -1,3 +1,4 @@
+import { productTitle } from '../../../utils/format'
 import i18n from '../../../i18n'
 
 export const fmtMoney = (n) => Math.round(Number(n) || 0).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
@@ -19,7 +20,7 @@ export const fmtDT = (d) => {
 const targetText = (type, ids, t, products, categories) => {
   if (!type || type === 'all') return t('mkt_sum_all_goods')
   const names = ids.slice(0, 3).map(id => {
-    if (type === 'product') { const p = products.find(x => String(x.id) === String(id)); return p ? [p.brand, p.name].filter(Boolean).join(' ') : id }
+    if (type === 'product') { const p = products.find(x => String(x.id) === String(id)); return p ? productTitle(p.brand, p.name) : id }
     if (type === 'category') { const c = categories.find(x => String(x.id) === String(id)); return c ? c.label : id }
     return id
   })
@@ -46,7 +47,7 @@ export const promoSummary = (p, t, products = [], categories = []) => {
   else if (p.kind === 'bundle') {
     const items = (p.bundleItems || []).map(b => {
       const pr = products.find(x => String(x.id) === String(b.productId))
-      return `${b.qty}× ${pr ? [pr.brand, pr.name].filter(Boolean).join(' ') : b.productId}`
+      return `${b.qty}× ${pr ? productTitle(pr.brand, pr.name) : b.productId}`
     }).join(' + ')
     main = t('mkt_sum_bundle', { items, value: p.discountType === 'fixed_price' ? fmtMoney(p.discountValue) : valueText(p, t) })
   }

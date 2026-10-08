@@ -7,10 +7,15 @@ import { TrendingUp, TrendingDown } from 'lucide-react'
 // Diagrammalar uchun yagona ranglar (to'q va yorug' mavzuda ham ko'rinadi)
 export const PALETTE = ['#2BD4F0', '#A86BFF', '#F062C0', '#4F8CFF', '#F5A524', '#2ED47A', '#EF4B5A', '#7A8BFF']
 
+// 1 047 200 → 1.05M, 45 220 000 → 45.2M, 5 500 → 5.5K, 190 400 → 190K
+const trimDec = (x, d) => (d ? x.toFixed(d).replace(/\.?0+$/, '') : x.toFixed(0))
 export const shortNum = (v) => {
   const n = Math.abs(Number(v) || 0)
-  const s = n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(Math.round(n))
-  return (Number(v) < 0 ? '−' : '') + s.replace('.0', '')
+  const s = n >= 1e9 ? trimDec(n / 1e9, n >= 1e10 ? 1 : 2) + 'B'
+    : n >= 1e6 ? trimDec(n / 1e6, n >= 1e7 ? 1 : 2) + 'M'
+    : n >= 1e3 ? trimDec(n / 1e3, n >= 1e4 ? 0 : 1) + 'K'
+    : String(Math.round(n))
+  return (Number(v) < 0 ? '−' : '') + s
 }
 const fmt = (v) => Math.round(Number(v) || 0).toLocaleString('ru-RU')
 
@@ -128,7 +133,7 @@ export const TrendArea = ({ data, xKey = 'label', series, height = 260, valueFor
           </defs>
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
           <XAxis dataKey={xKey} {...axisProps} minTickGap={16} />
-          <YAxis {...axisProps} tickFormatter={yFormatter} width={56} />
+          <YAxis {...axisProps} tickFormatter={yFormatter} width={56} allowDecimals={false} />
           <Tooltip content={<TooltipBox valueFormatter={valueFormatter} labelFormatter={labelFormatter} />} />
           {series.map((s, i) => (
             <Area key={s.key} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} strokeWidth={s.dashed ? 2 : 3}
@@ -157,13 +162,13 @@ export const GradientBars = ({ data, xKey = 'label', yKey = 'value', height = 24
           <CartesianGrid stroke="var(--chart-grid)" vertical={horizontal} horizontal={!horizontal} />
           {horizontal ? (
             <>
-              <XAxis type="number" {...axisProps} tickFormatter={shortNum} />
+              <XAxis type="number" {...axisProps} tickFormatter={shortNum} allowDecimals={false} />
               <YAxis type="category" dataKey={xKey} {...axisProps} width={110} tickFormatter={v => (String(v).length > 14 ? String(v).slice(0, 13) + '…' : v)} />
             </>
           ) : (
             <>
               <XAxis dataKey={xKey} {...axisProps} />
-              <YAxis {...axisProps} tickFormatter={shortNum} width={48} />
+              <YAxis {...axisProps} tickFormatter={shortNum} width={48} allowDecimals={false} />
             </>
           )}
           <Tooltip cursor={{ fill: 'var(--bg-tertiary)', opacity: 0.4 }} content={<TooltipBox valueFormatter={valueFormatter} />} />

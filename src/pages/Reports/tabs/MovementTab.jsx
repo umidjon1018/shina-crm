@@ -1,3 +1,4 @@
+import { productTitle } from '../../../utils/format'
 import React, { useState, useEffect, useMemo } from 'react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts'
 import { ArrowDownToLine, ArrowUpFromLine, Boxes, CalendarCheck, PackageX } from 'lucide-react'
@@ -37,7 +38,7 @@ const MovementTab = () => {
     getStockAsOf({ date, shop_id: selectedShopId }).then(setAsOf).catch(e => setError(e?.response?.data?.error || t('exp_err_generic')))
   }, [view, date, selectedShopId])
 
-  const name = (r) => [r.brand, r.name].filter(Boolean).join(' ') + (r.size ? ` (${r.size})` : '')
+  const name = (r) => productTitle(r.brand, r.name) + (r.size ? ` (${r.size})` : '')
   const src = view === 'movement' ? (mov?.rows || []) : (asOf?.rows || [])
   const categories = useMemo(() => [...new Set(src.map(r => r.category))], [src])
   const rows = src.filter(r => category === 'all' || r.category === category)

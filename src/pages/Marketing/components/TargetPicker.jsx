@@ -1,3 +1,4 @@
+import { productTitle } from '../../../utils/format'
 import React, { useState, useMemo } from 'react'
 import { Check, Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +16,7 @@ const TargetPicker = ({ type, ids, onChange, products, categories, allowAll = tr
       return products
         .filter(p => !qq || `${p.brand || ''} ${p.name} ${p.size || ''}`.toLowerCase().includes(qq))
         .slice(0, 80)
-        .map(p => ({ id: String(p.id), label: [p.brand, p.name].filter(Boolean).join(' '), sub: p.cashPrice ? Math.round(p.cashPrice).toLocaleString('uz-UZ') : '' }))
+        .map(p => ({ id: String(p.id), label: productTitle(p.brand, p.name), sub: p.cashPrice ? Math.round(p.cashPrice).toLocaleString('uz-UZ') : '' }))
     }
     if (type === 'category') return categories.map(c => ({ id: String(c.id), label: i18n.language === 'ru' ? (c.labelRu || c.label) : c.label }))
     if (type === 'brand') return brands.map(b => ({ id: b, label: b }))
@@ -23,7 +24,7 @@ const TargetPicker = ({ type, ids, onChange, products, categories, allowAll = tr
   }, [type, products, categories, brands, q, i18n.language])
 
   const labelOf = (id) => {
-    if (type === 'product') { const p = products.find(x => String(x.id) === String(id)); return p ? [p.brand, p.name].filter(Boolean).join(' ') : id }
+    if (type === 'product') { const p = products.find(x => String(x.id) === String(id)); return p ? productTitle(p.brand, p.name) : id }
     if (type === 'category') { const c = categories.find(x => String(x.id) === String(id)); return c ? c.label : id }
     return id
   }
