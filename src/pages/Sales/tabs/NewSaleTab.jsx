@@ -30,7 +30,7 @@ const NewSaleTab = ({ ctx }) => {
     source, setSource, sources,
     tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
     productCategories, subtotal, total, priceWarnings, setPriceWarnings,
-    handleSubmitSale, isSubmitting,
+    handleSubmitSale, isSubmitting, fiscalEnabled,
     salesList, addNextItemOfProduct, updateGroupSalePrice,
     addBundleToCart, removeBundleFromCart,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
@@ -741,6 +741,9 @@ const NewSaleTab = ({ ctx }) => {
               </>
             )}
           </div>
+          {fiscalEnabled && cartItems.some(c => !c.product?.ikpu) && (
+            <p className="text-xs text-accent-orange bg-accent-orange/10 rounded-xl px-3 py-2">{t('fis_cart_missing', { names: [...new Set(cartItems.filter(c => !c.product?.ikpu).map(c => c.product?.name).filter(Boolean))].slice(0, 3).join(', ') })}</p>
+          )}
           <button ref={sellBtnRef} onClick={handleSubmitSale}
             disabled={sellDisabled}
             className="w-full py-4 sm:py-5 g-green text-white font-extrabold text-lg rounded-2xl hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-lg">

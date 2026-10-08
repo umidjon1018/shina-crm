@@ -113,6 +113,7 @@ const HistoryTab = ({ ctx }) => {
               { label: t('sl_hist_th_payment'), value: `${payLabel(open)}${open.paymentType === 'card' && open.cardType ? ' · ' + open.cardType.toUpperCase() : ''}` },
               { label: t('col_category'), value: open.isBundle ? 'Komplekt' : catLabel(open.items?.[0]?.productCategory || open.items?.[0]?.category, open.items?.[0]?.categoryLabel) },
               { label: t('sl_hist_th_total'), value: <span className="text-lg font-bold">{money(open.total)}</span> },
+              open.fiscalStatus && { label: t('fis_receipt'), value: <span className={{ done: 'text-accent-green', pending: 'text-accent-orange', error: 'text-accent-red' }[open.fiscalStatus]}>{t('fis_st_' + open.fiscalStatus)}{open.fiscalSign ? ` · ${open.fiscalSign}` : ''}</span> },
             ]} />
             <div className="panel px-4 divide-y divide-border">
               {(open.items || []).map((it, i) => {

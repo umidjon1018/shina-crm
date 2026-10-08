@@ -31,6 +31,7 @@ import { getIncomeBatches } from '../../api/incomeService'
 import { getProducts } from '../../api/productService'
 import { getReservedItemIds } from '../../api/reservationService'
 import { productTitle } from '../../utils/format'
+import { getFiscalPublic } from '../../api/fiscalService'
 
 const hasPerm = (role, perm) => {
   const PERMISSIONS = {
@@ -290,12 +291,14 @@ export const useSalesState = () => {
   const [codeChecking, setCodeChecking] = useState(false)
   // UDS va onlayn to'lov (integratsiyalar)
   const [udsEnabled, setUdsEnabled] = useState(false)
+  const [fiscalEnabled, setFiscalEnabled] = useState(false)
   const [udsInfo, setUdsInfo] = useState(null) // { code, name, points, maxPoints }
   const [udsPointsInput, setUdsPointsInput] = useState('')
   const [onlineProviders, setOnlineProviders] = useState([])
   const [onlinePayment, setOnlinePayment] = useState(null) // { id, provider }
   useEffect(() => {
     getUdsStatus().then(s => setUdsEnabled(!!s.enabled)).catch(() => {})
+    getFiscalPublic().then(s => setFiscalEnabled(!!s.enabled)).catch(() => {})
     getPaymentProviders().then(setOnlineProviders).catch(() => {})
   }, [])
 
@@ -1837,7 +1840,7 @@ export const useSalesState = () => {
     maxDiscount, effectiveDiscount, promoDiscount, customerHasLoyalty, subtotal, discountAmount, total,
     promoResult, afterPromo, appliedCode, setAppliedCode, giftCard, setGiftCard, giftCardUsed, codeError, setCodeError,
     codeChecking, applyCode, clearMarketing, codeIgnored,
-    udsEnabled, udsInfo, setUdsInfo, udsPointsInput, setUdsPointsInput, udsPointsUsed,
+    udsEnabled, fiscalEnabled, udsInfo, setUdsInfo, udsPointsInput, setUdsPointsInput, udsPointsUsed,
     onlineProviders, onlinePayment, setOnlinePayment,
     loyaltyInfo, loyaltyTierPercent, loyaltyActive, useBalance, setUseBalance, balanceInput, setBalanceInput,
     customerBalance, balanceUsed, payable, cashbackPreview,

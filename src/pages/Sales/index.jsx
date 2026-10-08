@@ -201,7 +201,7 @@ const Sales = () => {
           contractNumber, setContractNumber, source, setSource,
           tradeInItems, addTradeInRow, updateTradeInRow, removeTradeInRow, tradeInTotal,
           subtotal, total, priceWarnings, setPriceWarnings,
-          handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice,
+          handleSubmitSale, isSubmitting, addNextItemOfProduct, updateGroupSalePrice, fiscalEnabled: state.fiscalEnabled,
           addBundleToCart, removeBundleFromCart,
           loyaltyInfo: state.loyaltyInfo, loyaltyTierPercent: state.loyaltyTierPercent, loyaltyActive: state.loyaltyActive,
           useBalance: state.useBalance, setUseBalance: state.setUseBalance, balanceInput: state.balanceInput, setBalanceInput: state.setBalanceInput,

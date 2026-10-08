@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Globe, Bot, Star, CreditCard } from 'lucide-react'
+import { Globe, Bot, Star, CreditCard, Receipt } from 'lucide-react'
 import ApiTab from './ApiTab'
 import BotTab from './BotTab'
 import UdsTab from './UdsTab'
 import PaymentsTab from './PaymentsTab'
+import FiscalTab from './FiscalTab'
 import TelegramConnectionCard from '../../../components/marketing/TelegramConnectionCard'
 
 // Sozlamalar → Integratsiyalar (avval alohida sahifa): internet-do'kon API, Telegram botda qoldiq, UDS, to'lov tizimlari
@@ -13,6 +14,7 @@ const SUB = [
   { id: 'bot', icon: Bot },
   { id: 'uds', icon: Star },
   { id: 'payments', icon: CreditCard },
+  { id: 'fiscal', icon: Receipt },
 ]
 
 const IntegrationsSection = () => {
@@ -36,6 +38,7 @@ const IntegrationsSection = () => {
       {tab === 'bot' && <div className="space-y-4"><div className="max-w-2xl"><TelegramConnectionCard /></div><BotTab /></div>}
       {tab === 'uds' && <UdsTab />}
       {tab === 'payments' && <PaymentsTab />}
+      {tab === 'fiscal' && <FiscalTab />}
     </div>
   )
 }

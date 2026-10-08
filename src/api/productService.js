@@ -22,6 +22,7 @@ const map = (p) => ({
   notes: p.notes || '',
   installmentMonths: Array.isArray(p.installment_months) ? p.installment_months : [],
   isActive: p.is_active,
+  ikpu: p.ikpu || '',
   // Stock (backend dan)
   totalStock: Number(p.stock_count) || 0,
   barcodeReadyStock: Number(p.barcode_ready_stock) || 0,
