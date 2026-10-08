@@ -286,6 +286,16 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - **Eski modallar** (`fixed inset-0 z-50…z-[200]`) z-[300…360] ga ko'tarildi — bo'lim modali ichidan ochilganda ustida chiqadi.
 - **Tekshiruv:** admin/sotuvchi bilan barcha sahifalar ochildi, 375px da gorizontal toshish yo'q, konsolda xato yo'q. Commitlar e698b1da … 87c3a4b9.
 
+### Bosqich 2B / 2C / 3 — qisman ✅ (2026-10-08)
+- **2C Touch:** `components/ui/NumpadHost` — planshet/sensorli monitorda (≥640px, barmoq) `input[type=number]` bosilsa katta tugmali raqam klaviaturasi (onChange va onBlur bilan ishlaydi, eski modallar ustida ham); kassada JAMI, SOTISH, to'lov turi tugmalari kattalashtirildi.
+- **3 Yangi Foyda ko'rinishi:** Sotuv → Foyda: Tovarlar bo'yicha / Sotuvlar bo'yicha ixcham ro'yxat; tovar bosilsa uning barcha sotuvlari eski jadvalning **barcha ustunlari** bilan modalda (tushum va komissiya donalarga mutanosib), sotuv bosilsa to'liq ma'lumot.
+- **3 Moliya → Qarzlar:** backend `GET /api/finance/debts` (ruxsat `expenses.debts`); bizga qarzdorlar (nasiya tashkiloti / mijoz bo'yicha, muddati o'tgan) va yetkazib beruvchilarga qarz yonma-yon.
+- **3 Yagona kirim formasi (2B qarori):** `components/income/IncomeForm` — Ombor → Kirim va Kirim → Yangi kirim bitta komponent; yetkazib beruvchi aksiyasi (% va nomi) qo'shildi.
+- **3 Telegram:** bot ulanishi (rejim, token, webhook, sinov) Sozlamalar → Integratsiyalar → Telegram bot ga ko'chirildi; Marketing → Sozlamalarda tabriklar va xodimlar statistikasi.
+- **2B bo'limlar ichi:** Sotuv tarixi, Bekor/almashtirish tarixi, Muddatli to'lov — ixcham ro'yxat + bosilganda to'liq ma'lumot oynasi; Ombor qoldiq jadvali standart ixcham (6 ustun), "To'liq jadval" tugmasi.
+- **Qoldi (2B):** Kirim → Partiyalar jadvali, Moliya bo'limlari ichi, Marketing ro'yxatlari, Hisobotlar ichidagi eski jadvallar, eski modallarni `Modal` ga o'tkazish (Esc/orqaga hozircha bo'lim oynasini yopadi).
+- **Qoldi (3):** Hisobotlarni serverga ko'chirish (hozir klientda), yagona foyda formulasi barcha hisobotlarda.
+
 ---
 
 ## 16. Foydalanuvchi fikri va yangi talablar (2026-10-08, 3-versiya)
@@ -363,9 +373,9 @@ Misollar: kafel kleyi (qum, sement, qo'shimchalar tonnalab → qop-qop klei), sh
 | Bosqich | Nima |
 |---|---|
 | 2A ✅ | Dizayn tizimi + diagramma to'plami + hub tuzilmasi; Bosh sahifa diagrammalari; barcha sahifalar hub ko'rinishiga |
-| 2B | Bo'limlar ichini yangi komponentlarga (DataTable, Modal, yirik yozuv) — sahifama-sahifa |
-| 2C | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
-| 3 | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi + Moliya → Qarzlar |
+| 2B ⏳ | Bo'limlar ichini yangi komponentlarga (DataTable, Modal, yirik yozuv) — sahifama-sahifa (Sotuv bo'limlari, Ombor qoldiq ✅) |
+| 2C ✅ | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
+| 3 ⏳ | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi ✅ + Moliya → Qarzlar ✅ + yagona kirim formasi ✅ + Telegram → Integratsiyalar ✅ |
 | 4 | Omborlar turlari + Ulgurji savdo (konsignatsiya, narx guruhlari) |
 | 5 | Ishlab chiqarish: miqdor bo'yicha hisob, retseptura, ishlab chiqarish buyurtmalari, tannarx |
 | 6 | Fiskal chek: tayyorlov → provayder tanlangach ulanish |
