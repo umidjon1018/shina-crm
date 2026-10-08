@@ -1,313 +1,138 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { X, Pencil } from 'lucide-react'
-import { getCategoryColor } from '../../../utils/categoryColors'
+import { Pencil, Receipt } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import EditSaleModal from '../../../components/sales/EditSaleModal'
+import Modal from '../../../components/ui/Modal'
+import DataTable from '../../../components/ui/DataTable'
+import { Segmented, Badge, DetailGrid } from '../../../components/ui/Kit'
+import { formatNumber } from '../../../utils/format'
 
-const formatPrice = (price, som) => Math.round(price).toLocaleString('uz-UZ') + ' ' + som
-
+// Sotuvlar tarixi: ixcham ro'yxat (sana, mijoz, tovarlar, summa, to'lov, holat); qator bosilsa — to'liq ma'lumot oynasi
 const HistoryTab = ({ ctx }) => {
   const { t } = useTranslation()
   const som = t('unit_som')
   const { productImages } = useSettingsStore()
-  const [peekProduct, setPeekProduct] = useState(null) // { id, name }
+  const [kind, setKind] = useState('new')
+  const [open, setOpen] = useState(null)
   const [editingSale, setEditingSale] = useState(null)
   const {
     historyMonthFilter, setHistoryMonthFilter, historyMonthOptions, formatMonthValue,
-    filteredSalesForHistory, sortedSalesForHistory, historyPage, setHistoryPage,
-    historySortField, historySortOrder, handleHistorySort,
-    exchangePairColors, barcodeSelectClass, getItemBarcode,
+    filteredSalesForHistory, setHistoryPage, exchangePairColors, getItemBarcode,
     productCategories, sources, usedSalesList,
     user, allCustomers, bump, fetchData,
   } = ctx
   const canEdit = user?.role === 'admin' || user?.role === 'manager'
 
-  return (
-    <motion.div
-      key="history"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      className="space-y-4"
-    >
-      {/* Yangi sotuvlar tarixi */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
-        <h3 className="font-syne font-bold text-text-primary text-lg mb-4 text-white">{t('sl_hist_title')}</h3>
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary font-bold">{t('sl_hist_month_filter')}</span>
-            <select value={historyMonthFilter} onChange={(e) => { setHistoryMonthFilter(e.target.value); setHistoryPage(1) }}
-              className="bg-bg-tertiary border border-border text-text-primary px-3 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-accent-red cursor-pointer">
-              {historyMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
-            </select>
-          </div>
-          <div className="text-xs text-text-muted">{t('sl_hist_total', { n: filteredSalesForHistory.length })}</div>
-        </div>
+  const money = (v) => `${formatNumber(Math.round(v || 0))} ${som}`
+  const payLabel = (s) => (s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank'))
+  const sourceLabel = (s) => (s.source ? t('source_' + s.source, { defaultValue: sources.find(src => src.id === s.source)?.label || s.source }) : '—')
+  const catLabel = (id, fallback) => { const c = productCategories.find(x => x.id === id); return c ? t('cat_' + c.id, { defaultValue: c.label }) : (fallback || id || '—') }
+  const barcodeOf = (it) => { const b = it.barcode || getItemBarcode(it.itemId); return b && b !== '—' ? b : null }
+  const qtyOf = (s) => s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0
+  const itemsSummary = (s) => {
+    const names = (s.items || []).map(i => i.name || 'Tovar')
+    return names.length > 1 ? `${names[0]} +${names.length - 1}` : (names[0] || '—')
+  }
+  const status = (s) => {
+    if (s.status === 'completed') return <Badge color={s._isExchange ? 'bg-accent-blue/10 text-accent-blue' : 'bg-accent-green/10 text-accent-green'}>{s.statusLabel || t('col_done')}</Badge>
+    if (s.status === 'pending' || s.status === 'active') return <Badge color="bg-accent-orange/10 text-accent-orange">{s.statusLabel || t('pay_installment')}</Badge>
+    return <Badge color="bg-accent-red/10 text-accent-red">{s.statusLabel || t('sl_hist_status_cancelled')}</Badge>
+  }
+  const discountText = (s) => (s.discount > 0
+    ? `-${s.discount}% (${money(Math.round((s.subtotal || s.total) * s.discount / 100))})`
+    : s.bundleDiscountAmount > 0 ? `${s.bundleDiscountPercent > 0 ? `-${s.bundleDiscountPercent}% ` : ''}(${money(s.bundleDiscountAmount)})` : null)
 
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left text-xs min-w-[1200px]" style={{ tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '130px' }} /><col style={{ width: '140px' }} /><col style={{ width: '130px' }} />
-              <col style={{ width: '85px' }} /><col style={{ width: '100px' }} /><col style={{ width: '75px' }} />
-              <col style={{ width: '110px' }} /><col style={{ width: '45px' }} /><col style={{ width: '120px' }} />
-              <col style={{ width: '105px' }} /><col style={{ width: '65px' }} /><col style={{ width: '110px' }} />
-            </colgroup>
-            <thead className="bg-bg-tertiary text-text-muted">
-              <tr>
-                {[
-                  { key: 'soldAt', label: t('col_date') },
-                  { key: 'itemsNames', label: t('col_product_name') },
-                  { key: 'barcode', label: t('sl_hist_th_barcode') },
-                  { key: 'category', label: t('col_category') },
-                  { key: 'customerName', label: t('col_customer') },
-                  { key: 'soldByName', label: t('col_employee') },
-                  { key: 'source', label: t('col_source') },
-                  { key: 'qty', label: t('sl_hist_th_qty') },
-                  { key: 'discount', label: t('col_discount') },
-                  { key: 'total', label: t('sl_hist_th_total') },
-                  { key: 'paymentTypeLabel', label: t('sl_hist_th_payment') },
-                  { key: 'statusLabel', label: t('sl_hist_th_status'), right: true },
-                ].map(col => (
-                  <th key={col.key} className={`px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase cursor-pointer hover:text-text-primary select-none transition-colors ${col.right ? 'text-right' : ''}`}
-                    onClick={() => handleHistorySort(col.key)}>
-                    <div className={`flex items-center gap-1 ${col.right ? 'justify-end' : ''}`}>
-                      {col.label} {historySortField === col.key && (historySortOrder === 'asc' ? '▲' : '▼')}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {sortedSalesForHistory.slice((historyPage - 1) * 15, historyPage * 15).map(s => {
-                const firstItem = s.items?.[0]
-                const catId = firstItem?.productCategory
-                const catLabel = (() => { const _c = productCategories.find(c => c.id === catId); return _c ? t('cat_' + _c.id, { defaultValue: _c.label }) : (catId || '—') })()
-                const pairBg = exchangePairColors[s.id]
+  const columns = (isUsed) => [
+    { key: 'date', label: t('col_date'), sortValue: s => s.soldAt || '', render: s => (
+      <span className="flex items-center gap-2 whitespace-nowrap text-text-secondary">
+        {!isUsed && exchangePairColors[s.id] && <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: exchangePairColors[s.id].replace(/,\s*0?\.\d+\)$/, ',1)') }} title={t('sl_hist_exchange_pair')} />}
+        {new Date(s.soldAt).toLocaleString('uz-UZ')}
+        {s.editCount > 0 && <span className="text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
+      </span>
+    ) },
+    { key: 'customer', label: t('col_customer'), sortValue: s => s.customerName || '', render: s => (
+      <div className="min-w-0">
+        <p className={`font-semibold truncate ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</p>
+        <p className="text-sm text-text-muted truncate">{s.soldByName || '—'}</p>
+      </div>
+    ) },
+    { key: 'items', label: t('col_product_name'), sortValue: s => itemsSummary(s), hideOnMobile: true, render: s => <span className="block max-w-[240px] truncate">{itemsSummary(s)}</span> },
+    { key: 'total', label: t('sl_hist_th_total'), align: 'right', sortValue: s => s.total, render: s => (
+      <div className="whitespace-nowrap">
+        <p className="font-bold text-text-primary">{money(s.total)}</p>
+        <p className="text-sm text-text-muted">{payLabel(s)}</p>
+      </div>
+    ) },
+    ...(isUsed ? [] : [{ key: 'status', label: t('sl_hist_th_status'), align: 'right', sortValue: s => s.status, render: status }]),
+  ]
+
+  const rows = kind === 'new' ? filteredSalesForHistory : usedSalesList
+  const isUsed = open?.isUsedSale || kind === 'used'
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Segmented value={kind} onChange={setKind} options={[
+          { id: 'new', label: t('sl_hist_kind_new'), count: filteredSalesForHistory.length },
+          { id: 'used', label: t('sl_hist_kind_used'), count: usedSalesList.length },
+        ]} />
+        {kind === 'new' && (
+          <select value={historyMonthFilter} onChange={(e) => { setHistoryMonthFilter(e.target.value); setHistoryPage(1) }}
+            className="bg-bg-secondary border border-border text-text-primary px-3 py-2.5 rounded-xl text-[15px] focus:outline-none focus:border-accent-red cursor-pointer">
+            {historyMonthOptions.map(opt => <option key={opt} value={opt}>{formatMonthValue(opt)}</option>)}
+          </select>
+        )}
+      </div>
+
+      <DataTable key={kind} rows={rows} columns={columns(kind === 'used')} rowKey={s => (kind === 'used' ? 'u' : 'n') + s.id}
+        initialSort={{ key: 'date', dir: 'desc' }} resetKey={historyMonthFilter} onRowClick={setOpen}
+        rowClass={s => (s.status === 'cancelled' ? 'bg-accent-red/5' : '')}
+        empty={kind === 'used' ? t('sl_hist_bu_not_found') : t('sl_profit_empty')} />
+
+      {/* Bitta sotuvning to'liq ma'lumoti */}
+      <Modal open={!!open} onClose={() => setOpen(null)} size="lg" icon={Receipt}
+        title={open && new Date(open.soldAt).toLocaleString('uz-UZ')}
+        subtitle={open && <span className="flex items-center gap-2">{open.customerName || "Noma'lum"} {!isUsed && status(open)}</span>}
+        actions={open && canEdit && !isUsed && open.status !== 'cancelled' && (
+          <button onClick={() => setEditingSale(open)} title={t('sl_edit_title')}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-text-muted hover:text-accent-blue hover:bg-bg-tertiary"><Pencil size={19} /></button>
+        )}>
+        {open && (
+          <div className="space-y-4">
+            <DetailGrid cols={3} items={[
+              { label: t('col_customer'), value: <>{open.customerName || "Noma'lum"}{open.originalCustomerName && <span className="block text-sm text-text-muted line-through">{open.originalCustomerName}</span>}</> },
+              { label: t('col_employee'), value: <>{open.soldByName || '—'}{(open.status === 'cancelled' || open._isExchange) && open.cancelledByName && String(open.cancelledBy) !== String(open.soldBy) && <span className="block text-sm text-accent-red">↩ {open.cancelledByName}</span>}</> },
+              { label: t('col_source'), value: sourceLabel(open) },
+              { label: t('sl_hist_th_qty'), value: t('sl_inst_org_count', { n: qtyOf(open) }) },
+              { label: t('col_discount'), value: discountText(open) ? <span className="text-accent-orange">{discountText(open)}</span> : '—' },
+              { label: t('sl_hist_th_payment'), value: `${payLabel(open)}${open.paymentType === 'card' && open.cardType ? ' · ' + open.cardType.toUpperCase() : ''}` },
+              { label: t('col_category'), value: open.isBundle ? 'Komplekt' : catLabel(open.items?.[0]?.productCategory || open.items?.[0]?.category, open.items?.[0]?.categoryLabel) },
+              { label: t('sl_hist_th_total'), value: <span className="text-lg font-bold">{money(open.total)}</span> },
+            ]} />
+            <div className="panel px-4 divide-y divide-border">
+              {(open.items || []).map((it, i) => {
+                const img = it.productId && productImages[String(it.productId)]?.[0]
                 return (
-                  <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors" style={pairBg ? { backgroundColor: pairBg } : {}}>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary">
-                      {(() => {
-                        const items = s.items || []
-                        const visible = items.slice(0, 2)
-                        const hidden = items.slice(2)
-                        return (
-                          <div className="flex flex-col gap-0.5">
-                            {visible.map((item, i) => {
-                              const hasImg = item.productId && productImages[String(item.productId)]?.length
-                              return (
-                                <span
-                                  key={i}
-                                  className={`text-xs truncate block ${hasImg ? 'cursor-pointer hover:text-accent-blue transition-colors' : ''}`}
-                                  onClick={() => hasImg && setPeekProduct({ id: item.productId, name: item.name })}
-                                >{item.name || 'Tovar'}</span>
-                              )
-                            })}
-                            {hidden.length > 0 && (
-                              <details className="cursor-pointer select-none">
-                                <summary className="text-[10px] text-accent-blue font-bold list-none">+{hidden.length} ta</summary>
-                                {hidden.map((item, i) => {
-                                  const hasImg = item.productId && productImages[String(item.productId)]?.length
-                                  return (
-                                    <span
-                                      key={i}
-                                      className={`text-[10px] block truncate text-text-secondary font-normal ${hasImg ? 'cursor-pointer hover:text-accent-blue transition-colors' : ''}`}
-                                      onClick={() => hasImg && setPeekProduct({ id: item.productId, name: item.name })}
-                                    >{item.name || 'Tovar'}</span>
-                                  )
-                                })}
-                              </details>
-                            )}
-                            {items.length === 0 && <span>—</span>}
-                          </div>
-                        )
-                      })()}
-                    </td>
-                    {(() => {
-                      const barcodes = s.items?.map(it => { const b = it.barcode || getItemBarcode(it.itemId); return (b && b !== '—') ? b : null }).filter(Boolean) || []
-                      const visible = barcodes.slice(0, 2)
-                      const hidden = barcodes.slice(2)
-                      return (
-                        <td className={`px-3 sm:px-4 py-2.5 sm:py-3.5 font-mono text-text-muted truncate ${barcodeSelectClass}`}>
-                          <div className="flex flex-col gap-0.5">
-                            {visible.map((b, i) => <span key={i} className="text-[10px] truncate">{b}</span>)}
-                            {hidden.length > 0 && (
-                              <details className="cursor-pointer select-none">
-                                <summary className="text-[10px] text-accent-blue font-bold list-none">+{hidden.length} ta</summary>
-                                {hidden.map((b, i) => <span key={i} className="text-[10px] block truncate">{b}</span>)}
-                              </details>
-                            )}
-                            {barcodes.length === 0 && <span>—</span>}
-                          </div>
-                        </td>
-                      )
-                    })()}
-                    {(() => {
-                      if (s.isBundle) {
-                        return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className="font-semibold text-sm text-accent-blue">Komplekt</span></td>
-                      }
-                      const catObj = productCategories.find(c => c.id === catId)
-                      const catColor = getCategoryColor(catObj?.id, productCategories)
-                      return <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-semibold text-sm ${catColor.text}`}>{catLabel}</span></td>
-                    })()}
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate">
-                      <span className={`font-medium ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</span>
-                      {s.originalCustomerName && <div className="text-[9px] text-text-muted line-through">{s.originalCustomerName}</div>}
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">
-                      {(s.status === 'cancelled' || s._isExchange) && s.cancelledBy && String(s.cancelledBy) !== String(s.soldBy) ? (
-                        <div className="flex flex-col gap-0.5 leading-tight">
-                          <span className="truncate">{s.soldByName || '—'}</span>
-                          <span className="text-[10px] text-accent-red font-semibold truncate">↩ {s.cancelledByName}</span>
-                        </div>
-                      ) : (s.soldByName || '—')}
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-bg-tertiary text-text-primary text-[10px] whitespace-nowrap">
-                        {t('source_' + s.source, { defaultValue: sources.find(src => src.id === s.source)?.label || s.source })}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary whitespace-nowrap">
-                      {s.discount > 0
-                        ? <span className="text-accent-orange font-semibold whitespace-nowrap">
-                            -{s.discount}% ({formatPrice(Math.round((s.subtotal || s.total) * s.discount / 100), som)})
-                          </span>
-                        : s.bundleDiscountAmount > 0
-                          ? <span className="text-accent-orange font-semibold whitespace-nowrap">
-                              {s.bundleDiscountPercent > 0 ? `-${s.bundleDiscountPercent}% ` : ''}({formatPrice(s.bundleDiscountAmount, som)})
-                            </span>
-                          : <span className="text-text-muted">—</span>}
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">
-                      <div className="flex flex-col gap-0.5">
-                        <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
-                        {s.paymentType === 'card' && s.cardType && (
-                          <span className="text-[10px] text-text-muted font-bold uppercase">{s.cardType}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-right">
-                      {(() => {
-                        let cls, label
-                        if (s.status === 'completed' && !s._isExchange) { cls = 'bg-accent-green/10 text-accent-green'; label = t('col_done') }
-                        else if (s.status === 'completed' && s._isExchange) { cls = 'bg-accent-blue/10 text-accent-blue'; label = t('col_done') }
-                        else if (s.status === 'pending' || s.status === 'active') { cls = 'bg-accent-orange/10 text-accent-orange'; label = t('pay_installment') }
-                        else { cls = 'bg-accent-red/10 text-accent-red'; label = t('sl_hist_status_cancelled') }
-                        return (
-                          <div className="flex items-center justify-end gap-1.5">
-                            {s.editCount > 0 && <span className="text-[9px] text-accent-blue font-bold" title={t('sl_edit_history')}>✎</span>}
-                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold ${cls}`}>{s.statusLabel || label}</span>
-                            {canEdit && s.status !== 'cancelled' && (
-                              <button onClick={() => setEditingSale(s)} title={t('sl_edit_title')}
-                                className="p-1 rounded-md text-text-muted hover:text-accent-blue hover:bg-bg-tertiary transition-colors">
-                                <Pencil size={12} />
-                              </button>
-                            )}
-                          </div>
-                        )
-                      })()}
-                    </td>
-                  </tr>
+                  <div key={i} className="py-3 flex items-center gap-3">
+                    {img ? <img src={img} alt="" className="w-12 h-12 rounded-xl object-cover border border-border shrink-0" /> : null}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] font-semibold text-text-primary truncate">{it.name || 'Tovar'}</p>
+                      <p className="text-sm text-text-muted font-mono">{barcodeOf(it) || '—'}{(it.qty || 1) > 1 ? ` · ${it.qty} ${t('unit_pcs')}` : ''}</p>
+                    </div>
+                    <p className="text-[15px] font-bold whitespace-nowrap">{money((it.price ?? it.salePrice ?? 0) * (it.qty || 1))}</p>
+                  </div>
                 )
               })}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredSalesForHistory.length > 15 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-text-muted">{Math.min(historyPage * 15, filteredSalesForHistory.length)} / {filteredSalesForHistory.length} ta</p>
-            <div className="flex gap-2">
-              <button disabled={historyPage === 1} onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_prev')}</button>
-              <button disabled={historyPage >= Math.ceil(filteredSalesForHistory.length / 15)} onClick={() => setHistoryPage(p => p + 1)}
-                className="px-3 py-1.5 bg-bg-tertiary border border-border rounded-lg text-xs font-bold text-text-primary disabled:opacity-40">{t('sl_next')}</button>
             </div>
           </div>
         )}
-      </div>
+      </Modal>
 
       {editingSale && (
-        <EditSaleModal sale={editingSale} customers={allCustomers} onClose={() => setEditingSale(null)} onSaved={() => { fetchData(); bump() }} />
-      )}
-
-      {/* B/U sotuvlar tarixi */}
-      <div className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
-        <h3 className="font-syne font-bold text-text-primary text-lg mb-4 text-white">{t('sl_hist_bu_title')}</h3>
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-border/50">
-          <div className="text-xs text-text-muted">{t('sl_hist_bu_total', { n: usedSalesList.length })}</div>
-        </div>
-        {usedSalesList.length === 0 ? (
-          <p className="text-xs text-text-muted text-center py-4 sm:py-6">{t('sl_hist_bu_not_found')}</p>
-        ) : (
-          <div className="overflow-x-auto no-scrollbar">
-            <table className="w-full text-left text-xs min-w-[1100px]" style={{ tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: '130px' }} /><col style={{ width: '150px' }} /><col style={{ width: '100px' }} />
-                <col style={{ width: '130px' }} /><col style={{ width: '100px' }} /><col style={{ width: '130px' }} />
-                <col style={{ width: '70px' }} /><col style={{ width: '90px' }} /><col style={{ width: '110px' }} />
-                <col style={{ width: '90px' }} />
-              </colgroup>
-              <thead className="bg-bg-tertiary text-text-muted">
-                <tr>
-                  {[t('col_date'), t('col_product_name'), t('col_category'), t('col_customer'), t('col_employee'), t('col_source'), t('sl_hist_th_qty'), t('col_discount'), t('sl_hist_th_total'), t('sl_hist_th_payment')].map((label, i) => (
-                    <th key={i} className="px-3 sm:px-4 py-2 sm:py-3 font-bold uppercase">{label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {usedSalesList.map(s => (
-                  <tr key={s.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap text-text-secondary">{new Date(s.soldAt).toLocaleString('uz-UZ')}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate font-bold text-text-primary">{s.items?.map(i => i.name || 'Tovar').join(', ') || '—'}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate">{(() => { const cat = s.items?.[0]; if (!cat?.category) return '—'; const catColor = getCategoryColor(cat.category, productCategories); return <span className={`font-semibold text-sm ${catColor.text}`}>{t('cat_' + cat.category, { defaultValue: cat.categoryLabel || cat.category })}</span> })()}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 truncate"><span className={`font-medium ${s.customerName ? 'text-text-primary' : 'text-text-muted italic'}`}>{s.customerName || "Noma'lum"}</span></td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary truncate">{s.soldByName || '—'}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-bg-tertiary text-text-primary text-[10px]">
-                        {s.source ? t('source_' + s.source, { defaultValue: sources.find(src => src.id === s.source)?.label || s.source }) : '—'}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">{s.items?.reduce((sum, it) => sum + (it.qty || 1), 0) || 0}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary whitespace-nowrap">
-                      {s.discount > 0 ? <span className="text-accent-orange font-semibold">-{s.discount}%</span> : <span className="text-text-muted">—</span>}
-                    </td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-primary font-bold">{formatPrice(s.total, som)}</td>
-                    <td className="px-3 sm:px-4 py-2.5 sm:py-3.5 text-text-secondary">
-                      <div className="flex flex-col gap-0.5">
-                        <span>{s.paymentType === 'cash' ? t('pay_cash') : s.paymentType === 'card' ? t('pay_card') : s.paymentType === 'installment' ? t('pay_installment') : t('sl_hist_pay_bank')}</span>
-                        {s.paymentType === 'card' && s.cardType && (
-                          <span className="text-[10px] text-text-muted font-bold uppercase">{s.cardType}</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-      {peekProduct && (
-        <div className="fixed inset-0 bg-black/50 z-[360] flex items-center justify-center p-4" onClick={() => setPeekProduct(null)}>
-          <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 w-72 shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="font-bold text-text-primary text-sm truncate pr-2">{peekProduct.name}</p>
-              <button onClick={() => setPeekProduct(null)} className="p-1 text-text-muted hover:text-text-primary flex-shrink-0"><X size={16} /></button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {(productImages[String(peekProduct.id)] || []).map((img, i) => (
-                <div key={i} className="aspect-square rounded-xl overflow-hidden border border-border">
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <EditSaleModal sale={editingSale} customers={allCustomers} onClose={() => setEditingSale(null)}
+          onSaved={() => { setEditingSale(null); setOpen(null); fetchData(); bump() }} />
       )}
     </motion.div>
   )
