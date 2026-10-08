@@ -1,18 +1,16 @@
-# SICRM — to'liq tahlil va qayta tuzish rejasi (2026-10-08)
+# SICRM — to'liq tahlil va qayta tuzish rejasi (2026-10-08, 2-versiya)
 
-Frontend (60 ming qator, 13 sahifa) va backend (14 ming qator, 33 route) to'liq ko'rib chiqildi.
-Kod o'zgartirilmagan — bu faqat qaror uchun reja.
+1-versiya: tahlil. 2-versiya: foydalanuvchi qarorlari (10-bo'lim) + UI, mijoz profili, ulgurji savdo, bosh sahifa diagrammalari rejalari + tekshiruv natijalari.
 
 ---
 
 ## 0. Qisqa xulosa
 
-1. **Bir nechta funksiya bitta qurilmadan tashqariga chiqmaydi.** Chegirma so'rovi, ogohlantirishlar, komplektlar, USD kursi, nasiya tashkilotlari, audit jurnali va boshqalar faqat **shu brauzerning xotirasida** (localStorage) saqlanadi. Xodimlar telefonda, admin kompyuterda ishlayotgani uchun bular hozir **amalda ishlamayapti**. Bu — eng birinchi tuzatiladigan narsa (Bosqich 0).
-2. **Tuzilma tarqoq:** 12 ta menyu, **66 ta tab**. Bir mavzu (masalan, foyda) 7 joyda ko'rinadi, 3–4 xil formula bilan. "Boshqaruv" va "Admin" ikki sahifaga bo'linib ketgan, sozlamalar 6 joyda. Taklif: **10 ta menyu, ~39 ta tab**.
-3. **Eski hisobot tablari hamma ma'lumotni telefonga yuklab hisoblaydi** (barcha sotuvlar tarixi har safar). Hozir sezilmaydi, lekin ma'lumot ko'paygani sari sekinlashadi. Yangi tablar esa serverda hisoblaydi — ikki xil yondashuv aralash.
-4. **Server nazorati bo'shliqlari:** server sotuv narxini (minimal narx) va chegirma chegarasini tekshirmaydi — bu nazorat faqat brauzerda.
-
-**Tavsiya:** avval Bosqich 0 (ko'rinmas xatolar, UI deyarli o'zgarmaydi). Tablarni birlashtirish (Bosqich 1–3) xodimlar uchun yangi ko'rinish bo'ladi: test oyi oxirida yoki xodimlarni ogohlantirib qilish yaxshi.
+1. **Bir nechta funksiya bitta qurilmadan tashqariga chiqmaydi** (chegirma so'rovi, ogohlantirishlar, komplektlar, savdo sozlamalari, audit) — faqat brauzer xotirasida. Xodimlar telefonda, admin kompyuterda ishlaganda bular amalda ishlamaydi.
+2. **Tuzilma tarqoq:** 12 menyu, 66 tab, foyda 7 joyda 3–4 formulada, sozlamalar 6 joyda → **10 menyu, ~39 tab**.
+3. **Eski hisobot tablari hamma ma'lumotni telefonga yuklab hisoblaydi.**
+4. **Server narx va chegirma chegarasini tekshirmaydi.**
+5. **UI zich va mayda:** 9–11 px yozuv 656 marta, 12 px — 1638 marta; 83 ta alohida yozilgan modal, umumiy modal komponenti yo'q.
 
 ---
 
@@ -22,223 +20,228 @@ Kod o'zgartirilmagan — bu faqat qaror uchun reja.
 |---|---|---|
 | Bosh sahifa | — | Dashboard 213 + DashboardSummary 169 |
 | Ombor | 6: Qoldiq, B/U qoldiq, Kirim, Barkod, Inventarizatsiya, Hisobdan chiqarish | BarcodeTab 1451, StockTab 996 |
-| Sotuv | 8: Yangi sotuv, B/U sotuv, Bronlar, Bekor qilish, Sotuv tarixi, Bekor tarixi, Muddatli to'lov, Foyda (+2 tugma: sertifikat, kassa xarajati) | useSalesState **1877**, NewSaleTab 766 |
-| Mijozlar | — (profil oynasida 8 ta tab) | index 793, ProfileModal 680 |
+| Sotuv | 8: Yangi sotuv, B/U sotuv, Bronlar, Bekor qilish, Sotuv tarixi, Bekor tarixi, Muddatli to'lov, Foyda | useSalesState **1877**, NewSaleTab 766 |
+| Mijozlar | — (profil oynasida 8 tab) | index 793, ProfileModal 680 |
 | Marketing | 6: Aksiyalar, Promokodlar, Sertifikatlar, Telegram xabarlar, Tug'ilgan kunlar, Sozlamalar | |
-| Kirim | 7: Kirimlar, Yetkazib beruvchilar, Qarzlar, Buyurtmalar, Hisob-kitob, To'lovlar tarixi, Qaytarish | index **1802**, BatchesTab 699 |
-| Moliya | 7: Xarajatlar, Daromadlar, Pul harakati, Foyda va zarar, Yetkazib beruvchi to'lovlari, Kapital, Kategoriyalar | |
+| Kirim | 7: Kirimlar, Yetkazib beruvchilar, Qarzlar, Buyurtmalar, Hisob-kitob, To'lovlar tarixi, Qaytarish | index **1802** |
+| Moliya | 7: Xarajatlar, Daromadlar, Pul harakati, Foyda va zarar, Yetk. to'lovlari, Kapital, Kategoriyalar | |
 | Hisobotlar | **12**: Sotuv, Tovarlar, Qoldiq, Ombor harakati, Kirim, Mijozlar, Segmentlar, Xodimlar, Do'konlar, Moliya, B/U, Foyda | index **1948**, SalesTab **1813** |
-| Integratsiyalar | 4: API, Telegram botda qoldiq, UDS, Payme/Click/Uzum | |
+| Integratsiyalar | 4: API, Telegram botda qoldiq, UDS, To'lov tizimlari | |
 | AI Agent | 4: Kunlik tahlil, AI yordamchi, Statistika, Instagram | |
 | Boshqaruv | 6: Ogohlantirishlar, Tovarlar, Xodimlar, Chegirmalar, Komplektlar, Sozlamalar | index **1705**, ProductsTab **1894** |
 | Admin | 6: Xodimlar, Qurilmalar, Audit, Do'konlar, AI agentlar, Sozlamalar | |
 
 ---
 
-## 2. 🔴 Jiddiy xatolar: ma'lumot faqat bitta qurilmada
+## 2. 🔴 Ma'lumot faqat bitta qurilmada (localStorage)
 
-Hammasi `localStorage` da — boshqa telefon/kompyuter buni ko'rmaydi. Serverda tegishli jadval yoki sozlama yo'q.
-
-| # | Funksiya | Hozir qanday ishlaydi | Oqibat |
-|---|---|---|---|
-| 1 | **Chegirma so'rovi** (sotuvchi 5%+ so'raydi) | So'rov sotuvchining o'z telefonidagi ro'yxatga yoziladi | Boshqaruvchi so'rovni **hech qachon ko'rmaydi**; sotuvchi cheksiz kutadi |
-| 2 | **Ogohlantirishlar** (Boshqaruv → Ogohlantirishlar, menyudagi qizil raqam): barkodsiz sotuv, mijozsiz sotuv, tovar tugadi, qayta chop | Har qurilma o'zinikini ko'radi | Admin xodim telefonida bo'lgan hodisalarni ko'rmaydi |
-| 3 | **Komplektlar** (Boshqaruv → Komplektlar) | `bundleService.js` — "API" deb nomlangan, lekin localStorage | Admin yaratgan komplekt sotuvchi kassasida **yo'q**; hisobotlar (5 tab) va Qaytarish ham komplekt chegirmasini aniqlashda shu mahalliy ro'yxatga tayanadi |
-| 4 | **Savdo sozlamalari:** USD kursi, nasiya tashkilotlari (komissiya %), sotuv manbalari, chegirma chegaralari (5/10%), do'kon va xodim oylik rejalari, ogohlantirish yoqish/o'chirish, tovar atributlari, narxnoma sozlamalari, menyu nomlari va **yashirin sahifalar** | `settingsStore` (localStorage). Serverga faqat brend va rollar yoziladi | Admin kompyuterda o'zgartirsa, telefonlarda eski/standart qiymat qoladi (masalan, telefonda faqat "Uzum Nasiya 0%" va "Oddiy Nasiya 3%"). Rejalar faqat kiritilgan qurilmada ko'rinadi. White-label uchun mo'ljallangan "sahifani yashirish" ham telefonlarda ishlamaydi |
-| 5 | **Audit jurnali** (Admin → Audit) | localStorage, 5000 yozuvgacha | Admin faqat **o'z brauzerida** qilingan amallarni ko'radi — xodimlar nazorati uchun foydasiz |
-| 6 | **Boshqaruvchi xodimni tahrirlashi** (Boshqaruv → Xodimlar) | Serverda xodim tahriri faqat admin uchun → 403, xato jimgina yutiladi | Boshqaruvchi "saqlandi" deb o'ylaydi, sahifa yangilansa o'zgarish yo'qoladi. "Tahrirlashni bloklash", "tahrir tarixi", "o'chirish so'rovi" (Admin → Xodimlar) ham localStorage — amalda ishlamaydi |
-| 7 | **AI sozlamalari** (Admin → Sozlamalar: provayder, model, oylik limit, AI yoqish/o'chirish) | Hech qayerda ishlatilmaydi | O'lik tugmalar. AI kaliti ikki joyda (Admin va Boshqaruv), faqat kiritilgan qurilmadan yuboriladi |
-| 8 | **"Ishonchli qurilmalar"** (Admin → Qurilmalar pastida) | Eski localStorage ro'yxati | Endi qurilmalar serverda boshqariladi — bu blok ma'nosiz |
-| 9 | Marketing yo'l xaritasi (AI → Kunlik tahlil) | localStorage | Faqat bitta qurilmada ko'rinadi (kichik muammo) |
-
-**Yechim (Bosqich 0):**
-- Serverda `app_settings` ga `business` kaliti — 4-banddagi hammasi (rollar va brend bilan bir xil usul: serverdan o'qiladi, localStorage faqat oflayn kesh).
-- `bundles` jadvali **yoki** komplektni Marketing → Aksiyalar ichiga yangi tur sifatida qo'shish (tavsiya — 5-bo'limga qarang).
-- `notifications` jadvali + SSE: chegirma so'rovi real vaqtda boshqaruvchiga boradi, tasdiq sotuvchiga qaytadi. Ogohlantirishlar hammaga ko'rinadi.
-- `audit_log` jadvali — muhim amallarni **server** yozadi (narx o'zgarishi, sotuv tahriri/bekor, xodim, qurilma, sozlama).
-- Xodim tahriri bo'yicha qaror (8-bo'lim, 4-savol) + xatoni ekranda ko'rsatish.
-- O'lik AI sozlamalari va "ishonchli qurilmalar" blokini olib tashlash.
-
----
+| # | Funksiya | Oqibat |
+|---|---|---|
+| 1 | **Chegirma so'rovi** | So'rov sotuvchining o'z telefonida qoladi — boshqaruvchi ko'rmaydi |
+| 2 | **Ogohlantirishlar** (barkodsiz/mijozsiz sotuv, tovar tugadi, qayta chop) | Har qurilma faqat o'zinikini ko'radi |
+| 3 | **Komplektlar** (`bundleService.js` — localStorage) | Admin yaratgan komplekt sotuvchi kassasida yo'q; hisobotlar ham shu mahalliy ro'yxatga tayanadi |
+| 4 | **Savdo sozlamalari:** USD kursi, nasiya tashkilotlari, manbalar, chegirma chegaralari, oylik rejalar, ogohlantirish sozlamalari, atributlar, narxnoma, menyu nomlari, yashirin sahifalar | Telefonlarda standart qiymat qoladi |
+| 5 | **Audit jurnali** | Admin faqat o'z brauzeridagi amallarni ko'radi |
+| 6 | **Boshqaruvchi xodimni tahrirlashi** | Server 403 qaytaradi, xato yashirinadi. Bloklash/tahrir tarixi/o'chirish so'rovi ham localStorage |
+| 7 | **AI sozlamalari** (provayder, model, limit, yoqish) | Hech narsaga ta'sir qilmaydi |
+| 8 | "Ishonchli qurilmalar" ro'yxati | Eski, ma'nosiz |
+| 9 | Marketing yo'l xaritasi | Bitta qurilmada |
 
 ## 3. 🟠 Server nazorati va hisob-kitob
 
-| # | Muammo | Tafsilot |
+1. **Narx va chegirma nazorati faqat brauzerda** — server minimal narx va rol chegarasini tekshirmaydi.
+2. **Foyda 3–4 formulada** (brauzer keshbekni ayirmaydi; P&L, bosh sahifa, AI — alohida SQL).
+3. **Sotuv → Foyda tabi kirim narxi yo'q bo'lsa uni sotuv narxining 80% deb "o'ylab topadi"** (`purchasePrice || price * 0.8`) — foyda soxta raqam bo'lib chiqadi. *(2-versiyada topildi)*
+4. Sotuvchi API orqali boshqa do'kon sotuvlarini olishi mumkin.
+5. Sotuvchi xarajat va kapitalni o'qiy oladi.
+6. B/U olingan narx yashirilmaydi.
+7. Uch xil "standart rol" ro'yxati (ikkitasi o'lik).
+8. `ExpenseFormModal` kursi `12700` qattiq yozilgan.
+9. Xodim "o'chirish so'rovi"da bo'lsa, server uni darhol bloklaydi (`pending_delete = FALSE` sharti) — "admin tasdiqlaguncha faol qoladi" degan izohga zid.
+
+## 4. Tarqoq mavzular
+
+| Mavzu | Hozir (joylar soni) | Yangi joy |
 |---|---|---|
-| 1 | **Narx nazorati faqat brauzerda** | `POST /api/sales` mijoz yuborgan narxni tekshirmasdan yozadi: `min_sale_price` dan past narx, 0–100% chegirma har qanday rolga ruxsat. Yechim: serverda `price >= min_sale_price` (yoki tasdiqlangan chegirma so'rovi bilan) va rol bo'yicha chegirma chegarasi |
-| 2 | **Foyda 3–4 xil formulada** | Brauzer (`profitHelpers`, eski hisobotlar) keshbekni ayirmaydi; Moliya → Foyda va zarar (server) ayiradi; Bosh sahifa (`reportsController`) va AI (`aiSections`) — alohida SQL. Bir davr uchun turli sahifada turli foyda chiqishi mumkin. Yechim: yagona server formulasi |
-| 3 | Sotuvchi boshqa do'kon sotuvlarini olishi mumkin | `GET /api/sales` do'konni foydalanuvchiga bog'lamaydi (`shop_id` berilmasa — hammasi) |
-| 4 | Sotuvchi xarajat va kapitalni o'qiy oladi | `GET /api/expenses`, `/api/capital` — ochiq savol (CLAUDE.md) |
-| 5 | B/U olingan narx yashirilmaydi | `acquired_price` ruxsatsiz foydalanuvchiga ham boradi (kichik) |
-| 6 | AI sahifasida tab ruxsati yo'q | Sotuvchida standart `ai_agent` bor → butun biznes tushumi, AI yordamchi ochiq. Foyda yashiriladi, tushum yo'q. Ataylabmi? |
-| 7 | Uch xil "standart rol" ro'yxati | `perm.js DEFAULT_TREES`, `settingsStore.roleAccessTrees`, eski `authStore.rolePermissions` / `apHelpers.ROLE_PERMISSIONS` (sotuvchiga "Kirim" bergan eski tizim). Eski ikkitasi o'lik, `employees.permissions` ustuni ham |
-| 8 | `ExpenseFormModal` da kurs `12700` qattiq yozilgan | Sozlamadagi kursni olmaydi |
+| Foyda | 7 | Moliya → Foyda (yangi ko'rinish, 7-bo'lim) |
+| Savdo KPI | 5 | Bosh sahifa (qisqa) + Hisobotlar → Savdo; AI → Statistika o'z joyida qoladi |
+| Yetkazib beruvchi qarzi | 7 | Kirim → Qarz va to'lovlar + Moliya → Qarzlar |
+| Yetk. to'lovlari tarixi | 2 (turli manba) | Kirim → Qarz va to'lovlar |
+| Mijoz qarzi | 5 | Sotuv → Nasiyalar + Moliya → Qarzlar + mijoz profili |
+| Qoldiq / kam qolgan | 6 | Ombor → Qoldiq + Hisobotlar → Ombor |
+| Pul harakati / kapital | 3 | Moliya |
+| Xodim samaradorligi | 4 | Hisobotlar → Xodimlar |
+| Xodimlarni boshqarish | 2 | Sozlamalar → Xodimlar |
+| Kirim formasi | 3 joy, 2 xil forma | Bitta umumiy forma, ikki joyda (qaror 2) |
+| Barkod | 2 | Ombor → Barkod |
+| Tovar katalogi | 2 | Ombor → Tovarlar |
+| Chegirmalar | 5 | Marketing (Aksiyalar + komplekt, Kodlar, Sodiqlik); chegirma chegarasi → Sozlamalar |
+| Telegram | 5 | Ulanish → Sozlamalar → Integratsiyalar; xabarlar → Marketing |
+| Instagram | 2 | Ulanish → Sozlamalar → Integratsiyalar; suhbatlar → AI |
+| Sozlamalar | 6 | Bitta Sozlamalar sahifasi |
+| Sana filtri | 2 xil | Hamma joyda `PeriodPicker` |
 
 ---
 
-## 4. Tarqoq mavzular (bir yo'nalishdagi kartalar)
+## 5. Yangi tuzilma
 
-| Mavzu | Hozir qayerda (soni) | Taklif |
+**Menyu (10):** Bosh sahifa · Sotuv · Ombor · Kirim · **Ulgurji** (yangi, 9-bo'lim) · Mijozlar · Marketing · Moliya · Hisobotlar · AI · Sozlamalar
+`[A | B]` — tab ichidagi almashtirgich.
+
+| Sahifa | Yangi tablar |
+|---|---|
+| **Sotuv** (8→5) | Kassa `[Yangi \| B/U]` · Bronlar · Qaytarish · Tarix `[Sotuvlar \| Bekorlar]` · Nasiyalar |
+| **Ombor** (6→5) | Qoldiq `[Yangi \| B/U]` · Tovarlar (Boshqaruvdan) · Kirim (umumiy forma) · Barkod (+qayta chop ruxsati) · Nazorat `[Inventarizatsiya \| Hisobdan chiqarish]` |
+| **Kirim** (7→4) | Kirimlar `[Kirimlar \| Buyurtmalar]` (+Excel, umumiy forma) · Yetkazib beruvchilar (profilda akt sverka) · Qarz va to'lovlar · Qaytarish |
+| **Marketing** (6→4) | Aksiyalar (+ "Komplekt" turi) · Kodlar `[Promokodlar \| Sertifikatlar]` · Sodiqlik (Boshqaruvdan) · Xabarlar `[Telegram \| Tug'ilgan kunlar]` |
+| **Moliya** (7→5) | Xarajat va daromad · Pul harakati · Foyda (yangi ko'rinish, P&L shu yerda) · Qarzlar (debitor + kreditor) · Kapital |
+| **Hisobotlar** (12→5) | Savdo `[Umumiy \| Tovarlar \| Do'konlar]` · Ombor `[Qoldiq \| Harakat \| B/U]` · Mijozlar `[Tahlil \| Segmentlar]` · Xodimlar · Yetkazib beruvchilar |
+| **AI** (4 — o'zgarmaydi) | Kunlik tahlil · Yordamchi · Statistika (qaror 7: o'z joyida) · Mijozlar boti (Instagram) |
+| **Sozlamalar** (yangi) | Kompaniya* · Do'konlar* · Xodimlar `[Xodimlar \| Rollar* \| Qurilmalar]` · Savdo qoidalari · Bildirishnomalar · AI agentlar* · Integratsiyalar* · Audit* |
+
+\* — **faqat admin**. Qolganlari rol ruxsati bilan (qaror 1): boshqaruvchi admin bo'limlari va ma'lumotlarini ko'rmaydi — na menyuda, na API'da.
+
+**Bildirishnomalar** — yuqori panelda qo'ng'iroqcha (server + real vaqt), chegirma so'rovini shu yerdan tasdiqlash.
+
+---
+
+## 6. UI soddalashtirish rejasi (11-band)
+
+**Muammo:** sahifa ochilganda hamma narsa birdan ko'rinadi — 6–14 ustunli jadvallar, 9–11 px yozuvlar, har sahifada 5–8 ta statistika kartasi, filtrlar doim ochiq.
+
+**Tamoyil — "avval muhim, keyin to'liq":**
+1. **Sahifa = 3 qism:** sarlavha + 3–4 ta asosiy KPI → qisqa ro'yxat (4–5 ustun) → qator bosilsa **modal**da to'liq ma'lumot.
+2. **Modal ichida modal** (stack): masalan, mijoz → sotuv → tovar. "Orqaga" tugmasi va telefon "orqaga" tugmasi faqat yuqoridagi modalni yopadi.
+3. **Yozuv o'lchami:** asosiy matn 14 px (telefonda ham), ikkinchi darajali 12 px, 9–11 px faqat belgi/badge'larda. Raqamlar katta va qalin.
+4. **Filtrlar yashirin:** "Filtr" tugmasi → pastdan chiquvchi panel (telefon) yoki modal. Faol filtrlar chip ko'rinishida.
+5. **Telefonda jadval → karta** (har qator — kichik karta: nom, asosiy raqam, holat).
+6. **Bitta davr tanlagich** (`PeriodPicker`) hamma joyda.
+
+**Umumiy komponentlar to'plami** (birinchi qadam, `src/components/ui/`):
+`PageHeader`, `KpiStrip`, `DataTable` (saralash, sahifalash, qator bosish, telefonda karta), `Modal` + `ModalStack` (ichma-ich, orqaga tugmasi bilan), `FilterSheet`, `DetailRow`/`DetailGrid`, `EmptyState`, `Badge`, `formatPrice`/`formatDate` (`src/utils/format.js`).
+
+**Tartib:** komponentlar → Mijozlar (namuna sahifa, 8-bo'lim) → Sotuv → Ombor → Kirim → Moliya → Hisobotlar → Marketing → Sozlamalar. Har sahifa tablari birlashtirilayotganda bir yo'la yangi UI ga o'tkaziladi (ikki marta qilinmaydi).
+
+---
+
+## 7. Yangi foyda ko'rinishi (3-qaror)
+
+Hozirgi Sotuv → Foyda jadvalidagi **barcha ustunlar saqlanadi** (sana, tovar, barkod, kategoriya, mijoz, xodim, kirim summasi, sotuv summasi, soni, to'lov turi, holat, komissiya, marja, foyda) + boshqa joylardagi foyda ma'lumotlari (xarajatlar, sof foyda, dinamika, kategoriya taqsimoti).
+
+**Moliya → Foyda:**
+1. **Yuqorida:** davr tanlagich + 4 KPI — Tushum, Yalpi foyda, Xarajatlar, Sof foyda (oldingi davr bilan solishtirish).
+2. **Diagramma:** kunlar bo'yicha tushum/foyda.
+3. **Ixcham ro'yxat** `[Tovarlar | Sotuvlar | Kategoriyalar | P&L]`:
+   - *Tovarlar:* tovar · sotilgan soni · tushum · foyda · marja %. **Bosilsa — tovar modali**: shu davrdagi har bir sotuvi (sana, barkod, mijoz, xodim, kirim/sotuv narxi, to'lov turi, nasiya holati, komissiya, foyda), o'rtacha kirim narxi, partiyalar bo'yicha tannarx, qoldiq.
+   - *Sotuvlar:* chek · sana · mijoz · summa · foyda. Bosilsa — chek modali (hamma ustunlar).
+   - *Kategoriyalar:* kategoriya · tushum · foyda · ulush.
+   - *P&L:* hozirgi Foyda va zarar jadvali (o'zgarmaydi).
+4. Hammasi **serverda** hisoblanadi, bitta formula: `sof tushum − tannarx − nasiya komissiyasi − keshbek`; kirim narxi yo'q tovar "narx kiritilmagan" deb belgilanadi (80% taxmin olib tashlanadi).
+5. Sotuv → Foyda va Hisobotlar → Foyda tablari olib tashlanadi; `sales.profit` / `reports.profit` ruxsati yangi tabga o'tkaziladi.
+
+---
+
+## 8. Mijoz profili modali (12-band)
+
+Mijozlar ro'yxati ixcham: ism · telefon · qarz · daraja · oxirgi xarid. **Bosilsa — profil modali**, hamma narsa bitta joyda:
+
+- **Yuqori qism (doim ko'rinadi):** ism, telefon(lar), daraja, balans, umumiy xarid, qarz, oxirgi tashrif; tezkor tugmalar: Qo'ng'iroq, Telegram, Qarz to'lash, Tahrirlash.
+- **Tablar (5):** Umumiy (ma'lumot + afzalliklar + guruh/teglar) · Xaridlar `[Yangi | B/U]` · Moliya `[Nasiya | Balans/keshbek]` · Izohlar · Telegram.
+- **Ichma-ich modal:** xarid qatori → chek modali → tovar modali; nasiya → to'lov jadvali modali.
+- Ma'lumot bitta so'rov bilan serverdan (`GET /api/customers/:id/profile`), hozirgidek hamma sotuvlarni yuklab filtrlash emas.
+
+---
+
+## 9. Ulgurji savdo bo'limi (13-band)
+
+**Maqsad:** biznes egasi boshqa do'konlarga ulgurji narxda tovar beradi. Yetkazib berish yo'q — mijoz o'zi olib ketadi, shuning uchun logistika moduli kerak emas.
+
+**Menyu: "Ulgurji"** — tablar:
+1. **Hujjatlar** (nakladnoylar): yangi hujjat → mijoz (do'kon) tanlanadi → tovarlar: barkod skaner **yoki** tovar + soni (tizim do'kon qoldig'idan FIFO bo'yicha itemlarni o'zi tanlaydi) → ulgurji narx avtomatik → chegirma → to'lov (naqd/o'tkazma/qarzga) → chop etish (nakladnoy PDF). Holatlar: qoralama → berildi → to'langan/qisman.
+2. **Mijozlar** (ulgurji): do'kon nomi, mas'ul shaxs, telefon, INN, manzil, **kredit limiti**, to'lov muddati (kun), narx guruhi.
+3. **Qarzlar va to'lovlar:** har mijozning qarzi, muddati o'tganlar, to'lov qabul qilish (FIFO — eng eski hujjatdan), **akt sverka** (Kirimdagi yetkazib beruvchi akt sverkasining teskarisi).
+4. **Qaytarish:** hujjat bo'yicha qaytarish → itemlar omborga qaytadi, qarz kamayadi.
+
+**Narx:** tovarda yangi maydon `wholesale_price` (ulgurji narx) + ixtiyoriy narx guruhlari (masalan, "Doimiy diler −3%").
+**Ma'lumotlar bazasi:** `wholesale_clients`, `wholesale_docs`, `wholesale_doc_items` (item_id, narx, tannarx nusxasi), `wholesale_payments`, `wholesale_returns`. Itemlar `sold` holatiga o'tadi (`sold_at`), kanal belgisi bilan.
+**Hisobotlarga ulanish:** Moliya → Foyda va Pul harakati (ulgurji alohida qator), Moliya → Qarzlar (debitorlikda ulgurji mijozlar), Hisobotlar → Savdo (`[Chakana | Ulgurji]` filtri), AI tahlil (alohida bo'lim).
+**Ruxsatlar:** `wholesale.docs`, `wholesale.clients`, `wholesale.debts`, `wholesale.returns`; ulgurji narx va tannarx — `canSeeCost`.
+
+**Savollar (ulgurji):**
+- U1. Konsignatsiya kerakmi (tovar beriladi, sotilgach to'lanadi, sotilmagani qaytadi)?
+- U2. Ulgurji narx: har tovarga bitta narx yetarlimi yoki har mijoz/guruhga alohida narx kerakmi?
+- U3. Ulgurji sotuvni kim qiladi — faqat admin/boshqaruvchimi yoki sotuvchiga ham ruxsat beriladimi?
+- U4. Ulgurji tovar qaysi do'kon qoldig'idan chiqadi — tanlangan do'kondanmi yoki alohida "ulgurji ombor" kerakmi?
+
+---
+
+## 10. Qarorlar (2026-10-08)
+
+| # | Savol | Qaror |
 |---|---|---|
-| **Foyda** | Bosh sahifa, Sotuv → Foyda, Hisobotlar → Foyda, Hisobotlar → Sotuv, Moliya → Foyda va zarar, AI → Statistika, AI → Savdo (**7**) | Yagona joy: **Moliya → Foyda va zarar**. Bosh sahifada faqat KPI. Sotuv → Foyda va Hisobotlar → Foyda olib tashlanadi |
-| **Savdo KPI** (tushum, chek, o'rtacha chek) | Bosh sahifa, AI → Statistika, AI → Savdo, Hisobotlar → Sotuv, Hisobotlar → Do'konlar (**5**) | Bosh sahifa (qisqa) + Hisobotlar → Savdo (batafsil). AI → Statistika → Bosh sahifaga |
-| **Yetkazib beruvchi qarzi** | Bosh sahifa, Kirim → Qarzlar, Kirim → Hisob-kitob, Kirim → Yetkazib beruvchilar, Hisobotlar → Kirim, Hisobotlar → Moliya, Moliya → Yetk. to'lovlari (**7**) | Kirim → "Qarz va to'lovlar" (bitta tab) + Moliya → Qarzlar (umumiy ko'rinish) |
-| **Yetkazib beruvchiga to'lovlar tarixi** | Kirim → To'lovlar tarixi, Moliya → Yetk. to'lovlari (**2, turli manba!**) | Moliyadagisini olib tashlash — u buyurtma avanslarini ko'rsatmaydi, buyurtmadan kelgan to'lovlarni esa qayta ko'rsatadi |
-| **Mijoz qarzi (nasiya)** | Sotuv → Muddatli to'lov, Mijozlar (qarz ustuni), Mijoz profili, Hisobotlar → Moliya, AI → Mijozlar (**5**) | Sotuv → Nasiyalar (ish joyi) + Moliya → Qarzlar (umumiy). Mijoz profili qoladi |
-| **Qoldiq / kam qolgan** | Bosh sahifa, Ombor → Qoldiq, Hisobotlar → Qoldiq, Hisobotlar → Ombor harakati, AI → Ombor, Ogohlantirishlar (**6**) | Ombor → Qoldiq (ish) + Hisobotlar → Ombor (tahlil: qoldiq + harakat + B/U) |
-| **Pul harakati / kapital** | Moliya → Pul harakati, Moliya → Kapital, Hisobotlar → Moliya (**3**) | Faqat Moliya. Hisobotlar → Moliya tabidagi noyob kartalar (nasiya tashkilotlari hisoboti, mijozlardan kutilayotgan to'lov) → Moliya → Qarzlar |
-| **Xodim samaradorligi** | Hisobotlar → Xodimlar, Boshqaruv → Xodimlar (tafsilot oynasi — sotuv statistikasi), AI → Xodimlar, Boshqaruv → Sozlamalar (rejalar) (**4**) | Hisobotlar → Xodimlar (rejalar bilan). Rejani kiritish — Sozlamalar → Savdo qoidalari |
-| **Xodimlarni boshqarish** | Admin → Xodimlar, Boshqaruv → Xodimlar (**2**) | Bitta: Sozlamalar → Xodimlar va ruxsatlar |
-| **Kirim yaratish** | Ombor → Kirim (forma 1), Kirim → Kirimlar (forma 2 + Excel), Kirim → Buyurtmalar (qabul) (**3, ikki xil forma**) | Bitta umumiy forma komponenti; joy bo'yicha qaror (8-bo'lim, 2-savol) |
-| **Barkod** | Ombor → Barkod, Boshqaruv → Tovarlar → Barkodlar (qayta chop ruxsati) (**2**) | Ombor → Barkod (ruxsat tugmasi shu yerda) |
-| **Tovar katalogi / narxlar / kategoriyalar** | Boshqaruv → Tovarlar, Ombor → Qoldiq (tovar oynasi, narxnoma) (**2**) | Ombor → Tovarlar |
-| **Chegirmalar** | Boshqaruv → Chegirmalar (sodiqlik + chegara), Boshqaruv → Komplektlar, Marketing → Aksiyalar/Promokodlar, Integratsiyalar → UDS (**5**) | Marketing: Aksiyalar (+komplekt turi), Kodlar, Sodiqlik. Chegirma chegarasi → Sozlamalar → Savdo qoidalari |
-| **Telegram** | Marketing → Xabarlar, Marketing → Sozlamalar (bot tokeni), Integratsiyalar → Botda qoldiq, Hisobotlar → Telegram tugmasi (xodim), Mijoz profili → Telegram (**5**) | Bot ulanishi bitta joyda: Sozlamalar → Integratsiyalar → Telegram bot (token, rejim, xodimlar, qoldiq). Marketingda faqat xabarlar |
-| **Instagram** | AI → Instagram (statistika, DM), Admin → AI agentlar → Mijozlar boti (token, kanallar) (**2**) | Ulanish → Sozlamalar → Integratsiyalar; suhbatlar → AI → Mijozlar boti |
-| **Sozlamalar** | Admin → Sozlamalar, Boshqaruv → Sozlamalar, Marketing → Sozlamalar, Integratsiyalar, Admin → AI agentlar, Moliya → Kategoriyalar (**6**) | Bitta **Sozlamalar** sahifasi (bo'limlar bilan) |
-| **Sana filtri** | Oy ro'yxati (19 faylda) va davr tanlagich `PeriodPicker` (10 faylda). Hisobotlarda bitta sahifada ikkalasi | Hamma joyda `PeriodPicker` |
+| 1 | Bitta Sozlamalar sahifasi | **Ha.** Faqat rol ruxsati ishlaydi; boshqaruvchi admin tablari va ma'lumotlarini ko'rmaydi |
+| 2 | Kirim formasi | **B** — ikki joyda qoladi, bitta umumiy forma |
+| 3 | Foyda | Ko'chirish mumkin. Barcha ustunlar saqlanadi → yangi ko'rinish: ixcham ro'yxat + tovar modali (7-bo'lim) |
+| 4 | Boshqaruvchi xodimni tahrirlaydi | **A** — ha (serverda ruxsat), o'chirish admin tasdig'i bilan |
+| 5 | Chegirma so'rovi | Boshqaruvchiga real vaqtda boradi, u tasdiqlaydi |
+| 6 | Minimal narx | Sotuvchi savdolashib tushira oladigan **eng past chegara**. Aksiya va maxsus chegirmalarga taalluqli emas — ular birinchi aytilgan narxdan (`cash_price`) ayriladi |
+| 7 | AI → Statistika | **O'z joyida qoladi** (alohida bo'lim, bosh sahifani chalg'itmasin) |
+| 8 | Komplekt → Aksiyalar | **Ha** |
+| 9 | Qachon | **Hozir**, hammasi. Kerak bo'lsa test oyi to'xtatiladi |
+
+**Minimal narx qoidasi (6-qaror) — serverda:**
+- Har sotuv qatorida `base_price` (aksiyadan oldingi narx) saqlanadi.
+- Sotuvchi uchun: `base_price ≥ min_sale_price` (nasiyada `installment_base_price`) va qo'lda berilgan foizli chegirmadan keyin ham shu chegaradan past emas. Chegara faqat **boshqaruvchi tasdiqlagan chegirma so'rovi** bilan o'tiladi.
+- Aksiya, komplekt, sodiqlik, promokod, sertifikat chegirmalari `cash_price` dan hisoblanadi va minimal narx chegarasiga tushmaydi.
+- Qo'lda foizli chegirma: rol chegarasidan (sozlamadagi 5%/10%) oshsa — tasdiqlangan so'rov talab qilinadi.
 
 ---
 
-## 5. Yangi tuzilma taklifi
+## 11. Bosh sahifa diagrammalari (14-band)
 
-**Menyu: 12 → 10. Tablar: 66 → ~39.** `[A | B]` — tab ichidagi almashtirgich (alohida tab emas).
+Hozir: tushum maydon-diagrammasi + to'lov turlari doira-diagrammasi + ro'yxatlar. Qo'shiladi (hammasi serverdan, davr tanlagichga bog'liq):
+1. **Tushum va foyda** — kunlar bo'yicha ustun + chiziq (foyda ruxsati bo'lsa).
+2. **Kategoriyalar ulushi** — doira (shina/disk/aksessuar...).
+3. **Top-5 tovar** — gorizontal ustunlar (hozirgi ro'yxat o'rniga).
+4. **Do'konlar solishtiruvi** — ustunlar (bir nechta do'kon bo'lsa).
+5. **Soatlar bo'yicha savdo** — qaysi soatda xaridor ko'p (ustun).
+6. **Qarzlar** — mijozlar bizga / biz yetkazib beruvchilarga / ulgurji mijozlar (yonma-yon ustunlar).
+7. **Qoldiq qiymati kategoriyalar bo'yicha** (ruxsat bo'lsa).
 
-### Bosh sahifa
-- KPI (serverdan, hozirgidek) + **AI → Statistika shu yerga** (kun/hafta/oy taqqoslash).
-- Yangi karta: "Qarzlar" — mijozlar bizga / biz yetkazib beruvchilarga.
-- Yangi karta: bugungi AI xulosasi (Kunlik tahlildan qisqa).
-- Oxirgi sotuvlar va kam qolgan tovarlar — serverdan (hozir 5 ta to'liq ro'yxat yuklanadi).
-
-### Sotuv (8 → 5)
-1. **Kassa** `[Yangi | B/U]`
-2. **Bronlar**
-3. **Qaytarish** (bekor qilish/almashtirish)
-4. **Tarix** `[Sotuvlar | Bekorlar]`
-5. **Nasiyalar** (muddatli to'lov)
-- ❌ Foyda → Moliya → Foyda va zarar
-
-### Ombor (6 → 5)
-1. **Qoldiq** `[Yangi | B/U]`
-2. **Tovarlar** ← Boshqaruv → Tovarlar (katalog, narx, kategoriya, atribut, narxnoma)
-3. **Kirim** *(qaror: 2-savol)*
-4. **Barkod** (+ qayta chop ruxsati Boshqaruvdan)
-5. **Nazorat** `[Inventarizatsiya | Hisobdan chiqarish]`
-
-### Kirim (7 → 4)
-1. **Kirimlar** `[Kirimlar | Buyurtmalar]` (+ Excel import)
-2. **Yetkazib beruvchilar** — profilida akt sverka (Hisob-kitob)
-3. **Qarz va to'lovlar** — Qarzlar + To'lovlar tarixi + FIFO to'lash
-4. **Qaytarish**
-
-### Mijozlar
-- Sahifa o'zgarmaydi. Profil oynasi 8 → 5 tab: Umumiy (+afzalliklar), Xaridlar `[yangi | B/U]`, Moliya `[nasiya | balans]`, Izohlar, Telegram.
-
-### Marketing (6 → 4)
-1. **Aksiyalar** (+ yangi tur "Komplekt" ← Boshqaruv → Komplektlar)
-2. **Kodlar va sertifikatlar** `[Promokodlar | Sertifikatlar]`
-3. **Sodiqlik** ← Boshqaruv → Chegirmalar (jamg'arma chegirma, keshbek)
-4. **Xabarlar** `[Telegram tarqatma | Tug'ilgan kunlar]` (tug'ilgan kun matni sozlamasi shu yerda)
-- ❌ Sozlamalar → Sozlamalar → Integratsiyalar → Telegram bot
-
-### Moliya (7 → 5)
-1. **Xarajat va daromad** `[Xarajatlar | Daromadlar]` (kategoriyalar — tishli tugma)
-2. **Pul harakati**
-3. **Foyda va zarar** — foydaning yagona joyi
-4. **Qarzlar** (yangi) — debitor (mijozlar nasiyasi, nasiya tashkilotlari) + kreditor (yetkazib beruvchilar)
-5. **Kapital**
-- ❌ Yetkazib beruvchi to'lovlari (takror, noto'g'ri manba)
-
-### Hisobotlar (12 → 5)
-1. **Savdo** `[Umumiy | Tovarlar (ABC) | Do'konlar]`
-2. **Ombor** `[Qoldiq | Harakat (sanaga qoldiq) | B/U]`
-3. **Mijozlar** `[Tahlil | Segmentlar]`
-4. **Xodimlar** (rejalar bilan)
-5. **Yetkazib beruvchilar**
-- ❌ Moliya, Foyda → Moliya sahifasi. Yuqorida bitta davr tanlagich.
-
-### AI (4 → 3)
-1. **Kunlik tahlil** (+ haftalik hisobot)
-2. **Yordamchi**
-3. **Mijozlar boti** (Instagram suhbatlar va statistika; keyin Telegram)
-- ❌ Statistika → Bosh sahifa
-
-### Sozlamalar (yangi — Boshqaruv + Admin + Integratsiyalar o'rniga)
-Bo'limlar (chapda ro'yxat yoki akkordeon):
-1. **Kompaniya** — nom, logo, login sahifasi, menyu nomlari, yashirin sahifalar
-2. **Do'konlar**
-3. **Xodimlar va ruxsatlar** `[Xodimlar | Rollar | Qurilmalar]`
-4. **Savdo qoidalari** — USD kursi, manbalar, nasiya tashkilotlari, chegirma chegaralari, do'kon/xodim rejalari
-5. **Bildirishnomalar** — qaysi hodisalar kimga
-6. **AI agentlar**
-7. **Integratsiyalar** — Telegram bot, Instagram, Payme/Click/Uzum, UDS, API kalitlar
-8. **Audit jurnali** (server)
-
-**Bildirishnomalar** — sahifa emas, yuqori panelda qo'ng'iroqcha (server + real vaqt). Chegirma so'rovini shu yerdan tasdiqlash.
-
-**Yangi menyu:** Bosh sahifa · Sotuv · Ombor · Kirim · Mijozlar · Marketing · Moliya · Hisobotlar · AI · Sozlamalar
+Diagrammalar ixcham: telefonda bittadan, kompyuterda 2–3 ustunda; bosilsa — tegishli hisobot sahifasiga o'tadi.
 
 ---
 
-## 6. Tezlik va kod sifati
+## 12. Tezlik va kod sifati (o'zgarmagan, qisqa)
 
-### Tezlik
-- **Hamma ma'lumotni yuklab hisoblash:** `getSales()` serverdan **barcha sotuvlar tarixini itemlari bilan** qaytaradi (sahifalashsiz) va u 5 sahifada chaqiriladi. Hisobotlar sahifasi ochilganda **11 ta to'liq ro'yxat** yuklanadi. Boshqaruv sahifasi **har tab almashganda** 6 ta ro'yxatni qayta yuklaydi (Sozlamalar tabida ham). Bosh sahifa 5 ta to'liq ro'yxatni faqat "oxirgi 5 sotuv" va "kam qolgan" uchun yuklaydi. Har javob oflayn uchun IndexedDB ga ham yoziladi.
-- **Yechim:** eski hisobot tablarini serverga (`reportsController`) ko'chirish; Sotuv tarixi va Mijozlar uchun server sahifalash (pagination) va filtr; Bosh sahifani serverdagi kichik so'rovlarga o'tkazish.
-- **Tarjimalar:** o'zbek va rus tili bitta bo'lakda (~426 KB) har sahifada yuklanadi → faol bo'lmagan tilni kerak bo'lganda yuklash (telefonda sezilarli).
-- Eng katta bo'laklar: Hisobotlar 431 KB, Sotuv 261 KB, Ombor 233 KB, Boshqaruv 197 KB.
-
-### Kod tuzilmasi
-- **"Hamma narsani biluvchi" fayllar:** `Sales/useSalesState.js` (1877 qator, 8 tabning hammasi bitta hook'da — faol bo'lmagan tablar holati ham hisoblanadi), `Management/index.jsx` (1705, har tabga `ctx` orqali ~150 maydon uzatadi), `Income/index.jsx` (1802), `Reports/index.jsx` (1948). Yangi tuzilmada har tab o'z holatini o'zi boshqaradi.
-- **Takrorlangan yordamchilar:** `formatPrice` 15 faylda, `Pagination` 15, `fmt` 8, `isPrivileged` 7, `SortIcon` 4 → `src/utils/format.js` + `src/components/ui/`.
-- **89 ta jim `catch {}`** — xato foydalanuvchiga ko'rinmaydi (2-bo'limdagi xodim tahriri xatosi shu sababli bilinmagan).
-- `MOCK_*` nomlari (mock.js davridan) 21 faylda 428 marta — haqiqiy ma'lumot uchun chalg'ituvchi nom.
-
-### O'lik kod (olib tashlash mumkin)
-- `src/config/credentials.js` — **demo parollar** (admin123 va h.k.) git'da; hech qayerda ishlatilmaydi.
-- `src/constants/calendar.js`, `src/api/higgsfieldService.js`, backend `controllers/higgsfieldController.js`.
-- Boshqaruv → `index.jsx` dagi aksiya (promo) holati va funksiyalari — hech qaysi tab ishlatmaydi.
-- Bosh sahifadagi ishlatilmaydigan hisob-kitoblar (bugungi tushum, 7 kunlik grafik, `KpiCard`).
-- Eski ruxsat tizimi (`rolePermissions`, `ROLE_PERMISSIONS`, `employees.permissions`), AI mahalliy sozlamalari, "ishonchli qurilmalar", eski sodiqlik o'zgaruvchilari (`silverVisits`, `loyaltyVisitsRequired` — ctx da yuriladi, ishlatilmaydi).
-- Tarjimalar: ~800 ta ehtimoliy ishlatilmagan kalit (shundan ~230 tasi eski `ai_*`), rus tilida 130 ta ortiqcha kalit.
-- Ruxsat daraxtida `management.shops` bor, lekin Boshqaruvda bunday tab yo'q.
-
-### Backend
-- **Migratsiyalar 17 faylga tarqalgan** (`index.js` 48 ta, `marketingDb` 31 ta, controllerlar boshida `ADD COLUMN/CREATE TABLE`). Ular ilova ishga tushganda bitta bazaga qo'llanadi → **multi-tenant (Bosqich 4) uchun to'siq**: har tenant bazasiga qo'llanmaydi. Ikkinchi mijozdan oldin bitta versiyali migratsiya tizimiga yig'ish kerak.
-- `aiController.js` 1655 qator (chat + Instagram webhooklar + statistika) → 2–3 faylga bo'lish.
-- `index.js` 666 qator (migratsiya + seed + jadval) → ajratish.
+- `getSales()` barcha sotuvlarni itemlari bilan qaytaradi, 5 sahifada; Hisobotlar 11 ta to'liq ro'yxat; Boshqaruv har tab almashganda 6 ta ro'yxat.
+- **O'lchov (lokal):** 1 sotuv ≈ 1,75 KB, 1 item ≈ 0,5 KB. Hisobotlar sahifasi hozir ~340 KB; 1 yildan keyin (~3000 sotuv, ~10 000 item) **~10 MB** har ochilganda.
+- Katta fayllar: `useSalesState` 1877, `Management/index` 1705, `Income/index` 1802, `Reports/index` 1948.
+- Takrorlar: `formatPrice` 15 faylda, `Pagination` 15, 83 ta modal, 82 ta jadval.
+- 89 ta jim `catch {}`; `MOCK_*` nomlari 428 marta.
+- O'lik kod: `config/credentials.js` (demo parollar), `constants/calendar.js`, `higgsfieldService.js`, `higgsfieldController.js`, Boshqaruvdagi promo holati, eski ruxsat tizimi, ~800 ehtimoliy ishlatilmagan tarjima kaliti.
+- Backend: migratsiyalar 17 faylda (multi-tenant uchun to'siq), `aiController` 1655 qator.
 
 ---
 
-## 7. Bosqichli reja
+## 13. Bosqichli reja (yangilangan)
 
-| Bosqich | Nima | Hajm | Xodimlarga ta'siri |
-|---|---|---|---|
-| **0. Xatolar** (birinchi) | 2-bo'lim (server sozlamalari, komplekt, bildirishnomalar + real vaqt chegirma so'rovi, audit, xodim tahriri) + 3-bo'lim 1–3 (server narx/chegirma nazorati, do'kon chegarasi) + o'lik AI sozlamalari | 2–3 sessiya | Deyarli ko'rinmaydi; chegirma so'rovi ishlay boshlaydi |
-| **1. Sozlamalar** | Boshqaruv + Admin + Integratsiyalar → bitta Sozlamalar; Tovarlar → Ombor; Sodiqlik/Komplekt → Marketing; bildirishnoma qo'ng'iroqchasi | 1–2 sessiya | Admin/boshqaruvchi uchun yangi joylashuv |
-| **2. Ish sahifalari** | Sotuv 8→5, Kirim 7→4, Moliya 7→5, Ombor 6→5, Marketing 6→4, mijoz profili 8→5; `useSalesState` ni tablar bo'yicha bo'lish; yagona kirim formasi | 2–3 sessiya | Sotuvchilar uchun Kassa joylashuvi o'zgaradi — ogohlantirish kerak |
-| **3. Hisobotlar** | Eski 7 tab hisobini serverga, yagona foyda formulasi, 12→5 tab, yagona davr tanlagich; Bosh sahifa yengillashtirish; Sotuv tarixi sahifalash | 3–4 sessiya | Raqamlar hamma joyda bir xil bo'ladi |
-| **4. Tozalash** | O'lik kod, `MOCK_` nomlar, tarjima kalitlari, umumiy yordamchilar, til bo'lagini ajratish, jim `catch` lar, backend migratsiyalarini yig'ish, `aiController` bo'lish | 1–2 sessiya | Ko'rinmaydi |
+| Bosqich | Nima |
+|---|---|
+| **0. Xatolar** | Server: savdo sozlamalari, bildirishnomalar + real vaqt chegirma so'rovi, audit, komplekt → aksiya turi, boshqaruvchi xodim tahriri, minimal narx/chegirma nazorati, do'kon chegarasi, foyda 80% taxminini olib tashlash, o'lik AI sozlamalari |
+| **1. UI asos + Sozlamalar** | Umumiy UI komponentlari; Sozlamalar sahifasi (Boshqaruv + Admin + Integratsiyalar), yangi ruxsat daraxti va eski ruxsatlarni ko'chirish; bildirishnoma qo'ng'iroqchasi; Tovarlar → Ombor; Sodiqlik → Marketing |
+| **2. Ish sahifalari** | Mijozlar (profil modali) → Sotuv → Ombor → Kirim (umumiy forma) → Marketing → Moliya (yangi Foyda, Qarzlar) — tablar birlashtiriladi va yangi UI ga o'tadi; `useSalesState` bo'linadi |
+| **3. Hisobotlar + Bosh sahifa** | Eski hisoblar serverga, 12→5 tab, yagona formula, diagrammalar, sahifalash |
+| **4. Ulgurji savdo** | 9-bo'lim (U1–U4 javoblaridan keyin) |
+| **5. Tozalash** | O'lik kod, tarjimalar, migratsiyalarni yig'ish, `aiController` bo'lish, til bo'lagini ajratish |
 
-Har bosqichdan keyin: `npm run build`, lokal sinov, commit. Deploy — faqat siz aytganda.
-
----
-
-## 8. Siz qaror qilishingiz kerak bo'lgan savollar
-
-1. **Boshqaruv + Admin + Integratsiyalar → bitta "Sozlamalar" sahifasi** — rozimisiz? *(Tavsiya: ha.)*
-2. **Kirim formasi qayerda bo'lsin?** (a) Faqat Kirim sahifasida, omborchiga "Kirim" ruxsati moliyaviy ma'lumotsiz beriladi; (b) Ombor → Kirim ham qoladi, lekin ikkala joy bitta umumiy formani ishlatadi. *(Tavsiya: b — omborchi odatiga tegmaydi.)*
-3. **Hisobotlar → Moliya va Foyda tablarini Moliya sahifasiga ko'chiramizmi**, Sotuv → Foyda tabini olib tashlaymizmi? *(Tavsiya: ha — foyda bitta joyda, bitta formulada.)*
-4. **Boshqaruvchi xodimlarni tahrirlay oladimi?** (a) Ha — serverda ruxsat beriladi (o'chirish faqat admin tasdig'i bilan); (b) Yo'q — faqat admin, boshqaruvchi faqat ko'radi. *(Hozir oraliq holat: ko'rinadi, lekin saqlanmaydi.)*
-5. **Chegirma so'rovi:** real vaqtda boshqaruvchi telefoniga borib, u yerdan tasdiqlansinmi? Yoki qo'shimcha "boshqaruvchi PIN kodi" (sotuvchi telefonida kiritiladi) ham kerakmi?
-6. **Server narx nazorati:** minimal narxdan past sotuv serverda butunlay taqiqlansinmi yoki faqat tasdiqlangan chegirma so'rovi bilan ruxsat berilsinmi?
-7. **AI → Statistika → Bosh sahifaga** ko'chirilsinmi? Sotuvchi AI sahifasini (butun biznes tushumini) ko'rishi kerakmi?
-8. **Komplekt → Marketing → Aksiyalar** ichiga yangi tur sifatida qo'shilsinmi (alohida tab o'rniga)? *(Tavsiya: ha — aksiya mexanizmi serverda tayyor, kassa uni allaqachon hisoblaydi.)*
-9. **Qachon boshlaymiz?** Bosqich 0 ni hozir (test oyi davomida) qilib, ko'rinishni o'zgartiruvchi bosqichlarni test oyidan keyin qilishmi? *(Tavsiya: ha.)*
+Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), commit. Deploy — faqat foydalanuvchi aytganda.
 
 ---
 
-## 9. Tekshirilmagan narsalar
+## 14. Tekshiruv natijalari (2026-10-08)
 
-- Server bazasidagi yozuvlar soni (sotuvlar, itemlar) — avtomatik rejim server bazasiga ulanishga ruxsat bermadi. Tezlik bahosi kod asosida, real hajm bilan emas.
-- Ilova brauzerda bosib ko'rilmadi — tahlil kodni o'qish asosida. 2-bo'limdagi xatolar kod orqali aniq tasdiqlangan (saqlash joyi va server route'lari tekshirildi).
+- ✅ Lokal backend + `dist-local` ishga tushirildi; admin sifatida **12 sahifa ochildi — konsolda xato yo'q**.
+- ✅ Ro'yxat so'rovlari o'lchandi (12-bo'lim).
+- ✅ 2-bo'limdagi xatolar kod orqali tasdiqlangan (saqlash joyi va server route'lari).
+- ⛔ **Server bazasi hajmi** — avtomatik rejim server bazasiga ulanishni rad etdi ("Production Reads"). Hal qilish: foydalanuvchi ruxsat beradi yoki buyruqni o'zi ishga tushiradi.
