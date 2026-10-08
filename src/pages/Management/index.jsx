@@ -782,17 +782,7 @@ export const Management = () => {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-text-secondary">{t('password')}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold font-mono text-text-primary">
-                                {showEmpPassValue ? (selectedEmployee.password || '—') : '••••••••'}
-                              </span>
-                              <button
-                                onClick={() => setShowEmpPassValue(v => !v)}
-                                className="p-1 text-text-muted hover:text-text-primary transition-colors"
-                              >
-                                {showEmpPassValue ? <EyeOff size={14} /> : <Eye size={14} />}
-                              </button>
-                            </div>
+                            <span className="text-sm font-bold font-mono text-text-primary">••••••••</span>
                           </div>
                         </div>
                       </div>

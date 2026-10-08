@@ -1,28 +1,15 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { sendAudit } from '../api/auditService'
 
-export const useAuditStore = create(
-  persist(
-    (set) => ({
-      logs: [],
-      addLog: ({ userId, userName, action, actionKey, entity, details }) =>
-        set(s => ({
-          logs: [
-            {
-              id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
-              timestamp: new Date().toISOString(),
-              userId,
-              userName,
-              action,
-              actionKey: actionKey || '',
-              entity,
-              details: details || '',
-            },
-            ...s.logs,
-          ].slice(0, 5000),
-        })),
-      clearLogs: () => set({ logs: [] }),
-    }),
-    { name: 'goodtires-audit' }
-  )
-)
+// Muhim amallarni (xodim, qurilma, narx, sotuv bekor/tahrir, sozlamalar) server o'zi yozadi.
+// Brauzerdan faqat server bilmaydigan hodisalar yuboriladi — takror yozuv bo'lmasligi uchun.
+const CLIENT_KEYS = new Set(['audit_session_login', 'audit_session_logout', 'audit_page_visited'])
+
+export const useAuditStore = create(() => ({
+  addLog: ({ actionKey, entity, details }) => {
+    if (!CLIENT_KEYS.has(actionKey)) return
+    sendAudit({ actionKey, entity, details: typeof details === 'string' ? details : '' }).catch(() => {})
+  },
+}))
+
+try { localStorage.removeItem('goodtires-audit') } catch { /* eski mahalliy jurnal */ }

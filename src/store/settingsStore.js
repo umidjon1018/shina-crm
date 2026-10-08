@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { getEmployees, createEmployee, updateEmployee as apiUpdateEmp, deactivateEmployee, activateEmployee, deleteEmployee } from '../api/employeeService'
+import { getEmployees, createEmployee, updateEmployee as apiUpdateEmp, requestEmployeeDelete, deactivateEmployee, activateEmployee, deleteEmployee } from '../api/employeeService'
 import { getProductImageMap, saveProductImages } from '../api/productImageService'
 import { getBranding, saveBranding, getBusinessSettings, saveBusinessSettings } from '../api/settingsService'
 import { toast, errorText } from '../components/ui/Toast'
@@ -25,9 +25,9 @@ import { getCategories, createCategory, updateCategory as apiUpdateCat, toggleCa
 const BUSINESS_KEYS = [
   'usdRate', 'sources', 'installmentOrganizations', 'discountSmallMax', 'discountMediumMax',
   'monthlyTargets', 'employeeTargets', 'notificationSettings', 'productAttributeDefs',
-  'priceListSettings', 'downloadEnabled', 'sidebarLabels', 'hiddenPages',
+  'priceListSettings', 'downloadEnabled', 'sidebarLabels', 'hiddenPages', 'employeeEditLocked',
 ]
-const ADMIN_ONLY_KEYS = ['sidebarLabels', 'hiddenPages']
+const ADMIN_ONLY_KEYS = ['sidebarLabels', 'hiddenPages', 'employeeEditLocked']
 let businessReady = false
 let applyingRemote = false
 let businessTimer = null
@@ -217,13 +217,8 @@ export const useSettingsStore = create(
       // Xodim tahrirlash tarixi — diff (oldingi/keyingi holat) va bekor qilish uchun
       // Struktura: { id, employeeId, employeeName, editedBy, editedByRole, timestamp, before, after, undone }
       employeeEditHistory: [],
-      addEmployeeEditHistory: (entry) =>
-        set(s => ({
-          employeeEditHistory: [
-            { id: Date.now().toString() + Math.random().toString(36).slice(2, 6), undone: false, ...entry },
-            ...s.employeeEditHistory,
-          ].slice(0, 200)
-        })),
+      // Tahrir tarixi endi serverdagi audit jurnalida (Admin → Audit)
+      addEmployeeEditHistory: () => {},
       undoEmployeeEdit: (historyId) =>
         set(s => {
           const entry = s.employeeEditHistory.find(h => h.id === historyId)
@@ -415,54 +410,45 @@ export const useSettingsStore = create(
       // Xodimlar
       loadEmployees: async () => {
         try {
-          const emps = await getEmployees()
-          const current = get().employees
-          const merged = emps.map(e => {
-            const existing = current.find(x => x.id === e.id)
-            return { ...e, password: existing?.password || '' }
-          })
-          set({ employees: merged.length > 0 ? merged : [] })
+          set({ employees: await getEmployees() })
         } catch {}
+      },
+      // Har amal serverga yoziladi; server javobi ro'yxatga tushadi, rad etilsa — xabar va qayta yuklash
+      _saveEmployee: async (promise) => {
+        try {
+          const emp = await promise
+          if (emp) set(s => ({ employees: s.employees.some(x => x.id === emp.id) ? s.employees.map(x => x.id === emp.id ? emp : x) : [...s.employees, emp] }))
+          return emp
+        } catch (e) {
+          toast(errorText(e), 'error')
+          get().loadEmployees()
+          return null
+        }
       },
       addEmployee: async (employee) => {
         const created = await createEmployee(employee)
-        set(s => ({ employees: [...s.employees, { ...created, password: employee.password || '' }] }))
+        set(s => ({ employees: [...s.employees, created] }))
         return created
       },
-      updateEmployee: async (id, data) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, ...data } : x) }))
-        try { await apiUpdateEmp(id, { ...get().employees.find(e => e.id === id), ...data }) } catch {}
-      },
-      removeEmployee: async (id) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, isActive: false, deactivatedAt: new Date().toISOString() } : x) }))
-        try { await deactivateEmployee(id) } catch {}
-      },
-      restoreEmployee: async (id) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, isActive: true, deactivatedAt: null } : x) }))
-        try { await activateEmployee(id) } catch {}
-      },
+      // data — faqat o'zgargan maydonlar (parol faqat yangi kiritilganda)
+      updateEmployee: (id, data) => get()._saveEmployee(apiUpdateEmp(id, data)),
+      removeEmployee: (id) => get()._saveEmployee(deactivateEmployee(id)),
+      restoreEmployee: (id) => get()._saveEmployee(activateEmployee(id)),
       permanentlyDeleteEmployee: async (id) => {
-        set(s => ({ employees: s.employees.filter(x => x.id !== id) }))
-        try { await deleteEmployee(id) } catch {}
+        try {
+          await deleteEmployee(id)
+          set(s => ({ employees: s.employees.filter(x => x.id !== id) }))
+        } catch (e) { toast(errorText(e), 'error') }
       },
 
-      // Boshqaruvchi o'chirish so'rovi — Admin tasdiqlamaguncha xodim faol qoladi
-      requestEmployeeDeletion: async (id) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, pendingDelete: true, pendingDeleteAt: new Date().toISOString() } : x) }))
-        try { await apiUpdateEmp(id, { ...get().employees.find(e => e.id === id), pendingDelete: true, pendingDeleteAt: new Date().toISOString() }) } catch {}
-      },
-      approveEmployeeDeletion: async (id) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, isActive: false, deactivatedAt: new Date().toISOString(), pendingDelete: false, pendingDeleteAt: null } : x) }))
-        try { await deactivateEmployee(id) } catch {}
-      },
-      cancelEmployeeDeletion: async (id) => {
-        set(s => ({ employees: s.employees.map(x => x.id === id ? { ...x, pendingDelete: false, pendingDeleteAt: null, lastEditedBy: 'admin' } : x) }))
-        try { await apiUpdateEmp(id, { ...get().employees.find(e => e.id === id), pendingDelete: false, pendingDeleteAt: null }) } catch {}
-      },
+      // Boshqaruvchi bo'shatish so'rovi — admin tasdiqlamaguncha xodim ishlaydi
+      requestEmployeeDeletion: (id) => get()._saveEmployee(requestEmployeeDelete(id)),
+      approveEmployeeDeletion: (id) => get()._saveEmployee(deactivateEmployee(id)),
+      cancelEmployeeDeletion: (id) => get()._saveEmployee(apiUpdateEmp(id, { pendingDelete: false })),
     }),
     {
       name: 'goodtires-settings',
-      version: 5,
+      version: 6,
       migrate: (state, version) => {
         if (version < 5) {
           state.sidebarLabels = {
@@ -500,6 +486,11 @@ export const useSettingsStore = create(
         if (version < 2) {
           // Test xodimlar o'chirildi — backend dan yuklanadi
           state.employees = []
+        }
+        if (version < 6) {
+          // Xodim parollari va mahalliy tahrir tarixi endi brauzerda saqlanmaydi
+          state.employees = (state.employees || []).map(({ password, ...e }) => e)
+          state.employeeEditHistory = []
         }
         return state
       },

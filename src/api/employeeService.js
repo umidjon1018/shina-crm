@@ -4,7 +4,6 @@ const map = (e) => ({
   id: String(e.id),
   name: e.name,
   username: e.username || '',
-  password: e.password || '',
   role: e.role || 'employee',
   phone: e.phone || '',
   shopId: e.shopId ?? e.shop_id ?? '',
@@ -17,8 +16,26 @@ const map = (e) => ({
   pendingDelete: e.pendingDelete ?? e.pending_delete ?? false,
   pendingDeleteAt: e.pendingDeleteAt ?? e.pending_delete_at ?? null,
   lastEditedBy: e.lastEditedBy ?? e.last_edited_by ?? null,
+  isBlocked: e.isBlocked ?? e.is_blocked ?? false,
+  blockedByAdmin: e.blockedByAdmin ?? e.blocked_by_admin ?? false,
   createdAt: e.createdAt ?? e.created_at ?? '',
 })
+
+// UI maydoni → server maydoni (faqat yuborilganlari — server qolganini o'zgartirmaydi)
+const FIELDS = {
+  name: 'name', username: 'username', password: 'password', role: 'role', phone: 'phone',
+  shopId: 'shop_id', salary: 'salary', hiredAt: 'hired_at', isBlocked: 'is_blocked',
+  pendingDelete: 'pending_delete', access: 'access',
+}
+const toBody = (patch) => {
+  const body = {}
+  for (const [k, col] of Object.entries(FIELDS)) {
+    if (patch[k] === undefined) continue
+    if (k === 'password' && !patch[k]) continue
+    body[col] = ['shopId', 'username', 'phone', 'hiredAt'].includes(k) ? (patch[k] || null) : patch[k]
+  }
+  return body
+}
 
 export const getEmployees = async () => {
   const { data } = await api.get('/api/employees')
@@ -33,7 +50,6 @@ export const createEmployee = async (emp) => {
     role: emp.role || 'employee',
     phone: emp.phone || null,
     shop_id: emp.shopId || null,
-    permissions: emp.permissions || [],
     salary: emp.salary || 0,
     hired_at: emp.hiredAt || null,
     access: emp.access || null,
@@ -41,23 +57,14 @@ export const createEmployee = async (emp) => {
   return map(data)
 }
 
-export const updateEmployee = async (id, emp) => {
-  const { data } = await api.put(`/api/employees/${id}`, {
-    name: emp.name,
-    username: emp.username || null,
-    password: emp.password || null,
-    role: emp.role || 'employee',
-    phone: emp.phone || null,
-    shop_id: emp.shopId || null,
-    permissions: emp.permissions || [],
-    salary: emp.salary || 0,
-    hired_at: emp.hiredAt || null,
-    is_active: emp.isActive ?? true,
-    pending_delete: emp.pendingDelete ?? false,
-    pending_delete_at: emp.pendingDeleteAt || null,
-    last_edited_by: emp.lastEditedBy || null,
-    ...(emp.access !== undefined ? { access: emp.access } : {}),
-  })
+// patch — faqat o'zgargan maydonlar (parol faqat yangi kiritilganda)
+export const updateEmployee = async (id, patch) => {
+  const { data } = await api.put(`/api/employees/${id}`, toBody(patch))
+  return map(data)
+}
+
+export const requestEmployeeDelete = async (id) => {
+  const { data } = await api.post(`/api/employees/${id}/request-delete`)
   return map(data)
 }
 

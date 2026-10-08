@@ -98,7 +98,7 @@ function EmployeesTab() {
   }
   const openEdit = (emp) => {
     setEditing(emp)
-    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: emp.password||'', permissions: emp.permissions||[], shopId: emp.shopId||'', access: emp.access || null })
+    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: '', permissions: emp.permissions||[], shopId: emp.shopId||'', access: emp.access || null })
     setHiredAtDisplay(isoToDisplay(emp.hiredAt||''))
     setSaveError('')
     setShowPass(false)
