@@ -8,6 +8,15 @@ const TONES = {
 }
 export const toneClass = (tone) => TONES[tone] || TONES.cyan
 
+// Bo'limlar `group` maydoni bo'yicha guruhlanadi (tartib saqlanadi)
+const groupsOf = (sections) => sections.reduce((acc, s) => {
+  const name = s.group || ''
+  let g = acc.find(x => x.name === name)
+  if (!g) acc.push(g = { name, items: [] })
+  g.items.push(s)
+  return acc
+}, [])
+
 const setSectionParam = (id) => {
   const url = new URL(window.location.href)
   if (id) url.searchParams.set('section', id)
@@ -46,29 +55,34 @@ const SectionHub = ({ sections, title, variant = 'tiles', openId: controlledId, 
       ) : (
         <div className="space-y-3">
           {title && <h2 className="text-lg sm:text-xl font-bold text-text-primary">{title}</h2>}
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {sections.map(s => {
-              const Icon = s.icon
-              return (
-                <button key={s.id} onClick={() => open(s.id)}
-                  className="panel text-left flex items-center gap-3.5 p-4 hover:border-border-bright transition-colors active:scale-[0.99] group min-w-0">
-                  {Icon && (
-                    <span className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${toneClass(s.tone)} text-white flex items-center justify-center shrink-0 shadow-md`}>
-                      <Icon size={22} />
-                    </span>
-                  )}
-                  <span className="flex-1 min-w-0">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base font-bold text-text-primary truncate">{s.label}</span>
-                      {s.badge ? <span className="px-2 py-0.5 rounded-full bg-accent-red text-white text-xs font-bold">{s.badge}</span> : null}
-                    </span>
-                    {s.desc && <span className="block text-sm text-text-muted leading-snug line-clamp-2">{s.desc}</span>}
-                  </span>
-                  <ChevronRight size={20} className="text-text-muted group-hover:text-text-primary shrink-0" />
-                </button>
-              )
-            })}
-          </div>
+          {groupsOf(sections).map(g => (
+            <div key={g.name} className="space-y-2.5">
+              {g.name && <h3 className="text-sm font-bold uppercase tracking-wider text-text-muted pt-1">{g.name}</h3>}
+              <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {g.items.map(s => {
+                  const Icon = s.icon
+                  return (
+                    <button key={s.id} onClick={() => open(s.id)}
+                      className="panel text-left flex items-center gap-3.5 p-4 hover:border-border-bright transition-colors active:scale-[0.99] group min-w-0">
+                      {Icon && (
+                        <span className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${toneClass(s.tone)} text-white flex items-center justify-center shrink-0 shadow-md`}>
+                          <Icon size={22} />
+                        </span>
+                      )}
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-center gap-2">
+                          <span className="text-base font-bold text-text-primary truncate">{s.label}</span>
+                          {s.badge ? <span className="px-2 py-0.5 rounded-full bg-accent-red text-white text-xs font-bold">{s.badge}</span> : null}
+                        </span>
+                        {s.desc && <span className="block text-sm text-text-muted leading-snug line-clamp-2">{s.desc}</span>}
+                      </span>
+                      <ChevronRight size={20} className="text-text-muted group-hover:text-text-primary shrink-0" />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
       <Modal open={!!sec} onClose={close} size={sec?.size || 'xl'} title={sec?.label} icon={sec?.icon}

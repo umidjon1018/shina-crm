@@ -34,6 +34,8 @@ import SupplyTab from './tabs/SupplyTab'
 import ShopsReportTab from './tabs/ShopsReportTab'
 import SegmentsTab from './tabs/SegmentsTab'
 import TelegramStatsButton from './components/TelegramStatsButton'
+import SectionHub from '../../components/ui/SectionHub'
+import { PageHeader } from '../../components/ui/Kit'
 import { useDataStore } from '../../store/dataStore'
 import {
   InstagramDM, Modal, Pagination, ModalTable, MonthlyDynamicsChart,
@@ -210,7 +212,8 @@ export const Reports = () => {
   }
 
   const [showExportMenu, setShowExportMenu] = React.useState(false)
-  const [activeTabRaw, setActiveTab] = useState('sales')
+  const [activeTabRaw, setActiveTab] = useState(() => new URLSearchParams(window.location.search).get('section') || 'sales')
+  const [section, setSection] = useState(() => new URLSearchParams(window.location.search).get('section'))
   const [period, setPeriod] = useState('all')
   const [stockCategory, setStockCategory] = useState('all')
 
@@ -1851,96 +1854,61 @@ export const Reports = () => {
     MOCK_USED_SALES, MOCK_USED_STOCK, MOCK_RETURNS,
   }
 
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-syne font-extrabold tracking-tight text-text-primary">{t('reports')}</h1>
-          <p className="text-text-secondary">{t('rep_subtitle')}</p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <TelegramStatsButton />
-          {!isNewTab && (<>
-          <div className="relative">
-            <select
-              value={period}
-              onChange={e => setPeriod(e.target.value)}
-              disabled={activeTab === 'stock'}
-              className="appearance-none bg-bg-secondary border border-border rounded-xl pl-4 pr-10 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red disabled:opacity-50 transition-all cursor-pointer"
-            >
-              {periodOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-          </div>
-
-          <div className="relative">
-            <button
-              onClick={() => setShowExportMenu(v => !v)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-bold text-text-primary hover:bg-bg-tertiary transition-all"
-            >
-              <Download size={16} /> Export <ChevronDown size={14} />
-            </button>
-            {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-bg-secondary border border-border rounded-xl shadow-2xl z-50 overflow-hidden min-w-[140px]">
-                {[
-                  { fmt: 'csv',  label: 'CSV (.csv)' },
-                  { fmt: 'xlsx', label: 'Excel (.xlsx)' },
-                  { fmt: 'pdf',  label: 'PDF (.pdf)' },
-                ].map(({ fmt, label }) => (
-                  <button
-                    key={fmt}
-                    onClick={() => getExportData(fmt)}
-                    className="w-full px-4 py-2.5 text-left text-sm text-text-primary hover:bg-bg-tertiary transition-colors flex items-center gap-2"
-                  >
-                    <Download size={14} className="text-text-muted" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          </>)}
-        </div>
+  // Eski (klientda hisoblanadigan) hisobotlar uchun davr va eksport — hisobot oynasining tepasida
+  const legacyToolbar = (id) => (
+    <div className="flex items-center justify-end gap-2 flex-wrap mb-4">
+      <div className="relative">
+        <select value={period} onChange={e => setPeriod(e.target.value)} disabled={id === 'stock'}
+          className="appearance-none bg-bg-secondary border border-border rounded-xl pl-4 pr-10 py-2.5 text-[15px] text-text-primary focus:outline-none focus:border-accent-red disabled:opacity-50 transition-all cursor-pointer">
+          {periodOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
       </div>
-
-      {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-border overflow-x-auto no-scrollbar scroll-smooth">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            title={tab.label}
-            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-sm font-bold whitespace-nowrap transition-all relative shrink-0 ${
-              activeTab === tab.id ? 'text-accent-red' : 'text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            <tab.icon size={18} />
-            <span className={activeTab === tab.id ? '' : 'hidden sm:inline'}>{tab.label}</span>
-            {activeTab === tab.id && (
-              <motion.div layoutId="activeReportTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-red" />
-            )}
-          </button>
-        ))}
+      <div className="relative">
+        <button onClick={() => setShowExportMenu(v => !v)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-[15px] font-bold text-text-primary hover:bg-bg-tertiary transition-all">
+          <Download size={17} /> Export <ChevronDown size={15} />
+        </button>
+        {showExportMenu && (
+          <div className="absolute right-0 top-full mt-1 bg-bg-secondary border border-border rounded-xl shadow-2xl z-50 overflow-hidden min-w-[160px]">
+            {[{ fmt: 'csv', label: 'CSV (.csv)' }, { fmt: 'xlsx', label: 'Excel (.xlsx)' }, { fmt: 'pdf', label: 'PDF (.pdf)' }].map(({ fmt, label }) => (
+              <button key={fmt} onClick={() => getExportData(fmt)}
+                className="w-full px-4 py-3 text-left text-[15px] text-text-primary hover:bg-bg-tertiary transition-colors flex items-center gap-2">
+                <Download size={15} className="text-text-muted" /> {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Content */}
+    </div>
+  )
+  const REPORT_VIEW = {
+    sales: <SalesTab ctx={ctx} />, stock: <StockTab ctx={ctx} />, profit: <ProfitTab ctx={ctx} />,
+    customers: <CustomersTab ctx={ctx} />, employees: <EmployeesTab ctx={ctx} />, finance: <FinanceTab ctx={ctx} />,
+    used: <UsedTab ctx={ctx} />, products: <ProductsReportTab />, movement: <MovementTab />, supply: <SupplyTab />,
+    segments: <SegmentsTab />, shops: <ShopsReportTab />,
+  }
+  const GROUP = { sales: 'sales', products: 'sales', profit: 'sales', stock: 'stock', movement: 'stock', supply: 'stock', used: 'stock',
+    customers: 'customers', segments: 'customers', employees: 'team', shops: 'team', finance: 'team' }
+  const TONE = { sales: 'cyan', products: 'violet', profit: 'green', stock: 'blue', movement: 'orange', supply: 'pink', used: 'green',
+    customers: 'pink', segments: 'violet', employees: 'cyan', shops: 'blue', finance: 'orange' }
+  const ORDER = ['sales', 'products', 'profit', 'stock', 'movement', 'supply', 'used', 'customers', 'segments', 'employees', 'shops', 'finance']
+  const SECTIONS = [...tabs].sort((x, y) => ORDER.indexOf(x.id) - ORDER.indexOf(y.id)).map(tab => ({
+    id: tab.id, label: tab.label, icon: tab.icon, tone: TONE[tab.id], desc: t('rep_desc_' + tab.id),
+    group: t('rep_group_' + GROUP[tab.id]),
+    render: () => (
       <div className="space-y-4 sm:space-y-6">
-        {activeTab === 'sales' && <SalesTab ctx={ctx} />}
-        {activeTab === 'stock' && <StockTab ctx={ctx} />}
-        {activeTab === 'profit' && <ProfitTab ctx={ctx} />}
-        {activeTab === 'customers' && <CustomersTab ctx={ctx} />}
-        {activeTab === 'employees' && <EmployeesTab ctx={ctx} />}
-        {activeTab === 'finance' && <FinanceTab ctx={ctx} />}
-        {activeTab === 'used' && <UsedTab ctx={ctx} />}
-        {activeTab === 'products' && <ProductsReportTab />}
-        {activeTab === 'movement' && <MovementTab />}
-        {activeTab === 'supply' && <SupplyTab />}
-        {activeTab === 'segments' && <SegmentsTab />}
-        {activeTab === 'shops' && <ShopsReportTab />}
+        {!NEW_TABS.includes(tab.id) && legacyToolbar(tab.id)}
+        {REPORT_VIEW[tab.id]}
       </div>
+    ),
+  }))
 
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-5">
+      <PageHeader title={t('reports')} subtitle={t('rep_subtitle')} actions={<TelegramStatsButton />} />
+      <SectionHub sections={SECTIONS} openId={section}
+        onOpenChange={(id) => { setSection(id); setShowExportMenu(false); if (id) setActiveTab(id) }} />
     </motion.div>
   )
 }
