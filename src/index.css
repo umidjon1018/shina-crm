@@ -196,11 +196,10 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { font-size: 16px; }
 }
 /* Barmoq bilan boshqariladigan ekranlarda kichik tugmalar ham bosish uchun yetarli */
+/* Faqat balandlik: min-width qo'yilsa tugmaning "yozuvidan tor bo'lmaslik" (min-width: auto) xususiyati yo'qoladi va
+   flex qatorda tugma siqilib yozuv kesiladi; "ikonka + matn" tugmani CSS ikonkali tugmadan ajrata olmaydi */
 @media (pointer: coarse) {
   button:not(.tap-free) { min-height: 36px; }
-  /* Kenglik faqat ikonkali tugmalarga: yozuvli tugmada min-width yozuv kengligini (min-width: auto) bekor qilib,
-     flex qatorda tugma siqilib yozuv kesilardi */
-  button:not(.tap-free):has(> svg:only-child) { min-width: 36px; }
 }
 /* Ustiga kelganda chiqadigan tugmalar: faqat sichqonchali qurilmada yashiriladi, sensorli ekranda doim ko'rinadi */
 @media (hover: hover) and (pointer: fine) {
