@@ -305,6 +305,17 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 - Sinov: API to'liq oqim + brauzerda (sotildi, to'lov, individual narx, yangi sotuv, bo'limlar) — lokal bazada, keyin tozalandi. Commitlar: backend 73b13c9, frontend 7d99d08b.
 - **Keyinroq (kerak bo'lsa):** Hisobotlar → Savdo `[Chakana | Ulgurji]` filtri, AI tahlilda ulgurji bo'limi, barkod skaner bilan hujjat to'ldirish.
 
+### Bosqich 5 ✅ (2026-10-08) — Ishlab chiqarish
+- **Tovar turi va hisob turi:** `products.item_kind` (xomashyo / yarim tayyor / tayyor / qayta sotiladigan), `products.stock_mode` — `serial` (hozirgidek: har dona item, barkod) yoki `bulk` (miqdor: kg, l, m — `stock_lots` + `stock_moves`, kasr bilan), `base_unit`, `shelf_life_days`. Mavjud shina/dona tizimiga tegilmagan.
+- **Xomashyo kirimi:** Ishlab chiqarish → Xomashyo kirimi — Kirim partiyasi (`batch_type 'bulk'`, yetkazib beruvchi qarzi/to'lovlari Kirimda) + lot. Inventarizatsiya (haqiqiy qoldiq → kamomad/ortiqcha). Yechish tartibi: avval muddati yaqin, keyin eng eski (FEFO/FIFO).
+- **Retseptlar:** chiqish birligi uchun xomashyo me'yori, chiqit %, qo'shimcha xarajatlar (birlik uchun), versiyalar (nusxa → yangi versiya), ishlatilgani arxivga.
+- **Buyurtmalar** `ICH-00000`: reja (retsept nusxasi) → boshlash → yakunlash: yaroqli + brak, haqiqiy sarf (reja bo'yicha to'ldiriladi), xarajatlar, partiya, ishlab chiqarilgan sana, yaroqlilik (mahsulot muddatidan avtomatik). Tannarx = xomashyo (lot narxlari) + xarajatlar, yaroqli birlikka bo'linadi. Tayyor mahsulot: dona bo'lsa — `production` partiya + itemlar (Ombor, kassa, ulgurji savdoda oddiy tovar, barkod Ombor → Barkod), miqdor bo'lsa — lot. Xomashyo yetmasa — `NOT_ENOUGH_MATERIAL`, hech narsa yechilmaydi.
+- **Hisobot:** xomashyo sarfi reja/fakt (ortiqcha sarf qizil), mahsulot bo'yicha hajm va tannarx (min/maks), 12 oylik tannarx dinamikasi, 30 kun ichida muddati tugaydigan qoldiq.
+- **Kirim bilan:** xomashyo partiyasi Kirimda miqdori bilan ko'rinadi; `bulk`/`production` partiyalarni Kirimda tahrirlash to'silgan; ishlab chiqarish partiyalari xarid hisoboti va Kirim ko'rsatkichlariga kirmaydi.
+- **Menyu:** Ulgurji savdo va Ishlab chiqarish faqat shunday turdagi do'kon (ulgurji ombor / ishlab chiqarish sexi) bo'lsa ko'rinadi. Ruxsat `production` (.orders, .materials, .recipes) — standartda boshqaruvchi va admin (`perm_production_v1`). Tannarx `canSeeCost` bo'lmasa yashiriladi.
+- Sinov: API to'liq oqim + brauzerda (yakunlash, xomashyo kirimi, bo'limlar) — lokal bazada, keyin faqat SINOV yozuvlari tozalandi. Commitlar: backend 46812c4, e6d1c43; frontend 0c9edb41.
+- **Keyinroq (kerak bo'lsa):** miqdor bo'yicha tovarni sotish (kassa/ulgurji kg bilan), xomashyoni omborlar orasida ko'chirish, dona bo'yicha xomashyo (qadoq) sarfi, biznes profili (modullarni yoqish — Bosqich 7).
+
 ---
 
 ## 16. Foydalanuvchi fikri va yangi talablar (2026-10-08, 3-versiya)
@@ -386,6 +397,6 @@ Misollar: kafel kleyi (qum, sement, qo'shimchalar tonnalab → qop-qop klei), sh
 | 2C ✅ | Touch: kassa ekran klaviaturasi, planshet joylashuvi |
 | 3 ⏳ | Hisobotlar serverga + yagona foyda formulasi + yangi Foyda ko'rinishi ✅ + Moliya → Qarzlar ✅ + yagona kirim formasi ✅ + Telegram → Integratsiyalar ✅ |
 | 4 ✅ | Omborlar turlari + Ulgurji savdo (konsignatsiya, narx guruhlari) |
-| 5 | Ishlab chiqarish: miqdor bo'yicha hisob, retseptura, ishlab chiqarish buyurtmalari, tannarx |
+| 5 ✅ | Ishlab chiqarish: miqdor bo'yicha hisob, retseptura, ishlab chiqarish buyurtmalari, tannarx |
 | 6 | Fiskal chek: tayyorlov → provayder tanlangach ulanish |
 | 7 | Tozalash, biznes profili (modullarni yoqish), multi-tenant |
