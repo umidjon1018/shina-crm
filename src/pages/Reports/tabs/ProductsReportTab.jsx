@@ -53,7 +53,7 @@ const ProductsReportTab = () => {
   ]
   const effCols = [
     { key: 'name', label: t('rpt_col_product'), value: name, className: 'text-text-primary font-medium' },
-    { key: 'abc', label: 'ABC', align: 'center', render: r => <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${ABC_CLS[r.abc]}`}>{r.abc}</span> },
+    { key: 'abc', label: 'ABC', title: t('rpt_abc_what'), align: 'center', render: r => <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${ABC_CLS[r.abc]}`}>{r.abc}</span> },
     { key: 'soldQty', label: t('rpt_col_sold_qty'), align: 'right', sum: true },
     { key: 'stockQty', label: t('rpt_col_stock'), align: 'right', sum: true },
     { key: 'sellThrough', label: t('rpt_col_sell_through'), align: 'right', render: r => `${r.sellThrough}%` },
@@ -101,17 +101,31 @@ const ProductsReportTab = () => {
                 </ResponsiveContainer>
               </div>
             </div>
-            <div className="bg-bg-secondary border border-border rounded-2xl p-4">
-              <p className="font-syne font-bold text-text-primary text-sm mb-3">{t('rpt_abc_share')}</p>
-              <div className="h-64">
+            <div className="bg-bg-secondary border border-border rounded-2xl p-4 space-y-3">
+              <div>
+                <p className="font-bold text-text-primary text-base">{t('rpt_abc_share')}</p>
+                <p className="text-sm text-text-muted leading-snug">{t('rpt_abc_what')}</p>
+              </div>
+              <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={abcPie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} label={e => e.name}>
+                    <Pie data={abcPie} dataKey="value" nameKey="name" innerRadius={42} outerRadius={70} label={e => e.name}>
                       {abcPie.map(x => <Cell key={x.name} fill={x.name === 'A' ? C.green : x.name === 'B' ? C.blue : C.orange} />)}
                     </Pie>
                     <Tooltip formatter={v => money(v)} />
                   </PieChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="space-y-2">
+                {['A', 'B', 'C'].map(k => (
+                  <div key={k} className="flex items-start gap-2.5">
+                    <span className={`px-2 py-0.5 rounded-md text-sm font-bold shrink-0 ${ABC_CLS[k]}`}>{k}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-text-primary">{t('rpt_abc_' + k + '_title')} <span className="text-text-muted font-normal">· {t('sl_inst_org_count', { n: abcCount(k) })}</span></p>
+                      <p className="text-sm text-text-muted leading-snug">{t('rpt_abc_' + k + '_tip')}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

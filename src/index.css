@@ -7,9 +7,13 @@
   --bg-primary:     #F3F5FB;
   --bg-secondary:   #FFFFFF;
   --bg-tertiary:    #EBEEF7;
-  --sidebar-bg:     #1B1E33;
-  --sidebar-text:   #C9CCE3;
-  --sidebar-muted:  #7D82A6;
+  --sidebar-bg:     #FFFFFF;
+  --sidebar-text:   #3A4060;
+  --sidebar-muted:  #8A90AE;
+  --sidebar-strong: #121528;
+  --sidebar-hover:  rgba(18, 21, 40, 0.05);
+  --sidebar-field:  #F3F5FB;
+  --sidebar-border: #E3E7F2;
   --border:         #DCE1EE;
   --border-bright:  #B7BFD8;
   --accent-red:     #E63946;
@@ -35,6 +39,10 @@
   --sidebar-bg:     #12142A;
   --sidebar-text:   #C3C7E2;
   --sidebar-muted:  #6E7396;
+  --sidebar-strong: #FFFFFF;
+  --sidebar-hover:  rgba(255, 255, 255, 0.05);
+  --sidebar-field:  rgba(255, 255, 255, 0.05);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
   --border:         #2B3050;
   --border-bright:  #3D4368;
   --accent-red:     #EF4B5A;
@@ -60,6 +68,10 @@
   --sidebar-bg:     #0A2A6E;
   --sidebar-text:   #D6E2FF;
   --sidebar-muted:  #8FA9DB;
+  --sidebar-strong: #FFFFFF;
+  --sidebar-hover:  rgba(255, 255, 255, 0.07);
+  --sidebar-field:  rgba(255, 255, 255, 0.08);
+  --sidebar-border: rgba(255, 255, 255, 0.12);
   --border:         #BFCFEE;
   --border-bright:  #1E5FB8;
   --accent-red:     #E30613;
@@ -187,3 +199,15 @@ button, [role="button"] { -webkit-tap-highlight-color: transparent; }
 @media (pointer: coarse) {
   button:not(.tap-free) { min-height: 36px; min-width: 36px; }
 }
+
+/* ── Diagramma hover'lari mavzuga mos (recharts standarti oq/kulrang) ── */
+.recharts-rectangle.recharts-tooltip-cursor { fill: var(--bg-tertiary) !important; fill-opacity: 0.55 !important; }
+.recharts-curve.recharts-tooltip-cursor { stroke: var(--border-bright) !important; }
+.recharts-default-tooltip {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.recharts-default-tooltip .recharts-tooltip-label { color: var(--text-secondary) !important; }

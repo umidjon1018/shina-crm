@@ -44,7 +44,6 @@ import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useTranslation } from 'react-i18next'
 import { useNotificationStore } from '../store/notificationStore'
 import { useSettingsStore } from '../store/settingsStore'
-import { useAuditStore } from '../store/auditStore'
 
 const PAGE_KEYS = {
   '/dashboard': 'dashboard',
@@ -68,11 +67,11 @@ const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => (
       relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group
       ${isActive
         ? 'g-brand text-white shadow-glow-red'
-        : 'text-sidebarText hover:text-white hover:bg-white/5'}
+        : 'text-sidebarText hover:text-sidebarStrong hover:bg-sidebarHover'}
     `}
   >
     {isActive && <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-7 rounded-r-full bg-white/90" />}
-    <Icon size={20} className={`${isActive ? 'text-white' : 'text-sidebarMuted group-hover:text-white'} transition-colors flex-shrink-0`} />
+    <Icon size={20} className={`${isActive ? 'text-white' : 'text-sidebarMuted group-hover:text-sidebarStrong'} transition-colors flex-shrink-0`} />
     <span className="font-semibold text-[15px]">{label}</span>
     {isActive && <ChevronRight size={16} className="ml-auto opacity-70" />}
   </Link>
@@ -182,7 +181,6 @@ export const MainLayout = () => {
       message: t('ais_notif_msg', { week: (d.weekStart || '').split('-').reverse().join('.') }),
     }),
   }, { enabled: isAuthenticated, onAuthFail: (status) => { if (status === 401) kick('rt_kick_session') } })
-  const { addLog } = useAuditStore()
   const sl = sidebarLabels || {}
   const hidden = hiddenPages || []
   const getSlLabel = (key) => {
@@ -194,17 +192,6 @@ export const MainLayout = () => {
 
   const isPrivileged = (role) => role === 'admin' || role === 'manager'
 
-  useEffect(() => {
-    if (!isAuthenticated || !user) return
-    addLog({
-      userId: user.id,
-      userName: user.fullName || user.name || user.username,
-      action: t('nav_page_visited'),
-      actionKey: 'audit_page_visited',
-      entity: 'page',
-      details: PAGE_KEYS[location.pathname] ? t(PAGE_KEYS[location.pathname]) : location.pathname,
-    })
-  }, [location.pathname, isAuthenticated])
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
@@ -225,12 +212,12 @@ export const MainLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-72 safe-sidebar bg-sidebar border-r border-white/5 z-50
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 w-72 safe-sidebar bg-sidebar border-r border-sidebarBorder z-50
         transition-transform duration-300 transform flex flex-col flex-shrink-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-border/20">
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebarBorder">
           {companyLogo
             ? <img
                 src={companyLogo}
@@ -245,7 +232,7 @@ export const MainLayout = () => {
               </div>
           }
           <div className="min-w-0">
-            <h1 className="text-base font-syne font-bold text-white leading-tight">{companyName}</h1>
+            <h1 className="text-base font-syne font-bold text-sidebarStrong leading-tight">{companyName}</h1>
             <p className="text-[10px] text-sidebarMuted uppercase tracking-widest">CRM</p>
           </div>
           <NotificationsPanel className="ml-auto hidden lg:block" />
@@ -278,7 +265,7 @@ export const MainLayout = () => {
               <select
                 value={selectedShopId}
                 onChange={e => setSelectedShop(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-[15px] text-white focus:outline-none focus:border-accent-red [&>option]:text-black"
+                className="w-full bg-sidebarField border border-sidebarBorder rounded-xl px-3 py-2.5 text-[15px] text-sidebarStrong focus:outline-none focus:border-accent-red [&>option]:text-black"
               >
                 <option value="all">{t('all_shops')}</option>
                 {activeShops.map(s => (
@@ -286,9 +273,9 @@ export const MainLayout = () => {
                 ))}
               </select>
             ) : (
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl">
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-sidebarField border border-sidebarBorder rounded-xl">
                 <div className="w-2 h-2 rounded-full bg-accent-red flex-shrink-0" />
-                <span className="text-[15px] text-white truncate">
+                <span className="text-[15px] text-sidebarStrong truncate">
                   {activeShops.find(s => s.id === selectedShopId)?.name || t('all_shops')}
                 </span>
               </div>
@@ -357,7 +344,7 @@ export const MainLayout = () => {
         </nav>
 
         {/* Bottom: user + lang + theme + logout */}
-        <div className="px-3 py-2 border-t border-border/20 space-y-1.5">
+        <div className="px-3 py-2 border-t border-sidebarBorder space-y-1.5">
 
           {/* Lang toggle */}
           <div className="flex items-center gap-2 px-2">
@@ -370,7 +357,7 @@ export const MainLayout = () => {
                   className={`px-2 py-0.5 rounded-lg text-xs font-bold uppercase transition-all ${
                     lang === l
                       ? 'bg-accent-red text-white'
-                      : 'text-sidebarMuted hover:text-white'
+                      : 'text-sidebarMuted hover:text-sidebarStrong'
                   }`}
                 >
                   {l}
@@ -391,7 +378,7 @@ export const MainLayout = () => {
               {user?.name?.[0] || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">{user?.name}</p>
+              <p className="text-sm font-bold text-sidebarStrong truncate">{user?.name}</p>
               <p className="text-xs text-sidebarMuted truncate">{user?.role ? t(`mgmt_role_${user.role}`) : ''}</p>
             </div>
             {user?.role !== 'admin' && (

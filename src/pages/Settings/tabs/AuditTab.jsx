@@ -21,6 +21,15 @@ const ACTION_COLORS = {
   audit_shop_added: GREEN, audit_shop_edited: BLUE, audit_shop_deleted: RED,
   audit_branding_updated: BLUE, audit_loyalty_updated: BLUE, audit_roles_updated: BLUE, audit_business_settings_updated: BLUE,
   audit_discount_approved: GREEN, audit_discount_rejected: RED,
+  audit_sale_created: GREEN, audit_used_sale_created: GREEN, audit_used_sale_cancelled: RED, audit_installment_paid: GREEN,
+  audit_used_stock_added: BLUE, audit_return_created: ORANGE, audit_batch_created: BLUE, audit_supplier_paid: GREEN,
+  audit_stock_transfer: BLUE, audit_expense_created: ORANGE, audit_expense_updated: ORANGE, audit_income_created: GREEN,
+  audit_income_deleted: RED, audit_cash_expense: ORANGE, audit_capital_created: BLUE, audit_customer_created: GREEN,
+  audit_customer_updated: BLUE, audit_customer_deleted: RED, audit_customer_merged: ORANGE, audit_balance_changed: BLUE,
+  audit_product_created: GREEN, audit_writeoff_created: RED, audit_stocktake_started: BLUE, audit_stocktake_completed: GREEN,
+  audit_order_created: BLUE, audit_order_received: GREEN, audit_supplier_return: ORANGE, audit_promo_created: GREEN,
+  audit_promo_updated: BLUE, audit_promo_deleted: RED, audit_giftcard_sold: GREEN, audit_campaign_sent: BLUE,
+  audit_reservation_created: BLUE, audit_reservation_cancelled: MUTED,
 }
 
 function AuditTab() {
@@ -31,7 +40,6 @@ function AuditTab() {
   const [query, setQuery] = useState('')
   const [filterUser, setFilterUser] = useState('all')
   const [filterAction, setFilterAction] = useState('all')
-  const [hidePages, setHidePages] = useState(true)
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ rows: [], total: 0, users: [], keys: [] })
   const [loading, setLoading] = useState(false)
@@ -40,9 +48,8 @@ function AuditTab() {
     q: query || undefined,
     user: filterUser !== 'all' ? filterUser : undefined,
     key: filterAction !== 'all' ? filterAction : undefined,
-    hidePages: hidePages ? '1' : undefined,
     ...extra,
-  }), [query, filterUser, filterAction, hidePages])
+  }), [query, filterUser, filterAction])
 
   const load = useCallback(() => {
     setLoading(true)
@@ -98,10 +105,6 @@ function AuditTab() {
           <option value="all">{t('adm_audit_all_actions')}</option>
           {data.keys.map(a => <option key={a} value={a}>{actionLabel(a)}</option>)}
         </select>
-        <label className="flex items-center gap-2 text-sm text-text-secondary px-1">
-          <input type="checkbox" checked={hidePages} onChange={e => { setHidePages(e.target.checked); setPage(1) }} className="accent-accent-red w-4 h-4" />
-          {t('adm_audit_hide_pages')}
-        </label>
         <button onClick={load} className="p-2 bg-bg-secondary border border-border rounded-xl text-text-secondary hover:text-text-primary" title="↻">
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>

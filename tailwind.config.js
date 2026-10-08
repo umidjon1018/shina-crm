@@ -29,6 +29,10 @@ export default {
         },
         sidebarText: 'var(--sidebar-text)',
         sidebarMuted: 'var(--sidebar-muted)',
+        sidebarStrong: 'var(--sidebar-strong)',
+        sidebarHover: 'var(--sidebar-hover)',
+        sidebarField: 'var(--sidebar-field)',
+        sidebarBorder: 'var(--sidebar-border)',
         text: {
           primary: 'var(--text-primary)',
           secondary: 'var(--text-secondary)',

@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { sendAudit } from '../api/auditService'
 
-// Muhim amallarni (xodim, qurilma, narx, sotuv bekor/tahrir, sozlamalar) server o'zi yozadi.
-// Brauzerdan faqat server bilmaydigan hodisalar yuboriladi — takror yozuv bo'lmasligi uchun.
-const CLIENT_KEYS = new Set(['audit_session_login', 'audit_session_logout', 'audit_page_visited'])
+// Barcha amallarni (kirish/chiqish, sotuv, kirim, xarajat, xodim, sozlamalar…) server o'zi yozadi.
+// Brauzerdan hech narsa yuborilmaydi; sahifa ochilishlari jurnalga kirmaydi.
+const CLIENT_KEYS = new Set()
 
 export const useAuditStore = create(() => ({
   addLog: ({ actionKey, entity, details }) => {

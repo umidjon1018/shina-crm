@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, ShieldAlert, Info, Percent, User } from 'lucide-react'
@@ -95,7 +96,8 @@ const NotificationsPanel = ({ className = '' }) => {
           </span>
         )}
       </button>
-      <AnimatePresence>
+      {/* Panel body ga chiqariladi — sidebar ichida (transform) bo'lsa kesilib qolmasin */}
+      {createPortal(<AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-[300]">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50" onClick={close} />
@@ -142,7 +144,7 @@ const NotificationsPanel = ({ className = '' }) => {
             </motion.aside>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
     </>
   )
 }
