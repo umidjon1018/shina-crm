@@ -482,7 +482,7 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-04 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-08 (23-deploy)** — backend `e3b4006`, frontend `6dc27aa0` (AI statistika: AI Agent → Statistika tabi, /api/ai-stats, haftalik hisobot dushanba 08:00, stats-agent Sonnet 5.5; AI Agent sahifasi auditi; instagram-agent kundalik tahlildan chiqarilgan — bot qayta yoqilsa agentScheduler AGENT_SLUGS ga qaytar). Zaxira `/root/backups/2026-10-08b`. Serverda Anthropic krediti TUGAGAN (2026-10-08) — AI funksiyalar to'ldirilguncha ishlamaydi. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
+**Oxirgi deploy: 2026-10-08 (23-deploy)** — backend `e3b4006`, frontend `6dc27aa0` (AI statistika: AI Agent → Statistika tabi, /api/ai-stats, haftalik hisobot dushanba 08:00, stats-agent Sonnet 5.5; AI Agent sahifasi auditi; instagram-agent kundalik tahlildan chiqarilgan — bot qayta yoqilsa agentScheduler AGENT_SLUGS ga qaytar). Zaxira `/root/backups/2026-10-08b`. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
 Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
 
 ### Xavfsiz deploy tartibi (har safar)
