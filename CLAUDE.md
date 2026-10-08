@@ -66,7 +66,11 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 3. [ ] Multi-tenant — ikkinchi mijoz paydo bo'lganda ("Domen" bo'limi). Shunda AI kaliti har tenantga alohida (hozir chat `settingsStore.aiApiKey` ni yubora oladi, kundalik tahlilchi faqat `.env ANTHROPIC_API_KEY`).
 4. [ ] Instagram token avto-yangilash (graph.instagram.com/refresh_access_token, haftalik) + muddat yaqinlashsa adminga ogohlantirish — bot qayta yoqilganda taklif qil.
 
-**Ochiq savollar (oxirida so'ra):** sotuvchi `GET /api/expenses` va `/api/capital` ni o'qiy oladi (faqat authMiddleware) — yopish kerakmi?
+**Keyinga qoldirilgan (foydalanuvchi qarori 2026-10-09 — o'zing boshlama, u aytganda qil):**
+- [ ] **Fiskal chek** — tayyorlov tayyor (Sozlamalar → Integratsiyalar → Fiskal chek, `utils/fiscal.js` navbat); provayder tanlanib adapter yoziladi (`ADAPTERS`).
+- [ ] **Ikkinchi mijoz (multi-tenant)** — domen/SSL/tenant routing ("Domen" bo'limi).
+
+✅ Sotuvchi xarajat/kapitalni ko'rmaydi (2026-10-09): `GET /api/expenses`, `/api/capital` `requirePerm`, AI toollari `TOOL_PERMS` (aiController), yetkazib beruvchi qarzi AI bo'limlarida sezgir.
 
 ---
 
