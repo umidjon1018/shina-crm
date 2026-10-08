@@ -27,7 +27,7 @@ Katta faylni bo'lishdan oldin **majburiy qadamlar**:
 3. Har bir bo'lingan faylda importlarni tekshir:
    - React hooks (`useState`, `useEffect`, `useMemo`...) to'liqmi?
    - `lucide-react` ikonlar to'liqmi?
-   - `mock.js` funksiyalari to'liqmi?
+   - `src/api/*Service.js` importlari to'liqmi?
    - `export default ComponentName` bormi?
 4. `npm run build` — xato yo'qligini tasdiqlа
 5. `git add` + `git commit`
@@ -48,33 +48,55 @@ Katta faylni bo'lishdan oldin **majburiy qadamlar**:
 
 ---
 
+## JORIY HOLAT VA KEYINGI ISHLAR (har sessiyada BIRINCHI o'qi — yangilangan: 2026-10-08)
+
+**Holat:** lokal = server (24-deploy). Ilova real sinovda (test oyi): xodimlar telefondan ishlaydi, server DB — haqiqiy ma'lumot.
+BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI agentlar arxitekturasi" bo'limi).
+
+**Foydalanuvchidan kutilmoqda (o'zing boshlama, u aytganda tekshir):**
+- [ ] **FaceID xodim sinovi** — xodim tizimga qayta kirgach "kirdi" deydi → serverda `select user_type, count(*) from refresh_tokens group by 1` (`employee` qatori paydo bo'lishi kerak; 2026-10-08 da faqat `user` = admin bor edi).
+- [ ] **Instagram botni qayta yoqish** — yangi Meta token (eskisi 2026-10-04 tugagan) → Admin → AI Agentlar → Mijozlar boti → Instagram ulanishi + Kanallar (komment/DM hozir aniq "o'chiq"). Yoqilgach haqiqiy Instagram bilan sinov (webhook → javob → Graph API).
+- [ ] **Telegram bot token** — Mijozlar botining Telegram kanali shu bilan ulanadi (`botPrompts.BOT_CHANNELS.telegram` tayyor; webhook/ulash kodi YO'Q).
+- [ ] **Mijozlar boti modeli** — Sonnet 5.5 qo'yilgan (foydalanuvchi: "qimmat bo'lsa qaytaraman"); bot yoqilgach xarajatni kuzat, kerak bo'lsa Haiku.
+- [ ] **Showroom ish vaqti** — bot bilimlar bazasida "kuz-qish mavsumida 24 soat"; bahorda o'zgarishi mumkin (Admin → Mijozlar boti → Bilimlar bazasi).
+
+**Navbatdagi ishlar (tartib bilan):**
+1. [ ] Telegram kanali — token kelganda.
+2. [ ] **~2026-10-21: eski login yo'lini yopish** — `authController` da `flow` yo'q login → 7 kunlik token beradi (FaceID'ni chetlab o'tadigan oxirgi yo'l). Avval hamma xodim yangi yo'lga o'tganini `refresh_tokens` orqali tekshir.
+3. [ ] Multi-tenant — ikkinchi mijoz paydo bo'lganda ("Domen" bo'limi). Shunda AI kaliti har tenantga alohida (hozir chat `settingsStore.aiApiKey` ni yubora oladi, kundalik tahlilchi faqat `.env ANTHROPIC_API_KEY`).
+4. [ ] Instagram token avto-yangilash (graph.instagram.com/refresh_access_token, haftalik) + muddat yaqinlashsa adminga ogohlantirish — bot qayta yoqilganda taklif qil.
+
+**Ochiq savollar (oxirida so'ra):** sotuvchi `GET /api/expenses` va `/api/capital` ni o'qiy oladi (faqat authMiddleware) — yopish kerakmi?
+
+---
+
 ## Working Agreement (read every session)
 
 We work page by page. The user describes what needs to be done; Claude does it or says it's already done.
 
 **Rules:**
-1. All data lives in `src/api/mock.js` — add/edit/delete must mutate these arrays dynamically
+1. Data lives in the backend (PostgreSQL) — frontend reads/writes via `src/api/*Service.js` (axios `client.js`). `mock.js` NO LONGER EXISTS (eski eslatmalardagi `MOCK_*` nomlari — tarixiy).
 2. Pages update via local `useState` + `useDataStore().bump()` — never reload the page
 3. When connecting a card/modal from one page to another, use `bump()` so the target page receives data automatically
 4. Do not add features beyond what is explicitly requested
 5. Do not add comments unless the WHY is non-obvious
+6. Lokalda ishla, test qil, commit qil — serverga deploy FAQAT foydalanuvchi "deploy" deganda
 
 ## Architecture Overview
 
-**Shina CRM** is a fully client-side React SPA for managing a tire/wheel shop chain (GoodTires). There is no backend — all data lives in `src/api/mock.js` and Zustand stores persisted to `localStorage`.
+**Shina CRM (SICRM)** — React SPA (PWA) + backend `C:\Users\Umidjon\Desktop\shina_crm_backend` (Node.js + Express + PostgreSQL). Server: Hetzner `167.233.169.118`, `gt.sicrm.uz` (ilova), `sicrm.uz` (API).
 
 ### Data Layer
 
-Two sources of truth:
+1. **Backend API** — `src/api/*Service.js` (masalan `salesService`, `productService`, `reportService`, `aiStatsService`), umumiy axios `src/api/client.js` (token, `x-lang`), tokenni jimgina yangilash `src/api/session.js` (access 15 daqiqa + refresh 7 kun). Server tomonda hisob-kitob (hisobotlar, AI) — `reportsController`, `utils/aiSections` va h.k.
 
-1. **`src/api/mock.js`** — module-level mutable arrays: `MOCK_PRODUCTS`, `MOCK_BATCHES`, `MOCK_ITEMS`, `MOCK_SALES`, `MOCK_CUSTOMERS`, `MOCK_SUPPLIERS`, `MOCK_INCOME_BATCHES`, `MOCK_EXPENSES`, `MOCK_CAPITAL`, `MOCK_RETURNS`. Mutations persist for the browser session only (reset on reload). All async helper functions (`getStock()`, `getBatches()`, `createSale()`, `addBatch()`, etc.) live here too.
-
-2. **Zustand stores** (all `persist` → `localStorage`):
-   - `authStore` — session, device approval, permissions
-   - `settingsStore` — USD rate, employees, installment orgs, discount rules, loyalty thresholds, notification toggles (`goodtires-settings`)
-   - `shopStore` — branch list, selected shop (`goodtires-shop-store`)
+2. **Zustand stores** (`persist` → `localStorage`):
+   - `authStore` — session, device approval, `hasPermission` (rollar daraxti serverdan, `utils/rolesSync.js`)
+   - `settingsStore` — USD rate, employees (serverdan cache), installment orgs, discount rules, notification toggles, `aiApiKey` (`goodtires-settings`)
+   - `shopStore` — branch list, selected shop (`goodtires-shop-store`) — **global do'kon tanlovi** (sidebar), sahifalar shu `selectedShopId` ga bog'lanadi
    - `cartStore` — active POS cart (`goodtires-cart`)
    - `notificationStore` — in-app notifications with read/unread (`goodtires-notifications`)
+   - `aiStore` — AI chat tarixi (`chatKey` bo'yicha), `marketingStore` — marketing yo'l xaritasi
    - `dataStore` — global `version` counter + `bump()` for cross-page reactivity (not persisted)
    - `themeStore` / `langStore` — UI preferences
 
@@ -92,148 +114,70 @@ const { version } = useDataStore()
 useEffect(() => { loadData() }, [version])
 ```
 
-**Where `bump()` is already called:** Sales (`createSale`, `cancelSale`, `addReturn`), Income (`addBatch`, `addPaymentToBatch`), Customers (`add`, `edit`, `delete`, installment payment), Management (product price edit, product delete), Warehouse (barcode generate, print, download).
+**Where `bump()` is already called:** sotuv, bekor qilish, qaytarish, kirim, to'lovlar, mijoz CRUD, tovar narxi/o'chirish, barkod amallari. Real vaqt hodisalari (SSE) ham kerakli joyda `bump()`/sync chaqiradi.
 
 ### Inventory Model (3-level hierarchy)
 
 ```
-MOCK_PRODUCTS → MOCK_BATCHES → MOCK_ITEMS
-  (product)     (purchase lot)  (individual unit with barcode)
+products → batches → items          (DB jadvallari)
+ (tovar)   (kirim partiyasi) (bitta dona, barkod bilan)
 ```
 
-- **product**: `cashPrice`, `minSalePrice`, `installmentBasePrice`, `category` (`tire`|`wheel`|`accessory`)
-- **batch**: supplier, date, `quantityIn`, `quantityRemaining`, `shopId`
-- **item**: single physical unit. `barcode: null` = cannot be sold. `barcodeStatus`: `null → active → printed | downloaded → inactive` (after sale)
-
-`getStock(productId)` — counts `in_stock` items. `getBarcodeReadyStock(productId)` — counts barcoded+in_stock. `findItemByBarcode(barcode)` — lookup for POS scanner.
+- **product**: `cash_price`, `min_sale_price`, `installment_base_price`, `category` (`tire`|`wheel`|`accessory`), `low_stock_threshold`
+- **batch**: supplier, `quantity_in`, `purchase_price(_usd)`, `entry_usd_rate`, `has_missing_price`, `unit`, `shop_id`, qarz (`debt_usd`, `due_date`)
+- **item**: bitta dona. `barcode` bo'sh = sotib bo'lmaydi. `status` (`in_stock`/`sold`/...), `shop_id` (transferdan keyin partiya do'konidan farq qilishi mumkin — do'kon bo'yicha qoldiqni `items.shop_id` dan hisobla)
+- B/U: `used_stock`, `used_sales`, `used_sale_items` (alohida oqim)
 
 ### Auth & Permissions
 
-Two-step login: credentials → selfie → device trust. New devices go `pending` until admin approves via `approveDevice()`. Trusted device IDs in `localStorage` key `shina_trusted_devices`.
+Login (yangi ilova, `flow: 2`): parol → vaqtinchalik `pre` token → selfie → `POST /api/auth/verify-face` (yuz serverda solishtiriladi) → to'liq sessiya yoki admin tasdig'i (kutish sahifasi, SSE `device_status`). Admin — cheksiz qurilma; xodim — bitta qurilma (yangisi tasdiqlansa eskilari bekor, SSE `device_revoked`).
 
-Permission values: `warehouse`, `sales`, `income`, `expenses`, `reports`, `ai_agent`. `['all']` = admin full access. `ProtectedRoute` checks `hasPermission()`.
-
-Hardcoded users in `mock.js`. Management-added employees in `settingsStore.employees` — both checked by `authStore.checkCredentials()`.
+Ruxsatlar: rollar va ruxsat daraxti serverda (app_settings `roles`), xodimga individual `employees.access`. Frontend `hasPermission('<sahifa>.<tab>')`, backend yozish route'larida `requirePerm(...)`, foyda/tannarx `canSeeProfit`/`canSeeCost`.
 
 ### Routing & Layout
 
 - `AuthLayout` — `/login`, `/pending-approval`
 - `MainLayout` — all protected routes; sidebar with permission-filtered nav, offline badge, lang/theme toggles
 
-React Router v6 — pages **unmount on navigation** (no caching), so re-mounting always reads fresh mock arrays.
+React Router v6 — pages **unmount on navigation** (no caching), so re-mounting always re-fetches from the API.
 
 ### Deployment & Tijoratlashtirish Yo'l Xaritasi (qoida — har doim eslab qolinsin)
 
 Bu bo'lim foydalanuvchi bilan PWA/SaaS strategiyasi haqida bo'lib o'tgan suhbat xulosasi. Loyiha shu yo'naltiruvchi reja asosida rivojlantiriladi — kelajakda tegishli bosqichga yetganda shu yerdan eslab, mos qadamlarni taklif qilish kerak.
 
-**Bosqich 1 — Frontendni tugatish (hozirgi holat, ~70%)**
-- Davom etilayotgan ish. Backend/SaSa haqida hozircha amaliy qadam tashlanmaydi.
+**Bosqich 1 — Frontend + backend ✅ (2026-10)** — backend yozildi, server ishlayapti, BILLZ paritet bo'limlari tugadi, real sinov (test oyi) davom etmoqda.
 
 **Bosqich 2 — PWA qilib chiqarish ✅ BAJARILDI (2026-06-07)**
 - `vite-plugin-pwa` o'rnatildi, `vite.config.js` ga `VitePWA` konfiguratsiyasi qo'shildi (manifest, service worker, ikonlar, runtime caching). `public/icons/` da 192/512/maskable PNG ikonlar yaratildi (PIL bilan, "GT" + accent-red brand rang). `index.html` ga manifest link, theme-color, apple-mobile-web-app meta teglar qo'shildi. `npm run build` muvaffaqiyatli — `dist/` da `manifest.webmanifest`, `sw.js`, `registerSW.js` generatsiya qilinadi. Endi loyiha brauzerda "O'rnatish"/"Bosh ekranga qo'shish" orqali App sifatida o'rnatiladi.
-- Sabab: hozirgi arxitektura (backend yo'q, `mock.js` + `localStorage`) PWA bilan to'liq mos, kodga deyarli tegmasdan amalga oshadi.
+- Sabab (o'sha paytda): arxitektura PWA bilan to'liq mos edi; backend qo'shilgandan keyin ham PWA ishlaydi (offline navbat — `offlineQueue`).
 - **Termal printer cheklovi**: brauzer/PWA xom (raw) TCP socket ocholmaydi → WiFi termal printerlarga ESC/POS orqali to'g'ridan-to'g'ri chop etish PWA ichidan ishlamaydi. Shu funksiya kerak bo'lganda loyiha **Capacitor** bilan native qobiqqa o'raladi (faqat shu qism uchun maxsus plagin qo'shiladi, qolgan kod o'zgarmaydi). Bluetooth printerlar uchun Web Bluetooth API variant bo'lishi mumkin, WiFi uchun emas. Hozirgi barcode generatsiya/print (`window.print()`) va kamera orqali skanerlash — PWA bilan muammosiz ishlaydi, o'zgartirish shart emas.
 
 **Bosqich 3 — Tijoratlashtirish: "alohida nusxalar" (white-label) modeli**
 - Har bir tadbirkor (jiyan, shogird, boshqa mijoz) uchun alohida sozlangan build (o'z `companyName`/`companyLogo`/narxlari bilan) tayyorlanadi — `Konfiguratsiya` va `Sozlamalar` bloklari shu uchun ishlatiladi.
 - Hosting: bitta hosting hisobida (Vercel/Netlify/Cloudflare Pages yoki bitta VPS + Nginx) bir nechta loyihani joylashtirish va har biriga alohida domen/subdomen ulash mumkin — har biriga alohida hosting sotib olish shart emas.
 - Domen: bitta asosiy domen sotib olib, har bir mijoz uchun subdomain (`mijoz1.brend.uz`, `mijoz2.brend.uz`) ochish — eng tejamkor yo'l.
-- **Ma'lumotlar izolyatsiyasi**: hozirgi arxitekturada baza yo'q (`mock.js`+`localStorage`) — har bir o'rnatish o'z-o'zidan butunlay mustaqil va izolyatsiyalangan. Bu "bitta umumiy baza" emas, balki "ko'p mustaqil nusxalar" demakdir — ma'lumotlar hech qachon aralashmaydi.
-- **AI Agent obunasi**: AI xizmati API kalitiga bog'liq va to'lov kalit egasidan yechiladi. Bitta umumiy kalitni barcha nusxalarga qo'yish — boshqalarning xarajati sizning hisobingizdan ketishiga olib keladi. Yechim: AI Agent sahifasiga/Sozlamalarga "API kalit kiritish" maydoni qo'shilishi kerak — har bir mijoz o'z kalitini kiritadi va o'zi to'laydi. Agar mijoz AI'ni xohlamasa — `hiddenPages` orqali shu bo'lim yashiriladi (bu funksiya allaqachon mavjud).
+- **Ma'lumotlar izolyatsiyasi**: endi backend bor — har tenant uchun alohida PostgreSQL bazasi (`/root/create_tenant.sh`, "Domen" bo'limi). Ma'lumotlar aralashmaydi.
+- [ ] **AI Agent obunasi** (multi-tenant bilan qilinadi): AI xizmati API kalitiga bog'liq va to'lov kalit egasidan yechiladi. Bitta umumiy kalitni barcha nusxalarga qo'yish — boshqalarning xarajati sizning hisobingizdan ketishiga olib keladi. Yechim: AI Agent sahifasiga/Sozlamalarga "API kalit kiritish" maydoni qo'shilishi kerak — har bir mijoz o'z kalitini kiritadi va o'zi to'laydi. Agar mijoz AI'ni xohlamasa — `hiddenPages` orqali shu bo'lim yashiriladi (bu funksiya allaqachon mavjud).
 
 **Bosqich 3.5 — Backend xavfsizlik yaxshilanishlari (SaaS DAN OLDIN bajarilishi kerak)**
 
 **✅ 1–3 BAJARILDI (2026-10-05):** login (`flow: 2`) faqat vaqtinchalik `pre` token beradi (12 soat; oddiy API → 403 `FACE_REQUIRED`); `POST /api/auth/verify-face` yuzni serverda saqlangan shablon bilan solishtiradi (`utils/faceCrypto.js`, Evklid < 0.5) → to'liq sessiya yoki admin tasdig'i; `POST /api/auth/session` (kutish sahifasi) faqat shu login davomida admin tasdiqlagan bo'lsa; `access` token 15 daqiqa (`TOKEN_EXPIRED` → frontend `src/api/session.js` jimgina yangilaydi), `refresh` 7 kun — `refresh_tokens` jadvalida hash, har yangilashda almashadi, qayta ishlatilsa shu qurilma sessiyalari bekor; qurilma bekor/xodim o'chirilsa/parol o'zgarsa refresh bekor. Selfie va descriptorlar AES-256-GCM (`.env FACE_ENC_KEY`, 64 hex — YO'QOTMA, aks holda selfie/shablonlar o'qilmaydi) bilan shifrlanadi. Eski ilova (flow yo'q) va eski 7 kunlik tokenlar o'tish davrida ishlaydi. 4-band (multi-device) qurilma tasdiqlash + real vaqt bilan qoplangan.
 
-Quyidagilar hozirgi backend (Node.js + PostgreSQL) da qilinishi kerak, lekin SaaS arxitekturasi bilan bog'liq emas:
+Bandlar (hammasi ✅):
+1. ✅ `selfie` va `descriptor` bazada AES-256-GCM bilan shifrlangan (`utils/faceCrypto.js`).
+2. ✅ `faceMatch` serverda tekshiriladi (`/api/auth/verify-face`, Evklid < 0.5).
+3. ✅ Access 15 daqiqa + refresh 7 kun (`refresh_tokens`, almashuv, qayta ishlatilsa bekor).
+4. ✅ Bitta qurilma nazorati — qurilma tasdiqlash + SSE `device_revoked`. Qolgan yagona yo'l: eski `flow`siz login (~2026-10-21 da yopiladi, "Navbatdagi ishlar").
 
-1. **`selfie` va `descriptor` ni bazada shifrlash** — biometrik ma'lumotlar hozir ochiq JSONB sifatida saqlanadi. PostgreSQL `pgcrypto` yoki application-level AES-256 shifrlash qo'shilishi kerak. `descriptor` — 128-float vector; `selfie` — base64 rasm. Ikkalasi `LOGIN_ATTEMPTS` jadvalida.
-
-2. **`faceMatch` serverda tekshirish** — hozir `faceMatch: true/false` qiymati frontenddan keladi, backend ishonadi. Haqiqiy biometrik tekshiruv uchun: backend `face_descriptor` ni `users` dan olib, frontenddan kelgan `descriptor` bilan o'zi solishtirishi kerak. Node.js da `face-api.js` yoki Python microservice (FastAPI + `deepface`) qo'shilishi mumkin. Threshold: Euclidean distance < 0.5.
-
-3. **JWT muddatini qisqartirish + refresh token** — hozir `expiresIn: '7d'`. Token o'g'irlansa 7 kun xavf. Yechim:
-   - `access_token`: 15 daqiqa
-   - `refresh_token`: 7 kun (HttpOnly cookie yoki alohida DB jadval)
-   - `POST /api/auth/refresh` endpoint
-   - Frontend: `axios` interceptor 401 bo'lsa refresh qiladi
-
-4. **`allow_multi_device` nazoratini to'liq qo'llash** — hozir faqat `/api/auth/attempts` da tekshiriladi. Login jarayonida ham (token berilgandan keyin) sessiya soni cheklanishi kerak. Bu WebSocket/SSE bilan birlashtirilishi lozim.
-
-**Bosqich 4 — SaaS (multi-tenant) ga o'tish — faqat talab tasdiqlangandan keyin**
-- Bu bosqichda backend + ma'lumotlar bazasi (masalan PostgreSQL) yoziladi, `mock.js` dagi mantiq (`getStock`, `createSale`, `addBatch` va h.k.) serverga ko'chiriladi, frontend `fetch`/`axios` orqali API bilan ishlaydigan bo'ladi.
+**Bosqich 4 — SaaS (multi-tenant) ga o'tish — [ ] ikkinchi mijoz paydo bo'lganda**
+- ✅ Backend + PostgreSQL yozilgan, frontend API bilan ishlaydi. Qolgani: tenant routing (subdomen → alohida DB), obuna/to'lov.
 - Multi-tenant izolyatsiya: har bir yozuvga `tenantId`/`businessId` qo'yiladi, har bir foydalanuvchi faqat o'ziga tegishli ma'lumotni ko'radi. Bitta domen, turli login/parollar.
 - Obuna (subscription) va to'lov tizimi (Click/Payme) integratsiyasi shu bosqichda qo'shiladi.
 - Oylik infratuzilma narxi (server+baza+email+backup) — kichik miqyosda taxminan $15-60/oy atrofida.
-- **Bu bosqichga hozir o'tish tavsiya etilmaydi** — sabab: frontend hali tugamagan, talab hali sinalmagan, va frontend tugagach SaaS arxitekturasi ancha aniqroq rejalashtiriladi (kod zoye ketmaydi — React qism deyarli o'zgarishsiz qoladi).
 
 **✅ BAJARILDI (2026-10-05) — SSE orqali real vaqt.** Backend `src/realtime.js` (`GET /api/realtime/stream`, authMiddlewareNoDeviceCheck; `toUser/toDevice/toAdmins/toAll/toNonAdmins`), frontend `src/hooks/useRealtime.js` (fetch oqimi, token sarlavhada, avtomatik qayta ulanish) — MainLayout va PendingApproval'da. Hodisalar: `perm_changed` (xodim yangilandi / rollar daraxti saqlandi → syncRolesFromServer), `device_revoked` (bekor qilindi yoki boshqa qurilma tasdiqlandi → logout + Login'da sabab), `account_disabled`, `device_status` (kutish sahifasi darhol), `login_attempt`/`attempts_changed` (admin bildirishnoma + Qurilmalar tabi yangilanadi). WebSocket emas — nginx Upgrade sozlamasi shart emas. Yangi xavfsizlik hodisasi qo'shilsa shu `rt.*` funksiyalaridan foydalan. Quyidagi matn — tarixiy reja.
 
-**MUHIM — WebSocket/SSE: eng muhim arxitektura vazifasi (backend ishga tushgach birinchi navbatda)**
-
-Bu vazifa **frontend yoki SaaS dan oldin** bajarilishi kerak. Sababi:
-
-**Hozirgi muammo (vaqtinchalik yamoqlar):**
-- `PendingApproval.jsx` — 3 soniyalik polling (`checkApprovalStatus`). Bu faqat bitta brauzer ichida ishlaydi. Boshqa qurilmada pending turgan xodim admin tasdiqlashini polling orqali biladi — bu server yukini oshiradi va kechikish beradi.
-- Qurilma revoke qilinganda eski qurilma **darhol chiqarib yuborilmaydi** — faqat keyingi API so'rovida (1-2 soniya) 403 oladi va redirect bo'ladi.
-
-**Eng muhim — ruxsatlar real-vaqt yangilanmaydi:**
-Admin xodimning ruxsatini (permissions) o'zgartirganda — o'sha xodim ekrani **qayta kirmasdan, sahifa yangilanmasdan darhol o'zgarishi kerak**. Hozir bu ishlamaydi: xodim yangi ruxsatni faqat qayta login qilganda ko'radi. Bu operatsion xavf — masalan, ishdan bo'shatilgan xodim ruxsati o'chirilgandan keyin ham tizimda ishlashda davom etishi mumkin (token muddati tugaguncha — 7 kun).
-
-**WebSocket/SSE bilan hal qilinadigan muammolar (muhimlik tartibida):**
-
-1. 🔴 **Ruxsatlar darhol kuchga kirishi** — admin `PATCH /employees/:id` qilganda → server o'sha xodimning WebSocket sessioniga `permissions_updated` event yuboradi → frontend `authStore` yangilanadi → sahifa refresh siz o'zgaradi
-2. 🔴 **Qurilma revoke — darhol logout** — `revokeDevice` chaqirilganda → server eski qurilmaga `device_revoked` event → frontend darhol `/login` ga redirect
-3. 🟡 **Qurilma tasdiqlash — polling o'rniga push** — `approveAttempt` → server pending qurilmaga `device_approved` event → `PendingApproval.jsx` polling o'chadi
-4. 🟡 **Yangi kirish urinishi — admin ga push** — `saveAttempt` → server admin/manager sessionlariga `new_login_attempt` event → bildirishnoma darhol chiqadi
-
-**Texnik yo'l (socket.io + JWT auth):**
-```js
-// Backend — src/socket.js
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token
-  socket.user = jwt.verify(token, process.env.JWT_SECRET)
-  next()
-})
-
-// Har bir user o'z room'iga kiradi
-socket.join(`user:${socket.user.id}`)
-if (['admin','manager'].includes(socket.user.role)) {
-  socket.join('admins')
-}
-
-// Ruxsat o'zgarganda (employeesController.js da):
-io.to(`user:${targetUserId}`).emit('permissions_updated', { permissions })
-
-// Qurilma revoke bo'lganda:
-io.to(`device:${deviceId}`).emit('device_revoked')
-```
-
-```js
-// Frontend — src/hooks/useRealtimeSync.js
-useEffect(() => {
-  const socket = io(API_URL, { auth: { token } })
-  socket.on('permissions_updated', ({ permissions }) => {
-    useAuthStore.getState().updatePermissions(permissions)
-  })
-  socket.on('device_revoked', () => {
-    useAuthStore.getState().logout()
-    navigate('/login')
-  })
-  socket.on('device_approved', () => {
-    useAuthStore.getState().checkApprovalStatus()
-  })
-  return () => socket.disconnect()
-}, [token])
-```
-
-**Backend hozir tayyor** — faqat `socket.io` paketi o'rnatib, `src/socket.js` fayl yozib, `src/index.js` ga ulash qoladi. Frontend tomonda `useRealtimeSync` hook `MainLayout.jsx` va `PendingApproval.jsx` ga qo'shiladi.
-
-**Qachon bajariladi:** Real foydalanuvchilar ishlatayotgan payt — ishdan bo'shatilgan xodim hali tizimda ishlashda davom etsa yoki admin ruxsatni o'zgartirib xodim buni bilmasa. Bu bitta ish kuni talab qiladi.
-
-**Talab qilingan, lekin backendsiz ILOJI YO'Q funksiya — eslatma (so'ralgan: 2026-06-07):**
-- Foydalanuvchi so'radi: "Bir xodim bir vaqtda faqatgina bitta qurilmadan kira olsin (ikkinchisidan kirish uchun birinchidan chiqishi kerak), lekin Adminga bu cheklov tegmasin — Admin istagancha qurilmadan bir vaqtda kira olishi kerak."
-- **Bu — real-vaqt sessiya nazorati va backendsiz ishlamaydi.** Sabab: `deviceId` har bir brauzerga tegishli (foydalanuvchiga emas), va `localStorage` faqat o'sha brauzer ichida ko'rinadi — masalan, Sardor telefonda kirgan bo'lsa, PC brauzeri bu haqda umuman bilolmaydi (xavtsizlik siyosati tufayli boshqa origin/brauzer localStorage'iga kirish mumkin emas).
-- Backend qurilganda amalga oshirish yo'li: serverda har bir foydalanuvchi uchun `activeSessionDeviceId`/`activeSessionToken` saqlanadi; yangi qurilmadan login qilinganda — agar foydalanuvchi `role !== 'admin'` bo'lsa va eski faol sessiya mavjud bo'lsa, server eski sessiyani bekor qiladi (token invalidate) va **WebSocket/SSE orqali** eski qurilmaga "Sizning sessiyangiz boshqa qurilmadan ochildi — chiqib ketdingiz" deb signal yuboradi (shu joyda ham yuqoridagi WebSocket/SSE qoidasi ishga tushadi). Admin uchun bu cheklov qo'llanilmaydi (`role === 'admin'` bo'lsa — istalgancha parallel sessiyaga ruxsat).
+**✅ Bitta qurilma talabi (so'ralgan 2026-06-07)** — bajarildi: xodim yangi qurilmasi tasdiqlansa eski qurilmalari bekor qilinadi va SSE orqali darhol chiqariladi; Admin uchun cheklov yo'q.
 
 ### Offline Support
 
@@ -254,7 +198,7 @@ Locales `uz` (default) and `ru` at `src/i18n/uz.js` and `src/i18n/ru.js`. Use `c
 
 ---
 
-## Session Notes (last updated: 2026-06-30)
+## Session Notes (tarixiy eslatmalar; `MOCK_*` nomlari — eski frontend davri)
 
 ### Hook xatosi haqida
 `.claude/settings.local.json` da `"cockroachdb": false` yozilgan. Yangi sessionda CockroachDB plugin hook xatosi chiqmasligi kerak.
@@ -284,7 +228,7 @@ Locales `uz` (default) and `ru` at `src/i18n/uz.js` and `src/i18n/ru.js`. Use `c
 - **birthDate / instagram** — profil modalining "Umumiy" tabida
 - **Pagination** — 20 ta / sahifa, search/filter o'zgarganda reset
 
-### mock.js — Muhim funksiyalar
+### mock.js — Muhim funksiyalar (TARIXIY — fayl o'chirilgan, mantiq backendda)
 - `mergeCustomers(keepId, removeId)` — mijozlarni birlashtiradi, salesni ko'chiradi
 - `addCustomer` — ID: `reduce` max + 1 (collision yo'q)
 
@@ -293,8 +237,8 @@ Locales `uz` (default) and `ru` at `src/i18n/uz.js` and `src/i18n/ru.js`. Use `c
 - Yetkazib beruvchi to'lovlari tab: readonly (Income dan), pagination, do'kon filtri, qidiruv, supplierName MOCK_SUPPLIERS dan o'qiladi
 - Kapital harakati tab: CRUD, oy filtri, pagination
 
-### Multido'kon funksiyasi qo'shilganda (kelajak)
-Hozir har bir tabda alohida `filterShop` local state bor.
+### ✅ Multido'kon — global do'kon filtri (bajarildi)
+Do'kon tanlovi sidebar'da (`shopStore.selectedShopId`), sahifalardagi alohida `filterShop` olib tashlangan. Quyidagi matn — tarixiy reja.
 Multido'kon qo'shilganda **do'kon va qidiruv filtri sahifaning eng tepasiga** (global header ga) ko'chirilsin.
 Shunda tepada tanlangan do'kon pastdagi **barcha tablar va maydonlarga** bir vaqtda ta'sir qilsin.
 Tegishli fayllar: `Expenses.jsx` (ShopExpensesTab, SupplierPaymentsTab, CapitalTabWithHeader), `shopStore.js`.
@@ -321,7 +265,7 @@ Barcha katta sahifalar bo'lindi. Hali bo'linmagan fayl yo'q.
 1. **Helper fayllar `.jsx` bo'lishi SHART** — JSX ishlatsa `.js` emas `.jsx` extension (Vite xato beradi)
 2. **Har bir fayl `export default ComponentName` bilan tugashi SHART**
 3. **Python script bilan bo'lish** — `open(..., encoding='utf-8')` — PowerShell Unicode muammosi bor
-4. **Bo'lgandan keyin ALBATTA tekshir**: har bir split fayl o'z importlarini to'liq o'z ichida olib yurishi kerak — hook, icon, mock funksiya barchasi
+4. **Bo'lgandan keyin ALBATTA tekshir**: har bir split fayl o'z importlarini to'liq o'z ichida olib yurishi kerak — hook, icon, api service funksiyalari barchasi
 5. **Folder pattern**: `src/pages/PageName/index.jsx` (main) + `tabs/TabName.jsx` + `components/ModalName.jsx` + `helpers.jsx`
 6. **Props pattern**: Warehouse kabi sahifalar named props oladi; Sales `{ ctx }` pattern ishlatadi
 
@@ -353,20 +297,12 @@ Quyidagilar **stash dan qaytarildi va ishlaydi**:
 
 **Texnik eslatma:** `cancelModal` da backend barcha return larni `cancelled` qilib qo'yadi → MOCK_RETURNS.refundAmount ni original sale bilan join qilib haqiqiy summa ko'rsatiladi.
 
-### Keyingi session (2026-10-08 dan keyin) — AVVAL O'QI
-BILLZ bo'limlarining hammasi tugadi va serverda. Holat va qolgan ishlar tartibi: memory `project_session_handoff_2026_10_08.md` (AI statistika → Telegram bot (token kutilmoqda) → ~21-oktabrda eski login yo'lini yopish → multi-tenant). Instagram bot ataylab o'chirilgan — qolgan ishlarga qo'shma.
-
-### Keyingi session (2026-10-04 dan keyin) — TARIXIY
-BILLZ paritet ishlari davom etadi: foydalanuvchi keyingi BILLZ bo'limi ro'yxatini beradi → har bandni kodda tekshir (bor/qisman/yo'q jadval) → yo'q va kamchiliklarni HAMMASINI qil → lokal test → commit → deploy faqat "deploy" deyilganda. Batafsil: memory `project_next_billz_plan.md`.
-Ochiq vazifalar: AI kredit xatosi tekshiruvi (`project_ai_credit_issue_todo.md`, foydalanuvchi "AI'ni tekshir" desa), Telegram bot (token kutilmoqda, `project_telegram_auth_todo.md`).
-
 ### O'lchov birligi tizimi (2026-08-14 da qo'shildi)
 
 - `src/components/UnitInput.jsx` — select + "Boshqa..." combo, X tugma bilan tozalash
 - `UNIT_OPTIONS = ['dona', 'metr', 'litr', 'kg', 'gramm', 'juft', 'ta']` — predefined, + erkin matn
 - **Batch darajasida** (product emas) — har do'kon o'zinikini tanlaydi kirim vaqtida
-- DB: `batches.unit VARCHAR(20) DEFAULT 'dona'` — lokal DB da qo'shildi (Hetzner da HALI yo'q!)
-- **Hetzner migration KERAK**: `ALTER TABLE batches ADD COLUMN IF NOT EXISTS unit VARCHAR(20) DEFAULT 'dona';`
+- DB: `batches.unit VARCHAR(20) DEFAULT 'dona'` — ✅ lokal va serverda bor
 - Ko'rinish joylari: BatchesTab, StockTab, ProductModal, BarcodeTab, ProductSearch, Management, Reports, Dashboard
 - **UX qoidasi**: forma ochilganda bo'sh (`— tanlang —`), majburiy, modal yopilsa/ochilsa reset
 
@@ -386,20 +322,23 @@ Ochiq vazifalar: AI kredit xatosi tekshiruvi (`project_ai_credit_issue_todo.md`,
 
 ---
 
-## Backend holati (2026-06-30 da yangilandi)
+## Backend holati (yangilangan: 2026-10-08)
 
 ### Backend nima?
 `C:\Users\Umidjon\Desktop\shina_crm_backend` — Node.js + Express + PostgreSQL.
-Frontend `src/api/index.js` orqali ulanadi (`VITE_API_URL` env dan).
+Frontend `src/api/client.js` orqali ulanadi (`VITE_API_URL`: `.env.production` → `https://sicrm.uz`; lokal sinovda `--mode development`). Express app `src/app.js`, ishga tushirish/migratsiya/seed/jadval `src/index.js`.
 
 ### Backend tuzilmasi
 ```
 src/
-  controllers/   — authController, shopsController, employeesController, ...
-  routes/        — auth.js, shops.js, employees.js, ...
-  middleware/    — auth.js (authMiddleware, adminOnly, adminOrManager, authMiddlewareNoDeviceCheck)
+  controllers/   — auth, sales, reports, finance, marketing, supplierOps, ai, aiStats, aiAgents, ...
+  routes/        — har controller uchun router (app.js da /api/... ga ulanadi)
+  middleware/    — auth.js (authMiddleware, adminOnly, adminOrManager, authMiddlewareNoDeviceCheck), perm.js (requirePerm, canSeeProfit), errorI18n.js
+  agents/        — prompts.js (AI yordamchi/tahlilchi qoidalari), botPrompts.js (Mijozlar boti), dailyAnalyst.js (kundalik tahlil + jadval)
+  utils/         — aiSections.js (bo'lim SQL), aiStats.js, aiStatsTools.js, localTime.js, tokens.js, faceCrypto.js, loyalty.js, ...
+  realtime.js    — SSE (rt.toUser/toAdmins/...)
   db.js          — pool (PostgreSQL)
-  index.js       — Express app entry
+  app.js / index.js
 tests/
   setup.js       — Jest env vars (JWT_SECRET, TEST_USER, TEST_PASS)
   auth.test.js   — login/auth testlar
@@ -409,7 +348,14 @@ tests/
 ### Muhim backend endpointlar
 | Endpoint | Izoh |
 |----------|------|
-| `POST /api/auth/login` | Login (username + password + deviceId) |
+| `POST /api/auth/login` | Login (`flow: 2` → `pre` token; flow'siz — eski yo'l, ~2026-10-21 yopiladi) |
+| `POST /api/auth/verify-face` | Yuzni serverda tekshirish → sessiya yoki admin tasdig'i |
+| `POST /api/auth/refresh` | Access tokenni yangilash (refresh almashadi) |
+| `GET /api/realtime/stream` | SSE hodisalar (perm_changed, device_revoked, weekly_report, ...) |
+| `GET /api/ai-stats/section/:section` | AI bo'lim KPI/ro'yxatlari + so'nggi AI xulosa (sales/inventory/customers/marketing/staff/instagram) |
+| `GET /api/ai-stats/digests`, `POST .../digests/run` | Kundalik tahlil natijalari / qo'lda ishga tushirish (admin) |
+| `POST /api/ai/chat` | AI yordamchi chati (SSE stream) |
+| `POST /api/ai/instagram`, `/api/ai/instagram-dm` | Mijozlar boti webhooklari (Cloudflare Worker orqali) |
 | `POST /api/auth/attempts` | Selfie yuborish (pending qurilma) |
 | `GET /api/auth/attempts/my-status` | Qurilma tasdiqlash statusini so'rash |
 | `GET /api/auth/descriptor` | Foydalanuvchining yuz descriptori |
@@ -433,9 +379,9 @@ tests/
 - Frontend: agar boshqa do'kon bo'lsa → transfer modal, bo'lmasa → xato xabar
 - Transfer API: `POST /api/shops/:id/transfer-and-delete` — batches, items, sales, expenses, used_stock ko'chiradi + original_shop_id saqlaydi
 
-### settingsStore xodimlar muammosi (MUHIM)
+### ✅ settingsStore xodimlar muammosi (tuzatilgan)
 `settingsStore` (`goodtires-settings` localStorage) xodimlarni cache qiladi. DB truncate qilsang → UI da ko'rinishda davom etadi.
-**Yechim**: `loadEmployees` funksiyasi `emps.length === 0` bo'lsa ham `set({ employees: [] })` chaqirishi kerak. Hozir bu **TUZATILMAGAN** — keyingi sessiyada tuzatish kerak.
+✅ **Tuzatilgan**: `loadEmployees` bo'sh ro'yxatda ham `set({ employees: [] })` qiladi.
 
 Foydalanuvchi localStorage ni qo'lda tozalashi: `localStorage.clear(); location.reload()`
 
@@ -444,9 +390,8 @@ Foydalanuvchi localStorage ni qo'lda tozalashi: `localStorage.clear(); location.
 - `tests/setup.js` — JWT_SECRET, TEST_USER, TEST_PASS env dan o'qiladi
 - `package.json` jest config: `"setupFiles": ["./tests/setup.js"]`
 
-### WebSocket/SSE — ENG MUHIM KEYINGI VAZIFA
-(CLAUDE.md ning WebSocket/SSE bo'limiga to'liq yozilgan — o'sha bo'limni o'qi)
-Hali bajarilmagan. Real foydalanuvchilar paytida bajariladi.
+### ✅ Real vaqt (SSE) — bajarilgan (2026-10-05)
+`src/realtime.js` + frontend `src/hooks/useRealtime.js`. Batafsil — yo'l xaritasidagi "SSE orqali real vaqt" bandi.
 
 ### Fragment pattern (MUHIM — yangi qoida)
 Tab fayllarida bir nechta root element bo'lsa (masalan `<motion.div>` + modal `<AnimatePresence>` bloklari), return ichini `<>...</>` fragment bilan o'rab chiq. Python script bilan bo'linganda oxirgi `</AnimatePresence>` odatda kesib qolinadi — uni qo'lda qo'shish kerak.
@@ -466,7 +411,7 @@ Tab fayllarida bir nechta root element bo'lsa (masalan `<motion.div>` + modal `<
 
 ### DB migration log (barcha qo'shilgan ustunlar)
 
-Quyidagilar **lokal DB da** bajarilgan (2026-06-30):
+Quyidagilar lokal va serverda bajarilgan ✅ (endi migratsiyalar backend ishga tushganda avtomatik: `ADD COLUMN/CREATE TABLE IF NOT EXISTS`):
 ```sql
 ALTER TABLE products ADD COLUMN IF NOT EXISTS attribute TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS car_category TEXT;
@@ -480,14 +425,14 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ---
 
-## SERVER DEPLOY (holat: 2026-10-04 — lokal va server BIR XIL)
+## SERVER DEPLOY (holat: 2026-10-08 — lokal va server BIR XIL)
 
 **Oxirgi deploy: 2026-10-08 (24-deploy)** — backend `910a99b`, frontend `95f92b03` (AI qayta qurildi: 3 ta AI — AI yordamchi, Kundalik tahlilchi, Mijozlar boti; AI sahifasi 4 tab; tafsilot "AI agentlar arxitekturasi" bo'limida). Mijozlar boti modeli Sonnet 5.5 (foydalanuvchi qarori, qimmat bo'lsa Haiku'ga qaytaradi), Instagram kanallari o'chiq (keyin yoqiladi, yangi Meta token kerak). Zaxira `/root/backups/2026-10-08c`. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
 Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
 
 ### Xavfsiz deploy tartibi (har safar)
 ```bash
-# 0. Zaxira (D = /root/backups/<sana><harf>)
+# 0. Zaxira (D = /root/backups/<sana><harf>) — AVVAL `ls -d /root/backups/<sana>*` bilan bo'sh harfni tanla (mavjud papka ustidan yozma!)
 ssh -i ~/.ssh/crm_bot root@167.233.169.118 'D=/root/backups/X; mkdir -p $D; sudo -u postgres pg_dump -Fc shina_crm > $D/shina_crm.dump; tar --exclude=node_modules -czf $D/backend.tgz -C /root shina_crm_backend; cp -a /var/www/shina-crm $D/frontend'
 # 1. Backend: lokal push → serverda pull + restart (DB migratsiyalar controller boshida avtomatik, faqat ADD/CREATE IF NOT EXISTS)
 git push origin master   # shina_crm_backend
@@ -507,7 +452,9 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
   - egalik: `pg_class` owner ≠ `shina_user` (jadval/sequence) → `permission denied`
 - Topilgan va tuzatilganlar: products 9 ustun yo'q edi (tovar qo'shib bo'lmasdi); `transfers` va `group_barcode_seq` postgres egaligida edi; `items_barcode_key` UNIQUE umumiy barkodni to'sardi (olib tashlandi, oddiy `idx_items_barcode`).
 - `ALTER DEFAULT PRIVILEGES FOR ROLE postgres ... TO shina_user` qo'yilgan — qo'lda yaratilgan obyektlar ham ishlaydi.
-- Lokal brauzer sinovi: `npx vite build --mode development --outDir dist-local` + launch.json `preview` (4173, CORS ruxsat). Oddiy `npm run build` .env.production (server API) ishlatadi — lokal sinovda ISHLATMA. Lokal admin token: backend `.env` JWT_SECRET bilan `jwt.sign` (scratchpad faylga, chatga chiqarma).
+- Lokal brauzer sinovi: `npx vite build --mode development --outDir dist-local` + launch.json `preview` (4173, CORS ruxsat). Oddiy `npm run build` .env.production (server API) ishlatadi — lokal sinovda ISHLATMA. Lokal admin token: backend `require('./src/utils/tokens').signAccess({id:1,role:'admin',userType:'user',...})` (scratchpad faylga, chatga chiqarma) → `localStorage.shina_token` + `shina-auth-storage`.
+- **Brauzer paneli yashirin bo'lsa** framer-motion `AnimatePresence mode="wait"` tab almashinuvi tugamaydi (kadr chizilmaydi). Sinov uchun VAQTINCHA `useState(new URLSearchParams(location.search).get('tab') || ...)` qo'yib `dist-local` build qil, `?tab=` bilan och, keyin manbani `git checkout` bilan qaytar (commit qilma).
+- **Mijozlar boti simulyatsiyasi**: webhook handler'ni node'da mock req/res bilan chaqir, `global.fetch` ni `instagram.com` uchun to'sib qo'y (aks holda lokal bazadagi token bilan haqiqiy Instagram'ga yozib yuborishi mumkin), sinovdan keyin sozlamani qaytar va `instagram_conversations`/`instagram_comment_log` dagi test yozuvlarini o'chir.
 
 ---
 
@@ -538,7 +485,7 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
 
 ## AI agentlar arxitekturasi (2026-10-08 qayta qurilgan — shu tuzilmani saqla)
 
-**2 ta tahlil agenti + mijoz botlari.** Raqamlar HAR DOIM SQL'dan; AI faqat sharhlaydi.
+**3 ta AI: AI yordamchi + Kundalik tahlilchi (tahlil) va Mijozlar boti (mijozlarga javob).** Raqamlar HAR DOIM SQL'dan; AI faqat sharhlaydi. Admin panel → AI Agentlar: 2 guruh — "Tahlil agentlari" (jadval vaqti + 2 karta) va "Mijozlar bilan muloqot botlari" (1 karta).
 - **Yagona SQL manba:** backend `utils/aiSections.js` — 5 bo'lim (sales, inventory, customers, marketing, staff) uchun KPI (`{key,label,value,prev,unit,sensitive,invert}`), ro'yxatlar va AI uchun `forAi()`. AI Agent tabidagi kartalar, kundalik tahlilchi va yordamchining `get_section_report` tooli shu bitta funksiyadan oladi — raqam hamma joyda bir xil. Yangi KPI shu faylga qo'shiladi (+ ru tarjima `aisec_kpi_<key>`, ustun `aisec_col_<list>_<col>`; uz nomi backend label'dan).
 - **AI yordamchi** (`ai-assistant`, kind `assistant`): har bo'lim tabidagi chat. `POST /api/ai/chat` `{agentId:'ai-assistant', section}` — prompt `agents/prompts.js` `buildAssistantPrompt` (mijoz yuborgan systemPrompt e'tiborga olinmaydi), toollar `ASSISTANT_TOOLS` ichidan (faqat o'qish). Suhbat tarixi bo'lim bo'yicha alohida (`chatKey`).
 - **Kundalik tahlilchi** (`daily-analyst`, kind `analyst`): `agents/dailyAnalyst.js` — har bo'lim uchun 1 ta AI chaqiruv (Sonnet 5.5, structured output `DIGEST_SCHEMA`), `ai_digest_runs`/`ai_digests` jadvallari. Jadval: app_settings `ai_schedule` `{hour}` (Toshkent, default 7), har 5 daqiqada tekshiradi; yangi faollik bo'lmasa `skipped`. Dushanba — haftalik hisobot (`aiStats.generateWeekly`). Sezgir bandlar (foyda/tannarx) `canSeeProfit` bo'lmasa yashiriladi (model belgisi + regex).
