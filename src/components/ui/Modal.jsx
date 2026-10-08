@@ -23,17 +23,16 @@ const SIZES = { sm: 'sm:max-w-md', md: 'sm:max-w-2xl', lg: 'sm:max-w-5xl', xl: '
 // xl — bo'lim oynasi: telefonda to'liq ekran, kompyuterda deyarli to'liq balandlik
 const HEIGHTS = { xl: 'h-[100dvh] sm:h-[92vh] rounded-none sm:rounded-3xl' }
 
-const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, zIndex, children }) => {
+// Bitta oynaning stekdagi yozuvi: Esc va telefon "orqaga" faqat eng yuqoridagi oynani yopadi.
+// markClosing — chiqish animatsiyasi bor oynalar (Sheet) yopilayotganda keyingi bosishda o'tkazib yuboriladi
+const useStackEntry = (onClose, markClosing = true) => {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
-  // Ichma-ich oynalar: har yangisi oldingisidan yuqorida (birinchi chizishdayoq)
-  const [z] = useState(() => zIndex ?? 200 + stack.length * 10)
   const entryRef = useRef(null)
-  const requestClose = () => { if (entryRef.current) entryRef.current.closing = true; onClose?.() }
   useEffect(() => {
     const entry = { id: ++seq, popped: false, closing: false }
-    entry.onPop = () => { entry.popped = true; entry.closing = true; onCloseRef.current?.() }
-    entry.close = () => { entry.closing = true; onCloseRef.current?.() }
+    entry.onPop = () => { entry.popped = true; if (markClosing) entry.closing = true; onCloseRef.current?.() }
+    entry.close = () => { if (markClosing) entry.closing = true; onCloseRef.current?.() }
     entryRef.current = entry
     stack.push(entry)
     window.history.pushState({ ...(window.history.state || {}), modal: entry.id }, '')
@@ -43,6 +42,21 @@ const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bo
       if (!entry.popped && window.history.state?.modal === entry.id) { ignorePops++; window.history.back() }
     }
   }, [])
+  return entryRef
+}
+
+// O'zi chiziladigan (eski uslubdagi) oynalar uchun: oyna ichiga <StackGuard onClose={...} /> qo'yiladi —
+// shunda Esc/"orqaga" ostidagi bo'lim oynasini emas, aynan shu oynani yopadi
+export const StackGuard = ({ onClose }) => {
+  useStackEntry(onClose, false)
+  return null
+}
+
+const Sheet = ({ onClose, title, subtitle, icon: Icon, actions, size, footer, bodyClass, zIndex, children }) => {
+  // Ichma-ich oynalar: har yangisi oldingisidan yuqorida (birinchi chizishdayoq)
+  const [z] = useState(() => zIndex ?? 200 + stack.length * 10)
+  const entryRef = useStackEntry(onClose)
+  const requestClose = () => { if (entryRef.current) entryRef.current.closing = true; onClose?.() }
 
   return (
     <div className="fixed inset-0 flex items-end sm:items-center justify-center sm:p-4" style={{ zIndex: z }}>

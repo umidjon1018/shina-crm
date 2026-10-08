@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Trash2, X } from 'lucide-react'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const DeleteModal = ({ ctx }) => {
   const { t } = useTranslation()
@@ -39,6 +40,7 @@ const DeleteModal = ({ ctx }) => {
       <AnimatePresence>
         {deleteTarget && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setDeleteTarget(null)} />
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setDeleteTarget(null)}

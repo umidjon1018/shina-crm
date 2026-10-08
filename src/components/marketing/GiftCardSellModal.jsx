@@ -7,6 +7,7 @@ import { useDataStore } from '../../store/dataStore'
 import { sellGiftCard } from '../../api/marketingService'
 import { getCustomers } from '../../api/customerService'
 import { PaymentMethodPicker } from '../../pages/Expenses/components/expHelpers'
+import { StackGuard } from '../ui/Modal'
 
 const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
 const Label = ({ children }) => <label className="text-text-secondary text-xs font-semibold mb-1.5 block">{children}</label>
@@ -60,6 +61,7 @@ const GiftCardSellModal = ({ shopId, onClose, onSold, presetCode = '' }) => {
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-4">
+      <StackGuard onClose={onClose} />
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[92vh] overflow-y-auto">

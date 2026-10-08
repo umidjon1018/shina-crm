@@ -6,6 +6,7 @@ import { getReservations, createReservation, cancelReservation } from '../../../
 import { getProducts } from '../../../api/productService'
 import { getItems } from '../../../api/itemService'
 import { toLocalISO } from '../../../utils/tz'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const DURATIONS = [
   { hours: 3, key: 'sl_resv_dur_3h' },
@@ -79,6 +80,7 @@ const NewReservationModal = ({ shopId, customers, onClose, onCreated }) => {
   const input = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-5 shadow-xl"
         onClick={e => e.stopPropagation()}>

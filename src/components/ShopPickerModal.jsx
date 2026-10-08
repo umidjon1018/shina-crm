@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Store } from 'lucide-react'
 import { useShopStore } from '../store/shopStore'
+import { StackGuard } from './ui/Modal'
 
 export const ShopPickerModal = ({ onConfirm, onCancel }) => {
   const { t } = useTranslation()
@@ -11,6 +12,7 @@ export const ShopPickerModal = ({ onConfirm, onCancel }) => {
 
   return (
     <div className="fixed inset-0 z-[360] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <StackGuard onClose={onCancel} />
       <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-sm shadow-xl space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-accent-red/10 flex items-center justify-center">

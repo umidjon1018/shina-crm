@@ -9,6 +9,7 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { getItemStatus } from '../../../utils/itemStatus'
 import JsBarcode from 'jsbarcode'
 import { Badge } from '../whHelpers.jsx'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const AttrBadges = ({ attributes }) => {
   if (!attributes || Object.keys(attributes).length === 0) return null
@@ -488,6 +489,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
               className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
               onClick={() => !isGenerating && setDeleteGroupModal(null)}
             >
+              <StackGuard onClose={() => !isGenerating && setDeleteGroupModal(null)} />
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                 onClick={e => e.stopPropagation()}
@@ -574,6 +576,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
             onClick={() => { setMergeDialog(null); pendingGenerate.current = null }}
           >
+            <StackGuard onClose={() => { setMergeDialog(null); pendingGenerate.current = null }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
@@ -622,6 +625,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4"
             onClick={() => setAttrEditModal(null)}
           >
+            <StackGuard onClose={() => setAttrEditModal(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
@@ -703,6 +707,7 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
             className="fixed inset-0 bg-black/70 z-[310] flex items-center justify-center p-4"
             onClick={() => setDetailModal(null)}
           >
+            <StackGuard onClose={() => setDetailModal(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}

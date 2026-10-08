@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Pencil, History, Loader2 } from 'lucide-react'
 import { updateReturn, getReturnEdits } from '../../api/returnService'
 import { toLocalISO } from '../../utils/tz'
+import { StackGuard } from '../ui/Modal'
 
 const METHODS = ['cash', 'card', 'transfer']
 const fmtDate = (iso) => (iso || '').slice(0, 10).split('-').reverse().join('.')
@@ -45,6 +46,7 @@ const EditReturnModal = ({ ret, onClose, onSaved }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-5 shadow-xl"

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '../../../store/authStore'
 import { motion } from 'framer-motion'
-import Modal from '../../../components/ui/Modal'
+import Modal, { StackGuard } from '../../../components/ui/Modal'
 import MonthRangeSelect from '../../../components/ui/MonthRangeSelect'
 import { matchPeriod, isRange, parseRange, rangeText } from '../../../utils/period'
 import DataTable from '../../../components/ui/DataTable'
@@ -178,6 +178,7 @@ const InstallmentTab = ({ ctx }) => {
 
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[340] flex items-center justify-center p-4" onClick={() => setDetailedOrg(null)}>
+            <StackGuard onClose={() => setDetailedOrg(null)} />
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
               className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto no-scrollbar space-y-4 sm:space-y-6 shadow-2xl">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -331,6 +332,7 @@ const InstallmentTab = ({ ctx }) => {
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[350] flex items-center justify-center p-4"
             onClick={() => { setCustomerPayModal(null); setCustomerPaySaleId(null); setCustomerPayAmount('') }}>
+            <StackGuard onClose={() => { setCustomerPayModal(null); setCustomerPaySaleId(null); setCustomerPayAmount('') }} />
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}
               className="bg-bg-secondary border border-border rounded-3xl p-4 sm:p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto no-scrollbar space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">

@@ -6,6 +6,7 @@ import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, ShieldAlert, Info, P
 import { useNotificationStore } from '../store/notificationStore'
 import { useAuthStore } from '../store/authStore'
 import { formatDateTime, formatNumber } from '../utils/format'
+import { StackGuard } from './ui/Modal'
 
 const SEVERITY = {
   warning: { icon: AlertTriangle, cls: 'bg-accent-orange/10 text-accent-orange' },
@@ -100,6 +101,7 @@ const NotificationsPanel = ({ className = '' }) => {
       {createPortal(<AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-[300]">
+            <StackGuard onClose={close} />
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50" onClick={close} />
             <motion.aside initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'tween', duration: 0.2 }}
               className="absolute right-0 top-0 bottom-0 w-full sm:w-[420px] bg-bg-primary border-l border-border flex flex-col safe-header">

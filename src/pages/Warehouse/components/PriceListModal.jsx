@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { X, Printer, FileText, CreditCard } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 import { printPriceList } from '../../../utils/printPriceList'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const FORMATS = [
   { id: 'a4',   label: 'A4',           size: '210 × 297 mm',  desc: 'Devorga osish, jadval ko\'rinishi', icon: FileText },
@@ -67,6 +68,7 @@ export default function PriceListModal({ products, items, attributeDefs, onClose
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <div
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-lg flex flex-col"
         style={{ maxHeight: '90vh' }}

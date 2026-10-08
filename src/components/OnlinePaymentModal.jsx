@@ -4,6 +4,7 @@ import QRCode from 'qrcode'
 import { AlertCircle, CheckCircle2, Copy, ExternalLink, Loader2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { createOnlinePayment, getOnlinePayment, cancelOnlinePayment, simulateOnlinePayment } from '../api/integrationService'
+import { StackGuard } from './ui/Modal'
 
 const NAMES = { payme: 'Payme', click: 'Click', uzum: 'Uzum Bank' }
 const COLORS = { payme: 'bg-[#00CCCC]/10 text-[#00A6A6] border-[#00CCCC]/40', click: 'bg-[#0073FF]/10 text-[#0073FF] border-[#0073FF]/40', uzum: 'bg-[#7000FF]/10 text-[#7000FF] border-[#7000FF]/40' }
@@ -44,6 +45,7 @@ const OnlinePaymentModal = ({ amount, providers, shopId, customerId, purpose = '
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-4">
+      <StackGuard onClose={() => { if (payment?.status !== 'paid') close() }} />
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={payment?.status === 'paid' ? undefined : close} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-sm shadow-2xl z-10 max-h-[92vh] overflow-y-auto">

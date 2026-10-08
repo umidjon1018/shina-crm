@@ -7,6 +7,7 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { useShopStore } from '../../../store/shopStore'
 import { ShopPickerModal } from '../../../components/ShopPickerModal'
 import CustomerExtraFields from './CustomerExtraFields'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const AddCustomerModal = ({ ctx }) => {
   const { t } = useTranslation()
@@ -50,6 +51,7 @@ const AddCustomerModal = ({ ctx }) => {
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => { setShowAddModal(false); setAddError('') }} />
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 

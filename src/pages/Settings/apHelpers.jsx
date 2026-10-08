@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Users, Monitor, ClipboardList, Store, Settings, Bot } from 'lucide-react'
+import { StackGuard } from '../../components/ui/Modal'
 
 const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr']
 const MONTHS_RU = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря']
@@ -52,6 +53,7 @@ const Badge = ({ color, children }) => (
 )
 const ModalWrap = ({ onClose, children, maxW = 'max-w-md' }) => (
   <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <StackGuard onClose={onClose} />
     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
     <motion.div
       initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}

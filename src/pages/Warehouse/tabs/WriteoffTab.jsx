@@ -5,6 +5,7 @@ import { Trash2, X, CheckCircle, Search, AlertTriangle } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
 import { getWriteoffs, createWriteoff, addWriteoffExpense } from '../../../api/writeoffService'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const fmtDate = (iso) => {
   if (!iso) return '—'
@@ -217,6 +218,7 @@ const WriteoffTab = ({ products, items, batches }) => {
       <AnimatePresence>
         {modal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => !saving && setModal(false)}>
+            <StackGuard onClose={() => !saving && setModal(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

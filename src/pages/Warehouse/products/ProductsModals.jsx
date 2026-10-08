@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { StackGuard } from '../../../components/ui/Modal'
 
 // Kategoriya qo'shish va o'chirish oynalari (avval Boshqaruv sahifasida edi)
 const ProductsModals = ({ ctx }) => {
@@ -14,6 +15,7 @@ const ProductsModals = ({ ctx }) => {
       <AnimatePresence>
         {showCategoryForm && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setShowCategoryForm(false)} />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCategoryForm(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -75,6 +77,7 @@ const ProductsModals = ({ ctx }) => {
       <AnimatePresence>
         {deleteCategoryConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setDeleteCategoryConfirm(null)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

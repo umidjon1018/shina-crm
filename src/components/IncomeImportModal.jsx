@@ -7,6 +7,7 @@ import {
 } from '../utils/excelIncomeImport'
 import { getProducts, createProduct } from '../api/productService'
 import { addBatch } from '../api/incomeService'
+import { StackGuard } from './ui/Modal'
 
 // Yacheyka border rangi
 const cellBorder = (level) => {
@@ -148,6 +149,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <StackGuard onClose={onClose} />
       <div className="bg-bg-secondary border border-border rounded-[2rem] w-full max-w-7xl max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 sm:px-8 py-5 border-b border-border shrink-0">

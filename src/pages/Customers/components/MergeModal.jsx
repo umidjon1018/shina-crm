@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle, Calendar, Check, GitMerge, Link2, Phone, User, X } from 'lucide-react'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const MergeModal = ({ ctx }) => {
   const { t } = useTranslation()
@@ -79,6 +80,7 @@ const MergeModal = ({ ctx }) => {
 
           return (
             <div className="fixed inset-0 z-[310] flex items-center justify-center p-4">
+              <StackGuard onClose={() => setMergeModal(null)} />
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => setMergeModal(null)}
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -250,6 +252,7 @@ const MergeModal = ({ ctx }) => {
 
           return (
             <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+              <StackGuard onClose={() => setShowOverdueModal(false)} />
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => setShowOverdueModal(false)}

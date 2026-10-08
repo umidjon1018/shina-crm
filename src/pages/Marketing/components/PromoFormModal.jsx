@@ -8,6 +8,7 @@ import { useShopStore } from '../../../store/shopStore'
 import { createPromotion, updatePromotion } from '../../../api/promotionService'
 import TargetPicker from './TargetPicker'
 import { promoSummary } from './mkHelpers'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const KINDS = [
   { id: 'discount', icon: Tag },
@@ -91,6 +92,7 @@ const PromoFormModal = ({ initial, onClose, onSaved, products, categories, custo
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-4">
+      <StackGuard onClose={onClose} />
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-2xl shadow-2xl z-10 max-h-[92vh] overflow-y-auto">

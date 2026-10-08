@@ -13,6 +13,7 @@ import { bulkUpdatePrices } from '../../../api/productService'
 import { compressImage } from '../../../api/productImageService'
 import DualPriceInput from '../components/DualPriceInput'
 import { productTitle } from '../../../utils/format'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const ProductsTab = ({ ctx }) => {
   const { t, i18n } = useTranslation()
@@ -545,6 +546,7 @@ const ProductsTab = ({ ctx }) => {
               <AnimatePresence>
                 {deletingAttrDef && (
                   <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setDeletingAttrDef(null)}>
+                    <StackGuard onClose={() => setDeletingAttrDef(null)} />
                     <motion.div
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -1345,6 +1347,7 @@ const ProductsTab = ({ ctx }) => {
                 <AnimatePresence>
                   {bulkPriceModal && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4" onClick={() => setBulkPriceModal(false)}>
+                      <StackGuard onClose={() => setBulkPriceModal(false)} />
                       <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -1531,6 +1534,7 @@ const ProductsTab = ({ ctx }) => {
                       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4"
                       onClick={e => { if (e.target === e.currentTarget) setEditingProduct(null) }}
                     >
+                      <StackGuard onClose={() => { setEditingProduct(null) }} />
                       <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -1848,6 +1852,7 @@ const ProductsTab = ({ ctx }) => {
                     className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[340] flex items-center justify-center p-4"
                     onClick={e => { if (e.target === e.currentTarget) setDeleteProductConfirm(null) }}
                   >
+                    <StackGuard onClose={() => { setDeleteProductConfirm(null) }} />
                     <motion.div
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}

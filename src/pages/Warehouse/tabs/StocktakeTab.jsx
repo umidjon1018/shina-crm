@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ClipboardList, CheckCircle2, Clock, Trash2, X, ChevronRight, Search, AlertTriangle, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { getStocktakes, getStocktake, createStocktake, updateStocktakeItem, completeStocktake, reopenStocktake, deleteStocktake } from '../../../api/stocktakeService'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ')
 const fmtDate = (s) => s ? new Date(s).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
@@ -370,6 +371,7 @@ const StocktakeTab = () => {
       <AnimatePresence>
         {deleting && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setDeleting(null)}>
+            <StackGuard onClose={() => setDeleting(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

@@ -17,6 +17,7 @@ import api from '../../../api/client'
 import { ViewToggle } from '../../../components/ui/TableView'
 import { HeroStat, MiniStat, ChartCard, DonutChart, PALETTE, shortNum } from '../../../components/charts/Charts'
 import { formatNumber } from '../../../utils/format'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const StockTab = ({ products, batches, items, userRole, productCategories }) => {
   const { t } = useTranslation()
@@ -880,6 +881,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       <AnimatePresence>
         {transferModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => !trSaving && setTransferModal(false)}>
+            <StackGuard onClose={() => !trSaving && setTransferModal(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -978,6 +980,7 @@ const StockTab = ({ products, batches, items, userRole, productCategories }) => 
       <AnimatePresence>
         {historyModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setHistoryModal(false)}>
+            <StackGuard onClose={() => setHistoryModal(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

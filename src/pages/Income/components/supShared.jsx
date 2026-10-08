@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { addSupplier } from '../../../api/incomeService'
+import { StackGuard } from '../../../components/ui/Modal'
 
 export const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-blue'
 export const labelCls = 'text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1.5 block'
@@ -13,6 +14,7 @@ export const SupModal = ({ title, subtitle, onClose, children, maxW = 'max-w-lg'
     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[340] flex items-end sm:items-center justify-center sm:p-4"
     onClick={e => { if (e.target === e.currentTarget) onClose() }}
   >
+    <StackGuard onClose={onClose} />
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}

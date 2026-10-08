@@ -28,7 +28,7 @@ import SettlementsTab from './tabs/SettlementsTab'
 import PaymentsHistoryTab from './tabs/PaymentsHistoryTab'
 import SupplierReturnsTab from './tabs/SupplierReturnsTab'
 import { getPurchaseOrders, getSupplierReturns } from '../../api/supplierOpsService'
-import Modal from '../../components/ui/Modal'
+import Modal, { StackGuard } from '../../components/ui/Modal'
 import IncomeForm from '../../components/income/IncomeForm'
 import SectionHub from '../../components/ui/SectionHub'
 import { monthShort } from '../../utils/format'
@@ -368,6 +368,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowPaymentModal(null) }}
           >
+            <StackGuard onClose={() => { setShowPaymentModal(null) }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -471,6 +472,7 @@ const Income = () => {
         {/* Supplier o'chirish tasdiqlash modali */}
         {deleteSupplierConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setDeleteSupplierConfirm(null)} />
             <div className="bg-bg-secondary border border-border rounded-[2rem] p-5 sm:p-8 w-full max-w-sm shadow-glow-red">
               <h3 className="text-lg font-syne font-extrabold text-text-primary mb-2">O'chirishni tasdiqlang</h3>
               <p className="text-sm text-text-secondary mb-4 sm:mb-6">
@@ -500,6 +502,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) { setShowSupplierModal(false); setSupplierModalError('') } }}
           >
+            <StackGuard onClose={() => { setShowSupplierModal(false); setSupplierModalError('') }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -727,6 +730,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowLinkModal(null) }}
           >
+            <StackGuard onClose={() => { setShowLinkModal(null) }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -776,6 +780,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setEditingBatch(null) }}
           >
+            <StackGuard onClose={() => { setEditingBatch(null) }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -996,6 +1001,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[330] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setEditingPayment(null) }}
           >
+            <StackGuard onClose={() => { setEditingPayment(null) }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -1073,6 +1079,7 @@ const Income = () => {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4"
             onClick={e => { if (e.target === e.currentTarget) setShowSupplierDetail(null) }}
           >
+            <StackGuard onClose={() => { setShowSupplierDetail(null) }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -1370,6 +1377,7 @@ const Income = () => {
         )}
         {contractDialog && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[360] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setContractDialog(null)} />
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -1473,6 +1481,7 @@ const Income = () => {
         const imgs = productImages[String(editingBatch.productId)] || []
         return createPortal(
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9999] flex items-center justify-center" onClick={() => setEbFsOpen(false)}>
+            <StackGuard onClose={() => setEbFsOpen(false)} />
             <button onClick={() => setEbFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
             {imgs.length > 1 && (
               <>

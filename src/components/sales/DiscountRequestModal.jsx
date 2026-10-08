@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
+import { StackGuard } from '../ui/Modal'
 
 const DiscountRequestModal = ({ discount, requiredRole, cartItems, cartTotal, onSend, onClose }) => {
   const { t } = useTranslation()
@@ -9,6 +10,7 @@ const DiscountRequestModal = ({ discount, requiredRole, cartItems, cartTotal, on
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[360] flex items-center justify-center p-4">
+      <StackGuard onClose={onClose} />
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

@@ -5,6 +5,7 @@ import { X, Pencil, History, Loader2, Search } from 'lucide-react'
 import DateMaskInput from '../DateMaskInput'
 import { updateSale, getSaleEdits } from '../../api/salesService'
 import { toLocalISO } from '../../utils/tz'
+import { StackGuard } from '../ui/Modal'
 
 const PAY_TYPES = ['cash', 'card', 'transfer']
 const CARD_TYPES = [
@@ -83,6 +84,7 @@ const EditSaleModal = ({ sale, customers = [], onClose, onSaved }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
         className="bg-bg-secondary border border-border rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-5 shadow-xl"

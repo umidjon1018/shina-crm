@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Image as ImageIcon, X } from 'lucide-react'
 import { useSettingsStore } from '../store/settingsStore'
+import { StackGuard } from './ui/Modal'
 
 const SIZE = {
   xs: { box: 'w-7 h-7', icon: 11, rounded: 'rounded-lg' },
@@ -48,6 +49,7 @@ const ProductImageViewer = ({ productId, size = 'sm', className = '', onFullscre
           className="fixed inset-0 bg-black/60 backdrop-blur-md z-[500] flex items-center justify-center"
           onClick={e => { e.stopPropagation(); closeFs() }}
         >
+          <StackGuard onClose={closeFs} />
           <button
             onClick={closeFs}
             className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"

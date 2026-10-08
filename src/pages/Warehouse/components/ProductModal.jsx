@@ -7,6 +7,7 @@ import { getCategoryColor } from '../../../utils/categoryColors'
 import { getItemStatus } from '../../../utils/itemStatus'
 import { Th, Td, Badge, SEASON_COLORS } from '../whHelpers.jsx'
 import { useSettingsStore } from '../../../store/settingsStore'
+import { StackGuard } from '../../../components/ui/Modal'
 
 const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, productCategories, onClose }) => {
   const { t } = useTranslation()
@@ -27,6 +28,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -241,6 +243,7 @@ const ProductModal = ({ product, batches, items, userRole, canSeePurchasePrice, 
 
       {fsOpen && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9999] flex items-center justify-center" onClick={() => setFsOpen(false)}>
+          <StackGuard onClose={() => setFsOpen(false)} />
           <button onClick={() => setFsOpen(false)} className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"><X size={20} /></button>
           {images.length > 1 && (
             <>

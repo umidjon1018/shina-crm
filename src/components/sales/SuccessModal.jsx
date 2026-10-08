@@ -4,6 +4,7 @@ import { CheckCircle, Printer, RotateCcw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { useSettingsStore } from '../../store/settingsStore'
+import { StackGuard } from '../ui/Modal'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
@@ -114,6 +115,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[320] flex items-center justify-center p-4">
+      <StackGuard onClose={onClose} />
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

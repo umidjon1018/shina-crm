@@ -6,7 +6,7 @@ import { streamChat, getInstagramConversations, getInstagramConversationDetail, 
 import { getAiSection } from '../../../api/aiStatsService'
 import { useShopStore } from '../../../store/shopStore'
 import { useNavigate } from 'react-router-dom'
-import Modal from '../../../components/ui/Modal'
+import Modal, { StackGuard } from '../../../components/ui/Modal'
 import { getCustomers, updateCustomer } from '../../../api/customerService'
 import { useDataStore } from '../../../store/dataStore'
 import AiChat from '../components/AiChat'
@@ -151,6 +151,7 @@ function CustomerModal({ customer, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <StackGuard onClose={onClose} />
       <div
         className="bg-bg-primary border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
@@ -330,6 +331,7 @@ function DmConversationsPanel() {
       {/* Suhbat detail modal */}
       {selected && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)}>
+          <StackGuard onClose={() => setSelected(null)} />
           <div className="bg-bg-primary border border-border rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div>

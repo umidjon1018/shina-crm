@@ -8,6 +8,7 @@ import { useAuditStore } from '../../../store/auditStore'
 import { useAuthStore } from '../../../store/authStore'
 import api from '../../../api/client'
 import { Badge, ModalWrap, MONTHS_UZ, MONTHS_RU } from '../apHelpers.jsx'
+import { StackGuard } from '../../../components/ui/Modal'
 
 function ShopsTab() {
   const { t, i18n } = useTranslation()
@@ -133,6 +134,7 @@ function ShopsTab() {
       <AnimatePresence>
         {showShopForm && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setShowShopForm(false)} />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowShopForm(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -231,6 +233,7 @@ function ShopsTab() {
       <AnimatePresence>
         {shopDeleteTarget && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => { setShopDeleteTarget(null); setDeleteError(''); setTransferMode(false); setTransferTargetId('') }} />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { setShopDeleteTarget(null); setDeleteError(''); setTransferMode(false); setTransferTargetId('') }} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}

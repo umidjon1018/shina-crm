@@ -7,6 +7,7 @@ import { useSettingsStore } from '../../../store/settingsStore'
 import { useShopStore } from '../../../store/shopStore'
 import { addCapital, updateCapital } from '../../../api/capitalService'
 import { today, fmtUZS, fmtNum, PaymentMethodPicker } from './expHelpers'
+import { StackGuard } from '../../../components/ui/Modal'
 
 // ─── CAPITAL FORM MODAL (qo'shish + tahrirlash) ──────────
 const CapitalFormModal = ({ onClose, onSave, editData }) => {
@@ -72,6 +73,7 @@ const CapitalFormModal = ({ onClose, onSave, editData }) => {
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+      <StackGuard onClose={onClose} />
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         className="relative bg-bg-secondary border border-border rounded-2xl w-full max-w-md shadow-2xl z-10 max-h-[90vh] overflow-y-auto">

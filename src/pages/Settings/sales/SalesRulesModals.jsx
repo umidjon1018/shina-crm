@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import DateMaskInput from '../../../components/DateMaskInput'
+import { StackGuard } from '../../../components/ui/Modal'
 
 // Manba va nasiya tashkiloti oynalari (avval Boshqaruv sahifasida edi)
 const SalesRulesModals = ({ ctx }) => {
@@ -18,6 +19,7 @@ const SalesRulesModals = ({ ctx }) => {
       <AnimatePresence>
         {showSourceModal && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setShowSourceModal(false)} />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSourceModal(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -68,6 +70,7 @@ const SalesRulesModals = ({ ctx }) => {
       <AnimatePresence>
         {showOrgModal && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setShowOrgModal(false)} />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowOrgModal(false)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -196,6 +199,7 @@ const SalesRulesModals = ({ ctx }) => {
       <AnimatePresence>
                 {deleteSourceConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setDeleteSourceConfirm(null)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -227,6 +231,7 @@ const SalesRulesModals = ({ ctx }) => {
         )}
         {deleteOrgConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <StackGuard onClose={() => setDeleteOrgConfirm(null)} />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
