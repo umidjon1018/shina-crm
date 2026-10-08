@@ -1,20 +1,20 @@
 import { useState, useEffect, useMemo } from 'react'
-import DateMaskInput from '../../../components/DateMaskInput'
+import DateMaskInput from '../../components/DateMaskInput'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { ArrowDownToLine, CheckCircle, Lock, Plus, Search, X, XCircle } from 'lucide-react'
-import { getSuppliers, addBatch as apiAddBatch } from '../../../api/incomeService'
-import { createProduct } from '../../../api/productService'
-import { getCategoryColor } from '../../../utils/categoryColors'
-import { useShopStore } from '../../../store/shopStore'
-import { ShopPickerModal } from '../../../components/ShopPickerModal'
-import ShopRequiredGuard from '../../../components/ShopRequiredGuard'
-import { useAuthStore } from '../../../store/authStore'
-import { useSettingsStore } from '../../../store/settingsStore'
-import { Badge, Th, Td, isPrivileged } from '../whHelpers.jsx'
-import UnitInput from '../../../components/UnitInput'
+import { getSuppliers, addBatch as apiAddBatch } from '../../api/incomeService'
+import { createProduct } from '../../api/productService'
+import { getCategoryColor } from '../../utils/categoryColors'
+import { useShopStore } from '../../store/shopStore'
+import { ShopPickerModal } from '../../components/ShopPickerModal'
+import ShopRequiredGuard from '../../components/ShopRequiredGuard'
+import { useAuthStore } from '../../store/authStore'
+import { useSettingsStore } from '../../store/settingsStore'
+import UnitInput from '../../components/UnitInput'
 
-const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, selectedShopId, shopBatchIds }) => {
+// Yangi kirim formasi — Ombor → Kirim va Kirim sahifasida bitta komponent (2B qarori)
+const IncomeForm = ({ products, batches = [], onSuccess, productCategories, selectedShopId }) => {
   const { t } = useTranslation()
   const { user, hasPermission } = useAuthStore()
   const { usdRate, productAttributeDefs } = useSettingsStore()
@@ -45,6 +45,8 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
     paymentStatus: 'credit',
     paidUSD: '',
     dueDate: '',
+    promoDiscount: '',
+    promoNote: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -73,7 +75,7 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
     setForm({
       newProductName: '', quantity: '', unit: '', notes: '', attributes: {},
       supplierId: '', purchasePriceUSD: '', entryUsdRate: String(usdRate || ''),
-      paymentStatus: 'credit', paidUSD: '', dueDate: '',
+      paymentStatus: 'credit', paidUSD: '', dueDate: '', promoDiscount: '', promoNote: '',
     })
     setSelectedProduct(null)
     setSearch('')
@@ -132,6 +134,8 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
         paymentStatus: canFinance ? form.paymentStatus : 'credit',
         paidUSD: canFinance ? paidUSD : 0,
         dueDate: canFinance ? (form.dueDate || null) : null,
+        promoDiscount: canFinance && form.promoDiscount ? +form.promoDiscount : null,
+        promoNote: canFinance && form.promoNote ? form.promoNote : null,
         attributes: Object.fromEntries(
           Object.entries(form.attributes || {}).filter(([k]) =>
             (productAttributeDefs || []).some(d => d.label === k)
@@ -437,6 +441,22 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
                 />
               </div>
             )}
+
+            {/* Yetkazib beruvchi aksiyasi */}
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5 block">{t('inc_promo_pct_label')}</label>
+                <input type="number" min="0" max="100" value={form.promoDiscount} placeholder="0"
+                  onChange={e => setForm(f => ({ ...f, promoDiscount: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1.5 block">{t('inc_promo_name_label')}</label>
+                <input value={form.promoNote} placeholder={t('inc_promo_name_ph')}
+                  onChange={e => setForm(f => ({ ...f, promoNote: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-bg-tertiary border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors" />
+              </div>
+            </div>
           </div>
         ) : (
           <div className="px-4 py-3 bg-bg-tertiary border border-border rounded-xl flex items-center gap-2">
@@ -522,8 +542,4 @@ const IncomeTab = ({ products, batches, userRole, onSuccess, productCategories, 
   )
 }
 
-// ============================
-// BARCODE TAB
-// ============================
-
-export default IncomeTab
+export default IncomeForm

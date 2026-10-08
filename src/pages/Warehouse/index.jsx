@@ -16,7 +16,7 @@ import SectionHub from '../../components/ui/SectionHub'
 import { PageHeader } from '../../components/ui/Kit'
 import StockTab from './tabs/StockTab'
 import UsedStockTab from './tabs/UsedStockTab'
-import IncomeTab from './tabs/IncomeTab'
+import IncomeForm from '../../components/income/IncomeForm'
 import BarcodeTab from './tabs/BarcodeTab'
 import StocktakeTab from './tabs/StocktakeTab'
 import WriteoffTab from './tabs/WriteoffTab'
@@ -78,7 +78,7 @@ const Warehouse = () => {
   const firstLoad = loading && products.length === 0
   const SECTIONS = [
     { id: 'products', icon: Package, tone: 'violet', render: () => <ProductsSection products={products} batches={shopBatches} items={items} refresh={refreshData} /> },
-    { id: 'income', icon: PackagePlus, tone: 'cyan', render: () => <IncomeTab products={shopProductsList} batches={shopBatches} userRole={user?.role} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} shopBatchIds={shopBatchIds} /> },
+    { id: 'income', icon: PackagePlus, tone: 'cyan', render: () => <IncomeForm products={products} batches={shopBatches} onSuccess={() => { refreshData(); bump() }} productCategories={productCategories} selectedShopId={selectedShopId} /> },
     { id: 'barcode', icon: Barcode, tone: 'blue', render: () => <BarcodeTab products={shopProductsList} batches={shopBatches} items={shopItems} userRole={user?.role} userId={user?.id} userName={user?.name} downloadEnabled={downloadEnabled} notificationSettings={notificationSettings} addNotification={addNotification} onRefresh={handleBarcodeRefresh} /> },
     { id: 'used_stock', icon: Recycle, tone: 'green', render: () => <UsedStockTab usedStock={selectedShopId === 'all' ? usedStock : usedStock.filter(u => !u.shopId || u.shopId === selectedShopId)} usedSales={usedSales} productCategories={productCategories} /> },
     { id: 'stocktake', icon: ClipboardCheck, tone: 'orange', render: () => <StocktakeTab /> },
