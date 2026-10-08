@@ -467,6 +467,15 @@ const Customers = () => {
     return { months, thisMonth: months[5].value }
   }, [customers, selectedShopId, shopCustomerIds, i18n.language])
 
+  // ?customer=ID — boshqa sahifadan (masalan, Instagram suhbatidan) mijoz profili ochiladi
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('customer')
+    if (!id || !customers.length) return
+    const c = customers.find(x => String(x.id) === String(id))
+    if (c) { setSelectedCustomer(c); setModalTab('general') }
+    const url = new URL(window.location.href); url.searchParams.delete('customer'); window.history.replaceState(window.history.state, '', url)
+  }, [customers.length])
+
   const handleAddCustomer = async (e) => {
     e.preventDefault()
     if (!newCust.name || !newCust.phone || saving) return

@@ -5,6 +5,9 @@ import { Globe, Users, AlertCircle, X, ChevronRight, Car, Zap, MessageCircle, Ba
 import { streamChat, getInstagramConversations, getInstagramConversationDetail, getInstagramStats } from '../../../api/aiService'
 import { getAiSection } from '../../../api/aiStatsService'
 import { useShopStore } from '../../../store/shopStore'
+import { useNavigate } from 'react-router-dom'
+import Modal from '../../../components/ui/Modal'
+import { getCustomers, updateCustomer } from '../../../api/customerService'
 import { useDataStore } from '../../../store/dataStore'
 import AiChat from '../components/AiChat'
 import { KpiGrid } from '../components/SectionData'
@@ -222,12 +225,14 @@ function DmConversationsPanel() {
   const [detailLoading, setDetailLoading] = useState(false)
   const [page, setPage] = useState(1)
 
-  useEffect(() => {
-    getInstagramConversations({ limit: 50 })
-      .then(setData)
-      .catch(() => setData({ conversations: [], total: 0 }))
-      .finally(() => setLoading(false))
-  }, [])
+  const navigate = useNavigate()
+  const [linking, setLinking] = useState(null)
+  const loadConvs = () => getInstagramConversations({ limit: 50 })
+    .then(setData)
+    .catch(() => setData({ conversations: [], total: 0 }))
+    .finally(() => setLoading(false))
+  useEffect(() => { loadConvs() }, [])
+  const openCustomer = (id) => navigate(`/customers?customer=${id}`)
 
   const openDetail = async (conv) => {
     setSelected(conv)
@@ -263,6 +268,7 @@ function DmConversationsPanel() {
             <thead>
               <tr className="border-b border-border bg-bg-secondary text-xs text-text-muted">
                 <th className="text-left px-3 sm:px-4 py-2.5">Foydalanuvchi</th>
+                <th className="text-left px-3 sm:px-4 py-2.5">Mijoz</th>
                 <th className="text-right px-3 sm:px-4 py-2.5 hidden sm:table-cell">Xabarlar</th>
                 <th className="text-right px-3 sm:px-4 py-2.5 hidden md:table-cell">So'nggi faollik</th>
                 <th className="text-left px-3 sm:px-4 py-2.5 hidden lg:table-cell">Oxirgi xabar</th>
@@ -288,6 +294,18 @@ function DmConversationsPanel() {
                       </div>
                     </div>
                   </td>
+                  <td className="px-3 sm:px-4 py-2 sm:py-3" onClick={e => e.stopPropagation()}>
+                    {c.customer ? (
+                      <button onClick={() => openCustomer(c.customer.id)} className="text-left hover:underline">
+                        <p className="text-sm font-semibold text-accent-green">{c.customer.name}</p>
+                        <p className="text-xs text-text-muted">{c.customer.phone}</p>
+                      </button>
+                    ) : c.username && !/^\d+$/.test(c.username) ? (
+                      <button onClick={() => setLinking(c)} className="px-2.5 py-1 rounded-lg border border-border text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-border-bright">
+                        Mijozga bog'lash
+                      </button>
+                    ) : <span className="text-xs text-text-muted">—</span>}
+                  </td>
                   <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs text-text-secondary hidden sm:table-cell">{c.msgCount} ta</td>
                   <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs text-text-muted hidden md:table-cell">
                     {c.lastMsg ? new Date(c.lastMsg).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
@@ -306,14 +324,23 @@ function DmConversationsPanel() {
         </div>
       )}
 
+      <LinkCustomerModal conv={linking} onClose={() => setLinking(null)} onLinked={() => { setLinking(null); loadConvs() }} />
+
       {/* Suhbat detail modal */}
       {selected && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)}>
           <div className="bg-bg-primary border border-border rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <p className="font-semibold text-text-primary text-sm">
-                {selected.username ? `@${selected.username}` : selected.senderId} — suhbat tarixi
-              </p>
+              <div>
+                <p className="font-semibold text-text-primary text-sm">
+                  {selected.username ? `@${selected.username}` : selected.senderId} — suhbat tarixi
+                </p>
+                {selected.customer && (
+                  <button onClick={() => openCustomer(selected.customer.id)} className="text-xs text-accent-green hover:underline">
+                    {selected.customer.name} · {selected.customer.phone} — profilni ochish
+                  </button>
+                )}
+              </div>
               <button onClick={() => setSelected(null)} className="text-text-muted hover:text-text-primary"><X size={16} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -337,6 +364,57 @@ function DmConversationsPanel() {
         </div>
       )}
     </div>
+  )
+}
+
+// Instagram foydalanuvchisini Mijozlar bazasidagi mijozga bog'lash (mijozning Instagram maydoniga yoziladi)
+function LinkCustomerModal({ conv, onClose, onLinked }) {
+  const [list, setList] = useState(null)
+  const [q, setQ] = useState('')
+  const [saving, setSaving] = useState(null)
+  const [err, setErr] = useState('')
+  useEffect(() => {
+    if (!conv) return
+    setQ(''); setErr('')
+    getCustomers().then(setList).catch(() => setList([]))
+  }, [conv])
+  const found = useMemo(() => {
+    const s = q.trim().toLowerCase()
+    const l = list || []
+    return (s ? l.filter(c => `${c.name} ${c.phone} ${c.phone2 || ''} ${c.instagram || ''}`.toLowerCase().includes(s)) : l).slice(0, 30)
+  }, [list, q])
+  const link = async (c) => {
+    setSaving(c.id); setErr('')
+    try {
+      await updateCustomer(c.id, { ...c, instagram: conv.username })
+      onLinked()
+    } catch (e) { setErr(e?.response?.data?.error || e?.message || 'Xatolik') }
+    finally { setSaving(null) }
+  }
+  return (
+    <Modal open={!!conv} onClose={onClose} size="md" title={conv ? `@${conv.username} — mijozga bog'lash` : ''}
+      subtitle="Tanlangan mijozning Instagram maydoniga shu username yoziladi">
+      <div className="space-y-3">
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Ism yoki telefon..." autoFocus
+          className="w-full bg-bg-secondary border border-border rounded-xl px-4 py-2.5 text-[15px] text-text-primary focus:outline-none focus:border-accent-red" />
+        {err && <p className="text-sm text-accent-red">{err}</p>}
+        {list === null ? <p className="text-sm text-text-muted py-6 text-center"><Loader2 size={14} className="animate-spin inline mr-1" />Yuklanmoqda...</p> : (
+          <div className="panel divide-y divide-border">
+            {found.map(c => (
+              <button key={c.id} onClick={() => link(c)} disabled={!!saving}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-bg-tertiary/50 disabled:opacity-50">
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[15px] font-semibold text-text-primary truncate">{c.name}</span>
+                  <span className="block text-sm text-text-muted">{c.phone}{c.instagram ? ` · @${c.instagram.replace(/^@/, '')}` : ''}</span>
+                </span>
+                {saving === c.id ? <Loader2 size={16} className="animate-spin text-text-muted" /> : <ChevronRight size={16} className="text-text-muted" />}
+              </button>
+            ))}
+            {!found.length && <p className="text-sm text-text-muted py-6 text-center">Topilmadi</p>}
+          </div>
+        )}
+      </div>
+    </Modal>
   )
 }
 
