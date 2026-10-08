@@ -263,3 +263,12 @@ Har qadamdan keyin: build, lokal sinov (3 rol: admin, boshqaruvchi, sotuvchi), c
 | Tozalash | o'lik AI sozlamalari, Boshqaruvdagi takror AI kaliti, "ishonchli qurilmalar", mahalliy Face ID, 80% tannarx taxmini | 20550789 |
 
 **Deploy eslatmalari (Bosqich 0):** yangi jadvallar va ustunlar avtomatik yaratiladi (`notifications`, `notification_reads`, `audit_log`, `employees.is_blocked/blocked_by_admin`, `product_categories.turnover_days`, `promotions.bundle_items`). `middleware/auth.js`, `utils/tokens.js`, `authController` dagi xodim sharti `pending_delete = FALSE` → `is_blocked IS NOT TRUE` ga o'zgardi (bo'shatish so'rovidagi xodim admin tasdiqlaguncha ishlaydi). Deploydan keyin admin bir marta ilovaga kirishi kerak — uning brauzeridagi sozlamalar (kurs, nasiya tashkilotlari...) serverga ko'chadi. Keyin Sozlamalarni tekshirish.
+
+### Bosqich 1 ✅ (2026-10-08)
+- Yagona **Sozlamalar** (`/settings`): Kompaniya*, Do'konlar*, Xodimlar, Qurilmalar, Savdo qoidalari, Bildirishnomalar, AI agentlar*, Integratsiyalar*, Audit* (* — faqat admin). Boshqaruvchi faqat ruxsat berilgan bo'limlarni ko'radi (lokal sinov: 4 bo'lim).
+- Ruxsat daraxti: `settings.*`, `notifications`, `warehouse.products`, `marketing.loyalty`; eski `management.*`/`integrations.*` serverda bir martalik ko'chiriladi (`utils/permMigrate.js`, belgi `app_settings.perm_tree_v2`).
+- Bildirishnoma qo'ng'iroqchasi (yuqorida) — chegirma so'rovlari va ogohlantirishlar.
+- Ombor → **Tovarlar** (katalog, narx, kategoriya, atribut, qayta chop ruxsati); Marketing → **Sodiqlik**.
+- `/management`, `/admin`, `/integrations` → `/settings` ga yo'naltiriladi. Boshqaruv, Admin Panel, Integratsiyalar sahifalari o'chirildi.
+- Commitlar: frontend c7251363, backend 16773fc.
+- Qoldi (Bosqich 2 da): Telegram bot sozlamalarini Marketingdan Integratsiyalarga ko'chirish; xodim samaradorligi oynasi (Boshqaruvdagi) → Hisobotlar → Xodimlar.
