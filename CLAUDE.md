@@ -536,6 +536,17 @@ tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/w
 
 ---
 
+## AI agentlar arxitekturasi (2026-10-08 qayta qurilgan — shu tuzilmani saqla)
+
+**2 ta tahlil agenti + mijoz botlari.** Raqamlar HAR DOIM SQL'dan; AI faqat sharhlaydi.
+- **Yagona SQL manba:** backend `utils/aiSections.js` — 5 bo'lim (sales, inventory, customers, marketing, staff) uchun KPI (`{key,label,value,prev,unit,sensitive,invert}`), ro'yxatlar va AI uchun `forAi()`. AI Agent tabidagi kartalar, kundalik tahlilchi va yordamchining `get_section_report` tooli shu bitta funksiyadan oladi — raqam hamma joyda bir xil. Yangi KPI shu faylga qo'shiladi (+ ru tarjima `aisec_kpi_<key>`, ustun `aisec_col_<list>_<col>`; uz nomi backend label'dan).
+- **AI yordamchi** (`ai-assistant`, kind `assistant`): har bo'lim tabidagi chat. `POST /api/ai/chat` `{agentId:'ai-assistant', section}` — prompt `agents/prompts.js` `buildAssistantPrompt` (mijoz yuborgan systemPrompt e'tiborga olinmaydi), toollar `ASSISTANT_TOOLS` ichidan (faqat o'qish). Suhbat tarixi bo'lim bo'yicha alohida (`chatKey`).
+- **Kundalik tahlilchi** (`daily-analyst`, kind `analyst`): `agents/dailyAnalyst.js` — har bo'lim uchun 1 ta AI chaqiruv (Sonnet 5.5, structured output `DIGEST_SCHEMA`), `ai_digest_runs`/`ai_digests` jadvallari. Jadval: app_settings `ai_schedule` `{hour}` (Toshkent, default 7), har 5 daqiqada tekshiradi; yangi faollik bo'lmasa `skipped`. Dushanba — haftalik hisobot (`aiStats.generateWeekly`). Sezgir bandlar (foyda/tannarx) `canSeeProfit` bo'lmasa yashiriladi (model belgisi + regex).
+- **Prompt qoidasi:** asosiy qoidalar KODDA (`agents/prompts.js`, deploy bilan yangilanadi, Admin panelda faqat ko'rinadi); egasining qo'shimchalari bazada (`ai_agents.custom_instructions`, `section_instructions {sec:{enabled,text}}`, `knowledge`). Admin panel → AI Agentlar → "Tahlil agentlari".
+- **Botlar** (kind `bot`: instagram-agent, instagram-dm-agent, telegram-agent) — eski tartibda (to'liq system_prompt bazada, webhooklar o'qiydi). Tegishdan oldin foydalanuvchidan so'ra. `instagram-agent` kundalik tahlili scheduler'dan chiqarilgan (bot o'chiq).
+- **Eski** sales/product/pr/customer/staff/stats agentlari `kind='legacy', archived=true` — o'chirilmagan (Instagram tabidagi mijoz tahlili `customer-agent` id dan foydalanadi). `/api/agents/*` (agentRunner) faqat Instagram tabi uchun qolgan.
+- Sonnet/Opus 5.5: thinking doim yoqiq → tool zanjirida `stream.finalMessage()` content'ini o'zgarishsiz qaytar; `tool_choice: any` va `temperature` 400 beradi.
+
 ## Domen (holat 2026-10-07)
 
 **Asosiy domen — `sicrm.uz`** (ishlaydi, SSL bor): `sicrm.uz` = backend API, `gt.sicrm.uz` = GoodTires ilovasi. `crmsi.uz` domeni muammo tufayli ISHLATILMAYDI — nomi `sicrm.uz` ga o'zgartirilgan; serverdagi `/etc/nginx/sites-available/crmsi.uz` eskirgan (yoqilmagan).
