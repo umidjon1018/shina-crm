@@ -1,40 +1,33 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck, Globe, BarChart3 } from 'lucide-react'
+import { Activity, TrendingUp, Package, Megaphone, Users, UserCheck, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TAB_COLORS, TAB_AGENT_KEYS, TAB_DESC_KEYS } from './aiHelpers'
 import { getAiAgents } from '../../api/aiAgentsService'
 import { getSales } from '../../api/salesService'
 import { getCustomers } from '../../api/customerService'
-import { getProducts } from '../../api/productService'
-import { getItems } from '../../api/itemService'
-import { getIncomeBatches } from '../../api/incomeService'
-import { getUsedSales, getUsedStock } from '../../api/usedService'
-import { getExpenses } from '../../api/expenseService'
-import { getCapital } from '../../api/capitalService'
-import { getPromotions } from '../../api/promotionService'
 import OverviewTab from './tabs/OverviewTab'
-import SalesTab from './tabs/SalesTab'
-import InventoryTab from './tabs/InventoryTab'
-import MarketingTab from './tabs/MarketingTab'
-import CustomerTab from './tabs/CustomerTab'
-import StaffTab from './tabs/StaffTab'
 import InstagramTab from './tabs/InstagramTab'
-import StatsTab from './tabs/StatsTab'
+import SectionView from './components/SectionView'
+import MarketingRoadmap from './components/MarketingRoadmap'
+
+// Bo'lim tablari: KPI (SQL) + kundalik AI xulosa + AI yordamchi chati
+const SECTION_TABS = {
+  sales:     { color: 'accent-green',  questions: ['aisec_q_sales_1', 'aisec_q_sales_2', 'aisec_q_sales_3'] },
+  inventory: { color: 'accent-red',    questions: ['aisec_q_inventory_1', 'aisec_q_inventory_2', 'aisec_q_inventory_3'] },
+  customers: { color: 'accent-blue',   questions: ['aisec_q_customers_1', 'aisec_q_customers_2', 'aisec_q_customers_3'] },
+  marketing: { color: 'accent-orange', questions: ['aisec_q_marketing_1', 'aisec_q_marketing_2', 'aisec_q_marketing_3'] },
+  staff:     { color: 'accent-purple', questions: ['aisec_q_staff_1', 'aisec_q_staff_2', 'aisec_q_staff_3'] },
+}
 
 export const AIAgent = () => {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
-
-  const [aiData, setAiData] = useState({ sales: [], customers: [], products: [], items: [], batches: [], usedSales: [], usedStock: [], expenses: [], capital: [], promotions: [] })
   const [agentConfigs, setAgentConfigs] = useState({})
+  // Instagram tabi uchun ma'lumot — faqat shu tab ochilganda yuklanadi
+  const [igData, setIgData] = useState(null)
 
   useEffect(() => {
-    Promise.all([getSales(), getCustomers(), getProducts(), getItems(), getIncomeBatches(), getUsedSales(), getUsedStock(), getExpenses(), getCapital(), getPromotions()])
-      .then(([sales, customers, products, items, batches, usedSales, usedStock, expenses, capital, promotions]) => {
-        setAiData({ sales, customers, products, items, batches, usedSales, usedStock, expenses, capital, promotions })
-      }).catch((err) => console.error('[AIAgent] data load xatosi:', err))
-
     getAiAgents()
       .then(list => {
         const map = {}
@@ -44,18 +37,25 @@ export const AIAgent = () => {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (activeTab !== 'instagram' || igData) return
+    Promise.all([getSales(), getCustomers()])
+      .then(([sales, customers]) => setIgData({ sales, customers }))
+      .catch((err) => console.error('[AIAgent] Instagram data xatosi:', err))
+  }, [activeTab, igData])
+
   const TABS = [
-    { id: 'overview',  label: t('ai_tab_overview'), Icon: Activity,   color: TAB_COLORS.overview },
-    { id: 'stats',     label: t('ais_tab'),         Icon: BarChart3,  color: TAB_COLORS.stats },
-    { id: 'sales',     label: t('ai_tab_sales'),    Icon: TrendingUp, color: TAB_COLORS.sales },
-    { id: 'inventory', label: t('ai_tab_inventory'),  Icon: Package,    color: TAB_COLORS.inventory },
-    { id: 'marketing', label: t('ai_tab_marketing'),Icon: Megaphone,  color: TAB_COLORS.marketing },
-    { id: 'customer',  label: t('ai_tab_customer'), Icon: Users,      color: TAB_COLORS.customer },
-    { id: 'staff',     label: t('ai_tab_staff'),     Icon: UserCheck,  color: TAB_COLORS.staff },
-    { id: 'instagram', label: t('ai_tab_instagram'), Icon: Globe,       color: TAB_COLORS.instagram },
-  ]
+    { id: 'overview',  label: t('ai_tab_overview'),  Icon: Activity },
+    { id: 'sales',     label: t('aisec_head_sales'),     Icon: TrendingUp },
+    { id: 'inventory', label: t('aisec_head_inventory'), Icon: Package },
+    { id: 'customers', label: t('aisec_head_customers'), Icon: Users },
+    { id: 'marketing', label: t('aisec_head_marketing'), Icon: Megaphone },
+    { id: 'staff',     label: t('aisec_head_staff'),     Icon: UserCheck },
+    { id: 'instagram', label: t('ai_tab_instagram'), Icon: Globe },
+  ].map(x => ({ ...x, color: TAB_COLORS[x.id] }))
 
   const tab = TABS.find(tb => tb.id === activeTab)
+  const sec = SECTION_TABS[activeTab]
 
   return (
     <motion.div
@@ -63,7 +63,7 @@ export const AIAgent = () => {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col"
     >
-      <div className="flex items-center gap-1 px-4 py-3 border-b border-border flex-shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-1 px-4 py-3 border-b border-border flex-shrink-0 overflow-x-auto no-scrollbar">
         {TABS.map(({ id, label, Icon, color }) => (
           <button
             key={id}
@@ -102,14 +102,18 @@ export const AIAgent = () => {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.15 }}
           >
-            {activeTab === 'overview'  && <OverviewTab onTabChange={setActiveTab} aiData={aiData} />}
-            {activeTab === 'stats'     && <StatsTab />}
-            {activeTab === 'sales'     && <SalesTab     aiData={aiData} agentConfig={agentConfigs['sales-agent']} />}
-            {activeTab === 'inventory' && <InventoryTab aiData={aiData} agentConfig={agentConfigs['product-agent']} />}
-            {activeTab === 'marketing' && <MarketingTab aiData={aiData} agentConfig={agentConfigs['pr-agent']} />}
-            {activeTab === 'customer'  && <CustomerTab  aiData={aiData} agentConfig={agentConfigs['customer-agent']} />}
-            {activeTab === 'staff'     && <StaffTab     aiData={aiData} agentConfig={agentConfigs['staff-agent']} />}
-            {activeTab === 'instagram' && <InstagramTab aiData={aiData} agentConfig={agentConfigs['instagram-agent']} customerAgentConfig={agentConfigs['customer-agent']} />}
+            {activeTab === 'overview' && <OverviewTab onTabChange={setActiveTab} />}
+            {sec && (
+              <SectionView
+                section={activeTab}
+                colorClass={sec.color}
+                questions={sec.questions.map(k => t(k))}
+                extra={activeTab === 'marketing' ? (data) => <MarketingRoadmap recommendations={data.digest?.recommendations || []} /> : null}
+              />
+            )}
+            {activeTab === 'instagram' && (
+              <InstagramTab aiData={igData || { sales: [], customers: [] }} agentConfig={agentConfigs['instagram-agent']} customerAgentConfig={agentConfigs['customer-agent']} />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

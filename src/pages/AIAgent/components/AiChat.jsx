@@ -47,7 +47,9 @@ const renderMarkdown = (text) => {
   return result
 }
 
-const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt, suggestions }) => {
+// chatKey — suhbat tarixi kaliti (bitta agent turli bo'limlarda alohida suhbat); section — backendga bo'lim konteksti
+const AiChat = ({ agentId, chatKey, section, systemPrompt, placeholder, colorClass = 'accent-green', autoPrompt, suggestions }) => {
+  const historyKey = chatKey || agentId
   const { chats, createChat, addMessage, updateLastMessage, deleteChat } = useAiStore()
   const [chatId, setChatId] = useState(null)
   const [input, setInput] = useState('')
@@ -59,11 +61,11 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
   const autoSentRef = useRef(false)
 
   useEffect(() => {
-    const existing = chats.find(c => c.agentId === agentId)
+    const existing = chats.find(c => c.agentId === historyKey)
     if (existing) setChatId(existing.id)
-    else setChatId(createChat(agentId))
+    else setChatId(createChat(historyKey))
     autoSentRef.current = false
-  }, [agentId])
+  }, [historyKey])
 
   const chat = chats.find(c => c.id === chatId)
   const messages = chat?.messages || []
@@ -92,6 +94,7 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
       messages: history,
       agentId,
       systemPrompt,
+      section,
       onModel: (m) => setActiveModel(m),
       onToken: (token) => {
         accumulated += token
@@ -125,7 +128,7 @@ const AiChat = ({ agentId, systemPrompt, placeholder, colorClass = 'accent-green
   const clearChat = () => {
     if (!chatId) return
     deleteChat(chatId)
-    setChatId(createChat(agentId))
+    setChatId(createChat(historyKey))
   }
 
   const colorMap = {

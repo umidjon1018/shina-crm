@@ -1,197 +1,314 @@
-import { useEffect, useState } from 'react'
-import { TrendingUp, Megaphone, Users, Package, Activity, UserCheck, Globe, Play, Loader2, CheckCircle2, XCircle } from 'lucide-react'
-import { useAgentActivityStore } from '../../../store/agentActivityStore'
-import { useDataStore } from '../../../store/dataStore'
-import { TAB_COLORS, localYmd } from '../aiHelpers'
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { TrendingUp, TrendingDown, AlertTriangle, AlertCircle, Info, CheckCircle2, RefreshCw, Loader2, FileText, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
+import { getAiStatsOverview, getWeeklyReports, generateWeeklyReport } from '../../../api/aiStatsService'
+import { useShopStore } from '../../../store/shopStore'
 import { useAuthStore } from '../../../store/authStore'
-import AgentActivityFeed from '../components/ActivityFeed'
-import { getAllAgentsStatus, triggerAgentRun } from '../../../api/agentRunService'
+import { useDataStore } from '../../../store/dataStore'
+import AiChat from '../components/AiChat'
+import DigestsOverview from '../components/DigestsOverview'
 
-const AGENT_DEFS = [
-  { id: 'sales',     slug: 'sales-agent',     label: 'Savdo agenti',             Icon: TrendingUp, emptyLabel: 'Savdo tahlili' },
-  { id: 'inventory', slug: 'product-agent',   label: 'Tovar bazasi agenti',      Icon: Package,    emptyLabel: 'Inventar tahlili' },
-  { id: 'marketing', slug: 'pr-agent',        label: 'PR/Marketing agenti',      Icon: Megaphone,  emptyLabel: 'Marketing tahlili' },
-  { id: 'customer',  slug: 'customer-agent',  label: 'Mijozlar agenti',          Icon: Users,      emptyLabel: 'Mijozlar tahlili' },
-  { id: 'staff',     slug: 'staff-agent',     label: 'Xodimlar faoliyat agenti', Icon: UserCheck,  emptyLabel: 'Xodimlar tahlili' },
-  { id: 'instagram', slug: 'instagram-agent', label: 'Instagram agenti',         Icon: Globe,      emptyLabel: 'Instagram bot' },
-]
+const num = (v) => Math.round(Number(v) || 0).toLocaleString('uz-UZ')
 
-// Stream tahlilidan localStorage keshini o'qish
-function getLocalCache(slug) {
-  try {
-    const raw = localStorage.getItem('ai_analysis_v4_' + slug)
-    if (!raw) return null
-    const { analysis, date } = JSON.parse(raw)
-    if (date !== localYmd(new Date())) return null
-    return analysis
-  } catch { return null }
-}
-
-function fmtAgo(iso) {
-  if (!iso) return null
-  const diff = Math.floor((Date.now() - new Date(iso)) / 60000)
-  if (diff < 1) return 'hozirgina'
-  if (diff < 60) return diff + ' daqiqa oldin'
-  if (diff < 1440) return Math.floor(diff / 60) + ' soat oldin'
-  return Math.floor(diff / 1440) + ' kun oldin'
-}
-
-function StatusDot({ status }) {
-  if (status === 'running') return <Loader2 size={10} className="text-blue-400 animate-spin" />
-  if (status === 'completed') return <div className="w-2 h-2 rounded-full bg-[#22c55e]" />
-  if (status === 'failed') return <div className="w-2 h-2 rounded-full bg-[#E63946]" />
-  return <div className="w-2 h-2 rounded-full bg-text-muted" />
-}
-
-function AgentCard({ def, runInfo, onTabChange, onRun, isRunning, canRun }) {
-  const { id, slug, label, Icon, emptyLabel } = def
-  const color = TAB_COLORS[id]
-  const hasRun = !!runInfo
-  // Backend run yo'q bo'lsa stream keshidan top KPI ni olamiz
-  const localCache = !hasRun ? getLocalCache(slug) : null
-  const localTopKpi = localCache?.kpis?.[0] || null
-
+const Change = ({ value, invert = false }) => {
+  if (value === null || value === undefined) return <span className="text-[11px] text-text-muted">—</span>
+  const good = invert ? value < 0 : value > 0
+  const bad = invert ? value > 0 : value < 0
+  const Icon = value >= 0 ? TrendingUp : TrendingDown
   return (
-    <div className={`flex flex-col text-left p-4 rounded-xl border ${color.border} ${color.bg}`}>
-      <div className="flex items-start justify-between mb-3">
-        <button
-          onClick={() => onTabChange(id)}
-          className={`w-9 h-9 rounded-xl ${color.bg} flex items-center justify-center border ${color.border} hover:scale-105 transition-transform`}
-        >
-          <Icon size={16} className={color.text} />
-        </button>
-        {canRun && <button
-          onClick={() => onRun(slug)}
-          disabled={isRunning}
-          title="Agentni ishga tushirish"
-          className={`p-1.5 rounded-lg transition-colors ${isRunning ? 'text-text-muted cursor-not-allowed' : 'text-text-muted hover:text-text-primary hover:bg-bg-secondary'}`}
-        >
-          {isRunning ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
-        </button>}
-      </div>
+    <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${good ? 'text-accent-green' : bad ? 'text-accent-red' : 'text-text-muted'}`}>
+      <Icon size={11} />{value > 0 ? '+' : ''}{String(value).replace('.', ',')}%
+    </span>
+  )
+}
 
-      <button onClick={() => onTabChange(id)} className="text-left flex-1">
-        {hasRun ? (
-          <>
-            <p className={`text-base font-bold font-syne ${color.text} leading-tight truncate`}>
-              {runInfo.top_kpi_value || (runInfo.insight_count != null ? `${runInfo.insight_count} ta` : '—')}
-            </p>
-            <p className="text-xs text-text-secondary mt-1 truncate">
-              {runInfo.top_kpi_label || fmtAgo(runInfo.finished_at) || 'tugallandi'}
-            </p>
-          </>
-        ) : localTopKpi ? (
-          <>
-            <p className={`text-base font-bold font-syne ${color.text} leading-tight truncate`}>
-              {localTopKpi.value}
-            </p>
-            <p className="text-xs text-text-secondary mt-1 truncate">{localTopKpi.label}</p>
-          </>
-        ) : (
-          <>
-            <p className={`text-lg font-bold font-syne ${color.text}`}>—</p>
-            <p className="text-xs text-text-secondary mt-1">{emptyLabel}</p>
-          </>
-        )}
-        <p className="text-sm text-text-primary mt-2 font-medium truncate">{label}</p>
-        <div className="flex items-center gap-1.5 mt-1">
-          <StatusDot status={runInfo?.status} />
-          <span className="text-xs text-text-secondary">
-            {isRunning ? 'Ishlamoqda...' : hasRun ? (runInfo.status === 'failed' ? 'Xato' : 'Tayyor') : localTopKpi ? 'Stream tahlili' : 'Ishga tushirilmagan'}
-          </span>
+const SEVERITY = {
+  danger:  { Icon: AlertCircle,   cls: 'border-accent-red/30 bg-accent-red/5',     icon: 'text-accent-red' },
+  warning: { Icon: AlertTriangle, cls: 'border-accent-orange/30 bg-accent-orange/5', icon: 'text-accent-orange' },
+  success: { Icon: CheckCircle2,  cls: 'border-accent-green/30 bg-accent-green/5', icon: 'text-accent-green' },
+  info:    { Icon: Info,          cls: 'border-accent-blue/30 bg-accent-blue/5',   icon: 'text-accent-blue' },
+}
+
+const anomalyDesc = (a, t) => {
+  const p = a.params || {}
+  const som = t('unit_som')
+  switch (a.code) {
+    case 'sales_drop':
+    case 'sales_up': return t(`ais_${a.code}_desc`, { current: `${num(p.current)} ${som}`, avg: `${num(p.avg)} ${som}`, value: Math.abs(a.value) })
+    case 'cancel_rate': return t('ais_cancel_rate_desc', { cancelled: p.cancelled, total: p.total, value: a.value })
+    case 'overdue_installments': return t('ais_overdue_installments_desc', { value: a.value, amount: `${num(p.amount)} ${som}` })
+    case 'supplier_overdue': return t('ais_supplier_overdue_desc', { value: a.value, usd: num(p.usd) })
+    case 'below_cost': return t('ais_below_cost_desc', { value: a.value, amount: `${num(p.loss)} ${som}` })
+    default: return t(`ais_${a.code}_desc`, { value: a.value })
+  }
+}
+
+const itemLine = (code, it, t) => {
+  const som = t('unit_som')
+  switch (code) {
+    case 'low_stock': return t('ais_item_low_stock', { stock: it.value, sold: it.extra })
+    case 'overdue_installments': return t('ais_item_overdue', { amount: `${num(it.value)} ${som}`, days: it.extra })
+    case 'supplier_overdue': return `$${num(it.value)}`
+    case 'below_cost': return t('ais_item_below_cost', { amount: `${num(it.value)} ${som}`, seller: it.extra })
+    case 'slow_moving': return t('ais_item_slow', { qty: it.value, days: it.extra })
+    case 'birthdays': return it.value === 0 ? t('ais_item_bd_today') : t('ais_item_bd_days', { days: it.value })
+    default: return String(it.value ?? '')
+  }
+}
+
+const AnomalyCard = ({ a, t }) => {
+  const [open, setOpen] = useState(false)
+  const s = SEVERITY[a.severity] || SEVERITY.info
+  const hasItems = a.items?.length > 0
+  return (
+    <div className={`border rounded-xl p-3 ${s.cls}`}>
+      <button type="button" onClick={() => hasItems && setOpen(o => !o)} className={`w-full flex items-start gap-2.5 text-left ${hasItems ? 'cursor-pointer' : 'cursor-default'}`}>
+        <s.Icon size={16} className={`${s.icon} flex-shrink-0 mt-0.5`} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-text-primary">{t(`ais_${a.code}_title`)}</p>
+          <p className="text-xs text-text-secondary mt-0.5">{anomalyDesc(a, t)}</p>
         </div>
+        {hasItems && (open ? <ChevronUp size={14} className="text-text-muted mt-0.5" /> : <ChevronDown size={14} className="text-text-muted mt-0.5" />)}
       </button>
+      {open && hasItems && (
+        <div className="mt-2 pl-6 space-y-1">
+          {a.items.map((it, i) => (
+            <div key={i} className="flex items-center justify-between gap-3 text-xs">
+              <span className="text-text-primary truncate">{it.name}</span>
+              <span className="text-text-muted flex-shrink-0">{itemLine(a.code, it, t)}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-function OverviewTab({ onTabChange }) {
-  const { activities } = useAgentActivityStore()
+const PeriodCard = ({ title, sub, data, showProfit, t }) => {
+  if (!data) return null
+  const c = data.current, ch = data.change
+  const som = t('unit_som')
+  const rows = [
+    { label: t('ais_sales_count'), value: num(c.salesCount), change: ch.salesCount },
+    { label: t('ais_avg_check'), value: `${num(c.avgCheck)} ${som}`, change: ch.avgCheck },
+    ...(showProfit ? [{ label: t('ais_profit'), value: `${num(c.profit)} ${som}`, change: ch.profit }] : []),
+  ]
+  return (
+    <div className="bg-bg-secondary border border-border rounded-xl p-3 sm:p-4">
+      <p className="text-xs font-semibold text-text-primary">{title}</p>
+      <p className="text-[11px] text-text-muted">{sub}</p>
+      <div className="mt-2 flex items-end justify-between gap-2">
+        <p className="text-lg sm:text-xl font-bold text-text-primary leading-tight">{num(c.revenue)} <span className="text-xs font-medium text-text-muted">{som}</span></p>
+        <Change value={ch.revenue} />
+      </div>
+      <p className="text-[11px] text-text-muted">{t('ais_prev')}: {num(data.previous.revenue)} {som}</p>
+      <div className="mt-2 pt-2 border-t border-border space-y-1">
+        {rows.map(r => (
+          <div key={r.label} className="flex items-center justify-between gap-2 text-xs">
+            <span className="text-text-muted">{r.label}</span>
+            <span className="flex items-center gap-2"><span className="text-text-primary font-medium">{r.value}</span><Change value={r.change} /></span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const renderSummary = (text) => text.split('\n').filter(l => l.trim()).map((line, i) => {
+  if (/^#+\s/.test(line.trim())) return <p key={i} className="text-xs font-bold text-text-primary">{line.replace(/^\s*#+\s/, '')}</p>
+  const isItem = /^[-*•]\s/.test(line.trim())
+  const parts = line.replace(/^\s*[-*•]\s/, '').split(/\*\*(.+?)\*\*/g)
+  const content = parts.map((p, j) => (j % 2 ? <b key={j}>{p}</b> : p))
+  return isItem
+    ? <div key={i} className="flex gap-1.5 text-xs text-text-primary"><span className="flex-shrink-0">•</span><span>{content}</span></div>
+    : <p key={i} className="text-xs text-text-primary">{content}</p>
+})
+
+const WeeklyReport = ({ reports, idx, setIdx, canGenerate, onGenerate, generating, showProfit, t }) => {
+  const rep = reports[idx]
+  const som = t('unit_som')
+  return (
+    <div className="bg-bg-secondary border border-border rounded-xl p-3 sm:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <FileText size={15} className="text-accent-blue" />
+          <p className="text-sm font-semibold text-text-primary">{t('ais_weekly_title')}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {reports.length > 0 && (
+            <select value={idx} onChange={e => setIdx(Number(e.target.value))}
+              className="text-xs bg-bg-primary border border-border rounded-lg px-2 py-1.5 text-text-primary focus:outline-none">
+              {reports.map((r, i) => <option key={r.id} value={i}>{r.data.weekStart.split('-').reverse().join('.')} – {r.data.weekEnd.split('-').reverse().join('.')}</option>)}
+            </select>
+          )}
+          {canGenerate && (
+            <button onClick={onGenerate} disabled={generating}
+              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-accent-blue/15 text-accent-blue hover:bg-accent-blue/25 disabled:opacity-50">
+              {generating ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+              <span className="hidden sm:inline">{t('ais_weekly_generate')}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {!rep ? (
+        <p className="text-xs text-text-muted py-4 text-center">{t('ais_weekly_none')}</p>
+      ) : (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: t('ais_revenue'), value: `${num(rep.data.current.revenue)} ${som}`, ch: rep.data.change.revenue },
+              { label: t('ais_sales_count'), value: num(rep.data.current.salesCount), ch: rep.data.change.salesCount },
+              { label: t('ais_avg_check'), value: `${num(rep.data.current.avgCheck)} ${som}`, ch: rep.data.change.avgCheck },
+              ...(showProfit && rep.data.current.profit !== null ? [{ label: t('ais_profit'), value: `${num(rep.data.current.profit)} ${som}`, ch: rep.data.change.profit }] : []),
+            ].map(k => (
+              <div key={k.label} className="bg-bg-primary border border-border rounded-lg p-2.5">
+                <p className="text-[11px] text-text-muted">{k.label}</p>
+                <p className="text-sm font-bold text-text-primary">{k.value}</p>
+                <Change value={k.ch} />
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-text-muted -mt-1">{t('ais_weekly_vs')}</p>
+
+          {rep.summary && (
+            <div className="bg-bg-primary border border-border rounded-lg p-3 space-y-1">
+              <p className="text-[11px] font-semibold text-accent-blue uppercase tracking-wide mb-1">{t('ais_weekly_ai')}</p>
+              {renderSummary(rep.summary)}
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { title: t('ais_weekly_top_products'), rows: rep.data.topProducts.map(p => [p.name, `${p.qty} ${t('ais_pcs')}`]) },
+              { title: t('ais_weekly_top_sellers'), rows: rep.data.topSellers.map(s => [s.name, `${num(s.revenue)} ${som}`]) },
+            ].map(b => (
+              <div key={b.title}>
+                <p className="text-xs font-semibold text-text-secondary mb-1">{b.title}</p>
+                {b.rows.length === 0 ? <p className="text-xs text-text-muted">—</p> : b.rows.map(([a, v], i) => (
+                  <div key={i} className="flex justify-between gap-3 text-xs py-0.5">
+                    <span className="text-text-primary truncate">{i + 1}. {a}</span>
+                    <span className="text-text-muted flex-shrink-0">{v}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const OverviewTab = ({ onTabChange }) => {
+  const { t } = useTranslation()
+  const { selectedShopId } = useShopStore()
+  const { user } = useAuthStore()
   const { version } = useDataStore()
-  void version; void activities
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [reports, setReports] = useState([])
+  const [repIdx, setRepIdx] = useState(0)
+  const [generating, setGenerating] = useState(false)
+  const canGenerate = user?.role === 'admin' || user?.role === 'manager'
 
-  const [statusMap, setStatusMap] = useState({})
-  const [loadingStatus, setLoadingStatus] = useState(true)
-  const [runningSet, setRunningSet] = useState(new Set())
-  const canRun = useAuthStore(s => s.user?.role === 'admin')
+  const load = useCallback(() => {
+    setLoading(true)
+    setError(null)
+    getAiStatsOverview({ shop: selectedShopId })
+      .then(setData)
+      .catch(err => setError(err?.response?.data?.error || err.message))
+      .finally(() => setLoading(false))
+    getWeeklyReports().then(r => { setReports(r); setRepIdx(0) }).catch(() => {})
+  }, [selectedShopId])
 
-  const fetchStatus = async () => {
+  useEffect(() => { load() }, [load, version])
+
+  const generate = async () => {
+    setGenerating(true)
     try {
-      const list = await getAllAgentsStatus()
-      const map = {}
-      list.forEach(r => { map[r.agent_slug] = r })
-      setStatusMap(map)
-      // Running agentlar hali ham running bo'lsa saqla, aks holda o'chir
-      setRunningSet(prev => {
-        const next = new Set()
-        prev.forEach(slug => { if (map[slug]?.status === 'running') next.add(slug) })
-        return next
-      })
-    } catch {}
-    setLoadingStatus(false)
-  }
-
-  useEffect(() => {
-    fetchStatus()
-    const interval = setInterval(fetchStatus, 6000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const handleRun = async (slug) => {
-    try {
-      setRunningSet(prev => new Set([...prev, slug]))
-      await triggerAgentRun(slug)
-      setTimeout(fetchStatus, 1500)
+      await generateWeeklyReport()
+      const r = await getWeeklyReports()
+      setReports(r)
+      setRepIdx(0)
     } catch (err) {
-      setRunningSet(prev => { const n = new Set(prev); n.delete(slug); return n })
+      setError(err?.response?.data?.error || err.message)
+    } finally {
+      setGenerating(false)
     }
   }
 
-  const completedCount = Object.values(statusMap).filter(r => r.status === 'completed').length
-  const failedCount    = Object.values(statusMap).filter(r => r.status === 'failed').length
-  const runningCount   = Object.values(statusMap).filter(r => r.status === 'running').length + runningSet.size
+  const som = t('unit_som')
+  const cmp = data?.comparison
+  const fmtDay = (d) => d.slice(8, 10) + '.' + d.slice(5, 7)
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Holat qatori */}
-      <div className="flex items-center gap-4 p-3 rounded-xl border border-border bg-bg-secondary text-xs text-text-secondary flex-wrap">
-        <span className="flex items-center gap-1.5">
-          <CheckCircle2 size={13} className="text-[#22c55e]" /> {completedCount} tayyor
-        </span>
-        {runningCount > 0 && (
-          <span className="flex items-center gap-1.5">
-            <Loader2 size={13} className="text-blue-400 animate-spin" /> {runningCount} ishlamoqda
-          </span>
-        )}
-        {failedCount > 0 && (
-          <span className="flex items-center gap-1.5">
-            <XCircle size={13} className="text-[#E63946]" /> {failedCount} xato
-          </span>
-        )}
-        <span className="text-text-muted ml-auto">Har kuni 06:00 da avtomatik ishlaydi</span>
-        {loadingStatus && <Loader2 size={12} className="animate-spin text-text-muted" />}
+      <DigestsOverview onTabChange={onTabChange} />
+
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-text-primary">{t('ais_cmp_title')}</p>
+        <button onClick={load} disabled={loading} className="p-1.5 rounded-lg hover:bg-bg-secondary text-text-muted hover:text-text-primary disabled:opacity-50">
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+        </button>
       </div>
 
-      {/* Agent kartalar */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {AGENT_DEFS.map(def => (
-          <AgentCard
-            key={def.id}
-            def={def}
-            runInfo={statusMap[def.slug] || null}
-            onTabChange={onTabChange}
-            onRun={handleRun}
-            isRunning={runningSet.has(def.slug) || statusMap[def.slug]?.status === 'running'}
-            canRun={canRun}
-          />
-        ))}
-      </div>
+      {error && <p className="text-xs text-accent-red bg-accent-red/10 border border-accent-red/20 rounded-lg px-3 py-2">{error}</p>}
+
+      {!data && loading ? (
+        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-text-muted" /></div>
+      ) : cmp && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <PeriodCard title={t('ais_p_day')} sub={t('ais_p_day_sub')} data={cmp.day} showProfit={data.showProfit} t={t} />
+            <PeriodCard title={t('ais_p_week')} sub={t('ais_p_week_sub')} data={cmp.week} showProfit={data.showProfit} t={t} />
+            <PeriodCard title={t('ais_p_month')} sub={t('ais_p_month_sub')} data={cmp.month} showProfit={data.showProfit} t={t} />
+            <PeriodCard title={t('ais_p_year')} sub={t('ais_p_year_sub')} data={cmp.year} showProfit={data.showProfit} t={t} />
+          </div>
+
+          <div className="bg-bg-secondary border border-border rounded-xl p-3 sm:p-4">
+            <p className="text-xs font-semibold text-text-primary mb-2">{t('ais_trend_title')}</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.trend} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                  <XAxis dataKey="date" tickFormatter={fmtDay} tick={{ fontSize: 10, fill: 'var(--text-muted, #888)' }} interval="preserveStartEnd" axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(127,127,127,0.1)' }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                    labelFormatter={(d) => d.split('-').reverse().join('.')}
+                    formatter={(v, _n, p) => [`${num(v)} ${som} · ${p.payload.salesCount} ${t('ais_sales_short')}`, t('ais_revenue')]}
+                  />
+                  <Bar dataKey="revenue" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-text-primary mb-2">{t('ais_anom_title')}</p>
+            {data.anomalies.length === 0 ? (
+              <p className="text-xs text-text-muted bg-bg-secondary border border-border rounded-xl px-3 py-4 text-center">{t('ais_anom_none')}</p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                {data.anomalies.map(a => <AnomalyCard key={a.code} a={a} t={t} />)}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      <WeeklyReport reports={reports} idx={repIdx} setIdx={setRepIdx} canGenerate={canGenerate} onGenerate={generate}
+        generating={generating} showProfit={data?.showProfit !== false} t={t} />
 
       <div>
-        <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-          <Activity size={15} className="text-purple-400" /> Barcha agentlar faoliyati
-        </h3>
-        <AgentActivityFeed />
+        <div className="flex items-center gap-2 mb-2">
+          <MessageSquare size={15} className="text-accent-blue" />
+          <p className="text-sm font-semibold text-text-primary">{t('ais_ask_title')}</p>
+        </div>
+        <AiChat agentId="ai-assistant" chatKey="ai-assistant:overview" section="overview" colorClass="accent-blue" placeholder={t('ais_ask_ph')}
+          suggestions={[t('ais_q1'), t('ais_q2'), t('ais_q3'), t('ais_q4')]} />
       </div>
     </div>
   )

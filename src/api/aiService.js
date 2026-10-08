@@ -26,7 +26,7 @@ export const getInstagramStats = async () => {
   return r.json()
 }
 
-export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onModel, onDone, onError }) => {
+export const streamChat = async ({ messages, agentId, systemPrompt, section, onToken, onModel, onDone, onError }) => {
   const token = await getFreshToken()
   const { aiApiKey } = useSettingsStore.getState()
 
@@ -38,7 +38,7 @@ export const streamChat = async ({ messages, agentId, systemPrompt, onToken, onM
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ messages, agentId, systemPrompt, ...(aiApiKey ? { apiKey: aiApiKey } : {}) }),
+      body: JSON.stringify({ messages, agentId, systemPrompt, section, ...(aiApiKey ? { apiKey: aiApiKey } : {}) }),
     })
   } catch (err) {
     onError?.('Server bilan aloqa yo\'q')

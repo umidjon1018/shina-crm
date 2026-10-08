@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Bot, TrendingUp, Package, Megaphone, MessageSquare, MessageCircle, UserCheck, Globe, Send, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Clock, Trash2 } from 'lucide-react'
+import { Bot, TrendingUp, Package, Megaphone, MessageSquare, MessageCircle, UserCheck, Globe, Send, Save, ChevronDown, ChevronUp, Zap, ToggleLeft, ToggleRight, Info, Sparkles } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getAiAgents, updateAiAgent } from '../../../api/aiAgentsService'
-import { useSettingsStore } from '../../../store/settingsStore'
-import { clearAnalysisCache, clearAllAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
+import { clearAnalysisCache } from '../../AIAgent/hooks/useAgentAnalysis'
+import { AssistantCard, AnalystCard, ScheduleCard } from '../components/AiAnalysisAgents'
 
 const AGENT_ICONS = {
   'sales-agent':        { Icon: TrendingUp,    color: 'text-accent-green',  bg: 'bg-accent-green/10',  border: 'border-border' },
@@ -427,19 +428,14 @@ function AgentCard({ agent, onSave }) {
   )
 }
 
+// Tahlil agentlari (AI yordamchi + Kundalik tahlilchi) — asosiy qoidalar kodda, bu yerda egasining ko'rsatmalari;
+// mijozlar bilan muloqot botlari (Instagram/Telegram) — avvalgi to'liq sozlama bilan
 export default function AiAgentsTab() {
+  const { t } = useTranslation()
   const [agents, setAgents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [saveError, setSaveError] = useState(null)
-  const [cacheCleared, setCacheCleared] = useState(false)
-  const { aiAutoAnalysisHour, setAiAutoAnalysisHour } = useSettingsStore()
-
-  const handleClearCache = () => {
-    clearAllAnalysisCache()
-    setCacheCleared(true)
-    setTimeout(() => setCacheCleared(false), 2000)
-  }
 
   useEffect(() => {
     getAiAgents()
@@ -472,58 +468,42 @@ export default function AiAgentsTab() {
     </div>
   )
 
+  const assistant = agents.find(a => a.kind === 'assistant')
+  const analyst = agents.find(a => a.kind === 'analyst')
+  const bots = agents.filter(a => a.kind === 'bot')
+
   return (
-    <div className="space-y-4 max-w-3xl">
-      <div className="flex items-center gap-2 mb-2">
-        <Bot size={16} className="text-accent-green" />
-        <h2 className="text-sm font-semibold text-text-primary">AI Agentlar sozlamalari</h2>
-        <span className="text-xs text-text-muted">— har bir agentni alohida sozlang</span>
+    <div className="space-y-5 max-w-3xl">
+      <div className="space-y-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles size={16} className="text-accent-blue" />
+            <h2 className="text-sm font-semibold text-text-primary">{t('aiadm_group_analysis')}</h2>
+          </div>
+          <p className="text-xs text-text-muted mt-1">{t('aiadm_group_analysis_hint')}</p>
+        </div>
+        <ScheduleCard />
+        {saveError && (
+          <div className="p-3 bg-accent-red/10 border border-accent-red/30 rounded-xl text-sm text-accent-red">{saveError}</div>
+        )}
+        {assistant && <AssistantCard key={assistant.id} agent={assistant} onSave={handleSave} />}
+        {analyst && <AnalystCard key={analyst.id} agent={analyst} onSave={handleSave} />}
       </div>
 
-      {/* Kunlik tahlil vaqti */}
-      <div className="bg-bg-secondary border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-2 flex-1">
-          <Clock size={14} className="text-amber-400" />
+      {bots.length > 0 && (
+        <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-text-primary">Kunlik avtomatik tahlil vaqti</p>
-            <p className="text-xs text-text-muted mt-0.5">AI agentlar har kuni shu vaqtda ma'lumotlarni tahlil qiladi. Kesh yangilanadi.</p>
+            <div className="flex items-center gap-2">
+              <MessageCircle size={16} className="text-pink-400" />
+              <h2 className="text-sm font-semibold text-text-primary">{t('aiadm_group_bots')}</h2>
+            </div>
+            <p className="text-xs text-text-muted mt-1">{t('aiadm_group_bots_hint')}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <select
-            value={aiAutoAnalysisHour}
-            onChange={e => setAiAutoAnalysisHour(e.target.value)}
-            className="bg-bg-primary border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-amber-400/50"
-          >
-            {Array.from({ length: 24 }, (_, i) => (
-              <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
-            ))}
-          </select>
-          <button
-            onClick={handleClearCache}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition-colors ${
-              cacheCleared
-                ? 'border-accent-green/30 bg-accent-green/10 text-accent-green'
-                : 'border-border text-text-muted hover:text-accent-red hover:border-accent-red/30'
-            }`}
-          >
-            <Trash2 size={12} />
-            {cacheCleared ? 'Tozalandi ✓' : 'Keshni tozalash'}
-          </button>
-        </div>
-      </div>
-      {saveError && (
-        <div className="p-3 bg-accent-red/10 border border-accent-red/30 rounded-xl text-sm text-accent-red">
-          {saveError}
+          {bots.map(agent => (
+            <AgentCard key={agent.slug} agent={agent} onSave={handleSave} />
+          ))}
         </div>
       )}
-      {agents.map(agent => (
-        <AgentCard
-          key={agent.slug}
-          agent={agent}
-          onSave={handleSave}
-        />
-      ))}
     </div>
   )
 }
