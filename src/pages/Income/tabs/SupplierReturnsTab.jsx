@@ -3,14 +3,18 @@ import TableView from '../../../components/ui/TableView'
 import { useTranslation } from 'react-i18next'
 import { Undo2, Plus, Search, RotateCcw } from 'lucide-react'
 import { createSupplierReturn, cancelSupplierReturn } from '../../../api/supplierOpsService'
+import { addSupplier, linkBatchToSupplier } from '../../../api/incomeService'
 import { SupModal, Field, ErrorBox, Pager, inputCls, usd, fmtDate, batchUnitCost } from '../components/supShared'
 
 const PS = 20
 const REASONS = ['sup_rr_defect', 'sup_rr_wrong', 'sup_rr_damaged', 'sup_rr_expired', 'sup_rr_other']
 const errText = (e) => e?.response?.data?.error || e?.message || 'Xato'
 
-const NewReturnModal = ({ suppliers, batches, onClose, onDone, t }) => {
-  const [supplierId, setSupplierId] = useState('')
+// Qaytarish: avval kirim (partiya) tanlanadi; yetkazib beruvchisi biriktirilmagan bo'lsa — shu yerning o'zida biriktiriladi yoki yangisi qo'shiladi
+const NewReturnModal = ({ suppliers: initialSuppliers, batches, onClose, onDone, onSupplierChange, t }) => {
+  const [suppliers, setSuppliers] = useState(initialSuppliers)
+  const [linked, setLinked] = useState({})
+  const [fSupplier, setFSupplier] = useState('all')
   const [batchId, setBatchId] = useState('')
   const [qty, setQty] = useState(1)
   const [reasonKey, setReasonKey] = useState(REASONS[0])
@@ -18,18 +22,45 @@ const NewReturnModal = ({ suppliers, batches, onClose, onDone, t }) => {
   const [q, setQ] = useState('')
   const [err, setErr] = useState('')
   const [saving, setSaving] = useState(false)
+  const [linkSup, setLinkSup] = useState('')
+  const [newSup, setNewSup] = useState(null)
 
-  const supBatches = useMemo(() => batches
-    .filter(b => b.supplierId === supplierId && b.quantityRemaining > 0)
+  const supOf = (b) => linked[b.id] || b.supplierId || null
+  const supName = (id) => suppliers.find(s => s.id === id)?.name || ''
+  const list = useMemo(() => batches
+    .filter(b => b.quantityRemaining > 0 && !['production', 'bulk'].includes(b.batchType))
+    .filter(b => fSupplier === 'all' || (fSupplier === 'none' ? !supOf(b) : supOf(b) === fSupplier))
     .filter(b => !q.trim() || b.productName.toLowerCase().includes(q.trim().toLowerCase()) || (b.batchNumber || '').toLowerCase().includes(q.trim().toLowerCase()))
-    .sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt)), [batches, supplierId, q])
+    .sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt)), [batches, fSupplier, q, linked])
   const batch = batches.find(b => b.id === batchId)
+  const batchSup = batch ? supOf(batch) : null
   const unit = batch ? batchUnitCost(batch) : 0
   const amount = unit * (Number(qty) || 0)
+
+  const link = async () => {
+    setErr('')
+    try {
+      let sid = linkSup
+      let nextList = null
+      if (newSup) {
+        if (!newSup.name.trim()) return setErr(t('sup_err_name'))
+        const created = await addSupplier({ name: newSup.name.trim(), phone: newSup.phone.trim() })
+        nextList = [...suppliers, created]
+        setSuppliers(nextList)
+        sid = created.id
+      }
+      if (!sid) return setErr(t('sup_err_pick_supplier'))
+      await linkBatchToSupplier(batch.id, sid)
+      setLinked(m => ({ ...m, [batch.id]: sid }))
+      setNewSup(null); setLinkSup('')
+      onSupplierChange?.(batch.id, sid, nextList)
+    } catch (e) { setErr(errText(e)) }
+  }
 
   const submit = async () => {
     setErr('')
     if (!batch) return setErr(t('sup_err_batch'))
+    if (!batchSup) return setErr(t('sup_err_pick_supplier'))
     const n = Math.floor(Number(qty))
     if (!(n >= 1) || n > batch.quantityRemaining) return setErr(t('sup_err_over', { n: batch.quantityRemaining }))
     const reason = reasonKey === 'sup_rr_other' ? reasonText.trim() : [t(reasonKey), reasonText.trim()].filter(Boolean).join(' — ')
@@ -41,37 +72,65 @@ const NewReturnModal = ({ suppliers, batches, onClose, onDone, t }) => {
 
   return (
     <SupModal title={t('sup_new_return')} onClose={onClose} maxW="max-w-2xl"
-      footer={<button disabled={saving || !batch} onClick={submit} className="w-full py-3.5 bg-accent-red text-white rounded-xl font-extrabold disabled:opacity-50 flex items-center justify-center gap-2"><Undo2 size={18} />{t('sup_do_return')}</button>}>
+      footer={<button disabled={saving || !batch || !batchSup} onClick={submit} className="w-full py-3.5 bg-accent-red text-white rounded-xl font-extrabold disabled:opacity-50 flex items-center justify-center gap-2"><Undo2 size={18} />{t('sup_do_return')}</button>}>
       <div className="space-y-4">
-        <Field label={t('sup_supplier') + ' *'}>
-          <select value={supplierId} onChange={e => { setSupplierId(e.target.value); setBatchId('') }} className={inputCls}>
-            <option value="">{t('sup_select')}</option>
-            {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        </Field>
-        {supplierId && (
-          <Field label={t('sup_pick_batch') + ' *'}>
-            <div className="relative mb-2">
+        <Field label={t('sup_pick_batch') + ' *'}>
+          <div className="flex flex-col sm:flex-row gap-2 mb-2">
+            <div className="relative flex-1">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
               <input value={q} onChange={e => setQ(e.target.value)} placeholder={t('sup_search_batch')} className={inputCls + ' pl-9'} />
             </div>
-            <div className="max-h-56 overflow-y-auto space-y-1.5 no-scrollbar">
-              {supBatches.map(b => (
-                <button key={b.id} onClick={() => { setBatchId(b.id); setQty(1) }}
-                  className={`w-full text-left border rounded-xl px-3 py-2 transition-colors ${batchId === b.id ? 'border-accent-red bg-accent-red/5' : 'border-border bg-bg-tertiary hover:border-text-muted'}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold text-text-primary">{b.productName}</span>
-                    <span className="text-xs text-text-muted shrink-0">{t('sup_in_stock')}: <b className="text-text-primary">{b.quantityRemaining}</b></span>
-                  </div>
-                  <p className="text-[11px] text-text-muted">{b.batchNumber} · {fmtDate(b.receivedAt)} · {usd(batchUnitCost(b))} / {b.unit || 'dona'}{b.shopName ? ` · ${b.shopName}` : ''}</p>
-                </button>
-              ))}
-              {supBatches.length === 0 && <p className="text-xs text-text-muted text-center py-4">{t('sup_no_batches_stock')}</p>}
-            </div>
-          </Field>
+            <select value={fSupplier} onChange={e => setFSupplier(e.target.value)} className={inputCls + ' sm:w-56'}>
+              <option value="all">{t('sup_all_suppliers')}</option>
+              <option value="none">{t('sup_no_supplier_linked')}</option>
+              {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div className="max-h-64 overflow-y-auto space-y-1.5 no-scrollbar">
+            {list.map(b => (
+              <button key={b.id} onClick={() => { setBatchId(b.id); setQty(1); setErr('') }}
+                className={`w-full text-left border rounded-xl px-3 py-2 transition-colors ${batchId === b.id ? 'border-accent-red bg-accent-red/5' : 'border-border bg-bg-tertiary hover:border-text-muted'}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-text-primary">{b.productName}</span>
+                  <span className="text-xs text-text-muted shrink-0">{t('sup_in_stock')}: <b className="text-text-primary">{b.quantityRemaining}</b></span>
+                </div>
+                <p className="text-[11px] text-text-muted">
+                  {b.batchNumber} · {fmtDate(b.receivedAt)} · {usd(batchUnitCost(b))} / {b.unit || 'dona'}{b.shopName ? ` · ${b.shopName}` : ''} · {supOf(b)
+                    ? <span className="text-text-secondary">{supName(supOf(b)) || b.supplierName}</span>
+                    : <span className="text-accent-orange font-semibold">{t('sup_no_supplier_linked')}</span>}
+                </p>
+              </button>
+            ))}
+            {list.length === 0 && <p className="text-xs text-text-muted text-center py-4">{t('sup_no_batches_stock_any')}</p>}
+          </div>
+        </Field>
+
+        {batch && !batchSup && (
+          <div className="border border-accent-orange/40 bg-accent-orange/5 rounded-xl p-3 space-y-2">
+            <p className="text-sm font-semibold text-accent-orange">{t('sup_link_needed')}</p>
+            {!newSup ? (
+              <div className="flex flex-col sm:flex-row gap-2">
+                <select value={linkSup} onChange={e => setLinkSup(e.target.value)} className={inputCls + ' flex-1'}>
+                  <option value="">{suppliers.length ? t('sup_select') : t('sup_no_suppliers_yet')}</option>
+                  {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <button onClick={() => setNewSup({ name: '', phone: '' })} className="px-3 py-2.5 rounded-xl border border-border text-sm font-bold text-text-secondary hover:bg-bg-tertiary whitespace-nowrap">+ {t('sup_new_supplier_short')}</button>
+                <button onClick={link} disabled={!linkSup} className="px-4 py-2.5 rounded-xl bg-accent-blue text-white text-sm font-bold disabled:opacity-50 whitespace-nowrap">{t('sup_link_btn')}</button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input value={newSup.name} onChange={e => setNewSup(s => ({ ...s, name: e.target.value }))} placeholder={t('sup_name_ph')} autoFocus className={inputCls + ' flex-1'} />
+                <input value={newSup.phone} onChange={e => setNewSup(s => ({ ...s, phone: e.target.value }))} placeholder="+998" className={inputCls + ' sm:w-40'} />
+                <button onClick={() => setNewSup(null)} className="px-3 py-2.5 rounded-xl border border-border text-sm font-bold text-text-secondary hover:bg-bg-tertiary">{t('sup_cancel_short')}</button>
+                <button onClick={link} className="px-4 py-2.5 rounded-xl bg-accent-blue text-white text-sm font-bold whitespace-nowrap">{t('sup_add_and_link')}</button>
+              </div>
+            )}
+          </div>
         )}
-        {batch && (
+
+        {batch && batchSup && (
           <>
+            <p className="text-sm text-text-secondary">{t('sup_supplier')}: <b className="text-text-primary">{supName(batchSup) || batch.supplierName}</b></p>
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('sup_qty') + ` (max ${batch.quantityRemaining})`}>
                 <input type="number" min="1" max={batch.quantityRemaining} value={qty} onChange={e => setQty(e.target.value)} className={inputCls} />
@@ -99,7 +158,7 @@ const NewReturnModal = ({ suppliers, batches, onClose, onDone, t }) => {
 
 const SupplierReturnsTab = ({ ctx }) => {
   const { t } = useTranslation()
-  const { suppliers, shopBatches, returns, selectedShopId, refreshAll, user } = ctx
+  const { suppliers, setSuppliers, setBatches, shopBatches, returns, selectedShopId, refreshAll, user } = ctx
   const [showNew, setShowNew] = useState(false)
   const [search, setSearch] = useState('')
   const [fSupplier, setFSupplier] = useState('all')
@@ -196,6 +255,10 @@ const SupplierReturnsTab = ({ ctx }) => {
 
       {showNew && (
         <NewReturnModal suppliers={suppliers} batches={shopBatches} t={t}
+          onSupplierChange={(batchId, supplierId, list) => {
+            if (list) setSuppliers(list)
+            setBatches(prev => prev.map(b => (b.id === batchId ? { ...b, supplierId } : b)))
+          }}
           onClose={() => setShowNew(false)} onDone={() => { setShowNew(false); refreshAll() }} />
       )}
     </div>

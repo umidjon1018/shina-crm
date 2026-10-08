@@ -48,7 +48,8 @@ const SuppliersTab = ({ ctx }) => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-              {(selectedShopId === 'all' ? suppliers : suppliers.filter(s => shopBatches.some(b => b.supplierId === s.id))).map(s => {
+              {/* Do'kon tanlanganda — shu do'konda kirimi borlar va hali hech qayerda kirimi yo'q (yangi) yetkazib beruvchilar */}
+              {(selectedShopId === 'all' ? suppliers : suppliers.filter(s => shopBatches.some(b => b.supplierId === s.id) || !batches.some(b => b.supplierId === s.id))).map(s => {
                 const supplierBatches = shopBatches.filter(b => b.supplierId === s.id)
                 const supplierDebts = supplierBatches.reduce((sum, b) => sum + (b.debtUSD || 0), 0)
                 const contractActivatedAt = s.contractActivatedAt || null
@@ -63,7 +64,9 @@ const SuppliersTab = ({ ctx }) => {
                   }
                   return (s.contractAmount || 0) - contractUsed
                 })()
-                const contractWarning = contractRemaining < 5000000
+                // Shartnoma summasi kiritilmagan bo'lsa — qoldiq va ogohlantirish ko'rsatilmaydi
+                const hasContract = (s.contractAmount || 0) > 0 || (s.contractStatus === 'pending_completion' && ((s.newContractAmount || 0) > 0 || (s.pendingRemaining || 0) > 0))
+                const contractWarning = hasContract && contractRemaining < 5000000
 
                 return (
                   <motion.div
@@ -118,8 +121,8 @@ const SuppliersTab = ({ ctx }) => {
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted">{t('inc_supplier_contract_remaining')}</p>
-                          <p className={`text-xl font-syne font-extrabold ${contractWarning ? 'text-accent-red animate-pulse' : 'text-accent-green'}`}>
-                            {formatPrice(contractRemaining)} {som}
+                          <p className={`text-xl font-syne font-extrabold ${!hasContract ? 'text-text-muted' : contractWarning ? 'text-accent-red animate-pulse' : 'text-accent-green'}`}>
+                            {hasContract ? `${formatPrice(contractRemaining)} ${som}` : t('inc_supplier_no_contract')}
                           </p>
                         </div>
                       </div>
@@ -129,7 +132,7 @@ const SuppliersTab = ({ ctx }) => {
                         </div>
                       )}
                       {/* Progress bar */}
-                      <div className="space-y-1">
+                      {hasContract && <div className="space-y-1">
                         <div className="flex justify-between text-[10px] text-text-muted">
                           <span>{t('inc_supplier_used')}: {formatPrice(contractUsed)} {som}</span>
                           <span>{t('inc_supplier_total')}: {formatPrice(s.contractAmount)} {som}</span>
@@ -140,7 +143,7 @@ const SuppliersTab = ({ ctx }) => {
                             style={{ width: `${Math.min(100, (contractUsed / (s.contractAmount || 1)) * 100)}%` }}
                           />
                         </div>
-                      </div>
+                      </div>}
                       <div className="flex items-center justify-between">
                         <button
                           onClick={() => setShowSupplierDetail(s)}
