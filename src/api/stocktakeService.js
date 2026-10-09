@@ -9,6 +9,7 @@ const mapSt = (s) => ({
   itemCount: s.item_count ?? 0,
   createdAt: s.created_at,
   completedAt: s.completed_at || null,
+  writeoffAt: s.writeoff_at || null,
 })
 
 const mapItem = (i) => ({
@@ -48,9 +49,9 @@ export const updateStocktakeItem = async (stocktakeId, itemId, { actualQty, note
   return mapItem(data)
 }
 
-export const completeStocktake = async (id) => {
-  const { data } = await api.post(`/api/stocktakes/${id}/complete`)
-  return mapSt(data)
+export const completeStocktake = async (id, autoWriteoff = false) => {
+  const { data } = await api.post(`/api/stocktakes/${id}/complete`, { auto_writeoff: autoWriteoff })
+  return { ...mapSt(data), writtenOff: data.written_off || [], notWrittenOff: data.not_written_off || [] }
 }
 
 export const reopenStocktake = async (id) => {

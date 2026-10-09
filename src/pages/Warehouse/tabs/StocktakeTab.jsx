@@ -4,6 +4,8 @@ import { Plus, ClipboardList, CheckCircle2, Clock, Trash2, X, ChevronRight, Chev
 import { useShopStore } from '../../../store/shopStore'
 import { getStocktakes, getStocktake, createStocktake, updateStocktakeItem, completeStocktake, reopenStocktake, deleteStocktake } from '../../../api/stocktakeService'
 import { StackGuard } from '../../../components/ui/Modal'
+import { useDataStore } from '../../../store/dataStore'
+import { useAuthStore } from '../../../store/authStore'
 
 const fmt = (n) => (n ?? 0).toLocaleString('uz-UZ')
 const fmtDate = (s) => s ? new Date(s).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
@@ -17,6 +19,11 @@ const DiffBadge = ({ diff }) => {
 
 const StocktakeTab = () => {
   const { selectedShopId } = useShopStore()
+  const { bump } = useDataStore()
+  const canWriteOff = useAuthStore(s => s.hasPermission('warehouse.writeoff'))
+  const [askWriteoff, setAskWriteoff] = useState(false)
+  const [completeError, setCompleteError] = useState('')
+  const [writeoffResult, setWriteoffResult] = useState(null) // { writtenOff, notWrittenOff }
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -83,12 +90,26 @@ const StocktakeTab = () => {
     }, 600)
   }
 
-  const handleComplete = async () => {
+  const handleCompleteClick = () => {
+    setCompleteError('')
+    if (shortages.length && canWriteOff && selected.shopId && !selected.writeoffAt) setAskWriteoff(true)
+    else handleComplete(false)
+  }
+
+  const handleComplete = async (autoWriteoff) => {
     setCompleting(true)
+    setCompleteError('')
     try {
-      const updated = await completeStocktake(selected.id)
-      setSelected(prev => ({ ...prev, status: updated.status, completedAt: updated.completedAt }))
+      const updated = await completeStocktake(selected.id, autoWriteoff)
+      setSelected(prev => ({ ...prev, status: updated.status, completedAt: updated.completedAt, writeoffAt: updated.writeoffAt }))
+      setAskWriteoff(false)
+      if (autoWriteoff) {
+        setWriteoffResult({ writtenOff: updated.writtenOff, notWrittenOff: updated.notWrittenOff })
+        bump()
+      }
       await loadList()
+    } catch (err) {
+      setCompleteError(err?.response?.data?.error || 'Xatolik yuz berdi')
     } finally { setCompleting(false) }
   }
 
@@ -142,6 +163,11 @@ const StocktakeTab = () => {
     const diff = filled.filter(i => { const d = getDiff(i); return d !== null && d !== 0 }).length
     return { total: items.length, filled: filled.length, ok, diff }
   }, [selected, localActual])
+
+  // Kamomad bo'lsa (va hali chiqarilmagan bo'lsa) — avtomatik hisobdan chiqarishni so'raymiz
+  const shortages = useMemo(() => (selected?.items || [])
+    .map(i => ({ name: i.productName, qty: -(getDiff(i) ?? 0) }))
+    .filter(x => x.qty > 0), [selected, localActual])
 
   return (
     <div className="flex gap-4 h-[calc(100vh-220px)] min-h-[500px]">
@@ -268,8 +294,8 @@ const StocktakeTab = () => {
                 )}
                 {selected.status === 'draft' && (
                   <button
-                    disabled={completing || !summary || summary.filled === 0}
-                    onClick={handleComplete}
+                    disabled={completing || !summary || summary.filled === 0 || Object.values(saving).some(Boolean)}
+                    onClick={handleCompleteClick}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-green text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
                     <CheckCircle2 size={14} /> {completing ? 'Yakunlanmoqda...' : 'Yakunlash'}
@@ -370,6 +396,83 @@ const StocktakeTab = () => {
           </>
         )}
       </div>
+
+      {/* Yakunlash: kamomadni avtomatik hisobdan chiqarish so'rovi */}
+      <AnimatePresence>
+        {askWriteoff && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => !completing && setAskWriteoff(false)}>
+            <StackGuard onClose={() => !completing && setAskWriteoff(false)} />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md space-y-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent-orange/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingDown size={20} className="text-accent-orange" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-text-primary">Kamomadni avtomatik hisobdan chiqarilsinmi?</h4>
+                  <p className="text-sm text-text-muted mt-1">
+                    {shortages.length} ta tovarda jami {fmt(shortages.reduce((s, x) => s + x.qty, 0))} dona kam chiqdi.
+                    "Ha" — shu tovarlar hozir hisobdan chiqariladi. "Yo'q" — inventarizatsiya yakunlanadi, hisobdan chiqarishni qo'lda qilasiz.
+                  </p>
+                </div>
+              </div>
+              <div className="max-h-40 overflow-y-auto border border-border rounded-xl divide-y divide-border">
+                {shortages.map((x, i) => (
+                  <div key={i} className="flex items-center justify-between px-3 py-1.5 text-xs">
+                    <span className="text-text-primary truncate pr-2">{x.name}</span>
+                    <span className="text-accent-red font-bold flex-shrink-0">−{fmt(x.qty)}</span>
+                  </div>
+                ))}
+              </div>
+              {completeError && <p className="text-xs text-accent-red">{completeError}</p>}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button disabled={completing} onClick={() => setAskWriteoff(false)} className="sm:flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-tertiary transition-colors disabled:opacity-50">Bekor</button>
+                <button disabled={completing} onClick={() => handleComplete(false)} className="sm:flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-bold text-text-primary hover:bg-bg-tertiary transition-colors disabled:opacity-50">Yo'q, qo'lda</button>
+                <button disabled={completing} onClick={() => handleComplete(true)} className="sm:flex-1 px-4 py-2.5 bg-accent-red text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50">{completing ? '...' : 'Ha, chiqarilsin'}</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Avtomatik hisobdan chiqarish natijasi */}
+      <AnimatePresence>
+        {writeoffResult && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[360] flex items-center justify-center p-4" onClick={() => setWriteoffResult(null)}>
+            <StackGuard onClose={() => setWriteoffResult(null)} />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-6 w-full max-w-md space-y-4"
+            >
+              <h4 className="font-bold text-text-primary flex items-center gap-2"><CheckCircle2 size={18} className="text-accent-green" /> Hisobdan chiqarildi</h4>
+              <div className="max-h-48 overflow-y-auto border border-border rounded-xl divide-y divide-border">
+                {writeoffResult.writtenOff.map((x, i) => (
+                  <div key={i} className="flex items-center justify-between px-3 py-1.5 text-xs">
+                    <span className="text-text-primary truncate pr-2">{x.product_name}</span>
+                    <span className="text-text-secondary flex-shrink-0">{fmt(x.quantity)} ta · {fmt(x.amount)} so'm</span>
+                  </div>
+                ))}
+                {!writeoffResult.writtenOff.length && <p className="px-3 py-2 text-xs text-text-muted">Hech narsa chiqarilmadi</p>}
+              </div>
+              {writeoffResult.notWrittenOff.length > 0 && (
+                <div className="text-xs text-accent-orange space-y-1">
+                  <p className="font-bold">Omborda yetarli qoldiq yo'q (sanashdan keyin sotilgan yoki bron qilingan) — qo'lda tekshiring:</p>
+                  {writeoffResult.notWrittenOff.map((x, i) => <p key={i}>{x.product_name}: {fmt(x.quantity)} ta</p>)}
+                </div>
+              )}
+              <button onClick={() => setWriteoffResult(null)} className="w-full px-4 py-2.5 bg-accent-blue text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity">Yopish</button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Delete confirmation */}
       <AnimatePresence>
