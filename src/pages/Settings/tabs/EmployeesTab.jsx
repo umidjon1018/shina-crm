@@ -100,8 +100,8 @@ function EmployeesTab() {
     if (!form.name.trim() || !form.username.trim()) return
     if (editing) {
       if (editing.role === 'admin') {
-        const res = await updateAdminProfile({ full_name: form.name, username: form.username, password: form.password || undefined })
-        if (!res.success) return
+        const res = await updateAdminProfile({ full_name: form.name, username: form.username, password: form.password || undefined, currentPassword: form.currentPassword })
+        if (!res.success) { setSaveError(res.message); return }
       } else {
         updateEmployee(editing.id, { ...form, salary: Number(form.salary) || 0 })
       }
@@ -394,6 +394,14 @@ function EmployeesTab() {
                   </div>
                 </div>
               </div>
+              {editing?.role === 'admin' && (form.password || form.username !== editing.username) && (
+                <div>
+                  <label className="text-xs text-text-muted mb-1 block">{t('profile_current_password')}</label>
+                  <input type="password" value={form.currentPassword || ''} onChange={e => setForm(f => ({ ...f, currentPassword: e.target.value }))}
+                    autoComplete="current-password"
+                    className="w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red font-mono" />
+                </div>
+              )}
               {isAdmin && editing?.role !== 'admin' && (
                 <div className="space-y-2">
                   <label className="text-xs text-text-muted block font-semibold">{t('adm_field_permissions')}</label>

@@ -776,6 +776,7 @@ export const useSalesState = () => {
         sellerName: seller,
         sellerId: user?.id,
         requestedDiscount: discount,
+        itemIds: cartItems.map(c => Number(c.item?.id)).filter(Boolean),
         requiredRole,
         shopId: selectedShopId !== 'all' ? selectedShopId : undefined,
         cartSummary: {

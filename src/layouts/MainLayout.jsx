@@ -515,7 +515,7 @@ const ProfileModal = ({ user, updateProfile, verifyPassword, onClose }) => {
     setError('')
     const valid = await verifyPassword(form.currentPassword)
     if (!valid) { setError(t('profile_err_wrong_password')); setLoading(false); return }
-    const result = await updateProfile({ username: form.username.trim(), password: form.newPassword || undefined })
+    const result = await updateProfile({ username: form.username.trim(), password: form.newPassword || undefined, currentPassword: form.currentPassword })
     setLoading(false)
     if (!result.success) { setError(result.message || t('exp_err_generic')); return }
     setSuccess(true)

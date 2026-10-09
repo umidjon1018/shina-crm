@@ -71,7 +71,7 @@ function DevicesTab() {
   }
 
   const approve = (a) => {
-    approveDevice(a.deviceId)
+    approveDevice(a.deviceId, a.id)
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Qurilma tasdiqlandi', actionKey: 'audit_device_approved', entity: 'device', details: `${a.username} — ${a.deviceId}` })
     load()
   }
@@ -85,7 +85,7 @@ function DevicesTab() {
     } catch {}
   }
   const reject = (a) => {
-    rejectDevice(a.deviceId)
+    rejectDevice(a.deviceId, a.id)
     addLog({ userId: me?.id, userName: me?.fullName || me?.username, action: 'Qurilma rad etildi', actionKey: 'audit_device_rejected', entity: 'device', details: `${a.username} — ${a.deviceId}` })
     load()
   }

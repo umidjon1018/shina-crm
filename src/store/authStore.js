@@ -184,12 +184,12 @@ export const useAuthStore = create(
       },
 
       // Admin approves device
-      approveDevice: async (deviceId) => {
+      approveDevice: async (deviceId, attemptId) => {
         let attempt = null
         try {
           const res = await api.get('/api/auth/attempts')
-          attempt = res.data.find(a => a.device_id === deviceId)
-          await api.patch(`/api/auth/attempts/${deviceId}/approve`)
+          attempt = res.data.find(a => (attemptId ? a.id === attemptId : a.device_id === deviceId))
+          await api.patch(`/api/auth/attempts/${deviceId}/approve`, null, { params: attemptId ? { attemptId } : undefined })
         } catch {}
 
         const targetRole = attempt?.role
@@ -229,14 +229,14 @@ export const useAuthStore = create(
       },
 
       // Admin rejects device
-      rejectDevice: async (deviceId) => {
+      rejectDevice: async (deviceId, attemptId) => {
         const { deviceId: currentDeviceId } = get()
         if (deviceId === currentDeviceId) {
           clearSession()
           set({ deviceStatus: 'rejected', user: null, token: null })
         }
         try {
-          await api.patch(`/api/auth/attempts/${deviceId}/reject`)
+          await api.patch(`/api/auth/attempts/${deviceId}/reject`, null, { params: attemptId ? { attemptId } : undefined })
         } catch {}
       },
 
@@ -264,7 +264,7 @@ export const useAuthStore = create(
       },
 
       // Admin o'z profilini yangilaydi — users jadvalini backend orqali
-      updateAdminProfile: async ({ full_name, username, password }) => {
+      updateAdminProfile: async ({ full_name, username, password, currentPassword }) => {
         const { user } = get()
         if (!user) return { success: false, message: "Ruxsat yo'q" }
         try {
@@ -272,6 +272,7 @@ export const useAuthStore = create(
             full_name: full_name || undefined,
             username: username || undefined,
             password: password || undefined,
+            currentPassword: currentPassword || undefined,
           })
           set({ user: { ...user, username: res.data.username, fullName: res.data.full_name } })
           return { success: true }
@@ -291,15 +292,11 @@ export const useAuthStore = create(
       },
 
       // Xodim o'z login/parolini o'zgartiradi — backend orqali
-      updateProfile: async ({ username, password }) => {
+      updateProfile: async ({ username, password, currentPassword }) => {
         const { user } = get()
         if (!user) return { success: false, message: "Ruxsat yo'q" }
         try {
-          const endpoint = user.role === 'admin' ? '/api/auth/me' : `/api/employees/${user.id}`
-          const body = user.role === 'admin'
-            ? { username, password: password || undefined, full_name: user.fullName }
-            : { name: user.fullName || user.username, username, password: password || undefined, role: user.role }
-          await api.put(endpoint, body)
+          await api.put('/api/auth/me', { username, password: password || undefined, currentPassword })
           set({ user: { ...user, username } })
           return { success: true }
         } catch (err) {
