@@ -437,7 +437,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (26-deploy)** — backend `62060f2`, frontend `71792f14` (telefonda sahifa yon tomonga surilmaydi/jadvallar kesilmaydi/inventarizatsiya; ochiq API kaliti faqat X-API-Key; FACE_ENC_KEY'siz biometrik saqlanmaydi; nginx'ga X-Forwarded-For — login limiterini soxta IP bilan aylanib o'tish yopildi). Zaxira `/root/backups/2026-10-09b`.
+**Oxirgi deploy: 2026-10-09 (27-deploy)** — backend `6d695be`, frontend `dab18837` (Antigravity auditi: qaytarish summasi/tovarlari serverda asl chekdan + umumiy barkod xatosi, qisman qaytarish → qoldiq chek, sotuvda FOR UPDATE, balansni to'ldirish faqat admin/boshqaruvchi, Instagram webhook kalitsiz rad, to'lov webhooklari shartli UPDATE + timingSafeEqual, bron 1–24 soat, tenant faqat Host'dan). Zaxira `/root/backups/2026-10-09c`.
+
+**26-deploy: 2026-10-09** — backend `62060f2`, frontend `71792f14` (telefonda sahifa yon tomonga surilmaydi/jadvallar kesilmaydi/inventarizatsiya; ochiq API kaliti faqat X-API-Key; FACE_ENC_KEY'siz biometrik saqlanmaydi; nginx'ga X-Forwarded-For — login limiterini soxta IP bilan aylanib o'tish yopildi). Zaxira `/root/backups/2026-10-09b`.
 
 **25-deploy: 2026-10-09** — backend `c3444b3`, frontend `380b3eea` (yangi UI, ulgurji, ishlab chiqarish, kg sotish, server hisobotlari, ekran klaviaturasi, menyu ixcham rejimi, fiskal tayyorlov, biznes profili; eski 7 klient hisobot o'chirilgan). Zaxira `/root/backups/2026-10-09a`. Migratsiyalar xatosiz, 18 asosiy endpoint 200.
 
