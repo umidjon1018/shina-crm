@@ -2,7 +2,7 @@ import { useEffect, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useThemeStore } from './store/themeStore'
 import { useLangStore } from './store/langStore'
-import { ProtectedRoute, DashboardGate } from './ProtectedRoute'
+import { ProtectedRoute, DashboardGate, AdminGate, SuperAdminGate } from './ProtectedRoute'
 
 // Layouts
 import { AuthLayout } from './layouts/AuthLayout'
@@ -23,6 +23,8 @@ const Marketing = lazy(() => import('./pages/Marketing'))
 const Reports = lazy(() => import('./pages/Reports'))
 const AIAgent = lazy(() => import('./pages/AIAgent'))
 const Settings = lazy(() => import('./pages/Settings'))
+const Subscription = lazy(() => import('./pages/Subscription'))
+const BillingAdmin = lazy(() => import('./pages/BillingAdmin'))
 
 function App() {
   const { initTheme } = useThemeStore()
@@ -120,6 +122,8 @@ function App() {
             </ProtectedRoute>
           } />
           {/* Eski sahifalar Sozlamalarga birlashdi */}
+          <Route path="/subscription" element={<ProtectedRoute><AdminGate><Subscription /></AdminGate></ProtectedRoute>} />
+          <Route path="/billing-admin" element={<ProtectedRoute><SuperAdminGate><BillingAdmin /></SuperAdminGate></ProtectedRoute>} />
           <Route path="/admin" element={<Navigate to="/settings" replace />} />
           <Route path="/management" element={<Navigate to="/settings" replace />} />
         </Route>

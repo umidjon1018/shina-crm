@@ -3697,6 +3697,8 @@ export default {
   set_sec_integrations: "Интеграции",
   set_sec_audit: "Журнал аудита",
   nav_settings: "Настройки",
+  nav_subscription: "Подписка",
+  nav_billing_admin: "Управление SICRM",
   int_page_subtitle: "Интернет-магазин, Telegram-бот, UDS и онлайн-оплата",
   int_tab_api: "Интернет-магазин",
   int_tab_bot: "Telegram-бот",

@@ -21,8 +21,9 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  Megaphone, Boxes, Factory, ChevronsLeft, ChevronsRight, Store
+  Megaphone, Boxes, Factory, ChevronsLeft, ChevronsRight, Store, CreditCard, Crown, AlertTriangle
 } from 'lucide-react'
+import { useBillingStore } from '../store/billingStore'
 import { useState, useEffect, useCallback, Suspense, createContext, useContext } from 'react'
 import { useUiStore } from '../store/uiStore'
 import { syncRolesFromServer } from '../utils/rolesSync'
@@ -66,6 +67,26 @@ const PAGE_KEYS = {
 // Ixcham menyu: faqat ikonkalar (lg va undan katta ekranda; telefondagi ochiladigan menyu doim to'liq)
 const MiniCtx = createContext(false)
 
+// Obuna ogohlantirishi: sinov, muddat yaqin, imtiyoz davri, muddati tugagan (faqat ko'rish)
+const BillingBanner = ({ status, isAdmin }) => {
+  if (!status || ['free', 'none'].includes(status.state)) return null
+  const d = status.daysLeft
+  let tone = null, text = ''
+  if (status.state === 'trial') { tone = 'blue'; text = `Sinov muddati: ${d} kun qoldi` }
+  else if (status.state === 'active' && d != null && d <= (status.warnDays ?? 3)) { tone = 'orange'; text = `Obuna ${d} kundan keyin tugaydi` }
+  else if (status.state === 'grace') { tone = 'orange'; text = `Obuna muddati tugadi. ${Math.max(0, (status.graceDays ?? 0) + (d ?? 0))} kun ichida to'lanmasa, ilova faqat ko'rish rejimiga o'tadi` }
+  else if (status.state === 'expired') { tone = 'red'; text = "Obuna muddati tugagan — faqat ko'rish rejimi. Yangi amallar to'lovdan keyin ochiladi" }
+  if (!tone) return null
+  const cls = { blue: 'bg-accent-blue/10 text-accent-blue border-accent-blue/30', orange: 'bg-accent-orange/10 text-accent-orange border-accent-orange/30', red: 'bg-accent-red/10 text-accent-red border-accent-red/30' }[tone]
+  return (
+    <div className={`mb-3 sm:mb-4 flex flex-wrap items-center gap-2 px-3 sm:px-4 py-2.5 border rounded-xl text-sm font-medium ${cls}`}>
+      <AlertTriangle size={16} className="flex-shrink-0" />
+      <span className="flex-1 min-w-0">{text}</span>
+      {isAdmin && <Link to="/subscription" className="px-3 py-1 rounded-lg bg-current/10 border border-current text-xs font-bold whitespace-nowrap">To'lash</Link>}
+    </div>
+  )
+}
+
 const SidebarItem = ({ to, icon: Icon, label, isActive, onClick, replace }) => {
   const mini = useContext(MiniCtx)
   return (
@@ -103,6 +124,7 @@ const SidebarSection = ({ label, children }) => {
 
 export const MainLayout = () => {
   const { isAuthenticated, logout, user, hasPermission, updateProfile, verifyPassword } = useAuthStore()
+  const billing = useBillingStore(s => s.status)
   const { lang, setLang } = useLangStore()
   const { t, i18n } = useTranslation()
   const location = useLocation()
@@ -158,8 +180,9 @@ export const MainLayout = () => {
     useNotificationStore.getState().load()
     if (user?.role === 'admin' || user?.role === 'manager') migrateLocalBundles()
     syncRolesFromServer().catch(() => {})
+    useBillingStore.getState().load()
     // Ilovaga qaytganda ruxsatlar yangilanadi (admin o'zgartirgan bo'lsa)
-    const onVisible = () => { if (document.visibilityState === 'visible') syncRolesFromServer().catch(() => {}) }
+    const onVisible = () => { if (document.visibilityState === 'visible') { syncRolesFromServer().catch(() => {}); useBillingStore.getState().load() } }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
@@ -381,6 +404,12 @@ export const MainLayout = () => {
             {visibleSettingsSections(user, hasPermission).length > 0 && (
               <SidebarItem to="/settings" icon={Settings} label={t('nav_settings')} isActive={isActive('/settings')} onClick={closeSidebar} replace={isSidebarOpen} />
             )}
+            {user?.role === 'admin' && billing && billing.state !== 'none' && (
+              <SidebarItem to="/subscription" icon={CreditCard} label={t('nav_subscription')} isActive={isActive('/subscription')} onClick={closeSidebar} replace={isSidebarOpen} />
+            )}
+            {billing?.superAdmin && (
+              <SidebarItem to="/billing-admin" icon={Crown} label={t('nav_billing_admin')} isActive={isActive('/billing-admin')} onClick={closeSidebar} replace={isSidebarOpen} />
+            )}
           </SidebarSection>
 
         </nav>
@@ -464,6 +493,7 @@ export const MainLayout = () => {
         {/* Page Content */}
         <div ref={areaRef} className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 safe-bottom no-scrollbar">
           <div ref={contentRef}>
+            <BillingBanner status={billing} isAdmin={user?.role === 'admin'} />
             <Suspense fallback={<PageLoader />}>
               <PageErrorBoundary key={location.pathname}><Outlet /></PageErrorBoundary>
             </Suspense>

@@ -7,6 +7,8 @@ import { useShopStore } from './shopStore'
 import { useNotificationStore } from './notificationStore'
 import { setSession, clearSession, revokeSessionOnServer } from '../api/session'
 import { useAuditStore } from './auditStore'
+import { useBillingStore } from './billingStore'
+import { PERMISSION_TREE } from '../config/permissionTree'
 
 const MODULE_NODES = [['used', ['sales.used_sale', 'warehouse.used_stock', 'reports.used']]]
 
@@ -311,6 +313,7 @@ export const useAuthStore = create(
         revokeSessionOnServer()
         clearSession()
         clearHttpCache()
+        useBillingStore.getState().clear()
         set({ user: null, token: null, isAuthenticated: false, deviceStatus: 'idle' })
       },
 
@@ -320,6 +323,13 @@ export const useAuthStore = create(
         const settings = useSettingsStore.getState()
         // Biznes profilida o'chirilgan modul bo'limlari — hech kimga (admin ham) ko'rinmaydi
         if (MODULE_NODES.some(([m, nodes]) => settings.modules?.[m] === false && nodes.some(n => permission === n || permission.startsWith(n + '.')))) return false
+        // Obuna tarifiga kirmagan bo'limlar — hech kimga (admin ham) ko'rinmaydi
+        const planDenied = useBillingStore.getState().status?.deniedNodes || []
+        const planBlocked = (id) => planDenied.some(n => id === n || id.startsWith(n + '.'))
+        if (planBlocked(permission)) return false
+        // Bo'limning hamma tablari tarifga kirmasa — bo'limning o'zi ham yopiq
+        const page = planDenied.length ? PERMISSION_TREE.find(p => p.id === permission) : null
+        if (page?.children?.length && page.children.every(c => planBlocked(c.id))) return false
         if (user.permissions.includes('all')) return true
         // Xodimga individual ruxsat berilgan bo'lsa — lavozim o'rniga shu ishlatiladi
         const own = user.access && Array.isArray(user.access.checked) ? user.access : null

@@ -3701,6 +3701,8 @@ export default {
   set_sec_integrations: "Integratsiyalar",
   set_sec_audit: "Audit jurnali",
   nav_settings: "Sozlamalar",
+  nav_subscription: "Obuna",
+  nav_billing_admin: "SICRM boshqaruvi",
   int_page_subtitle: "Internet-do'kon, Telegram bot, UDS va onlayn to'lovlar",
   int_tab_api: "Internet-do'kon",
   int_tab_bot: "Telegram bot",
