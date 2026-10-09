@@ -437,7 +437,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (31-deploy)** — backend `ef875f4`, frontend `ad7165eb` (Cloudflare security-audit: 27 topilma — flow'siz login yopildi (APP_UPDATE_REQUIRED), qurilma attemptId/himoyalangan rollar, SSE pre token cheklovi va bekorda oqim yopiladi, roleWithinActor, aksiya/chegirma tasdig'i serverda, do'kon chegarasi, poyga holatlari, AI/bot cheklovlari). Zaxira `/root/backups/2026-10-09g` (+ `env_before_jwt_rotation`). JWT_SECRET almashtirish — foydalanuvchi qo'lda (auto-mode sirni yozishni to'sdi).
+**Oxirgi deploy: 2026-10-09 (32-deploy)** — backend `18b5423`, frontend `fb561123` (tovar rasmlari diskda `uploads/product-images` + `product_images.file_name`, eski BYTEA ishga tushishda ko'chadi; inventarizatsiya yakunida kamomadni avtomatik hisobdan chiqarish so'rovi, `stocktakes.writeoff_at`, yadro `utils/writeOff.js`). Zaxira `/root/backups/2026-10-09h`. JWT_SECRET 31-deploydan keyin almashtirildi.
+
+**31-deploy: 2026-10-09** — backend `ef875f4`, frontend `ad7165eb` (Cloudflare security-audit: 27 topilma — flow'siz login yopildi (APP_UPDATE_REQUIRED), qurilma attemptId/himoyalangan rollar, SSE pre token cheklovi va bekorda oqim yopiladi, roleWithinActor, aksiya/chegirma tasdig'i serverda, do'kon chegarasi, poyga holatlari, AI/bot cheklovlari). Zaxira `/root/backups/2026-10-09g` (+ `env_before_jwt_rotation`). JWT_SECRET almashtirish — foydalanuvchi qo'lda (auto-mode sirni yozishni to'sdi).
 
 **30-deploy: 2026-10-09 (faqat backend)** — backend `fc64a81` (29-deploydagi regressiya tuzatildi: `StringString` — promokod tekshiruvi/vaucher/Telegram xabar/API kalit/UDS 500 berardi, logda foydalanuvchiga chiqmagan; Snyk: typeof tekshiruvlar, dinamik VALUES → unnest). Frontend `488ea439` o'zgarmagan. Zaxira `/root/backups/2026-10-09f`.
 
