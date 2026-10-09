@@ -437,7 +437,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (27-deploy)** — backend `6d695be`, frontend `dab18837` (Antigravity auditi: qaytarish summasi/tovarlari serverda asl chekdan + umumiy barkod xatosi, qisman qaytarish → qoldiq chek, sotuvda FOR UPDATE, balansni to'ldirish faqat admin/boshqaruvchi, Instagram webhook kalitsiz rad, to'lov webhooklari shartli UPDATE + timingSafeEqual, bron 1–24 soat, tenant faqat Host'dan). Zaxira `/root/backups/2026-10-09c`.
+**Oxirgi deploy: 2026-10-09 (28-deploy)** — backend `9f2fcd9`, frontend `15831681` (npm audit: production paketlarida 0 zaiflik, xlsx SheetJS 0.20.3, node-fetch override; users hisobi har so'rovda DB dan; frontend repo'dan node_modules kuzatuvi olib tashlandi). Serverda `npm install --omit=dev` qilindi. Zaxira `/root/backups/2026-10-09d` (node_modules bilan).
+
+**27-deploy: 2026-10-09** — backend `6d695be`, frontend `dab18837` (Antigravity auditi: qaytarish summasi/tovarlari serverda asl chekdan + umumiy barkod xatosi, qisman qaytarish → qoldiq chek, sotuvda FOR UPDATE, balansni to'ldirish faqat admin/boshqaruvchi, Instagram webhook kalitsiz rad, to'lov webhooklari shartli UPDATE + timingSafeEqual, bron 1–24 soat, tenant faqat Host'dan). Zaxira `/root/backups/2026-10-09c`.
 
 **26-deploy: 2026-10-09** — backend `62060f2`, frontend `71792f14` (telefonda sahifa yon tomonga surilmaydi/jadvallar kesilmaydi/inventarizatsiya; ochiq API kaliti faqat X-API-Key; FACE_ENC_KEY'siz biometrik saqlanmaydi; nginx'ga X-Forwarded-For — login limiterini soxta IP bilan aylanib o'tish yopildi). Zaxira `/root/backups/2026-10-09b`.
 
@@ -452,7 +454,7 @@ Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tari
 ssh -i ~/.ssh/crm_bot root@167.233.169.118 'D=/root/backups/X; mkdir -p $D; sudo -u postgres pg_dump -Fc shina_crm > $D/shina_crm.dump; tar --exclude=node_modules -czf $D/backend.tgz -C /root shina_crm_backend; cp -a /var/www/shina-crm $D/frontend'
 # 1. Backend: lokal push → serverda pull + restart (DB migratsiyalar controller boshida avtomatik, faqat ADD/CREATE IF NOT EXISTS)
 git push origin master   # shina_crm_backend
-ssh -i ~/.ssh/crm_bot root@167.233.169.118 'cd /root/shina_crm_backend && git pull --ff-only && pm2 restart shina-backend'
+ssh -i ~/.ssh/crm_bot root@167.233.169.118 'cd /root/shina_crm_backend && git pull --ff-only && npm install --omit=dev --no-audit --no-fund && pm2 restart shina-backend'  # package-lock o'zgarmagan bo'lsa npm install hech narsa qilmaydi
 # 2. Frontend: build (.env.production → https://sicrm.uz) → tar|ssh → /var/www/shina-crm-new → eski assets cp -an → mv almashtirish
 npm run build && git push origin main
 tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/www/shina-crm-new; mkdir -p /var/www/shina-crm-new; tar -xzf - -C /var/www/shina-crm-new; cp -an /var/www/shina-crm/assets/. /var/www/shina-crm-new/assets/; cp -a /var/www/shina-crm/models /var/www/shina-crm-new/ 2>/dev/null; chmod -R 755 /var/www/shina-crm-new; rm -rf /var/www/shina-crm-old; mv /var/www/shina-crm /var/www/shina-crm-old; mv /var/www/shina-crm-new /var/www/shina-crm'
