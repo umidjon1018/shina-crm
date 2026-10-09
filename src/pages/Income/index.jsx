@@ -1311,7 +1311,7 @@ const Income = () => {
                     {/* To'lovlar tarixi */}
                     <div>
                       <h4 className="text-xs font-extrabold uppercase tracking-widest text-text-muted mb-3">{t('inc_payments_history')}</h4>
-                      <div className="bg-bg-tertiary border border-border rounded-2xl overflow-hidden">
+                      <div className="bg-bg-tertiary border border-border rounded-2xl overflow-x-auto">
                         <table className="w-full text-left text-xs">
                           <thead className="bg-bg-secondary text-text-muted">
                             <tr>

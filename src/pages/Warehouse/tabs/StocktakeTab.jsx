@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, ClipboardList, CheckCircle2, Clock, Trash2, X, ChevronRight, Search, AlertTriangle, TrendingDown, TrendingUp, Minus } from 'lucide-react'
+import { Plus, ClipboardList, CheckCircle2, Clock, Trash2, X, ChevronRight, ChevronLeft, Search, AlertTriangle, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { getStocktakes, getStocktake, createStocktake, updateStocktakeItem, completeStocktake, reopenStocktake, deleteStocktake } from '../../../api/stocktakeService'
 import { StackGuard } from '../../../components/ui/Modal'
@@ -146,7 +146,8 @@ const StocktakeTab = () => {
   return (
     <div className="flex gap-4 h-[calc(100vh-220px)] min-h-[500px]">
       {/* Chap panel — ro'yxat */}
-      <div className="w-72 flex-shrink-0 bg-bg-secondary border border-border rounded-2xl flex flex-col overflow-hidden">
+      {/* Telefonda: ro'yxat yoki tafsilot — bittasi ko'rinadi */}
+      <div className={`${selected || loadingDetail ? 'hidden lg:flex' : 'flex'} w-full lg:w-72 flex-shrink-0 bg-bg-secondary border border-border rounded-2xl flex-col overflow-hidden`}>
         <div className="px-4 py-3 border-b border-border flex items-center justify-between">
           <span className="font-syne font-bold text-text-primary text-sm">Inventarizatsiyalar</span>
           <button
@@ -230,7 +231,7 @@ const StocktakeTab = () => {
       </div>
 
       {/* O'ng panel — detal */}
-      <div className="flex-1 bg-bg-secondary border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className={`${selected || loadingDetail ? 'flex' : 'hidden lg:flex'} flex-1 min-w-0 bg-bg-secondary border border-border rounded-2xl flex-col overflow-hidden`}>
         {!selected ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center p-5 sm:p-8">
             <ClipboardList size={40} className="text-text-muted opacity-30" />
@@ -241,8 +242,10 @@ const StocktakeTab = () => {
         ) : (
           <>
             {/* Header */}
-            <div className="px-5 py-3.5 border-b border-border flex items-center justify-between flex-shrink-0">
-              <div>
+            <div className="px-3 sm:px-5 py-3.5 border-b border-border flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+              <button onClick={() => setSelected(null)} className="lg:hidden p-1.5 -ml-1 rounded-lg text-text-secondary hover:bg-bg-tertiary"><ChevronLeft size={18} /></button>
+              <div className="min-w-0">
                 <p className="font-bold text-text-primary text-sm">{selected.notes || fmtDate(selected.createdAt)}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   {selected.status === 'complete'
@@ -251,6 +254,7 @@ const StocktakeTab = () => {
                   }
                   {selected.notes && <span className="text-xs text-text-muted">{fmtDate(selected.createdAt)}</span>}
                 </div>
+              </div>
               </div>
               <div className="flex gap-2">
                 {selected.status === 'complete' && (

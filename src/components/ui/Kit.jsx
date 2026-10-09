@@ -6,7 +6,7 @@ export const PageHeader = ({ title, subtitle, actions }) => (
       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">{title}</h1>
       {subtitle && <p className="text-text-secondary text-[15px] mt-0.5">{subtitle}</p>}
     </div>
-    {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+    {actions && <div className="flex flex-wrap items-center gap-2 min-w-0 max-w-full">{actions}</div>}
   </div>
 )
 

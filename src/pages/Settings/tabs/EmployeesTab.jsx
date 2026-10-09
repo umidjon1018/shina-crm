@@ -172,7 +172,7 @@ function EmployeesTab() {
       )}
 
       <TableView id="set_employees" optional={[t('adm_emp_col_username'), t('adm_emp_col_joined')]}>
-      <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-bg-tertiary">
             <tr>

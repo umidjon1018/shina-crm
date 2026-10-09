@@ -558,7 +558,7 @@ const BatchesTab = ({ ctx }) => {
                                       )}
                                     </div>
                                     {batch.payments?.length > 0 ? (
-                                      <div className="bg-bg-secondary border border-border rounded-2xl overflow-hidden">
+                                      <div className="bg-bg-secondary border border-border rounded-2xl overflow-x-auto">
                                         <table className="w-full text-left text-xs">
                                           <thead className="bg-bg-tertiary text-text-muted">
                                             <tr>

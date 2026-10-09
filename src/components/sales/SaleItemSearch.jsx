@@ -57,7 +57,7 @@ const SaleItemSearch = ({ salesList, onSelectSaleItem, allCustomers }) => {
       </div>
 
       {filtered.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-bg-secondary border border-border rounded-2xl shadow-xl overflow-hidden max-h-64 overflow-y-auto z-50">
+        <div className="absolute left-0 right-0 top-full mt-2 bg-bg-secondary border border-border rounded-2xl shadow-xl overflow-auto max-h-64 z-50">
           <table className="w-full text-left text-sm">
             <thead className="bg-bg-tertiary sticky top-0 text-text-muted">
               <tr>
