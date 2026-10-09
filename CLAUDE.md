@@ -437,7 +437,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (28-deploy)** — backend `9f2fcd9`, frontend `15831681` (npm audit: production paketlarida 0 zaiflik, xlsx SheetJS 0.20.3, node-fetch override; users hisobi har so'rovda DB dan; frontend repo'dan node_modules kuzatuvi olib tashlandi). Serverda `npm install --omit=dev` qilindi. Zaxira `/root/backups/2026-10-09d` (node_modules bilan).
+**Oxirgi deploy: 2026-10-09 (29-deploy)** — backend `52ac465`, frontend `488ea439` (Antigravity 2: ko'chirish o'z do'konidan/bronsiz/FOR UPDATE, sinov to'lovi faqat admin/boshqaruvchi, hisobdan chiqarish USD tannarxi, B/U xodim tokendan, audit limiti; zod 4.6.5 (Snyk); Snyk Code: so'rov turlari tekshiruvi). Zaxira `/root/backups/2026-10-09e`.
+
+**28-deploy: 2026-10-09** — backend `9f2fcd9`, frontend `15831681` (npm audit: production paketlarida 0 zaiflik, xlsx SheetJS 0.20.3, node-fetch override; users hisobi har so'rovda DB dan; frontend repo'dan node_modules kuzatuvi olib tashlandi). Serverda `npm install --omit=dev` qilindi. Zaxira `/root/backups/2026-10-09d` (node_modules bilan).
 
 **27-deploy: 2026-10-09** — backend `6d695be`, frontend `dab18837` (Antigravity auditi: qaytarish summasi/tovarlari serverda asl chekdan + umumiy barkod xatosi, qisman qaytarish → qoldiq chek, sotuvda FOR UPDATE, balansni to'ldirish faqat admin/boshqaruvchi, Instagram webhook kalitsiz rad, to'lov webhooklari shartli UPDATE + timingSafeEqual, bron 1–24 soat, tenant faqat Host'dan). Zaxira `/root/backups/2026-10-09c`.
 
