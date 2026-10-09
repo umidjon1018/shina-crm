@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Copy, ExternalLink, Loader2, X } from 'lucid
 import { useTranslation } from 'react-i18next'
 import { createOnlinePayment, getOnlinePayment, cancelOnlinePayment, simulateOnlinePayment } from '../api/integrationService'
 import { StackGuard } from './ui/Modal'
+import { useAuthStore } from '../store/authStore'
 
 const NAMES = { payme: 'Payme', click: 'Click', uzum: 'Uzum Bank' }
 const COLORS = { payme: 'bg-[#00CCCC]/10 text-[#00A6A6] border-[#00CCCC]/40', click: 'bg-[#0073FF]/10 text-[#0073FF] border-[#0073FF]/40', uzum: 'bg-[#7000FF]/10 text-[#7000FF] border-[#7000FF]/40' }
@@ -13,6 +14,7 @@ const fmt = (v) => Math.round(Number(v) || 0).toLocaleString('uz-UZ')
 // purpose: 'sale' — kassadagi sotuv uchun, 'link' — alohida to'lov havolasi
 const OnlinePaymentModal = ({ amount, providers, shopId, customerId, purpose = 'sale', note = '', onPaid, onClose, paidActionLabel }) => {
   const { t } = useTranslation()
+  const isPriv = ['admin', 'manager'].includes(useAuthStore(s => s.user?.role))
   const [provider, setProvider] = useState(providers.length === 1 ? providers[0].id : '')
   const [payment, setPayment] = useState(null)
   const [qr, setQr] = useState('')
@@ -80,7 +82,7 @@ const OnlinePaymentModal = ({ amount, providers, shopId, customerId, purpose = '
                 </a>
               </div>
               <p className="flex items-center justify-center gap-2 text-xs text-text-muted"><Loader2 size={13} className="animate-spin" /> {t('int_pay_waiting')}</p>
-              {payment.test && (
+              {payment.test && isPriv && (
                 <button onClick={simulate} className="w-full py-2 rounded-xl border border-dashed border-accent-orange text-accent-orange text-xs font-bold">{t('int_simulate')}</button>
               )}
             </>
