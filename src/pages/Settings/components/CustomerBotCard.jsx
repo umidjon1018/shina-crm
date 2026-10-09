@@ -13,7 +13,7 @@ const BOT_MODELS = [
 const CHANNELS = [
   { id: 'comment', flag: 'enabled' },
   { id: 'dm', flag: 'dmEnabled' },
-  { id: 'telegram', flag: null },
+  { id: 'telegram', flag: 'telegramEnabled' },
 ]
 
 // Instagram ulanish maydonlari (maxfiylari serverdan "__set__" bo'lib keladi va alohida saqlanadi)
