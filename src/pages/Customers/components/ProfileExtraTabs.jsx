@@ -179,14 +179,14 @@ export const BalanceTab = ({ customer, user, selectedShopId, onChanged }) => {
           <p className={`text-2xl sm:text-3xl font-syne font-extrabold ${data.balance > 0 ? 'text-accent-green' : data.balance < 0 ? 'text-accent-red' : 'text-text-primary'}`}>{fmt(data.balance)} {t('unit_som')}</p>
           <p className="text-xs text-text-muted mt-1">{t('cust_balance_hint')}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        {isPriv && <div className="flex flex-wrap gap-2">
           <button onClick={() => { setMode('deposit'); setErr('') }} className="px-3 py-2 rounded-xl bg-accent-green text-white text-xs font-bold flex items-center gap-1.5"><Plus size={14} />{t('cust_bal_deposit')}</button>
           <button onClick={() => { setMode('withdraw'); setErr('') }} disabled={data.balance <= 0} className="px-3 py-2 rounded-xl bg-bg-tertiary border border-border text-text-primary text-xs font-bold flex items-center gap-1.5 disabled:opacity-40"><Minus size={14} />{t('cust_bal_withdraw')}</button>
-          {isPriv && <button onClick={() => { setMode('adjust'); setErr('') }} className="px-3 py-2 rounded-xl bg-bg-tertiary border border-border text-text-primary text-xs font-bold flex items-center gap-1.5"><SlidersHorizontal size={14} />{t('cust_bal_adjust')}</button>}
-        </div>
+          <button onClick={() => { setMode('adjust'); setErr('') }} className="px-3 py-2 rounded-xl bg-bg-tertiary border border-border text-text-primary text-xs font-bold flex items-center gap-1.5"><SlidersHorizontal size={14} />{t('cust_bal_adjust')}</button>
+        </div>}
       </div>
 
-      {mode && (
+      {mode && isPriv && (
         <div className="bg-bg-secondary border border-accent-blue/40 rounded-2xl p-4 space-y-3">
           <p className="text-sm font-bold text-text-primary">{t(TX_LABEL[mode])}</p>
           <div className="grid grid-cols-2 gap-3">
