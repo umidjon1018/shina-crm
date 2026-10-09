@@ -74,7 +74,12 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 
 **Keyinga qoldirilgan (foydalanuvchi qarori 2026-10-09 — o'zing boshlama, u aytganda qil):**
 - [ ] **Fiskal chek** — tayyorlov tayyor (Sozlamalar → Integratsiyalar → Fiskal chek, `utils/fiscal.js` navbat); provayder tanlanib adapter yoziladi (`ADAPTERS`).
-- [ ] **Ikkinchi mijoz (multi-tenant)** — domen/SSL/tenant routing ("Domen" bo'limi).
+- [ ] **Ikkinchi mijoz (multi-tenant) + alohida SICRM boshqaruv paneli** (foydalanuvchi 2026-10-09: rejaga kiritildi, ikkinchi mijozdan OLDIN qilinadi). Hozir super-admin paneli (`/billing-admin`) GoodTires ichida — vaqtinchalik. Yakuniy tuzilma:
+  1. **Markaziy panel** — alohida manzil (masalan `admin.sicrm.uz`), o'z login/paroli (GoodTires `users` emas), markaziy baza (`billing_*` jadvallari shu yerga ko'chadi; `SUPERADMIN_USERNAMES` o'rniga panelning o'z hisobi).
+  2. **"Yangi mijoz" oqimi** — nom, subdomen, admin login/parol → alohida PostgreSQL baza (`create_tenant.sh` mantig'i), sxema/migratsiya, admin hisobi, 7 kunlik sinov avtomatik; mijozni bloklash/uzaytirish/o'chirish.
+  3. **Tenant routing** — `*.sicrm.uz` wildcard DNS + SSL, nginx, `middleware/tenant.js` da `getPool(shina_crm_<tenant>)`, ALLOWED_ORIGINS, frontend API manzili subdomenga qarab.
+  4. **Har tenant alohida:** AI kaliti, Telegram/Instagram tokenlari, `FACE_ENC_KEY`/fayllar (rasmlar `uploads/<tenant>/`), cron/scheduler (kundalik tahlilchi har bazada).
+  5. **GoodTires** — oddiy tenant bo'ladi (`goodtires.sicrm.uz`), `free` holati saqlanadi; `/billing-admin` GoodTires'dan olib tashlanadi.
 
 ✅ Sotuvchi xarajat/kapitalni ko'rmaydi (2026-10-09): `GET /api/expenses`, `/api/capital` `requirePerm`, AI toollari `TOOL_PERMS` (aiController), yetkazib beruvchi qarzi AI bo'limlarida sezgir.
 
