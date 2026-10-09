@@ -437,7 +437,7 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (33-deploy)** — backend `1489e05`, frontend `e3e1e0c4` (SICRM obunasi: `utils/billing.js` FEATURES katalogi, `billing_*` jadvallar, tariflar/narx/limit/xizmatlar super-admin "SICRM boshqaruvi" (`/billing-admin`) dan tahrirlanadi, `/subscription` sahifasi, to'lov `/api/billing/pay/{payme,click,uzum}`; `default` tenant = free; super-admin `.env SUPERADMIN_USERNAMES`). Zaxira `/root/backups/2026-10-09i`.
+**Oxirgi deploy: 2026-10-09 (33-deploy)** — backend `ba9cb5a` (free tenant cheklovsiz hotfix bilan), frontend `e3e1e0c4` (SICRM obunasi: `utils/billing.js` FEATURES katalogi, `billing_*` jadvallar, tariflar/narx/limit/xizmatlar super-admin "SICRM boshqaruvi" (`/billing-admin`) dan tahrirlanadi, `/subscription` sahifasi, to'lov `/api/billing/pay/{payme,click,uzum}`; `default` tenant = free; super-admin `.env SUPERADMIN_USERNAMES`). Zaxira `/root/backups/2026-10-09i`.
 
 **32-deploy: 2026-10-09** — backend `18b5423`, frontend `fb561123` (tovar rasmlari diskda `uploads/product-images` + `product_images.file_name`, eski BYTEA ishga tushishda ko'chadi; inventarizatsiya yakunida kamomadni avtomatik hisobdan chiqarish so'rovi, `stocktakes.writeoff_at`, yadro `utils/writeOff.js`). Zaxira `/root/backups/2026-10-09h`. JWT_SECRET 31-deploydan keyin almashtirildi.
 
