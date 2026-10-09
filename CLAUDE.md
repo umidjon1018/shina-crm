@@ -437,7 +437,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-09 (25-deploy)** — backend `c3444b3`, frontend `380b3eea` (yangi UI, ulgurji, ishlab chiqarish, kg sotish, server hisobotlari, ekran klaviaturasi, menyu ixcham rejimi, fiskal tayyorlov, biznes profili; eski 7 klient hisobot o'chirilgan). Zaxira `/root/backups/2026-10-09a`. Migratsiyalar xatosiz, 18 asosiy endpoint 200.
+**Oxirgi deploy: 2026-10-09 (26-deploy)** — backend `62060f2`, frontend `71792f14` (telefonda sahifa yon tomonga surilmaydi/jadvallar kesilmaydi/inventarizatsiya; ochiq API kaliti faqat X-API-Key; FACE_ENC_KEY'siz biometrik saqlanmaydi; nginx'ga X-Forwarded-For — login limiterini soxta IP bilan aylanib o'tish yopildi). Zaxira `/root/backups/2026-10-09b`.
+
+**25-deploy: 2026-10-09** — backend `c3444b3`, frontend `380b3eea` (yangi UI, ulgurji, ishlab chiqarish, kg sotish, server hisobotlari, ekran klaviaturasi, menyu ixcham rejimi, fiskal tayyorlov, biznes profili; eski 7 klient hisobot o'chirilgan). Zaxira `/root/backups/2026-10-09a`. Migratsiyalar xatosiz, 18 asosiy endpoint 200.
 
 **Oldingi deploy: 2026-10-08 (24-deploy)** — backend `910a99b`, frontend `95f92b03` (AI qayta qurildi: 3 ta AI — AI yordamchi, Kundalik tahlilchi, Mijozlar boti; AI sahifasi 4 tab; tafsilot "AI agentlar arxitekturasi" bo'limida). Mijozlar boti modeli Sonnet 5.5 (foydalanuvchi qarori, qimmat bo'lsa Haiku'ga qaytaradi), Instagram kanallari o'chiq (keyin yoqiladi, yangi Meta token kerak). Zaxira `/root/backups/2026-10-08c`. Serverda `.env FACE_ENC_KEY` bor (nusxasi `/root/backups/2026-10-07a/env_with_face_key`, chmod 600). Navbat bo'sh.
 Server DB HAQIQIY ma'lumot (test oyi, xodimlar telefondan ishlaydi). To'liq tarix: memory `project_server_deploy_queue.md`.
