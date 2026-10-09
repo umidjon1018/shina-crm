@@ -90,14 +90,14 @@ const ApiTab = () => {
       <Card title={t('int_api_docs')} icon={Store}>
         <p className="text-xs text-text-secondary">{t('int_api_docs_desc')}</p>
         <div className="space-y-3">
-          <div><Label>{t('int_api_ep_products')}</Label><CopyField value={`${API_BASE}/api/public/v1/products?api_key=${sample}`} /></div>
-          <div><Label>{t('int_api_ep_instock')}</Label><CopyField value={`${API_BASE}/api/public/v1/products?in_stock=1&api_key=${sample}`} /></div>
-          <div><Label>{t('int_api_ep_csv')}</Label><CopyField value={`${API_BASE}/api/public/v1/products?format=csv&api_key=${sample}`} /></div>
-          <div><Label>{t('int_api_ep_stock')}</Label><CopyField value={`${API_BASE}/api/public/v1/stock?api_key=${sample}`} /></div>
-          <div><Label>{t('int_api_ep_shops')}</Label><CopyField value={`${API_BASE}/api/public/v1/shops?api_key=${sample}`} /></div>
+          <div><Label>{t('int_api_ep_products')}</Label><CopyField value={`${API_BASE}/api/public/v1/products`} /></div>
+          <div><Label>{t('int_api_ep_instock')}</Label><CopyField value={`${API_BASE}/api/public/v1/products?in_stock=1`} /></div>
+          <div><Label>{t('int_api_ep_csv')}</Label><CopyField value={`${API_BASE}/api/public/v1/products?format=csv`} /></div>
+          <div><Label>{t('int_api_ep_stock')}</Label><CopyField value={`${API_BASE}/api/public/v1/stock`} /></div>
+          <div><Label>{t('int_api_ep_shops')}</Label><CopyField value={`${API_BASE}/api/public/v1/shops`} /></div>
         </div>
         <div className="text-xs text-text-secondary space-y-1.5 bg-bg-tertiary rounded-xl p-3">
-          <p>{t('int_api_hint_header')}</p>
+          <p>{t('int_api_hint_header', { sample })}</p>
           <p>{t('int_api_hint_shop')}</p>
           <p>{t('int_api_hint_fields')}</p>
         </div>
