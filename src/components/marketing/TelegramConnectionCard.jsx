@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AlertCircle, Bot, CheckCircle2, ExternalLink, Link2, Send } from 'lucide-react'
+import { AlertCircle, Bot, CheckCircle2, ExternalLink, Link2, Send, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getTgSettings, saveTgSettings, setupTgWebhook, testTgMessage } from '../../api/marketingService'
 
@@ -95,6 +95,27 @@ const TelegramConnectionCard = () => {
       <div>
         <Label>{t('mkt_tg_set_welcome')}</Label>
         <textarea rows={3} value={cfg.welcomeText} onChange={e => set('welcomeText', e.target.value)} placeholder={t('mkt_tg_set_welcome_ph')} className={inputCls + ' resize-none'} />
+      </div>
+      <div>
+        <Label>{t('mkt_tg_set_order_hours')}</Label>
+        <input type="number" min="1" max="72" value={cfg.orderHours ?? 24} onChange={e => set('orderHours', e.target.value)} className={inputCls + ' max-w-[140px]'} />
+        <p className="text-[11px] text-text-muted mt-1">{t('mkt_tg_set_order_hours_hint')}</p>
+      </div>
+      <div className="border-t border-border pt-4 space-y-2">
+        <Label>{t('mkt_tg_set_faq')}</Label>
+        <p className="text-[11px] text-text-muted">{t('mkt_tg_set_faq_hint')}</p>
+        {(cfg.faq || []).map((f, i) => (
+          <div key={i} className="border border-border rounded-xl p-2.5 space-y-1.5">
+            <div className="flex gap-2">
+              <input value={f.q} maxLength={80} onChange={e => set('faq', cfg.faq.map((x, j) => j === i ? { ...x, q: e.target.value } : x))} placeholder={t('mkt_tg_set_faq_q')} className={inputCls} />
+              <button type="button" onClick={() => set('faq', cfg.faq.filter((_, j) => j !== i))} className="p-2 rounded-lg text-text-muted hover:text-accent-red shrink-0"><Trash2 size={15} /></button>
+            </div>
+            <textarea rows={3} value={f.a} maxLength={2000} onChange={e => set('faq', cfg.faq.map((x, j) => j === i ? { ...x, a: e.target.value } : x))} placeholder={t('mkt_tg_set_faq_a')} className={inputCls + ' resize-y'} />
+          </div>
+        ))}
+        {(cfg.faq || []).length < 20 && (
+          <button type="button" onClick={() => set('faq', [...(cfg.faq || []), { q: '', a: '' }])} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-xs font-semibold text-text-secondary"><Plus size={13} /> {t('mkt_tg_set_faq_add')}</button>
+        )}
       </div>
       <div className="border-t border-border pt-4 space-y-2">
         <Label>{t('mkt_tg_set_test')}</Label>
