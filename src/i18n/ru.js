@@ -1460,6 +1460,7 @@ export default {
 
   // Audit log action keys
   audit_session_login: "Вошёл в систему (онлайн)",
+  audit_login_failed: "Попытка входа с неверным паролем",
   audit_session_logout: "Вышел из системы (офлайн)",
   audit_page_visited: "Посещена страница",
   audit_role_added: "Новая роль добавлена",
