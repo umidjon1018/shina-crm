@@ -43,6 +43,11 @@ export const settleWhDoc = async (id, body) => (await api.post(`/api/wholesale/d
 export const takeBackWhDoc = async (id, body) => (await api.post(`/api/wholesale/docs/${id}/take-back`, body)).data
 export const returnWhDoc = async (id, body) => (await api.post(`/api/wholesale/docs/${id}/return`, body)).data
 
+// ─── Telegram buyurtmalari ───
+export const getWhOrders = async (status) => (await api.get('/api/wholesale/orders', { params: status ? { status } : {} })).data
+export const confirmWhOrder = async (id, body) => (await api.post(`/api/wholesale/orders/${id}/confirm`, body)).data
+export const rejectWhOrder = async (id, body) => (await api.post(`/api/wholesale/orders/${id}/reject`, body)).data
+
 // ─── To'lovlar ───
 export const getWhPayments = async (clientId) =>
   (await api.get('/api/wholesale/payments', { params: clientId ? { client_id: clientId } : {} })).data

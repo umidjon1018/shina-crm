@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, FileText, PackageOpen, Wallet, Users, HandCoins, Tags, Warehouse } from 'lucide-react'
+import { AlertCircle, FileText, PackageOpen, Wallet, Users, HandCoins, Tags, Warehouse, ShoppingBag } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useShopStore } from '../../store/shopStore'
 import SectionHub from '../../components/ui/SectionHub'
@@ -19,6 +19,7 @@ import ClientsTab from './tabs/ClientsTab'
 import DebtsTab from './tabs/DebtsTab'
 import ConsignedTab from './tabs/ConsignedTab'
 import PricesTab from './tabs/PricesTab'
+import OrdersTab from './tabs/OrdersTab'
 
 // Ulgurji savdo: dilerlarga sotuv va konsignatsiya, qarz va to'lovlar, ulgurji narxlar
 const Wholesale = () => {
@@ -46,6 +47,7 @@ const Wholesale = () => {
   }), [])
 
   const SECTIONS = [
+    { id: 'orders', perm: 'wholesale', icon: ShoppingBag, tone: 'blue', render: () => <OrdersTab /> },
     { id: 'clients', perm: 'wholesale', icon: Users, tone: 'cyan', render: () => <ClientsTab /> },
     { id: 'debts', perm: 'wholesale.debts', icon: HandCoins, tone: 'orange', render: () => <DebtsTab /> },
     { id: 'consigned', perm: 'wholesale', icon: PackageOpen, tone: 'violet', render: () => <ConsignedTab /> },
