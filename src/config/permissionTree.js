@@ -26,6 +26,7 @@ export const PERMISSION_TREE = [
       { id: 'sales.new_sale', label: 'Yangi sotuv' },
       { id: 'sales.used_sale', label: "B/U Sotuv" },
       { id: 'sales.reservations', label: 'Bronlar' },
+      { id: 'sales.online_orders', label: 'Onlayn bronlar (Telegram, Instagram, telefon AI)' },
       { id: 'sales.returns', label: 'Bekor qilish' },
       { id: 'sales.history', label: 'Sotuv tarixi' },
       { id: 'sales.returns_history', label: 'Bekor tarixi' },

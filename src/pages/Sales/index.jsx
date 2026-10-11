@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import DateMaskInput from '../../components/DateMaskInput'
 import { Bookmark,
   Trash2, RotateCcw, History, Calendar,
-  TrendingUp, XCircle, X, Banknote, Gift
-} from 'lucide-react'
+  TrendingUp, XCircle, X, Banknote, Gift, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { ShopPickerModal } from '../../components/ShopPickerModal'
@@ -20,6 +19,7 @@ import NewSaleTab from './tabs/NewSaleTab'
 import UsedSaleTab from './tabs/UsedSaleTab'
 import HistoryTab from './tabs/HistoryTab'
 import ReservationsTab from './tabs/ReservationsTab'
+import OnlineOrdersTab from './tabs/OnlineOrdersTab'
 import ReturnsTab from './tabs/ReturnsTab'
 import ReturnsHistoryTab from './tabs/ReturnsHistoryTab'
 import InstallmentTab from './tabs/InstallmentTab'
@@ -119,7 +119,7 @@ const Sales = () => {
     profitSortField, profitSortOrder, handleProfitSort,
   } = state
   const KASSA_TABS = ['new_sale', 'used_sale'].filter(id => hasPermission('sales.' + id))
-  const SECTION_IDS = ['reservations', 'returns', 'history', 'returns_history', 'installment', 'profit'].filter(id => hasPermission('sales.' + id))
+  const SECTION_IDS = ['reservations', 'online_orders', 'returns', 'history', 'returns_history', 'installment', 'profit'].filter(id => hasPermission('sales.' + id))
   const kassaTab = KASSA_TABS.includes(pickedTab) ? pickedTab : KASSA_TABS[0]
   const [section, setSection] = useState(() => {
     const q = new URLSearchParams(window.location.search)
@@ -269,6 +269,7 @@ const Sales = () => {
           { id: 'returns_history', label: t('sl_tab_returns_history'), icon: XCircle, tone: 'red', render: () => <ReturnsHistoryTab ctx={ctx} /> },
           { id: 'installment', label: t('sl_tab_installment'), icon: Calendar, tone: 'pink', render: () => <InstallmentTab ctx={ctx} /> },
           { id: 'reservations', label: t('sl_tab_reservations'), icon: Bookmark, tone: 'cyan', render: () => <ReservationsTab ctx={ctx} /> },
+          { id: 'online_orders', label: t('sl_tab_online_orders'), icon: Globe, tone: 'blue', render: () => <OnlineOrdersTab ctx={ctx} /> },
           { id: 'profit', label: t('sl_tab_profit'), icon: TrendingUp, tone: 'green', render: () => <ProfitTab ctx={ctx} /> },
         ].filter(x => SECTION_IDS.includes(x.id))
         return (
