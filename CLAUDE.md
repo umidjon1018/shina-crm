@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (40-deploy)** — backend `d5f43f6`, frontend `cb21a169`: xodimni bir nechta do'konga biriktirish (`employees.shop_ids TEXT[]`, bo'sh = barcha; `perm.js` `staffShops`/`canShop`, `staffShopId` so'ralgan ruxsatli do'konni yoki birinchisini qaytaradi; `GET /api/auth/my-shops`; Xodimlar formasida checkbox, menyuda faqat ruxsatli do'konlar). Zaxira `/root/backups/2026-10-11f`.
+**Oxirgi deploy: 2026-10-11 (41-deploy, faqat backend)** — backend `6bde224`: Telegram botlarida (xizmat boti, @goodtires_bot mijoz va diler menyusi) `is_persistent` olib tashlandi — telefon orqaga tugmasi botdan chiqaradi; xizmat botida deploy zaxiralarini avtomatik tozalash (`229257f`). Frontend `cb21a169` o'zgarmagan. Zaxira `/root/backups/2026-10-11g`.
+
+**40-deploy: 2026-10-11** — backend `d5f43f6`, frontend `cb21a169`: xodimni bir nechta do'konga biriktirish (`employees.shop_ids TEXT[]`, bo'sh = barcha; `perm.js` `staffShops`/`canShop`, `staffShopId` so'ralgan ruxsatli do'konni yoki birinchisini qaytaradi; `GET /api/auth/my-shops`; Xodimlar formasida checkbox, menyuda faqat ruxsatli do'konlar). Zaxira `/root/backups/2026-10-11f`.
 
 **39-deploy: 2026-10-11** — backend `a4fc2df`, frontend `614cabca`: xavfsizlik auditi qoldiqlari — `perm.js` `ownShopFields/scopeShopQuery/ownShopRow` (do'konga biriktirilgan xodim: xarajat, daromad, kassa xarajati, ishlab chiqarish, bron, inventarizatsiya faqat o'z do'koni), spisaniya tannarxi `canSeeCost`, kirim/ishlab chiqarish ≤ 10 000 dona, `?from/?to` 2000…kelasi yil, SSE 8/foydalanuvchi va 3000 jami, shablonsiz admin yuz majburiy + `audit_face_enrolled` (xizmat boti xabar beradi). Zaxira `/root/backups/2026-10-11e`.
 
