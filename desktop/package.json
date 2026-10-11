@@ -24,7 +24,7 @@
     "productName": "SICRM",
     "copyright": "SICRM",
     "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["main.js", "preload.js", "www/**/*", "package.json"],
+    "files": ["main.js", "preload.js", "preload-sidebar.js", "sidebar.html", "www/**/*", "package.json"],
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
       "icon": "build/icon.png",

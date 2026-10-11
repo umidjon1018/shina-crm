@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:" />
+  <title>SICRM</title>
+  <style>
+    :root { --bg: #08080C; --card: #15151C; --line: #23232D; --text: #F3F4F6; --hint: #8B8F9C; --accent: #E63946; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; user-select: none; overflow: hidden; }
+    body { display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+    .top { display: flex; align-items: center; gap: 10px; padding: 14px 12px; border-bottom: 1px solid var(--line); min-height: 60px; }
+    .logo { font-weight: 800; font-size: 17px; letter-spacing: -.3px; white-space: nowrap; }
+    .logo b { color: var(--accent); }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    .icon-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--hint); }
+    .icon-btn:hover { background: var(--card); color: var(--text); }
+    .list { flex: 1; overflow-y: auto; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; }
+    .item { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border-radius: 12px; text-align: left; }
+    .item:hover { background: var(--card); }
+    .item.active { background: rgba(230, 57, 70, .14); }
+    .item.active::before { content: ''; position: absolute; left: -8px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--accent); }
+    .av { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; background: var(--card); border: 1px solid var(--line); }
+    .item.active .av { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .meta { min-width: 0; flex: 1; }
+    .name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .host { font-size: 11.5px; color: var(--hint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .x { opacity: 0; width: 26px; height: 26px; border-radius: 8px; color: var(--hint); font-size: 16px; line-height: 1; }
+    .item:hover .x { opacity: 1; }
+    .x:hover { background: #2a2a35; color: var(--text); }
+    .bottom { padding: 8px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+    .action { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 12px; color: var(--hint); font-size: 14px; white-space: nowrap; }
+    .action:hover { background: var(--card); color: var(--text); }
+    .action .ic { width: 20px; text-align: center; font-size: 18px; flex-shrink: 0; }
+    body.mini .logo, body.mini .meta, body.mini .x, body.mini .action span:not(.ic) { display: none; }
+    body.mini .top { justify-content: center; padding: 14px 8px; }
+    body.mini .item, body.mini .action { justify-content: center; }
+    .empty { color: var(--hint); font-size: 13px; padding: 8px; line-height: 1.4; }
+    body.mini .empty { display: none; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <button class="icon-btn" id="toggle" title="Panelni yig'ish / ochish">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="logo"><b>SI</b>CRM</div>
+  </div>
+  <div class="list" id="list"></div>
+  <div class="bottom">
+    <button class="action" id="add" title="Kompaniya qo'shish"><span class="ic">＋</span><span>Kompaniya qo'shish</span></button>
+    <button class="action" id="reload" title="Qayta yuklash (F5)"><span class="ic">⟳</span><span>Qayta yuklash</span></button>
+  </div>
+  <script>
+    var S = window.sicrmShell
+    var list = document.getElementById('list')
+    var initial = function (name) { var s = String(name || '?').trim(); return s ? s[0].toUpperCase() : '?' }
+    var render = function (st) {
+      document.body.classList.toggle('mini', !!st.collapsed)
+      list.innerHTML = ''
+      if (!st.companies.length) {
+        var e = document.createElement('div'); e.className = 'empty'; e.textContent = "Kompaniya kodini kiritib kiring — u shu ro'yxatga qo'shiladi."; list.appendChild(e)
+      }
+      st.companies.forEach(function (c) {
+        var b = document.createElement('div')
+        b.className = 'item' + (c.code === st.active ? ' active' : '')
+        b.title = c.name + ' — ' + c.host
+        b.setAttribute('role', 'button')
+        b.onclick = function () { S.select(c.code) }
+        var av = document.createElement('div'); av.className = 'av'; av.textContent = c.admin ? '⚙' : initial(c.name)
+        var meta = document.createElement('div'); meta.className = 'meta'
+        var n = document.createElement('div'); n.className = 'name'; n.textContent = c.name
+        var h = document.createElement('div'); h.className = 'host'; h.textContent = c.host
+        meta.appendChild(n); meta.appendChild(h)
+        var x = document.createElement('button'); x.className = 'x'; x.textContent = '×'; x.title = "Ro'yxatdan olib tashlash"
+        x.onclick = function (ev) { ev.stopPropagation(); if (confirm(c.name + " ro'yxatdan olib tashlansinmi? (kirish ma'lumoti shu kompyuterda saqlanib qoladi)")) S.remove(c.code) }
+        b.appendChild(av); b.appendChild(meta); b.appendChild(x)
+        list.appendChild(b)
+      })
+    }
+    S.onState(render)
+    document.getElementById('toggle').onclick = function () { S.toggle() }
+    document.getElementById('add').onclick = function () { S.add() }
+    document.getElementById('reload').onclick = function () { S.reload() }
+    S.ready()
+  </script>
+</body>
+</html>
