@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (37-deploy)** — backend `1423099`, frontend `01782410`: ulgurji hujjat yozilganda dilerga Telegram'da to'liq xabar + PDF chek (`utils/whDocs.js`, pdfkit + dejavu-fonts-ttf), akt sverka PDF, to'lov xabari; rekvizitlar `business.docHeader` (Sozlamalar → Kompaniya → Hujjat rekvizitlari). Zaxira `/root/backups/2026-10-11c`.
+**Oxirgi deploy: 2026-10-11 (38-deploy)** — backend `6a4e955`, frontend `ab8facc3`: Sotuv → **Onlayn bronlar** (`onlineOrdersController`, `/api/reservations/online{,/cancel,/extend}`): Telegram bot buyurtmalari (`retail_orders`), Instagram/AI (`customer-agent`), telefon AI (`phone-ai`) bitta ro'yxatda; kassaga, +24 soat, bekor (Telegram mijozga xabar); ruxsat `sales.online_orders`. Zaxira `/root/backups/2026-10-11d`.
+
+**37-deploy: 2026-10-11** — backend `1423099`, frontend `01782410`: ulgurji hujjat yozilganda dilerga Telegram'da to'liq xabar + PDF chek (`utils/whDocs.js`, pdfkit + dejavu-fonts-ttf), akt sverka PDF, to'lov xabari; rekvizitlar `business.docHeader` (Sozlamalar → Kompaniya → Hujjat rekvizitlari). Zaxira `/root/backups/2026-10-11c`.
 
 **36-deploy: 2026-10-11** — backend `d478e3e`, frontend `1c278128`: **AI telefon operatori API** (`voiceController`, `/api/voice/tools/{caller,search,shop-info,reserve,callback}` + `/api/voice/calls` post-call, X-API-Key; Sozlamalar → Integratsiyalar → AI telefon operatori). O'chiq, ovozli AI xizmati hali tanlanmagan (foydalanuvchi blogerdan qaysi xizmat ekanini aniqlayapti). Zaxira `/root/backups/2026-10-11b`.
 
