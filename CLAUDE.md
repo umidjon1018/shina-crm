@@ -444,7 +444,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (49-deploy, faqat backend)** — backend `34fb8f1`: bot bo'lim nomlari kompaniya kategoriyalaridan (`tgRetail.catLabels`), AI mijozlar boti `BUSINESS_KIND=general` varianti (`botPrompts.BOT_BASE_GENERAL`; GoodTires — `tires`, prompt o'zgarishsiz); Ceramix .env ga `BUSINESS_KIND=general`; tenant.sh yangi kompaniyaga qo'yadi. Zaxira `/root/backups/2026-10-11r`.
+**Oxirgi deploy: 2026-10-11 (50-deploy)** — backend `d540290`, frontend `ab`+: Biznes profilida "Chakana savdo" moduli (`modules.retail`; `authStore.MODULE_NODES` retail → dashboard, sales, customers, marketing, reports.sales/customers/employees/used, warehouse.used_stock), shablon "Ulgurji / ishlab chiqarish"; o'chiq bo'lsa Telegram bot va Mini App faqat dilerlarga (`utils/businessModules.retailOn`). Sukut — yoqiq (GoodTires o'zgarmagan). Zaxira `/root/backups/2026-10-11s`.
+
+**49-deploy: 2026-10-11 (faqat backend)** — backend `34fb8f1`: bot bo'lim nomlari kompaniya kategoriyalaridan (`tgRetail.catLabels`), AI mijozlar boti `BUSINESS_KIND=general` varianti (`botPrompts.BOT_BASE_GENERAL`; GoodTires — `tires`, prompt o'zgarishsiz); Ceramix .env ga `BUSINESS_KIND=general`; tenant.sh yangi kompaniyaga qo'yadi. Zaxira `/root/backups/2026-10-11r`.
 
 **48-deploy: 2026-10-11 (faqat frontend)** — frontend `35a58e16`: mobil ilovada chop etish va fayl saqlash (`utils/nativeBridge.js` → APK `MainActivity` `window.SicrmNative`: printHtml → Android PrintManager, saveFile → Ulashish oynasi; faqat *.sicrm.uz). APK android-10. Markaziy panel admin.sicrm.uz, `sicrm` ilova kodi. Zaxira `/root/backups/2026-10-11q`.
 
