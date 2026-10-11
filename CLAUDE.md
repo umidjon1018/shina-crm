@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (36-deploy)** — backend `d478e3e`, frontend `1c278128`: **AI telefon operatori API** (`voiceController`, `/api/voice/tools/{caller,search,shop-info,reserve,callback}` + `/api/voice/calls` post-call, X-API-Key; Sozlamalar → Integratsiyalar → AI telefon operatori). O'chiq, ovozli AI xizmati hali tanlanmagan (foydalanuvchi blogerdan qaysi xizmat ekanini aniqlayapti). Zaxira `/root/backups/2026-10-11b`.
+**Oxirgi deploy: 2026-10-11 (37-deploy)** — backend `1423099`, frontend `01782410`: ulgurji hujjat yozilganda dilerga Telegram'da to'liq xabar + PDF chek (`utils/whDocs.js`, pdfkit + dejavu-fonts-ttf), akt sverka PDF, to'lov xabari; rekvizitlar `business.docHeader` (Sozlamalar → Kompaniya → Hujjat rekvizitlari). Zaxira `/root/backups/2026-10-11c`.
+
+**36-deploy: 2026-10-11** — backend `d478e3e`, frontend `1c278128`: **AI telefon operatori API** (`voiceController`, `/api/voice/tools/{caller,search,shop-info,reserve,callback}` + `/api/voice/calls` post-call, X-API-Key; Sozlamalar → Integratsiyalar → AI telefon operatori). O'chiq, ovozli AI xizmati hali tanlanmagan (foydalanuvchi blogerdan qaysi xizmat ekanini aniqlayapti). Zaxira `/root/backups/2026-10-11b`.
 
 **35-deploy: 2026-10-11** — backend `8c2db96`, frontend `9ad8001f`: **GoodTires Telegram boti (@goodtires_bot)** — bitta bot, rolga qarab menyu: oddiy mijoz (`utils/tgRetail.js`: a'zolik/ID, katalog, savat → buyurtma = avtomatik bron `retail_orders`, aksiyalar, karta/chegirma darajasi, xabarlar, tayyor savol-javob `telegram.faq`; AI faqat "Boshqa savol"da — `utils/tgCustomerBot.js`, Mijozlar boti → Telegram kanali), ulgurji diler (`utils/tgWholesale.js`: diler narxi, bor/kam/yo'q, savat → `wholesale_orders` → Ulgurji → Buyurtmalar (Telegram)'da tasdiqlash/rad, qarz, akt sverka, muddat eslatmalari), xodim statistikasi (`tgStats`). Rejim hozir "test" (dilerga xabar/eslatma faqat "live"da). Zaxira `/root/backups/2026-10-11a`.
 
