@@ -61,8 +61,8 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 - [ ] **Showroom ish vaqti** — bot bilimlar bazasida "kuz-qish mavsumida 24 soat"; bahorda o'zgarishi mumkin (Admin → Mijozlar boti → Bilimlar bazasi).
 
 **KEYINGI SESSIYADA BIRINCHI (foydalanuvchi 2026-10-11: "Birinchi kichik takliflarni qilasan"):**
-1. [ ] Bot do'konida (Mini App) faol aksiyaga tushgan tovarga "Aksiya" belgisi (+ tovar ichida aksiya nomi/chegirmasi).
-2. [ ] Instagram orqali qilingan bronlarga holat xabari (`utils/orderNotify.js` hozir faqat Telegram) — kod tayyorlanadi, Meta token kelganda ishlaydi.
+1. [x] Bot do'konida (Mini App) "Aksiya" belgisi — backend `utils/tgPromo.js` (promoEngine formulalari; narx faqat 1 donaga hozir amal qiladigan chegirmada, qolganlari belgi+izoh), kartada belgi, tovar ichida aksiya bloki. **Lokal, deploy qilinmagan.**
+2. [x] Instagram bronlariga holat xabari — `orderNotify.sendIg` (notes `ig:<senderId>`; Mijozlar boti `dmEnabled` + token bo'lsa; bekor/uzaytirish/olib ketildi). Meta token kelganda ishlaydi. **Lokal, deploy qilinmagan.**
 Keyin: mobil/kompyuter ilovalari, multi-tenant + markaziy panel, fiskal chek. (Obuna ✅ 33-deploy, xavfsizlik auditi ✅ 31/39-deploy, ulgurji bot ✅ 35-deploy.)
 
 **Navbatdagi ishlar (tartib bilan):**
