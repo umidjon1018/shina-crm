@@ -1464,6 +1464,7 @@ export default {
 
   // Audit log action keys
   audit_session_login: "Tizimga kirdi (online)",
+  audit_face_enrolled: "Admin yuz shabloni ro'yxatga olindi",
   audit_login_failed: "Noto'g'ri parol bilan kirishga urinish",
   audit_session_logout: "Tizimdan chiqdi (offline)",
   audit_page_visited: "Sahifaga kirildi",
