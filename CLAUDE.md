@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (41-deploy, faqat backend)** — backend `6bde224`: Telegram botlarida (xizmat boti, @goodtires_bot mijoz va diler menyusi) `is_persistent` olib tashlandi — telefon orqaga tugmasi botdan chiqaradi; xizmat botida deploy zaxiralarini avtomatik tozalash (`229257f`). Frontend `cb21a169` o'zgarmagan. Zaxira `/root/backups/2026-10-11g`.
+**Oxirgi deploy: 2026-10-11 (42-deploy)** — backend `3c327f4`, frontend `8325ca68`: **Telegram Mini App do'kon** — `tgshop.html` (alohida Vite kirish nuqtasi `src/tgshop/`, CRM kodini yuklamaydi; asosiy bundle endi `assets/main-*.js`), API `/api/tg-shop/*` (`tgShopController`, `X-Telegram-Init-Data` imzosi bot tokeni bilan; avval diler, keyin mijoz). Mijoz: chakana narx + muddatli to'lov (`installment_base_price`/`installment_months`, oylik = narx/oy), chegirma darajasi; diler: `pricingFor` narxi, to'lov muddati, limit. Savat/buyurtma botdagi `placeOrder` bilan umumiy. Botdagi Katalog tugmasi `web_app` (`TG_SHOP_URL`, standart `https://gt.sicrm.uz/tgshop.html`). Zaxira `/root/backups/2026-10-11h`.
+
+**41-deploy: 2026-10-11 (faqat backend)** — backend `6bde224`: Telegram botlarida (xizmat boti, @goodtires_bot mijoz va diler menyusi) `is_persistent` olib tashlandi — telefon orqaga tugmasi botdan chiqaradi; xizmat botida deploy zaxiralarini avtomatik tozalash (`229257f`). Frontend `cb21a169` o'zgarmagan. Zaxira `/root/backups/2026-10-11g`.
 
 **40-deploy: 2026-10-11** — backend `d5f43f6`, frontend `cb21a169`: xodimni bir nechta do'konga biriktirish (`employees.shop_ids TEXT[]`, bo'sh = barcha; `perm.js` `staffShops`/`canShop`, `staffShopId` so'ralgan ruxsatli do'konni yoki birinchisini qaytaradi; `GET /api/auth/my-shops`; Xodimlar formasida checkbox, menyuda faqat ruxsatli do'konlar). Zaxira `/root/backups/2026-10-11f`.
 
