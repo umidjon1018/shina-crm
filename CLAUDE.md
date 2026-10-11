@@ -489,7 +489,7 @@ npm run build && git push origin main
 tar -czf - -C dist . | ssh -i ~/.ssh/crm_bot root@167.233.169.118 'rm -rf /var/www/shina-crm-new; mkdir -p /var/www/shina-crm-new; tar -xzf - -C /var/www/shina-crm-new; cp -an /var/www/shina-crm/assets/. /var/www/shina-crm-new/assets/; cp -a /var/www/shina-crm/models /var/www/shina-crm-new/ 2>/dev/null; chmod -R 755 /var/www/shina-crm-new; rm -rf /var/www/shina-crm-old; mv /var/www/shina-crm /var/www/shina-crm-old; mv /var/www/shina-crm-new /var/www/shina-crm'
 # 3. Tekshir: serverdagi index.html dagi assets/index-*.js lokal dist bilan bir xilmi; curl https://gt.sicrm.uz/ → 200; pm2 logs
 ```
-- **Zaxira papkalari:** oxirgi 5 ta deploy zaxirasi + `/root/backups/2026-10-07a` (FACE_ENC_KEY nusxasi — O'CHIRMA) saqlanadi; eskilarini foydalanuvchi roziligi bilan o'chir (2026-10-11 da 33 ta o'chirildi). Kundalik shifrlangan nusxalar `/root/backups/auto` (xizmat boti o'zi aylantiradi).
+- **Zaxira papkalari (avtomatik, 2026-10-11):** xizmat boti (`ops/opsBot.js` `pruneDeployBackups`, har soat) `/root/backups/<sana><harf>` dan eng yangi 5 tasini qoldiradi, ortiqchasini **24 soat o'tgach** o'chiradi va Telegram'ga xabar beradi. `/root/backups/2026-10-07a` (FACE_ENC_KEY nusxasi) himoyalangan — O'CHIRMA. Deploy paytida qo'lda o'chirish shart emas. Kundalik shifrlangan nusxalar `/root/backups/auto` (xizmat boti o'zi aylantiradi).
 - Login/qurilma qismi (`.env JWT_SECRET`, authController, middleware/auth.js, login_attempts) buzilmasa — xodimlar chiqib ketmaydi.
 - Serverda qo'lda kod o'zgartirma. Server DB tuzilmasini o'zgartirish (DROP/ALTER constraint) — faqat foydalanuvchi aniq ruxsati bilan.
 
