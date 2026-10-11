@@ -61,8 +61,8 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 - [ ] **Showroom ish vaqti** — bot bilimlar bazasida "kuz-qish mavsumida 24 soat"; bahorda o'zgarishi mumkin (Admin → Mijozlar boti → Bilimlar bazasi).
 
 **KEYINGI SESSIYADA BIRINCHI (foydalanuvchi 2026-10-11: "Birinchi kichik takliflarni qilasan"):**
-1. [x] Bot do'konida (Mini App) "Aksiya" belgisi — backend `utils/tgPromo.js` (promoEngine formulalari; narx faqat 1 donaga hozir amal qiladigan chegirmada, qolganlari belgi+izoh), kartada belgi, tovar ichida aksiya bloki. **Lokal, deploy qilinmagan.**
-2. [x] Instagram bronlariga holat xabari — `orderNotify.sendIg` (notes `ig:<senderId>`; Mijozlar boti `dmEnabled` + token bo'lsa; bekor/uzaytirish/olib ketildi). Meta token kelganda ishlaydi. **Lokal, deploy qilinmagan.**
+1. [x] Bot do'konida (Mini App) "Aksiya" belgisi — backend `utils/tgPromo.js` (promoEngine formulalari; narx faqat 1 donaga hozir amal qiladigan chegirmada, qolganlari belgi+izoh), kartada belgi, tovar ichida aksiya bloki. ✅ 46-deploy.
+2. [x] Instagram bronlariga holat xabari — `orderNotify.sendIg` (notes `ig:<senderId>`; Mijozlar boti `dmEnabled` + token bo'lsa; bekor/uzaytirish/olib ketildi). Meta token kelganda ishlaydi. ✅ 46-deploy.
 Keyin: mobil/kompyuter ilovalari, multi-tenant + markaziy panel, fiskal chek. (Obuna ✅ 33-deploy, xavfsizlik auditi ✅ 31/39-deploy, ulgurji bot ✅ 35-deploy.)
 
 **Navbatdagi ishlar (tartib bilan):**
@@ -441,7 +441,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (45-deploy)** — backend `541137f`, frontend `fe9f8481`: bot buyurtmalari holati mijozga Telegram'da (`utils/orderNotify.js`; "sinov" rejimida ham, faqat "o'chiq"da emas): do'kon bekor qilsa (Onlayn bronlarda sabab majburiy, Bronlarda ixtiyoriy — `CancelReasonModal`), uzaytirish, sotuvda olib ketildi (`onItemsSold`), muddatdan 2 soat oldin eslatma va tugashi (`sweep` har 10 daq, bronlar bo'shaydi); `retail_orders` holatlari endi `completed`/`expired` ham, ustunlar `reminded_at/cancel_reason/completed_at`. Mijoz bekor qilsa xodimlarga bildirishnoma; diler buyurtmasi tasdiq/rad xabari sinov rejimida ham (`force`). Zaxira `/root/backups/2026-10-11k`.
+**Oxirgi deploy: 2026-10-11 (46-deploy)** — backend `0e1aff3`, frontend `da603c9e`: bot do'konida Aksiya belgisi (`utils/tgPromo.js`), Instagram AI bronlariga DM holat xabari (`orderNotify.sendIg`, DM kanali yoqilganda). Zaxira `/root/backups/2026-10-11l`.
+
+**45-deploy: 2026-10-11** — backend `541137f`, frontend `fe9f8481`: bot buyurtmalari holati mijozga Telegram'da (`utils/orderNotify.js`; "sinov" rejimida ham, faqat "o'chiq"da emas): do'kon bekor qilsa (Onlayn bronlarda sabab majburiy, Bronlarda ixtiyoriy — `CancelReasonModal`), uzaytirish, sotuvda olib ketildi (`onItemsSold`), muddatdan 2 soat oldin eslatma va tugashi (`sweep` har 10 daq, bronlar bo'shaydi); `retail_orders` holatlari endi `completed`/`expired` ham, ustunlar `reminded_at/cancel_reason/completed_at`. Mijoz bekor qilsa xodimlarga bildirishnoma; diler buyurtmasi tasdiq/rad xabari sinov rejimida ham (`force`). Zaxira `/root/backups/2026-10-11k`.
 
 **44-deploy: 2026-10-11 (faqat frontend)** — frontend `4602a88b`: bildirishnoma bosilsa tegishli bo'lim ochiladi (`NotificationsPanel` `TARGETS` tur→URL+ruxsat; `navigate(to, {state:{navKey}})`, MainLayout `PageErrorBoundary` kaliti navKey bilan — o'sha sahifada ham qayta ochiladi). Backend `c81ccaf` o'zgarmagan. Zaxira `/root/backups/2026-10-11j`.
 
