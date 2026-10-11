@@ -81,15 +81,23 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npx cap sync ios
-      - name: iOS yig'ish tekshiruvi (simulyator, imzosiz)
+      - name: iPhone uchun imzosiz IPA (Sideloadly / AltStore / o'z sertifikati bilan imzolanadi)
         working-directory: ios/App
         run: |
-          xcodebuild -project App.xcodeproj -scheme App -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
-      - name: Simulyator ilovasi
-        run: cd ios/App/build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/sicrm-ios-simulator.zip" App.app
+          set -o pipefail
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""             MARKETING_VERSION="1.0.${{ github.run_number }}" CURRENT_PROJECT_VERSION="${{ github.run_number }}" build 2>&1 | tee "$RUNNER_TEMP/xcode.log" | tail -5 || {
+            echo "::error title=Xcode::$(grep -E 'error:' "$RUNNER_TEMP/xcode.log" | head -10 | tr '\n' ' ' | cut -c1-3000)"; exit 1; }
+          mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry "$GITHUB_WORKSPACE/SICRM-unsigned.ipa" Payload
       - uses: actions/upload-artifact@v4
         with:
-          name: sicrm-ios-simulator-${{ github.run_number }}
-          path: sicrm-ios-simulator.zip
+          name: sicrm-ios-${{ github.run_number }}
+          path: SICRM-unsigned.ipa
+          if-no-files-found: error
+      - name: ios-latest relizi (doimiy havola .../releases/download/ios-latest/SICRM-unsigned.ipa)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release delete ios-latest --yes --cleanup-tag || true
+          gh release create ios-latest SICRM-unsigned.ipa --title "SICRM iPhone 1.0.${{ github.run_number }} (imzosiz)"             --notes "Imzosiz IPA: Sideloadly/AltStore yoki Apple Developer sertifikati bilan imzolab o'rnatiladi. Ilova ochilganda kompaniya kodini kiriting." --latest=false
