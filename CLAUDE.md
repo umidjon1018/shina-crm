@@ -63,7 +63,8 @@ BILLZ paritet bo'limlarining hammasi ✅, AI qayta qurildi ✅ (3 ta AI — "AI 
 **KEYINGI SESSIYADA BIRINCHI (foydalanuvchi 2026-10-11: "Birinchi kichik takliflarni qilasan"):**
 1. [x] Bot do'konida (Mini App) "Aksiya" belgisi — backend `utils/tgPromo.js` (promoEngine formulalari; narx faqat 1 donaga hozir amal qiladigan chegirmada, qolganlari belgi+izoh), kartada belgi, tovar ichida aksiya bloki. ✅ 46-deploy.
 2. [x] Instagram bronlariga holat xabari — `orderNotify.sendIg` (notes `ig:<senderId>`; Mijozlar boti `dmEnabled` + token bo'lsa; bekor/uzaytirish/olib ketildi). Meta token kelganda ishlaydi. ✅ 46-deploy.
-Keyin: mobil/kompyuter ilovalari, multi-tenant + markaziy panel, fiskal chek. (Obuna ✅ 33-deploy, xavfsizlik auditi ✅ 31/39-deploy, ulgurji bot ✅ 35-deploy.)
+**Mobil ilova (2026-10-11 boshlandi):** Capacitor 8 qobig'i (`capacitor.config.json`, `android/`, `ios/`, `mobile/`), ilova `https://gt.sicrm.uz` ni ochadi (frontend deploy = ilova yangilanadi). Bulutda yig'ish: GitHub Actions "Mobil ilova" (`.github/workflows/mobile.yml`) — Android debug APK ✅, iOS simulyator ✅. Qoldi: chop etish/yuklab olish native plaginlarga, Google Play kaliti, Apple Developer hisobi → TestFlight. Batafsil `mobile/README.md`.
+Keyin: kompyuter ilovasi, multi-tenant + markaziy panel, fiskal chek. (Obuna ✅ 33-deploy, xavfsizlik auditi ✅ 31/39-deploy, ulgurji bot ✅ 35-deploy.)
 
 **Navbatdagi ishlar (tartib bilan):**
 1. [ ] Telegram kanali — token kelganda.
