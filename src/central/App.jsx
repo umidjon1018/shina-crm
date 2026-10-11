@@ -18,6 +18,12 @@ const api = async (path, { method = 'GET', body } = {}) => {
   return d
 }
 
+// Mobil ilova (SICRM-App) ichida — kompaniya kodi ekraniga qaytish
+const IN_APP = navigator.userAgent.includes('SICRM-App')
+const changeCompany = () => {
+  location.href = (/iPhone|iPad|iPod/.test(navigator.userAgent) ? 'capacitor://localhost' : 'https://localhost') + '/index.html?change=1'
+}
+
 const fmt = (v) => Math.round(Number(v) || 0).toLocaleString('ru-RU').replace(/,/g, ' ')
 const mb = (b) => `${Math.round((Number(b) || 0) / 1048576)} MB`
 const ddmm = (d) => (d ? new Date(d).toLocaleDateString('ru-RU', { timeZone: 'Asia/Tashkent' }) : '—')
@@ -105,6 +111,7 @@ const Login = ({ onDone }) => {
         )}
         <button disabled={busy} className="c-btn c-btn-primary w-full mt-2">{busy ? <Loader2 size={16} className="animate-spin" /> : challenge ? 'Kirish' : 'Davom etish'}</button>
         {challenge && <button type="button" onClick={() => { setChallenge(null); setCode(''); setErr('') }} className="w-full mt-3 text-[13px] text-[var(--c-hint)]">Orqaga</button>}
+        {IN_APP && <button type="button" onClick={changeCompany} className="w-full mt-3 text-[13px] text-[var(--c-hint)]">Kompaniyani almashtirish</button>}
       </form>
     </div>
   )
@@ -333,6 +340,7 @@ export default function App() {
       <header className="flex items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-2"><ShieldCheck className="text-[var(--c-accent)]" size={22} /><h1 className="text-lg font-bold">SICRM boshqaruv</h1></div>
         <div className="flex gap-2">
+          {IN_APP && <button onClick={changeCompany} className="c-btn c-btn-ghost" title="Kompaniyani almashtirish"><Smartphone size={16} /></button>}
           <button onClick={load} className="c-btn c-btn-ghost" title="Yangilash"><RefreshCw size={16} /></button>
           <button onClick={() => { setToken(null); setAuthed(false) }} className="c-btn c-btn-ghost" title="Chiqish"><LogOut size={16} /></button>
         </div>
