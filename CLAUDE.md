@@ -445,7 +445,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (52-deploy, faqat frontend)** — frontend `a5a7eefa`: admin panel keng ekranda 3–4 ustun. Kompyuter dasturi: yon panel (kompaniyalar, har biri alohida `WebContentsView`, `desktop/sidebar.html`). Zaxira `/root/backups/2026-10-11u`.
+**Oxirgi deploy: 2026-10-11 (53-deploy, faqat frontend)** — frontend `03d4564c`: admin paneldagi "Yangi kompaniya" oynasi (tushuntirish, kod tozalash, band kod xabari). Zaxira `/root/backups/2026-10-11v`.
+
+**52-deploy: 2026-10-11 (faqat frontend)** — frontend `a5a7eefa`: admin panel keng ekranda 3–4 ustun. Kompyuter dasturi: yon panel (kompaniyalar, har biri alohida `WebContentsView`, `desktop/sidebar.html`). Zaxira `/root/backups/2026-10-11u`.
 
 **51-deploy: 2026-10-11 (faqat frontend)** — frontend `174eee3d`: login belgisi `loginIconMode = 'bag'` (`components/LoginSackIcon.jsx`, 50 kg qop to'ldirilmoqda); Ceramix brandingiga `bag` qo'yildi. Zaxira `/root/backups/2026-10-11t`.
 
