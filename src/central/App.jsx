@@ -191,7 +191,10 @@ const BillingModal = ({ t, onClose, onSaved }) => {
 }
 
 // ─── Yangi kompaniya ───
-const CreateModal = ({ onClose, onSaved }) => {
+// Domen kodi: "https://alfa.sicrm.uz/" yoki "alfa.sicrm.uz" yozilsa ham — faqat "alfa"
+const cleanCode = (v) => v.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/\.sicrm\.uz$/, '')
+
+const CreateModal = ({ onClose, onSaved, tenants = [] }) => {
   const [f, setF] = useState({ code: '', name: '', admin: 'admin', alias: '' })
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -199,6 +202,9 @@ const CreateModal = ({ onClose, onSaved }) => {
   const [copied, setCopied] = useState(false)
   const submit = async (e) => {
     e.preventDefault()
+    const taken = (c) => c && tenants.find(t => t.code === c || t.aliases.includes(c))
+    if (taken(f.code)) { setErr(`"${f.code}" kodi band — ${taken(f.code).name}. Bu oyna yangi mijoz-kompaniya ochish uchun; mavjud kompaniyaga do'kon (filial) uning o'z Sozlamalar → Do'konlar bo'limida qo'shiladi.`); return }
+    if (taken(f.alias)) { setErr(`"${f.alias}" ilova kodi band — ${taken(f.alias).name}`); return }
     setBusy(true); setErr('')
     try { const d = await api('/tenants', { method: 'POST', body: f }); setDone(d); onSaved() }
     catch (e2) { setErr([e2.message, e2.data?.log].filter(Boolean).join('\n')) }
@@ -228,10 +234,11 @@ const CreateModal = ({ onClose, onSaved }) => {
   return (
     <Modal title="Yangi kompaniya" onClose={busy ? () => {} : onClose}>
       <form onSubmit={submit}>
+        <p className="mb-3 rounded-lg bg-[var(--c-card2)] px-3 py-2 text-[12.5px] text-[var(--c-hint)]">Yangi mijoz-biznes (alohida baza va manzil) ochiladi. Mavjud kompaniyaga do'kon yoki filial qo'shish — o'sha kompaniyaning Sozlamalar → Do'konlar bo'limida.</p>
         <ErrorText text={err} />
         <Field label="Kompaniya nomi"><input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="Masalan: Alfa Shina" /></Field>
         <Field label="Domen kodi" hint={f.code ? `Manzil: https://${f.code}.sicrm.uz — avval pscloud.uz'da "${f.code}" A → 167.233.169.118 yozuvini qo'shing` : "Qisqa, lotin harflarida (masalan alfa)"}>
-          <input value={f.code} onChange={e => setF({ ...f, code: e.target.value.toLowerCase().trim() })} placeholder="alfa" />
+          <input value={f.code} onChange={e => setF({ ...f, code: cleanCode(e.target.value) })} placeholder="alfa" />
         </Field>
         <Field label="Mobil ilova kodi (ixtiyoriy)" hint="Ilovada domen kodi o'rniga yoziladigan nom (masalan alfashina)">
           <input value={f.alias} onChange={e => setF({ ...f, alias: e.target.value.toLowerCase().trim() })} />
@@ -381,7 +388,7 @@ export default function App() {
       </div>
 
       {billing && <BillingModal t={billing} onClose={() => setBilling(null)} onSaved={load} />}
-      {creating && <CreateModal onClose={() => setCreating(false)} onSaved={load} />}
+      {creating && <CreateModal tenants={tenants} onClose={() => setCreating(false)} onSaved={load} />}
     </div>
   )
 }
