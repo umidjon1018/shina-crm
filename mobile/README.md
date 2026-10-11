@@ -13,13 +13,16 @@ Lokal kompyuterda Android Studio/Xcode shart emas. GitHub → Actions → "Mobil
 - **Android**: har doim debug APK (telefonga to'g'ridan-to'g'ri o'rnatish uchun). Imzo kaliti secrets'da bo'lsa — Google Play uchun `.aab` va imzolangan APK.
 - **iOS**: simulyator uchun yig'ish tekshiruvi. App Store/TestFlight uchun Apple Developer hisobi kerak (pastda).
 
-## Do'konlarga chiqarish uchun kerak
-**Google Play** — Google Play Console hisobi (bir martalik $25). GitHub secrets:
-`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
-Kalit fayli YO'QOTILMASIN (nusxasi `key/` papkada saqlanadi).
+## Tarqatish (do'konlarsiz — mijozga o'zimiz beramiz)
+**Android**: imzolangan APK GitHub Release'ga qo'yiladi, doimiy havola:
+https://github.com/umidjon1018/shina-crm/releases/latest/download/sicrm.apk
+Kalit: `key/android_release.p12` (PKCS12, alias `sicrm`, parol `key/android_keystore_password.txt`). YO'QOTMA —
+boshqa kalit bilan imzolangan versiya eskisining ustiga o'rnatilmaydi. GitHub secrets:
+`ANDROID_KEYSTORE_BASE64` (= `key/android_keystore_base64.txt`), `ANDROID_KEYSTORE_PASSWORD`.
+Repo yopiq (private) qilinsa — Release havolasi ishlamaydi, APK'ni serverga qo'yish kerak bo'ladi.
 
-**App Store** — Apple Developer Program ($99/yil). Keyin: App Store Connect API kaliti + imzo sertifikati →
-workflow'ga TestFlight'ga yuklash qadami qo'shiladi.
+**iOS**: App Store'siz o'rnatish faqat Apple Developer hisobi ($99/yil) bilan — Ad Hoc (har yili 100 tagacha
+qurilma, UDID ro'yxatga olinadi). Hisobsiz — PWA (Safari → Ulashish → "Bosh ekranga qo'shish").
 
 ## Ma'lum cheklovlar (keyingi bosqich)
 - `window.print()` (barkod/chek chop etish) va fayl yuklab olish (Excel) WebView ichida ishlamasligi mumkin —
