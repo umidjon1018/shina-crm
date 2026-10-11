@@ -14,6 +14,9 @@ Lokal kompyuterda Android Studio/Xcode shart emas. GitHub → Actions → "Mobil
 - **iOS**: simulyator uchun yig'ish tekshiruvi. App Store/TestFlight uchun Apple Developer hisobi kerak (pastda).
 
 ## Tarqatish (do'konlarsiz — mijozga o'zimiz beramiz)
+Kompaniya kodi ilova ochilganda so'raladi (`ceramix`, `goodtires`; taxalluslar serverda — `ops/tenant.sh alias`).
+Secrets: https://github.com/umidjon1018/shina-crm/settings/secrets/actions · yig'ish: Actions → "Mobil ilova".
+
 **Android**: imzolangan APK GitHub Release'ga qo'yiladi, doimiy havola:
 https://github.com/umidjon1018/shina-crm/releases/latest/download/sicrm.apk
 Kalit: `key/android_release.p12` (PKCS12, alias `sicrm`, parol `key/android_keystore_password.txt`). YO'QOTMA —
