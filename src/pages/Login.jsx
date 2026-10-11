@@ -10,6 +10,7 @@ import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { SelfieCapture } from '../components/SelfieCapture'
+import LoginSackIcon from '../components/LoginSackIcon'
 
 // Mobil ilova (SICRM-App) ichida: kompaniya kodini qayta kiritish ekraniga (ilovaning o'z sahifasi) qaytish
 const IN_APP = typeof navigator !== 'undefined' && navigator.userAgent.includes('SICRM-App')
@@ -129,6 +130,8 @@ const LoginPage = () => {
               alt={companyName}
               className="w-24 h-24 lg:w-32 lg:h-32 object-contain drop-shadow-[0_0_15px_rgba(230,57,70,0.4)]"
             />
+          ) : loginIconMode === 'bag' ? (
+            <LoginSackIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
           ) : (
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}>
               <TireIcon className="w-24 h-24 lg:w-32 lg:h-32 text-accent-red drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />

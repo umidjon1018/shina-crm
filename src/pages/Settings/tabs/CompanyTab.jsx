@@ -205,9 +205,10 @@ function CompanyTab() {
         </div>
         <div>
           <label className="text-text-secondary text-xs font-medium block mb-2">Login sahifasidagi belgi</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
               { id: 'animation', label: "Aylanadigan g'ildirak", desc: 'Animatsiyali, brend logosiz' },
+              { id: 'bag',       label: "To'ldirilayotgan qop",  desc: 'Animatsiyali: qopga kukun (quruq aralashma)' },
               { id: 'logo',      label: 'Kompaniya logosi',     desc: 'Yuklangan logo ko\'rinadi' },
             ].map(opt => (
               <button
