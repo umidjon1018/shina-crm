@@ -43,6 +43,7 @@ export default {
   username: 'Имя пользователя',
   password: 'Пароль',
   remember_me: 'Запомнить меня',
+  change_company: 'Сменить компанию',
   forgot_password: 'Забыли пароль?',
   login_btn: 'Войти',
   login_terms: 'Входя в систему, вы соглашаетесь с нашими',

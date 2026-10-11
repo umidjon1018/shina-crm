@@ -70,11 +70,6 @@
 	<string>Kamera tizimga yuz orqali kirish (selfie) va tovar barkodini skanerlash uchun ishlatiladi.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Tovar rasmlari va logotipni galereyadan tanlash uchun.</string>
-	<key>WKAppBoundDomains</key>
-	<array>
-		<string>gt.sicrm.uz</string>
-		<string>sicrm.uz</string>
-	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

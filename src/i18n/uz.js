@@ -43,6 +43,7 @@ export default {
   username: 'Foydalanuvchi nomi',
   password: 'Parol',
   remember_me: 'Eslab qol',
+  change_company: 'Kompaniyani almashtirish',
   forgot_password: 'Parolni unutdingizmi?',
   login_btn: 'Kirish',
   login_terms: 'Tizimga kirish bilan siz bizning',

@@ -3,17 +3,18 @@
   "appName": "SICRM",
   "webDir": "mobile/www",
   "server": {
-    "url": "https://gt.sicrm.uz",
     "errorPath": "offline.html",
-    "allowNavigation": ["gt.sicrm.uz", "sicrm.uz"]
+    "allowNavigation": [
+      "*.sicrm.uz",
+      "sicrm.uz"
+    ]
   },
   "android": {
     "backgroundColor": "#0B0B0F"
   },
   "ios": {
     "backgroundColor": "#0B0B0F",
-    "contentInset": "never",
-    "limitsNavigationsToAppBoundDomains": true
+    "contentInset": "never"
   },
   "plugins": {
     "SplashScreen": {
@@ -26,5 +27,6 @@
       "backgroundColor": "#0B0B0F",
       "overlaysWebView": false
     }
-  }
+  },
+  "appendUserAgent": "SICRM-App"
 }

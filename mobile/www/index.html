@@ -6,17 +6,70 @@
   <title>SICRM</title>
   <style>
     html, body { margin: 0; height: 100%; background: #0B0B0F; color: #F3F4F6; font-family: -apple-system, system-ui, Roboto, sans-serif; }
-    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; box-sizing: border-box; text-align: center; }
-    img { width: 72px; height: 72px; border-radius: 18px; }
-    h1 { font-size: 20px; margin: 0; }
-    p { margin: 0; color: #9CA3AF; font-size: 15px; line-height: 1.45; max-width: 320px; }
-    button { margin-top: 6px; background: #E63946; color: #fff; border: 0; border-radius: 12px; padding: 13px 28px; font-size: 16px; font-weight: 600; }
+    body { display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; }
+    #app { width: 100%; max-width: 360px; display: none; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+    img { width: 76px; height: 76px; border-radius: 18px; }
+    h1 { font-size: 21px; margin: 4px 0 0; }
+    p { margin: 0; color: #9CA3AF; font-size: 14px; line-height: 1.45; }
+    input { width: 100%; box-sizing: border-box; background: #16161D; color: #F3F4F6; border: 1px solid #2A2A35; border-radius: 12px;
+      padding: 14px 16px; font-size: 17px; text-align: center; letter-spacing: .5px; outline: none; }
+    input:focus { border-color: #E63946; }
+    button { width: 100%; background: #E63946; color: #fff; border: 0; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 600; }
+    button:disabled { opacity: .6; }
+    #err { color: #F87171; font-size: 14px; min-height: 20px; }
+    #saved { font-size: 14px; color: #9CA3AF; }
+    #saved a { color: #F3F4F6; }
   </style>
 </head>
 <body>
-  <img src="icon.png" alt="" />
-  <h1>Internet aloqasi yo'q</h1>
-  <p>Ilovani birinchi marta ochish uchun internet kerak. Aloqa tiklangach, qayta urinib ko'ring.</p>
-  <button onclick="location.href='https://gt.sicrm.uz/'">Qayta urinish</button>
+  <div id="app">
+    <img src="icon.png" alt="" />
+    <h1>Kompaniyangizga kiring</h1>
+    <p>Kompaniya kodini kiriting — uni sizga administrator beradi (masalan: <b>goodtires</b>).</p>
+    <input id="code" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="url" placeholder="kompaniya kodi" maxlength="30" />
+    <div id="err"></div>
+    <button id="go">Davom etish</button>
+    <div id="saved"></div>
+  </div>
+  <script>
+    // Kompaniya kodi → manzil: goodtires → gt.sicrm.uz, boshqalar → <kod>.sicrm.uz
+    var KEY = 'sicrm_company'
+    var ALIASES = { goodtires: 'gt', gt: 'gt' }
+    var urlFor = function (code) { return 'https://' + (ALIASES[code] || code) + '.sicrm.uz' }
+    var load = function () { try { return JSON.parse(localStorage.getItem(KEY) || 'null') } catch (e) { return null } }
+    var change = /[?&]change=1/.test(location.search)
+    var saved = load()
+    if (saved && saved.url && !change) {
+      location.replace(saved.url)
+    } else {
+      var app = document.getElementById('app'), input = document.getElementById('code'), btn = document.getElementById('go'), err = document.getElementById('err')
+      app.style.display = 'flex'
+      if (saved && saved.code) {
+        input.value = saved.code
+        document.getElementById('saved').innerHTML = 'Oldingi: <a href="' + saved.url + '">' + (saved.name || saved.code) + '</a>'
+      }
+      var submit = function () {
+        var code = input.value.trim().toLowerCase()
+        err.textContent = ''
+        if (!/^[a-z0-9][a-z0-9-]{1,29}$/.test(code)) { err.textContent = "Kod faqat lotin harflari, raqam va '-' dan iborat"; return }
+        var url = urlFor(code)
+        btn.disabled = true; btn.textContent = 'Tekshirilmoqda...'
+        var ctrl = new AbortController(); var t = setTimeout(function () { ctrl.abort() }, 12000)
+        fetch(url + '/api/app/tenant', { signal: ctrl.signal, cache: 'no-store' })
+          .then(function (r) { if (!r.ok) throw new Error('notfound'); return r.json() })
+          .then(function (d) {
+            if (!d || !d.ok) throw new Error('notfound')
+            localStorage.setItem(KEY, JSON.stringify({ code: code, url: url, name: d.name || null }))
+            location.replace(url)
+          })
+          .catch(function (e) {
+            err.textContent = e && e.message === 'notfound' ? 'Bunday kompaniya topilmadi — kodni tekshiring' : "Internet aloqasini tekshiring va qayta urinib ko'ring"
+          })
+          .finally(function () { clearTimeout(t); btn.disabled = false; btn.textContent = 'Davom etish' })
+      }
+      btn.onclick = submit
+      input.onkeydown = function (e) { if (e.key === 'Enter') submit() }
+    }
+  </script>
 </body>
 </html>

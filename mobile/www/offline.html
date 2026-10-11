@@ -17,6 +17,12 @@
   <img src="icon.png" alt="" />
   <h1>Internet aloqasi yo'q</h1>
   <p>Ilovani birinchi marta ochish uchun internet kerak. Aloqa tiklangach, qayta urinib ko'ring.</p>
-  <button onclick="location.href='https://gt.sicrm.uz/'">Qayta urinish</button>
+  <button id="retry">Qayta urinish</button>
+  <script>
+    document.getElementById('retry').onclick = function () {
+      var s = null; try { s = JSON.parse(localStorage.getItem('sicrm_company') || 'null') } catch (e) {}
+      location.href = s && s.url ? s.url : 'index.html'
+    }
+  </script>
 </body>
 </html>

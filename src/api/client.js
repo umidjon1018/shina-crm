@@ -2,8 +2,9 @@ import axios from 'axios'
 import { cacheKey, putCached, getCached } from '../utils/httpCache'
 import i18n from '../i18n'
 import { getFreshToken, refreshSession, clearSession, getRefresh } from './session'
+import { API_BASE_URL } from './apiBase'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+const BASE_URL = API_BASE_URL
 
 const api = axios.create({
   baseURL: BASE_URL,

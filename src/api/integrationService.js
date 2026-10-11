@@ -1,4 +1,5 @@
 import api from './client'
+import { API_PUBLIC_URL } from './apiBase'
 
 // Internet-do'kon API kalitlari
 export const getApiKeys = async () => (await api.get('/api/integrations/api-keys')).data
@@ -26,4 +27,4 @@ export const getOnlinePayment = async (id) => (await api.get(`/api/integrations/
 export const cancelOnlinePayment = async (id) => (await api.post(`/api/integrations/payments/${id}/cancel`)).data
 export const simulateOnlinePayment = async (id) => (await api.post(`/api/integrations/payments/${id}/simulate`)).data
 
-export const API_BASE = (import.meta.env.VITE_API_URL || window.location.origin).replace(/\/+$/, '')
+export const API_BASE = API_PUBLIC_URL

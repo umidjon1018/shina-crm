@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { getFreshToken, refreshSession } from '../api/session'
+import { API_BASE_URL } from '../api/apiBase'
 
-const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
+const BASE_URL = API_BASE_URL
 
 // Serverdan real vaqt hodisalari (SSE). EventSource sarlavha yubora olmagani uchun fetch oqimi ishlatiladi —
 // token URL da emas, Authorization sarlavhasida. Uzilsa avtomatik qayta ulanadi.

@@ -1,6 +1,7 @@
+import { API_BASE_URL } from './apiBase'
 // Sessiya tokenlari: access (15 daqiqa) + refresh (7 kun, har yangilashda almashadi).
 // Yangilash bir vaqtda faqat bitta bo'ladi (bir nechta so'rov birdan 401 olsa ham).
-const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
+const BASE_URL = API_BASE_URL
 const ACCESS_KEY = 'shina_token'
 const REFRESH_KEY = 'shina_refresh'
 

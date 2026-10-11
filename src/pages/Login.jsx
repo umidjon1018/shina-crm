@@ -11,6 +11,12 @@ import { Button } from '../components/ui/Button'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { SelfieCapture } from '../components/SelfieCapture'
 
+// Mobil ilova (SICRM-App) ichida: kompaniya kodini qayta kiritish ekraniga (ilovaning o'z sahifasi) qaytish
+const IN_APP = typeof navigator !== 'undefined' && navigator.userAgent.includes('SICRM-App')
+const changeCompany = () => {
+  location.href = (/iPhone|iPad|iPod/.test(navigator.userAgent) ? 'capacitor://localhost' : 'https://localhost') + '/index.html?change=1'
+}
+
 const TireIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
@@ -218,6 +224,11 @@ const LoginPage = () => {
                     {t('login_btn')}
                   </Button>
                 </form>
+                {IN_APP && (
+                  <button type="button" onClick={changeCompany} className="mt-4 w-full text-center text-sm text-text-secondary hover:underline">
+                    {t('change_company')}
+                  </button>
+                )}
               </div>
               <p className="mt-5 sm:mt-8 text-center text-text-muted text-sm">
                 {t('login_terms')}{' '}

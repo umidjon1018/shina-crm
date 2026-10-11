@@ -1,4 +1,5 @@
-const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+import { API_BASE_URL } from '../api/apiBase'
+const BASE = API_BASE_URL
 const tg = () => window.Telegram?.WebApp
 
 export const initData = () => tg()?.initData || new URLSearchParams(location.hash.slice(1)).get('dev_init') || ''

@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { AlertCircle, Bot, CheckCircle2, ExternalLink, Link2, Send, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getTgSettings, saveTgSettings, setupTgWebhook, testTgMessage } from '../../api/marketingService'
+import { API_PUBLIC_URL } from '../../api/apiBase'
 
 const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-red'
 const Label = ({ children }) => <label className="text-text-secondary text-xs font-semibold mb-1.5 block">{children}</label>
-const API_BASE = (import.meta.env.VITE_API_URL || window.location.origin).replace(/\/+$/, '')
+const API_BASE = API_PUBLIC_URL
 
 // Telegram bot ulanishi (rejim, token, webhook, sinov) — Sozlamalar → Integratsiyalar → Telegram bot
 const TelegramConnectionCard = () => {

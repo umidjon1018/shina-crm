@@ -1,6 +1,7 @@
 import api from './client'
+import { API_BASE_URL } from './apiBase'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+const BASE_URL = API_BASE_URL
 
 export const productImageUrl = (id) => `${BASE_URL}/api/product-images/${id}/file`
 

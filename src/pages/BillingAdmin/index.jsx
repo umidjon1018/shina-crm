@@ -5,6 +5,7 @@ import {
   getBillingAdminInvoices, markBillingInvoicePaid,
 } from '../../api/billingService'
 import { useBillingStore } from '../../store/billingStore'
+import { API_PUBLIC_URL } from '../../api/apiBase'
 
 const fmt = (n) => Math.round(n ?? 0).toLocaleString('uz-UZ')
 const fmtDate = (s) => s ? new Date(s).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
@@ -200,7 +201,7 @@ const SettingsForm = ({ settings, plans, onSave }) => {
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f[p].test} onChange={e => setP(p, 'test', e.target.checked)} /> Sinov rejimi</label>
     </div>
   )
-  const origin = import.meta.env.VITE_API_URL || window.location.origin
+  const origin = API_PUBLIC_URL
   return (
     <div className="space-y-4">
       <div className="bg-bg-secondary border border-border rounded-2xl p-4 sm:p-5 grid gap-3 sm:grid-cols-5">
