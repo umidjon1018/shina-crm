@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (43-deploy)** — backend `c81ccaf`, frontend `f88ad402`: Mini App reply-klaviaturadan ochilsa initData kelmaydi (Telegram cheklovi) → Katalog xabarida inline `web_app` tugma (`SHOP_BUTTON`) + mijoz/diler chatiga `setChatMenuButton` "Do'kon" (`setShopMenu`: /start, ulanish, Katalog). Zaxira `/root/backups/2026-10-11i`.
+**Oxirgi deploy: 2026-10-11 (44-deploy, faqat frontend)** — frontend `4602a88b`: bildirishnoma bosilsa tegishli bo'lim ochiladi (`NotificationsPanel` `TARGETS` tur→URL+ruxsat; `navigate(to, {state:{navKey}})`, MainLayout `PageErrorBoundary` kaliti navKey bilan — o'sha sahifada ham qayta ochiladi). Backend `c81ccaf` o'zgarmagan. Zaxira `/root/backups/2026-10-11j`.
+
+**43-deploy: 2026-10-11** — backend `c81ccaf`, frontend `f88ad402`: Mini App reply-klaviaturadan ochilsa initData kelmaydi (Telegram cheklovi) → Katalog xabarida inline `web_app` tugma (`SHOP_BUTTON`) + mijoz/diler chatiga `setChatMenuButton` "Do'kon" (`setShopMenu`: /start, ulanish, Katalog). Zaxira `/root/backups/2026-10-11i`.
 
 **42-deploy: 2026-10-11** — backend `3c327f4`, frontend `8325ca68`: **Telegram Mini App do'kon** — `tgshop.html` (alohida Vite kirish nuqtasi `src/tgshop/`, CRM kodini yuklamaydi; asosiy bundle endi `assets/main-*.js`), API `/api/tg-shop/*` (`tgShopController`, `X-Telegram-Init-Data` imzosi bot tokeni bilan; avval diler, keyin mijoz). Mijoz: chakana narx + muddatli to'lov (`installment_base_price`/`installment_months`, oylik = narx/oy), chegirma darajasi; diler: `pricingFor` narxi, to'lov muddati, limit. Savat/buyurtma botdagi `placeOrder` bilan umumiy. Botdagi Katalog tugmasi `web_app` (`TG_SHOP_URL`, standart `https://gt.sicrm.uz/tgshop.html`). Zaxira `/root/backups/2026-10-11h`.
 
