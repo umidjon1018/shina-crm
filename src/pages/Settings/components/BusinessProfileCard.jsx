@@ -3,8 +3,9 @@ import { Briefcase } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settingsStore'
 
 const PRESETS = {
-  tires: { used: true, tireFields: true },
-  other: { used: false, tireFields: false },
+  tires: { retail: true, used: true, tireFields: true },
+  other: { retail: true, used: false, tireFields: false },
+  wholesale: { retail: false, used: false, tireFields: false },
 }
 
 const Switch = ({ checked, onChange }) => (
@@ -43,7 +44,7 @@ const BusinessProfileCard = () => {
         </div>
       </div>
       <div className="divide-y divide-border">
-        {[['used', 'bp_used', 'bp_used_hint'], ['tireFields', 'bp_tire', 'bp_tire_hint']].map(([k, label, hint]) => (
+        {[['retail', 'bp_retail', 'bp_retail_hint'], ['used', 'bp_used', 'bp_used_hint'], ['tireFields', 'bp_tire', 'bp_tire_hint']].map(([k, label, hint]) => (
           <div key={k} className="flex items-center justify-between gap-3 py-3">
             <div className="min-w-0">
               <p className="text-[15px] font-semibold text-text-primary">{t(label)}</p>

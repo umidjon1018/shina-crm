@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { HandCoins, Truck, Building2, User, ArrowRight, Boxes } from 'lucide-react'
 import { useShopStore } from '../../../store/shopStore'
 import { useDataStore } from '../../../store/dataStore'
+import { useAuthStore } from '../../../store/authStore'
 import { getDebts } from '../../../api/financeService'
 import Modal from '../../../components/ui/Modal'
 import { Badge, DetailGrid } from '../../../components/ui/Kit'
@@ -42,6 +43,7 @@ const DebtsTab = () => {
     </button>
   )
 
+  const canSales = useAuthStore.getState().hasPermission('sales')
   return (
     <div className="space-y-4 sm:space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -53,7 +55,7 @@ const DebtsTab = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         <ChartCard title={t('fin_debt_receivable')} subtitle={t('fin_debt_receivable_sub')}
-          right={<button onClick={() => navigate('/sales?section=installment')} className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">{t('fin_debt_to_installments')} <ArrowRight size={15} /></button>}>
+          right={canSales && <button onClick={() => navigate('/sales?section=installment')} className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary">{t('fin_debt_to_installments')} <ArrowRight size={15} /></button>}>
           <div className="divide-y divide-border">
             {data.receivable.map(g => (
               <Row key={g.id} icon={groupIcon(g)} name={g.name}

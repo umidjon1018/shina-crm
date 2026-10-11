@@ -10,7 +10,11 @@ import { useAuditStore } from './auditStore'
 import { useBillingStore } from './billingStore'
 import { PERMISSION_TREE } from '../config/permissionTree'
 
-const MODULE_NODES = [['used', ['sales.used_sale', 'warehouse.used_stock', 'reports.used']]]
+const MODULE_NODES = [
+  ['used', ['sales.used_sale', 'warehouse.used_stock', 'reports.used']],
+  // Chakana savdo o'chiq (faqat ulgurji / ishlab chiqarish): kassa, mijozlar, marketing, kassa ko'rsatkichlari va hisobotlari
+  ['retail', ['dashboard', 'sales', 'customers', 'marketing', 'reports.sales', 'reports.customers', 'reports.employees', 'reports.used', 'warehouse.used_stock']],
+]
 
 const SESSION_ACTION_KEYS = {
   'Tizimga kirdi (online)': 'audit_session_login',
