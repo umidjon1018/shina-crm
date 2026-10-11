@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (38-deploy)** — backend `6a4e955`, frontend `ab8facc3`: Sotuv → **Onlayn bronlar** (`onlineOrdersController`, `/api/reservations/online{,/cancel,/extend}`): Telegram bot buyurtmalari (`retail_orders`), Instagram/AI (`customer-agent`), telefon AI (`phone-ai`) bitta ro'yxatda; kassaga, +24 soat, bekor (Telegram mijozga xabar); ruxsat `sales.online_orders`. Zaxira `/root/backups/2026-10-11d`.
+**Oxirgi deploy: 2026-10-11 (39-deploy)** — backend `a4fc2df`, frontend `614cabca`: xavfsizlik auditi qoldiqlari — `perm.js` `ownShopFields/scopeShopQuery/ownShopRow` (do'konga biriktirilgan xodim: xarajat, daromad, kassa xarajati, ishlab chiqarish, bron, inventarizatsiya faqat o'z do'koni), spisaniya tannarxi `canSeeCost`, kirim/ishlab chiqarish ≤ 10 000 dona, `?from/?to` 2000…kelasi yil, SSE 8/foydalanuvchi va 3000 jami, shablonsiz admin yuz majburiy + `audit_face_enrolled` (xizmat boti xabar beradi). Zaxira `/root/backups/2026-10-11e`.
+
+**38-deploy: 2026-10-11** — backend `6a4e955`, frontend `ab8facc3`: Sotuv → **Onlayn bronlar** (`onlineOrdersController`, `/api/reservations/online{,/cancel,/extend}`): Telegram bot buyurtmalari (`retail_orders`), Instagram/AI (`customer-agent`), telefon AI (`phone-ai`) bitta ro'yxatda; kassaga, +24 soat, bekor (Telegram mijozga xabar); ruxsat `sales.online_orders`. Zaxira `/root/backups/2026-10-11d`.
 
 **37-deploy: 2026-10-11** — backend `1423099`, frontend `01782410`: ulgurji hujjat yozilganda dilerga Telegram'da to'liq xabar + PDF chek (`utils/whDocs.js`, pdfkit + dejavu-fonts-ttf), akt sverka PDF, to'lov xabari; rekvizitlar `business.docHeader` (Sozlamalar → Kompaniya → Hujjat rekvizitlari). Zaxira `/root/backups/2026-10-11c`.
 
