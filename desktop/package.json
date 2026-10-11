@@ -1,0 +1,52 @@
+{
+  "name": "sicrm-desktop",
+  "productName": "SICRM",
+  "version": "1.0.0",
+  "description": "SICRM — kompyuter va touch monoblok uchun dastur",
+  "author": "SICRM",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "www": "node copy-www.js",
+    "start": "npm run www && electron .",
+    "dist:win": "npm run www && electron-builder --win --publish never",
+    "dist:mac": "npm run www && electron-builder --mac --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "uz.sicrm.desktop",
+    "productName": "SICRM",
+    "copyright": "SICRM",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "www/**/*", "package.json"],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.png",
+      "artifactName": "SICRM-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SICRM"
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["universal"] }],
+      "icon": "build/icon.png",
+      "category": "public.app-category.business",
+      "artifactName": "SICRM.${ext}",
+      "extendInfo": {
+        "NSCameraUsageDescription": "Kamera tizimga yuz orqali kirish (selfie) va tovar barkodini skanerlash uchun ishlatiladi."
+      }
+    },
+    "publish": [{ "provider": "generic", "url": "https://github.com/umidjon1018/shina-crm/releases/download/desktop-latest" }]
+  }
+}
