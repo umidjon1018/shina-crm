@@ -1,0 +1,83 @@
+name: Mobil ilova
+
+# Android (APK/AAB) va iOS ilovasini bulutda yig'adi. Ilova https://gt.sicrm.uz ni ochadi —
+# oddiy frontend deploy uchun qayta yig'ish shart emas; faqat native qism o'zgarsa ishga tushadi.
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Versiya nomi (masalan 1.0.1)"
+        required: false
+        default: "1.0"
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'ios/**'
+      - 'mobile/**'
+      - 'capacitor.config.json'
+      - '.github/workflows/mobile.yml'
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: ${{ inputs.version_name || '1.0' }}
+      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci --no-audit --no-fund
+      - run: npx cap sync android
+      - name: Debug APK (sinov uchun telefonga o'rnatiladi)
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Release (Google Play) — imzo kaliti bo'lsa
+        if: ${{ env.HAS_KEY == 'true' }}
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          export KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
+          ./gradlew bundleRelease assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sicrm-android-${{ github.run_number }}
+          path: |
+            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx cap sync ios
+      - name: iOS yig'ish tekshiruvi (simulyator, imzosiz)
+        working-directory: ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Simulyator ilovasi
+        run: cd ios/App/build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/sicrm-ios-simulator.zip" App.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sicrm-ios-simulator-${{ github.run_number }}
+          path: sicrm-ios-simulator.zip

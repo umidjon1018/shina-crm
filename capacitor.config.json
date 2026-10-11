@@ -1,0 +1,30 @@
+{
+  "appId": "uz.sicrm.app",
+  "appName": "SICRM",
+  "webDir": "mobile/www",
+  "server": {
+    "url": "https://gt.sicrm.uz",
+    "errorPath": "offline.html",
+    "allowNavigation": ["gt.sicrm.uz", "sicrm.uz"]
+  },
+  "android": {
+    "backgroundColor": "#0B0B0F"
+  },
+  "ios": {
+    "backgroundColor": "#0B0B0F",
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#0B0B0F",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0B0B0F",
+      "overlaysWebView": false
+    }
+  }
+}
