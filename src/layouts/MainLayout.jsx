@@ -29,6 +29,7 @@ import { useUiStore } from '../store/uiStore'
 import { syncRolesFromServer } from '../utils/rolesSync'
 import { migrateLocalBundles } from '../utils/migrateLocalBundles'
 import { createSale } from '../api/salesService'
+import { getMyShops } from '../api/employeeService'
 import { useDataStore } from '../store/dataStore'
 import PageLoader from '../components/PageLoader'
 import UpdateBanner from '../components/UpdateBanner'
@@ -169,6 +170,19 @@ export const MainLayout = () => {
   const { companyName, companyLogo, sidebarLabels, hiddenPages, sidebarLogoSize, employees, loadEmployees, loadProductCategories, loadProductImages, loadBranding, loadBusiness } = useSettingsStore()
   const { shops, selectedShopId, setSelectedShop, loadShops } = useShopStore()
   const activeShops = shops.filter(s => s.isActive)
+  // Oddiy xodim: faqat biriktirilgan do'konlar (bo'sh ro'yxat — barcha do'konlar)
+  const [myShops, setMyShops] = useState(null)
+  const loadMyShops = useCallback(() => {
+    if (user?.role === 'admin' || user?.role === 'manager') { setMyShops({ all: true, shopIds: [] }); return }
+    getMyShops().then(setMyShops).catch(() => {})
+  }, [user?.role])
+  useEffect(() => { loadMyShops() }, [loadMyShops])
+  const shopLimited = myShops && !myShops.all
+  const pickableShops = shopLimited ? activeShops.filter(s => myShops.shopIds.includes(String(s.id))) : activeShops
+  const pickableKey = pickableShops.map(s => s.id).join(',')
+  useEffect(() => {
+    if (shopLimited && pickableShops.length && !pickableShops.some(s => String(s.id) === String(selectedShopId))) setSelectedShop(pickableShops[0].id)
+  }, [shopLimited, pickableKey, selectedShopId])
 
   useEffect(() => {
     loadShops()
@@ -193,7 +207,7 @@ export const MainLayout = () => {
     logout()
   }
   useRealtime({
-    perm_changed: () => { syncRolesFromServer().catch(() => {}); loadEmployees() },
+    perm_changed: () => { syncRolesFromServer().catch(() => {}); loadEmployees(); loadMyShops() },
     settings_changed: () => loadBusiness(user?.role),
     notification: (d) => {
       const n = useNotificationStore.getState().upsertFromServer(d)
@@ -319,14 +333,14 @@ export const MainLayout = () => {
         )}
         {activeShops.length >= 1 && (
           <div className={`mx-3 mt-3 mb-1 ${mini ? 'lg:hidden' : ''}`}>
-            {isPrivileged(user?.role) ? (
+            {(isPrivileged(user?.role) || myShops?.all || pickableShops.length > 1) ? (
               <select
                 value={selectedShopId}
                 onChange={e => setSelectedShop(e.target.value)}
                 className="w-full bg-sidebarField border border-sidebarBorder rounded-xl px-3 py-2.5 text-[15px] text-sidebarStrong focus:outline-none focus:border-accent-red [&>option]:text-black"
               >
-                <option value="all">{t('all_shops')}</option>
-                {activeShops.map(s => (
+                {!shopLimited && <option value="all">{t('all_shops')}</option>}
+                {pickableShops.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>

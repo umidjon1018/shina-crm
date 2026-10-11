@@ -7,6 +7,7 @@ const map = (e) => ({
   role: e.role || 'employee',
   phone: e.phone || '',
   shopId: e.shopId ?? e.shop_id ?? '',
+  shopIds: e.shopIds ?? e.shop_ids ?? [],
   permissions: e.permissions || [],
   access: e.access || null,
   salary: e.salary ?? 0,
@@ -24,7 +25,7 @@ const map = (e) => ({
 // UI maydoni → server maydoni (faqat yuborilganlari — server qolganini o'zgartirmaydi)
 const FIELDS = {
   name: 'name', username: 'username', password: 'password', role: 'role', phone: 'phone',
-  shopId: 'shop_id', salary: 'salary', hiredAt: 'hired_at', isBlocked: 'is_blocked',
+  shopId: 'shop_id', shopIds: 'shop_ids', salary: 'salary', hiredAt: 'hired_at', isBlocked: 'is_blocked',
   pendingDelete: 'pending_delete', access: 'access',
 }
 const toBody = (patch) => {
@@ -36,6 +37,9 @@ const toBody = (patch) => {
   }
   return body
 }
+
+// Joriy xodim ishlay oladigan do'konlar: { all: true } yoki { all: false, shopIds }
+export const getMyShops = async () => (await api.get('/api/auth/my-shops')).data
 
 export const getEmployees = async () => {
   const { data } = await api.get('/api/employees')
@@ -50,6 +54,7 @@ export const createEmployee = async (emp) => {
     role: emp.role || 'employee',
     phone: emp.phone || null,
     shop_id: emp.shopId || null,
+    shop_ids: emp.shopIds || [],
     salary: emp.salary || 0,
     hired_at: emp.hiredAt || null,
     access: emp.access || null,

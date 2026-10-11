@@ -82,7 +82,7 @@ function EmployeesTab() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'], shopId: '', access: null })
+    setForm({ name:'', phone:'+998', role:'seller', hiredAt:'', salary:'', username:'', password:'', permissions: ROLE_PERMISSIONS['seller'], shopId: '', shopIds: [], access: null })
     setHiredAtDisplay('')
     setSaveError('')
     setShowPass(false)
@@ -90,7 +90,7 @@ function EmployeesTab() {
   }
   const openEdit = (emp) => {
     setEditing(emp)
-    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: '', permissions: emp.permissions||[], shopId: emp.shopId||'', access: emp.access || null })
+    setForm({ name: emp.name, phone: emp.phone||'', role: emp.role, hiredAt: emp.hiredAt||'', salary: emp.salary ? String(emp.salary) : '', username: emp.username||'', password: '', permissions: emp.permissions||[], shopId: emp.shopId||'', shopIds: emp.shopIds?.length ? emp.shopIds.map(String) : (emp.shopId ? [String(emp.shopId)] : []), access: emp.access || null })
     setHiredAtDisplay(isoToDisplay(emp.hiredAt||''))
     setSaveError('')
     setShowPass(false)
@@ -361,13 +361,26 @@ function EmployeesTab() {
                   </div>
                   <div>
                     <label className="text-xs text-text-muted mb-1 block">{t('mgmt_tab_shops')}</label>
-                    <select value={form.shopId||''} onChange={e=>setForm(f=>({...f,shopId:e.target.value}))}
-                      className="w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-red">
-                      <option value="">{t('all_shops')}</option>
-                      {shops.filter(s=>s.isActive).map(s=>(
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+                    <div className="bg-bg-tertiary border border-border rounded-xl px-3 py-2 space-y-1.5">
+                      <label className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
+                        <input type="checkbox" className="accent-accent-red w-4 h-4" checked={!(form.shopIds||[]).length}
+                          onChange={()=>setForm(f=>({...f,shopIds:[],shopId:''}))} />
+                        {t('all_shops')}
+                      </label>
+                      {shops.filter(s=>s.isActive).map(s=>{
+                        const on = (form.shopIds||[]).includes(String(s.id))
+                        return (
+                          <label key={s.id} className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
+                            <input type="checkbox" className="accent-accent-red w-4 h-4" checked={on}
+                              onChange={()=>setForm(f=>{
+                                const ids = on ? (f.shopIds||[]).filter(x=>x!==String(s.id)) : [...(f.shopIds||[]), String(s.id)]
+                                return {...f, shopIds: ids, shopId: ids[0] || ''}
+                              })} />
+                            {s.name}
+                          </label>
+                        )
+                      })}
+                    </div>
                   </div>
                 </>
               )}
