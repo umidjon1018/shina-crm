@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (44-deploy, faqat frontend)** — frontend `4602a88b`: bildirishnoma bosilsa tegishli bo'lim ochiladi (`NotificationsPanel` `TARGETS` tur→URL+ruxsat; `navigate(to, {state:{navKey}})`, MainLayout `PageErrorBoundary` kaliti navKey bilan — o'sha sahifada ham qayta ochiladi). Backend `c81ccaf` o'zgarmagan. Zaxira `/root/backups/2026-10-11j`.
+**Oxirgi deploy: 2026-10-11 (45-deploy)** — backend `541137f`, frontend `fe9f8481`: bot buyurtmalari holati mijozga Telegram'da (`utils/orderNotify.js`; "sinov" rejimida ham, faqat "o'chiq"da emas): do'kon bekor qilsa (Onlayn bronlarda sabab majburiy, Bronlarda ixtiyoriy — `CancelReasonModal`), uzaytirish, sotuvda olib ketildi (`onItemsSold`), muddatdan 2 soat oldin eslatma va tugashi (`sweep` har 10 daq, bronlar bo'shaydi); `retail_orders` holatlari endi `completed`/`expired` ham, ustunlar `reminded_at/cancel_reason/completed_at`. Mijoz bekor qilsa xodimlarga bildirishnoma; diler buyurtmasi tasdiq/rad xabari sinov rejimida ham (`force`). Zaxira `/root/backups/2026-10-11k`.
+
+**44-deploy: 2026-10-11 (faqat frontend)** — frontend `4602a88b`: bildirishnoma bosilsa tegishli bo'lim ochiladi (`NotificationsPanel` `TARGETS` tur→URL+ruxsat; `navigate(to, {state:{navKey}})`, MainLayout `PageErrorBoundary` kaliti navKey bilan — o'sha sahifada ham qayta ochiladi). Backend `c81ccaf` o'zgarmagan. Zaxira `/root/backups/2026-10-11j`.
 
 **43-deploy: 2026-10-11** — backend `c81ccaf`, frontend `f88ad402`: Mini App reply-klaviaturadan ochilsa initData kelmaydi (Telegram cheklovi) → Katalog xabarida inline `web_app` tugma (`SHOP_BUTTON`) + mijoz/diler chatiga `setChatMenuButton` "Do'kon" (`setShopMenu`: /start, ulanish, Katalog). Zaxira `/root/backups/2026-10-11i`.
 
