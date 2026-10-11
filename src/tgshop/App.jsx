@@ -234,7 +234,11 @@ export default function App() {
   const flash = (t) => { setToast(t); setTimeout(() => setToast(''), 2500) }
 
   useEffect(() => {
-    if (!initData()) { setFatal("Bu sahifa Telegram bot ichida ochiladi"); return }
+    if (!initData()) {
+      const inTg = tg()?.platform && tg().platform !== 'unknown'
+      setFatal(inTg ? "Do'konni chatdagi «Katalog» xabaridagi «Do'konni ochish» tugmasi yoki pastki chapdagi «Do'kon» (Menu) tugmasi orqali oching" : "Bu sahifa Telegram bot ichida ochiladi")
+      return
+    }
     api('/me').then(setMe).catch(e => setFatal(e.message))
     api('/categories').then(setCats).catch(() => {})
   }, [])
