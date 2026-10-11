@@ -42,8 +42,7 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew assembleDebug --no-daemon 2>&1 | tee "$RUNNER_TEMP/gradle.log" || {
-            echo "::error title=Gradle::$(grep -E 'error|What went wrong|FAILURE|>' "$RUNNER_TEMP/gradle.log" | tail -25 | tr '
-' ' ' | cut -c1-3500)"; exit 1; }
+            echo "::error title=Gradle::$(grep -E 'error|What went wrong|FAILURE|>' "$RUNNER_TEMP/gradle.log" | tail -25 | tr '\n' ' ' | cut -c1-3500)"; exit 1; }
       - name: Release (Google Play) — imzo kaliti bo'lsa
         if: ${{ env.HAS_KEY == 'true' }}
         working-directory: android
