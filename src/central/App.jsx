@@ -336,7 +336,7 @@ export default function App() {
   const count = (s) => tenants.filter(t => t.state === s).length
   const srv = data?.server
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-10" style={{ paddingTop: 'max(16px, env(safe-area-inset-top))' }}>
+    <div className="mx-auto max-w-[1800px] px-4 sm:px-6 pb-10" style={{ paddingTop: 'max(16px, env(safe-area-inset-top))' }}>
       <header className="flex items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-2"><ShieldCheck className="text-[var(--c-accent)]" size={22} /><h1 className="text-lg font-bold">SICRM boshqaruv</h1></div>
         <div className="flex gap-2">
@@ -374,7 +374,7 @@ export default function App() {
         {tab === 'audit' ? <Audit /> : !data ? (
           <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-[var(--c-hint)]" /></div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {tenants.map(t => <TenantCard key={t.code} t={t} onBilling={setBilling} onRestart={restart} />)}
           </div>
         )}
