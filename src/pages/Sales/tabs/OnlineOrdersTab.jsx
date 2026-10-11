@@ -6,6 +6,7 @@ import { getProducts } from '../../../api/productService'
 import { getItems } from '../../../api/itemService'
 import { Segmented } from '../../../components/ui/Kit'
 import { formatDateTime } from '../../../utils/format'
+import CancelReasonModal from '../../../components/CancelReasonModal'
 
 const SRC = {
   telegram: { icon: Send, cls: 'bg-accent-blue/15 text-accent-blue' },
@@ -33,6 +34,7 @@ const OnlineOrdersTab = ({ ctx }) => {
   const [list, setList] = useState(null)
   const [busy, setBusy] = useState(null)
   const [error, setError] = useState('')
+  const [cancelling, setCancelling] = useState(null)
 
   const load = useCallback(() => {
     setList(null)
@@ -41,11 +43,11 @@ const OnlineOrdersTab = ({ ctx }) => {
   }, [status, source, selectedShopId])
   useEffect(() => { load() }, [load])
 
-  const act = async (g, kind) => {
-    if (kind === 'cancel' && !window.confirm(t('onl_cancel_confirm', { name: g.customerName || g.customerPhone || '' }))) return
+  const act = async (g, kind, reason) => {
     setBusy(g.key + kind); setError('')
     try {
-      await api.post(`/api/reservations/online/${kind}`, { ids: g.activeIds, orderId: g.orderId, hours: 24 })
+      await api.post(`/api/reservations/online/${kind}`, { ids: g.activeIds, orderId: g.orderId, hours: 24, reason })
+      setCancelling(null)
       load()
     } catch (e) { setError(e?.response?.data?.error || t('sl_edit_err_save')) }
     finally { setBusy(null) }
@@ -128,7 +130,7 @@ const OnlineOrdersTab = ({ ctx }) => {
                       className="flex items-center justify-center gap-1 py-2.5 rounded-xl bg-accent-blue/10 text-accent-blue text-xs font-bold disabled:opacity-50">
                       {busy === g.key + 'extend' ? <Loader2 size={13} className="animate-spin" /> : <TimerReset size={13} />} +24 {t('onl_hours')}
                     </button>
-                    <button onClick={() => act(g, 'cancel')} disabled={!!busy}
+                    <button onClick={() => setCancelling(g)} disabled={!!busy}
                       className="flex items-center justify-center gap-1 py-2.5 rounded-xl bg-accent-red/10 text-accent-red text-xs font-bold disabled:opacity-50">
                       <X size={13} /> {t('onl_cancel')}
                     </button>
@@ -139,6 +141,9 @@ const OnlineOrdersTab = ({ ctx }) => {
           })}
         </div>
       )}
+      <CancelReasonModal open={!!cancelling} busy={!!busy}
+        subtitle={cancelling ? `${cancelling.customerName || cancelling.customerPhone || ''}${cancelling.orderId ? ` · #${cancelling.orderId}` : ''}` : ''}
+        onClose={() => setCancelling(null)} onConfirm={(reason) => act(cancelling, 'cancel', reason)} />
     </div>
   )
 }

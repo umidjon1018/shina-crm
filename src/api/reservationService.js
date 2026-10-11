@@ -29,7 +29,7 @@ export const getReservedItemIds = async () => {
   }
 }
 
-export const cancelReservation = async (id) => {
-  const r = await api.patch(`/api/reservations/${id}/cancel`)
+export const cancelReservation = async (id, reason) => {
+  const r = await api.patch(`/api/reservations/${id}/cancel`, { reason: reason || null })
   return r.data
 }

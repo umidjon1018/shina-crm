@@ -7,6 +7,7 @@ import { getProducts } from '../../../api/productService'
 import { getItems } from '../../../api/itemService'
 import { toLocalISO } from '../../../utils/tz'
 import { StackGuard } from '../../../components/ui/Modal'
+import CancelReasonModal from '../../../components/CancelReasonModal'
 
 const DURATIONS = [
   { hours: 3, key: 'sl_resv_dur_3h' },
@@ -161,6 +162,7 @@ const ReservationsTab = ({ ctx }) => {
   const [showNew, setShowNew] = useState(false)
   const [newShopId, setNewShopId] = useState(null)
   const [busyId, setBusyId] = useState(null)
+  const [cancelling, setCancelling] = useState(null)
   const [error, setError] = useState('')
 
   const load = useCallback(() => {
@@ -171,10 +173,9 @@ const ReservationsTab = ({ ctx }) => {
 
   const openNew = () => requireShop((shopId) => { setNewShopId(shopId); setShowNew(true) })
 
-  const doCancel = async (rv) => {
-    if (!window.confirm(t('sl_resv_cancel_confirm', { name: rv.customer_name || rv.customer_phone || '' }))) return
+  const doCancel = async (rv, reason) => {
     setBusyId(rv.id)
-    try { await cancelReservation(rv.id); load() } catch (e) { setError(e?.response?.data?.error || t('sl_edit_err_save')) }
+    try { await cancelReservation(rv.id, reason); setCancelling(null); load() } catch (e) { setError(e?.response?.data?.error || t('sl_edit_err_save')) }
     finally { setBusyId(null) }
   }
 
@@ -238,7 +239,7 @@ const ReservationsTab = ({ ctx }) => {
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-accent-green/15 text-accent-green text-xs font-bold disabled:opacity-50">
                     {busyId === rv.id ? <Loader2 size={13} className="animate-spin" /> : <ShoppingCart size={13} />} {t('sl_resv_sell')}
                   </button>
-                  <button onClick={() => doCancel(rv)} disabled={busyId === rv.id}
+                  <button onClick={() => setCancelling(rv)} disabled={busyId === rv.id}
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-accent-red/10 text-accent-red text-xs font-bold disabled:opacity-50">
                     <X size={13} /> {t('sl_resv_cancel')}
                   </button>
@@ -252,6 +253,9 @@ const ReservationsTab = ({ ctx }) => {
       {showNew && (
         <NewReservationModal shopId={newShopId} customers={allCustomers} onClose={() => setShowNew(false)} onCreated={load} />
       )}
+      <CancelReasonModal open={!!cancelling} required={false} busy={!!busyId}
+        subtitle={cancelling ? (cancelling.customer_name || cancelling.customer_phone || '') : ''}
+        onClose={() => setCancelling(null)} onConfirm={(reason) => doCancel(cancelling, reason)} />
     </motion.div>
   )
 }
