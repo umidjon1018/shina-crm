@@ -509,7 +509,7 @@ export const MainLayout = () => {
           <div ref={contentRef}>
             <BillingBanner status={billing} isAdmin={user?.role === 'admin'} />
             <Suspense fallback={<PageLoader />}>
-              <PageErrorBoundary key={location.pathname}><Outlet /></PageErrorBoundary>
+              <PageErrorBoundary key={location.pathname + (location.state?.navKey || '')}><Outlet /></PageErrorBoundary>
             </Suspense>
           </div>
         </div>

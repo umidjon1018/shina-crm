@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, ShieldAlert, Info, Percent, User } from 'lucide-react'
+import { Bell, X, Check, CheckCheck, Trash2, AlertTriangle, ShieldAlert, Info, Percent, User, ChevronRight } from 'lucide-react'
 import { useNotificationStore } from '../store/notificationStore'
 import { useAuthStore } from '../store/authStore'
 import { formatDateTime, formatNumber } from '../utils/format'
@@ -12,6 +13,26 @@ const SEVERITY = {
   warning: { icon: AlertTriangle, cls: 'bg-accent-orange/10 text-accent-orange' },
   error: { icon: ShieldAlert, cls: 'bg-accent-red/10 text-accent-red' },
   info: { icon: Info, cls: 'bg-accent-blue/10 text-accent-blue' },
+}
+
+// Bildirishnoma bosilganda ochiladigan bo'lim (ruxsat bo'lmasa — o'tmaydi)
+const TARGETS = {
+  RETAIL_ORDER: ['/sales?section=online_orders', 'sales.online_orders'],
+  BOT_RESERVATION: ['/sales?section=online_orders', 'sales.online_orders'],
+  WHOLESALE_ORDER: ['/wholesale?section=orders', 'wholesale'],
+  CUSTOMER_QUESTION: [(n) => n.customerId ? `/customers?customer=${n.customerId}` : '/customers', 'customers'],
+  DEVICE_LOGIN_ATTEMPT: ['/settings?section=devices', 'settings.devices'],
+  NEW_LOGIN_ATTEMPT: ['/settings?section=devices', 'settings.devices'],
+  DEVICE_APPROVED: ['/settings?section=devices', 'settings.devices'],
+  SALE_NO_CUSTOMER: ['/sales?section=history', 'sales.history'],
+  CREATE_SALE: ['/sales?section=history', 'sales.history'],
+  OFFLINE_SALE_REJECTED: ['/sales?section=history', 'sales.history'],
+  BARCODE_NOT_PRINTED: ['/warehouse?section=barcode', 'warehouse'],
+  BARCODE_REPRINTED: ['/warehouse?section=barcode', 'warehouse'],
+  BARCODE_SOLD_RESCAN: ['/warehouse?section=barcode', 'warehouse'],
+  REPRINT_ALLOWED: ['/warehouse?section=barcode', 'warehouse'],
+  OUT_OF_STOCK: ['/warehouse?section=products', 'warehouse'],
+  WEEKLY_REPORT: ['/ai-agent', 'ai_agent'],
 }
 
 // Chegirma so'rovi kartasi: boshqaruvchi/admin tasdiqlaydi, sotuvchi o'z so'rovi holatini ko'radi
@@ -71,6 +92,21 @@ const NotificationsPanel = ({ className = '' }) => {
   const [open, setOpen] = useState(false)
   const { notifications, markRead, markAllRead, removeNotification, updateNotification } = useNotificationStore()
   const { user, hasPermission } = useAuthStore()
+  const navigate = useNavigate()
+  const targetOf = (n) => {
+    const t = TARGETS[n.type]
+    if (!t || !(user?.role === 'admin' || hasPermission(t[1]))) return null
+    return typeof t[0] === 'function' ? t[0](n) : t[0]
+  }
+  // Bo'limga o'tish: panel tarix yozuvi o'rniga yangi sahifa; navKey — o'sha sahifada bo'lsa ham qayta ochiladi
+  const openTarget = (n) => {
+    if (!n.isRead) markRead(n.id)
+    const to = targetOf(n)
+    if (!to) return
+    const replace = !!window.history.state?.notif
+    setOpen(false)
+    navigate(to, { replace, state: { navKey: Date.now() } })
+  }
   const canResolve = { any: user?.role === 'admin' || hasPermission('notifications'), admin: user?.role === 'admin' }
   const unread = notifications.filter(n => !n.isRead).length
   const requests = notifications.filter(n => n.type === 'DISCOUNT_REQUEST')
@@ -123,8 +159,9 @@ const NotificationsPanel = ({ className = '' }) => {
                 {others.map(n => {
                   const sev = SEVERITY[n.severity] || SEVERITY.info
                   const Icon = sev.icon
+                  const to = targetOf(n)
                   return (
-                    <div key={n.id} onClick={() => !n.isRead && markRead(n.id)}
+                    <div key={n.id} onClick={() => openTarget(n)}
                       className={`flex items-start gap-3 rounded-2xl border p-3 cursor-pointer ${n.isRead ? 'border-border opacity-70' : 'border-accent-red/30 bg-bg-secondary'}`}>
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${sev.cls}`}><Icon size={17} /></div>
                       <div className="flex-1 min-w-0">
@@ -132,6 +169,7 @@ const NotificationsPanel = ({ className = '' }) => {
                         <p className="text-sm text-text-secondary">{n.messageKey ? t(n.messageKey, n.messageParams) : n.message}</p>
                         <p className="text-xs text-text-muted mt-1">{formatDateTime(n.createdAt)}{n.sellerName ? ` · ${n.sellerName}` : ''}</p>
                       </div>
+                      {to && <ChevronRight size={18} className="self-center shrink-0 text-text-muted" />}
                       <button onClick={e => { e.stopPropagation(); removeNotification(n.id) }} className="p-1.5 rounded-lg text-text-muted hover:text-accent-red hover:bg-accent-red/10"><Trash2 size={15} /></button>
                     </div>
                   )
