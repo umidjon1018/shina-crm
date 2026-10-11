@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Telegram mavzusi (telegram-web-app.js o'rnatadi), bot tashqarisida — yorug' standart */
+:root {
+  --s-bg: var(--tg-theme-secondary-bg-color, #f2f3f7);
+  --s-card: var(--tg-theme-bg-color, #ffffff);
+  --s-text: var(--tg-theme-text-color, #111827);
+  --s-hint: var(--tg-theme-hint-color, #8a8f9c);
+  --s-line: color-mix(in srgb, var(--s-hint) 22%, transparent);
+  --s-soft: color-mix(in srgb, var(--s-hint) 12%, transparent);
+  --s-accent: #E63946;
+  --s-accent-soft: color-mix(in srgb, #E63946 12%, transparent);
+  --s-monthly: #FFE14D;
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--s-bg);
+  color: var(--s-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 8px); }

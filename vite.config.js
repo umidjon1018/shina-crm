@@ -13,6 +13,8 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      // tgshop.html — Telegram bot ichidagi do'kon (Mini App), CRM kodini yuklamaydi
+      input: { main: 'index.html', tgshop: 'tgshop.html' },
       output: {
         // Kutubxonalar alohida — yangi deployda ilova kodi o'zgarsa ham telefon keshidan olinadi
         manualChunks(id) {
@@ -56,7 +58,7 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         navigateFallback: '/index.html',
         // API so'rovlari service worker'dan o'tmaydi (offlayn ma'lumot keshi alohida — utils/httpCache)
-        navigateFallbackDenylist: [/^\/api\//, /^\/models\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/models\//, /^\/tgshop/],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
