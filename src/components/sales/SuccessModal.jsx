@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import i18n from '../../i18n'
 import { useSettingsStore } from '../../store/settingsStore'
 import { StackGuard } from '../ui/Modal'
+import { printDocument } from '../../utils/nativeBridge'
 
 const formatPrice = (price) => Math.round(price).toLocaleString('uz-UZ') + ' ' + i18n.t('unit_som')
 
@@ -27,7 +28,6 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
   }
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=400,height=600')
     const saleDate = new Date(sale.soldAt).toLocaleString('uz-UZ')
 
     const itemsHtml = sale.items?.length > 0
@@ -53,7 +53,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
       sale.paymentType === 'installment' ? `Muddatli (${sale.installmentMonths || sale.installmentTermMonths || 3} oy)` :
       "Bank o'tkazma"
 
-    printWindow.document.write(`
+    printDocument(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -105,13 +105,7 @@ const SuccessModal = ({ sale, onClose, onCancel }) => {
         <div class="center small">${companyName} — Ishonchli tanlov</div>
       </body>
       </html>
-    `)
-    printWindow.document.close()
-    printWindow.focus()
-    setTimeout(() => {
-      printWindow.print()
-      printWindow.close()
-    }, 300)
+    `, { title: 'Chek', features: 'width=400,height=600' })
   }
 
   return (

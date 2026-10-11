@@ -1,3 +1,4 @@
+import { printDocument } from './nativeBridge'
 const fp = (n) => Math.round(n || 0).toLocaleString('uz-UZ')
 const fdate = () => new Date().toLocaleDateString('uz-UZ')
 
@@ -248,15 +249,11 @@ export function printPriceList({ products, items, attributeDefs, companyName, co
   const { onlyInStock } = options
   const list = onlyInStock ? products.filter(p => getStock(p.id, items) > 0) : products
 
-  const win = window.open('', '_blank', 'width=960,height=720')
-  if (!win) { alert('Pop-up bloklangan. Brauzer sozlamalaridan ruxsat bering.'); return }
-
   const html = (options.format === 'card')
     ? buildCardHtml({ products: list, items, attributeDefs, companyName, companyLogo, options, design })
     : buildTableHtml({ products: list, items, attributeDefs, companyName, companyLogo, options, design })
 
-  win.document.write(html)
-  win.document.close()
-  win.focus()
-  setTimeout(() => { win.print() }, 600)
+  if (!printDocument(html, { title: 'Narxnoma', features: 'width=960,height=720', delay: 600, keepOpen: true })) {
+    alert('Pop-up bloklangan. Brauzer sozlamalaridan ruxsat bering.')
+  }
 }

@@ -10,6 +10,7 @@ import { getItemStatus } from '../../../utils/itemStatus'
 import JsBarcode from 'jsbarcode'
 import { Badge } from '../whHelpers.jsx'
 import { StackGuard } from '../../../components/ui/Modal'
+import { printDocument, saveBlob } from '../../../utils/nativeBridge'
 
 const AttrBadges = ({ attributes }) => {
   if (!attributes || Object.keys(attributes).length === 0) return null
@@ -63,13 +64,7 @@ const downloadPng = (barcodeValue) => {
       })
       canvas.toBlob(blob => {
         if (!blob) { resolve(); return }
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${barcodeValue}.png`
-        a.click()
-        URL.revokeObjectURL(url)
-        resolve()
+        saveBlob(blob, `${barcodeValue}.png`).finally(resolve)
       })
     } catch { resolve() }
   })
@@ -325,18 +320,14 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
   const handlePrintGroupBarcodeByValue = async (barcodeValue, allItems) => {
     const svgHtml = await createBarcodeSvgHtml(barcodeValue)
     if (!svgHtml) return
-    const printWindow = window.open('', '_blank')
-    printWindow.document.write(`
+    printDocument(`
       <html><body style="margin:16px;background:#0F1520;">
         <div style="margin-bottom:8px;font-family:monospace;color:#aaa;font-size:12px;">
           ${selectedProduct?.name || ''} — Umumiy barkod · ${allItems.length} ta uchun
         </div>
         <div style="background:#0F1520;display:inline-block;padding:4px;">${svgHtml}</div>
       </body></html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-    printWindow.close()
+    `, { title: 'Barkod', delay: 0 })
     // Umumiy barkod: faqat count++ — reprint cheklanmaydi (bir barkod ko'p item uchun)
     await updateBarcodeStatus(allItems.map(i => i.id), { status: 'printed' })
     onRefresh?.()
@@ -345,15 +336,11 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
   const handlePrintSingleItem = async (item) => {
     const svgHtml = await createBarcodeSvgHtml(item.barcode)
     if (!svgHtml) return
-    const printWindow = window.open('', '_blank')
-    printWindow.document.write(`
+    printDocument(`
       <html><body style="margin:16px;background:#0F1520;">
         <div style="background:#0F1520;display:inline-block;padding:4px;">${svgHtml}</div>
       </body></html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-    printWindow.close()
+    `, { title: 'Barkod', delay: 0 })
     await updateBarcodeStatus([item.id], { status: 'printed', reprintAllowed: false })
     onRefresh?.()
   }
@@ -363,15 +350,11 @@ const BarcodeTab = ({ products, batches = [], items, userRole, userId, userName,
     const barcodes = withBarcode.map(i => i.barcode)
     if (!barcodes.length) return
     const svgHtmlParts = await Promise.all(barcodes.map(createBarcodeSvgHtml))
-    const printWindow = window.open('', '_blank')
-    printWindow.document.write(`
+    printDocument(`
       <html><body style="margin:0;background:#0F1520;display:flex;flex-wrap:wrap;gap:8px;padding:8px;">
         ${svgHtmlParts.map(s => `<div style="background:#0F1520;padding:4px;">${s}</div>`).join('')}
       </body></html>
-    `)
-    printWindow.document.close()
-    printWindow.print()
-    printWindow.close()
+    `, { title: 'Barkod', delay: 0 })
     await updateBarcodeStatus(withBarcode.map(i => i.id), { status: 'printed', reprintAllowed: false })
     onRefresh?.()
   }

@@ -1,3 +1,4 @@
+import { saveBlob } from '../../../utils/nativeBridge'
 // Hisobotlar uchun umumiy: diagramma ranglari va Excel eksport
 const C = {
   red:    '#E63946',
@@ -19,7 +20,8 @@ const exportXLSX = async (filename, sheets) => {
     const ws = XLSX.utils.json_to_sheet(rows)
     XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31))
   })
-  XLSX.writeFile(wb, filename + '.xlsx')
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  saveBlob(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), filename + '.xlsx')
 }
 
 export { C, exportXLSX }

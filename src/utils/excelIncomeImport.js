@@ -1,3 +1,4 @@
+import { saveBlob } from './nativeBridge'
 // xlsx og'ir (~1MB) — faqat import/eksport bosilganda yuklanadi
 let XLSX = null
 const loadXLSX = async () => (XLSX ??= await import('xlsx'))
@@ -204,10 +205,7 @@ export async function exportBatchesToExcel(batches, filename = 'qoldiq_eksport.x
   XLSX.utils.book_append_sheet(wb, ws, 'Qoldiq')
   const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
   const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url; a.download = filename; a.click()
-  URL.revokeObjectURL(url)
+  await saveBlob(blob, filename)
 }
 
 // Excel shablon fayli generatsiya qilish

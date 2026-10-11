@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { addSupplier } from '../../../api/incomeService'
 import { StackGuard } from '../../../components/ui/Modal'
+import { printDocument } from '../../../utils/nativeBridge'
 
 export const inputCls = 'w-full bg-bg-tertiary border border-border rounded-xl px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-accent-blue'
 export const labelCls = 'text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-1.5 block'
@@ -170,17 +171,12 @@ export const ledgerSummary = (rows) => rows.reduce((s, r) => {
 }, { purchased: 0, paid: 0, returned: 0, balance: 0 })
 
 export const printHtml = (title, bodyHtml) => {
-  const w = window.open('', '_blank')
-  if (!w) return
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+  printDocument(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
     <style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;padding:24px}
     h2{margin:0 0 4px}table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border:1px solid #999;padding:5px 7px;text-align:left}th{background:#eee}
     td.n,th.n{text-align:right}.muted{color:#555}.sign{margin-top:40px;display:flex;justify-content:space-between}</style>
-    </head><body>${bodyHtml}</body></html>`)
-  w.document.close()
-  w.focus()
-  setTimeout(() => w.print(), 300)
+    </head><body>${bodyHtml}</body></html>`, { title, keepOpen: true })
 }
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))

@@ -8,6 +8,7 @@ import {
 import { getProducts, createProduct } from '../api/productService'
 import { addBatch } from '../api/incomeService'
 import { StackGuard } from './ui/Modal'
+import { saveBlob } from '../utils/nativeBridge'
 
 // Yacheyka border rangi
 const cellBorder = (level) => {
@@ -87,9 +88,7 @@ export default function IncomeImportModal({ onClose, onSuccess, suppliers, shopI
   // ---- Shablon yuklab olish ----
   const downloadTemplate = async () => {
     const blob = await generateTemplate()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = 'kirim_shablon.xlsx'; a.click()
-    URL.revokeObjectURL(url)
+    await saveBlob(blob, 'kirim_shablon.xlsx')
   }
 
   // ---- Import ----

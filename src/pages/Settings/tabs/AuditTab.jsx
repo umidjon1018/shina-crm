@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight, Download, RefreshCw } from 'lucide-r
 import { getAuditLog } from '../../../api/auditService'
 import { MONTHS_UZ, MONTHS_RU, formatDateTimeWithMonths, Badge, PAGE_SIZE } from '../apHelpers.jsx'
 import { toast, errorText } from '../../../components/ui/Toast'
+import { saveBlob } from '../../../utils/nativeBridge'
 
 const GREEN = 'bg-accent-green/10 text-accent-green'
 const RED = 'bg-accent-red/10 text-accent-red'
@@ -87,8 +88,7 @@ function AuditTab() {
       const rows = all.rows.map(l => [formatDateTime(l.timestamp), l.userName || '', actionLabel(l.actionKey), ENTITY_LABELS[l.entity] || l.entity || '', l.details || ''])
       const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
       const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
-      a.download = `audit_${new Date().toISOString().slice(0, 10)}.csv`; a.click()
+      await saveBlob(blob, `audit_${new Date().toISOString().slice(0, 10)}.csv`)
     } catch (e) { toast(errorText(e), 'error') }
   }
 
