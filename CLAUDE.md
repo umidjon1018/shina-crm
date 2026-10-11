@@ -442,7 +442,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (39-deploy)** — backend `a4fc2df`, frontend `614cabca`: xavfsizlik auditi qoldiqlari — `perm.js` `ownShopFields/scopeShopQuery/ownShopRow` (do'konga biriktirilgan xodim: xarajat, daromad, kassa xarajati, ishlab chiqarish, bron, inventarizatsiya faqat o'z do'koni), spisaniya tannarxi `canSeeCost`, kirim/ishlab chiqarish ≤ 10 000 dona, `?from/?to` 2000…kelasi yil, SSE 8/foydalanuvchi va 3000 jami, shablonsiz admin yuz majburiy + `audit_face_enrolled` (xizmat boti xabar beradi). Zaxira `/root/backups/2026-10-11e`.
+**Oxirgi deploy: 2026-10-11 (40-deploy)** — backend `d5f43f6`, frontend `cb21a169`: xodimni bir nechta do'konga biriktirish (`employees.shop_ids TEXT[]`, bo'sh = barcha; `perm.js` `staffShops`/`canShop`, `staffShopId` so'ralgan ruxsatli do'konni yoki birinchisini qaytaradi; `GET /api/auth/my-shops`; Xodimlar formasida checkbox, menyuda faqat ruxsatli do'konlar). Zaxira `/root/backups/2026-10-11f`.
+
+**39-deploy: 2026-10-11** — backend `a4fc2df`, frontend `614cabca`: xavfsizlik auditi qoldiqlari — `perm.js` `ownShopFields/scopeShopQuery/ownShopRow` (do'konga biriktirilgan xodim: xarajat, daromad, kassa xarajati, ishlab chiqarish, bron, inventarizatsiya faqat o'z do'koni), spisaniya tannarxi `canSeeCost`, kirim/ishlab chiqarish ≤ 10 000 dona, `?from/?to` 2000…kelasi yil, SSE 8/foydalanuvchi va 3000 jami, shablonsiz admin yuz majburiy + `audit_face_enrolled` (xizmat boti xabar beradi). Zaxira `/root/backups/2026-10-11e`.
 
 **38-deploy: 2026-10-11** — backend `6a4e955`, frontend `ab8facc3`: Sotuv → **Onlayn bronlar** (`onlineOrdersController`, `/api/reservations/online{,/cancel,/extend}`): Telegram bot buyurtmalari (`retail_orders`), Instagram/AI (`customer-agent`), telefon AI (`phone-ai`) bitta ro'yxatda; kassaga, +24 soat, bekor (Telegram mijozga xabar); ruxsat `sales.online_orders`. Zaxira `/root/backups/2026-10-11d`.
 
