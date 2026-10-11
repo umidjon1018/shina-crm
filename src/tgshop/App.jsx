@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, SlidersHorizontal, ShoppingCart, Package, LayoutGrid, Minus, Plus, Trash2, X, ImageOff, ShieldCheck, Clock, Wallet, Star, Tag, CheckCircle2, ChevronDown, Loader2 } from 'lucide-react'
+import { Search, SlidersHorizontal, ShoppingCart, Package, LayoutGrid, Minus, Plus, Trash2, X, ImageOff, ShieldCheck, Clock, Wallet, Star, Tag, CheckCircle2, ChevronDown, Loader2, Gift } from 'lucide-react'
 import { api, imageUrl, haptic, fmt, initData } from './api'
 
 const tg = () => window.Telegram?.WebApp
@@ -40,9 +40,12 @@ const Card = ({ p, role, onOpen, onQty, busy }) => (
     <button onClick={onOpen} className="relative block">
       <Img id={p.imageId} className="w-full aspect-square p-2" />
       {STOCK[p.stock] && <span className={`absolute left-2 top-2 text-[11px] font-medium px-2 py-0.5 rounded-md ${STOCK[p.stock].cls}`}>{STOCK[p.stock].text}</span>}
+      {p.promo && <span className="absolute right-2 top-2 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-red-500 text-white">{p.promo.label}</span>}
     </button>
     <button onClick={onOpen} className="px-2.5 pt-2 text-left flex-1">
-      <div className="text-[17px] font-bold leading-tight">{fmt(p.price)} <span className="text-[13px] font-semibold">so'm</span>{p.unit !== 'dona' && <span className="text-[12px] font-normal text-[var(--s-hint)]"> / {p.unit}</span>}</div>
+      <div className={`text-[17px] font-bold leading-tight ${p.promo?.price != null ? 'text-red-600' : ''}`}>{fmt(p.promo?.price ?? p.price)} <span className="text-[13px] font-semibold">so'm</span>{p.unit !== 'dona' && <span className="text-[12px] font-normal text-[var(--s-hint)]"> / {p.unit}</span>}</div>
+      {p.promo?.price != null && <div className="text-[12px] text-[var(--s-hint)] line-through">{fmt(p.promo.oldPrice)} so'm</div>}
+      {p.promo && p.promo.price == null && <div className="mt-1 inline-flex items-center gap-1 rounded-md bg-red-50 px-1.5 py-0.5 text-[12px] font-medium text-red-600"><Gift size={12} /> Aksiya</div>}
       {role === 'retail' && p.monthly > 0 && (
         <div className="mt-1 inline-block rounded-md bg-[var(--s-monthly)] px-1.5 py-0.5 text-[12px] font-medium text-gray-900">{fmt(p.monthly)} so'm/oy · {p.months} oy</div>
       )}
@@ -84,13 +87,24 @@ const Detail = ({ id, role, onQty, busyId, goCart }) => {
         {imgs.length > 1 && <div className="flex justify-center gap-1.5 pb-3">{imgs.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all ${i === slide ? 'w-4 bg-[var(--s-accent)]' : 'w-1.5 bg-gray-300'}`} />)}</div>}
       </div>
       <div className="m-3 rounded-2xl bg-[var(--s-card)] p-4">
-        <div className="text-[26px] font-bold leading-tight">{fmt(d.price)} so'm{d.unit !== 'dona' && <span className="text-[15px] font-normal text-[var(--s-hint)]"> / {d.unit}</span>}</div>
+        <div className={`text-[26px] font-bold leading-tight ${d.promo?.price != null ? 'text-red-600' : ''}`}>{fmt(d.promo?.price ?? d.price)} so'm{d.unit !== 'dona' && <span className="text-[15px] font-normal text-[var(--s-hint)]"> / {d.unit}</span>}</div>
+        {d.promo?.price != null && <div className="text-[14px] text-[var(--s-hint)]"><span className="line-through">{fmt(d.promo.oldPrice)} so'm</span> <span className="ml-1 rounded bg-red-500 px-1.5 py-0.5 text-[12px] font-semibold text-white">{d.promo.label}</span></div>}
         {role === 'wholesale' && <div className="mt-1 text-[13px] text-[var(--s-accent)] font-medium">Sizning ulgurji narxingiz</div>}
         <h1 className="mt-2 text-[16px] leading-snug">{d.title}</h1>
         <div className="mt-2 text-[13px]">
           {d.stock === 'out' ? <span className="text-gray-500">Omborda yo'q</span> : d.stock === 'low' ? <span className="text-amber-600">Omborda kam qoldi</span> : <span className="text-green-600">Omborda bor</span>}
         </div>
       </div>
+
+      {d.promo && (
+        <div className="m-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-gray-900">
+          <div className="flex items-center gap-2 font-semibold text-[15px] text-red-600"><Gift size={18} /> Aksiya: {d.promo.name}</div>
+          <div className="mt-1.5 text-[14px] leading-snug">{d.promo.text}</div>
+          {d.promo.notes.length > 0 && <div className="mt-1 text-[13px] text-gray-600">{d.promo.notes.join(' · ')}</div>}
+          {d.promo.description && <div className="mt-1 text-[13px] text-gray-600 whitespace-pre-line">{d.promo.description}</div>}
+          <div className="mt-1.5 text-[12px] text-gray-500">{d.promo.endDate ? `${d.promo.endDate} gacha · ` : ''}chegirma do'konda kassada qo'llanadi</div>
+        </div>
+      )}
 
       {d.installment && (
         <div className="m-3 rounded-2xl bg-[var(--s-card)] p-4">
