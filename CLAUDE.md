@@ -444,7 +444,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (48-deploy, faqat frontend)** — frontend `35a58e16`: mobil ilovada chop etish va fayl saqlash (`utils/nativeBridge.js` → APK `MainActivity` `window.SicrmNative`: printHtml → Android PrintManager, saveFile → Ulashish oynasi; faqat *.sicrm.uz). APK android-10. Markaziy panel admin.sicrm.uz, `sicrm` ilova kodi. Zaxira `/root/backups/2026-10-11q`.
+**Oxirgi deploy: 2026-10-11 (49-deploy, faqat backend)** — backend `34fb8f1`: bot bo'lim nomlari kompaniya kategoriyalaridan (`tgRetail.catLabels`), AI mijozlar boti `BUSINESS_KIND=general` varianti (`botPrompts.BOT_BASE_GENERAL`; GoodTires — `tires`, prompt o'zgarishsiz); Ceramix .env ga `BUSINESS_KIND=general`; tenant.sh yangi kompaniyaga qo'yadi. Zaxira `/root/backups/2026-10-11r`.
+
+**48-deploy: 2026-10-11 (faqat frontend)** — frontend `35a58e16`: mobil ilovada chop etish va fayl saqlash (`utils/nativeBridge.js` → APK `MainActivity` `window.SicrmNative`: printHtml → Android PrintManager, saveFile → Ulashish oynasi; faqat *.sicrm.uz). APK android-10. Markaziy panel admin.sicrm.uz, `sicrm` ilova kodi. Zaxira `/root/backups/2026-10-11q`.
 
 **47-deploy: 2026-10-11** — backend `fdba2a5`, frontend `edb83565`+: ko'p kompaniya (multi-tenant) serverda, Ceramix (`cm.sicrm.uz`) yaratildi; `/api/app/tenant`; frontend `apiBase.js`; xizmat boti kompaniyalarni zaxiralaydi. Zaxira `/root/backups/2026-10-11m` (+ nginx).
 
