@@ -445,7 +445,9 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 ## SERVER DEPLOY (holat: 2026-10-09 — lokal va server BIR XIL)
 
-**Oxirgi deploy: 2026-10-11 (53-deploy, faqat frontend)** — frontend `03d4564c`: admin paneldagi "Yangi kompaniya" oynasi (tushuntirish, kod tozalash, band kod xabari). Zaxira `/root/backups/2026-10-11v`.
+**Oxirgi deploy: 2026-10-11 (54-deploy, faqat frontend)** — frontend `1b84c9d5`: `ProtectedRoute`/`DashboardGate` biznes modullari va obuna kelganda qayta tekshiradi (chakana o'chiq kompaniyada Bosh sahifa ochilib qolardi). Desktop 1.0.3: yon panel to'liq yopiladi (14 px tutqich). Zaxira `/root/backups/2026-10-11w`.
+
+**53-deploy: 2026-10-11 (faqat frontend)** — frontend `03d4564c`: admin paneldagi "Yangi kompaniya" oynasi (tushuntirish, kod tozalash, band kod xabari). Zaxira `/root/backups/2026-10-11v`.
 
 **52-deploy: 2026-10-11 (faqat frontend)** — frontend `a5a7eefa`: admin panel keng ekranda 3–4 ustun. Kompyuter dasturi: yon panel (kompaniyalar, har biri alohida `WebContentsView`, `desktop/sidebar.html`). Zaxira `/root/backups/2026-10-11u`.
 
