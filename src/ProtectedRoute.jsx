@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { useBillingStore } from './store/billingStore'
+import { useSettingsStore } from './store/settingsStore'
 
 // Bosh sahifaga ruxsati yo'q xodim uchun — ruxsati bor birinchi sahifa
 const HOME_ORDER = [['dashboard', '/dashboard'], ['sales', '/sales'], ['warehouse', '/warehouse'], ['wholesale', '/wholesale'], ['production', '/production'], ['customers', '/customers'],
@@ -19,8 +20,15 @@ export const SuperAdminGate = ({ children }) => {
   return status.superAdmin ? children : <Navigate to="/dashboard" replace />
 }
 
+// Biznes modullari va obuna holati serverdan kirishdan keyin keladi — o'zgarganda ruxsat qayta tekshirilsin
+const useAccessDeps = () => {
+  useSettingsStore(s => s.modules)
+  useBillingStore(s => s.status)
+}
+
 export const DashboardGate = ({ children }) => {
   const hasPermission = useAuthStore(s => s.hasPermission)
+  useAccessDeps()
   if (hasPermission('dashboard')) return children
   const to = homePath(hasPermission)
   return to === '/dashboard' ? children : <Navigate to={to} replace />
@@ -29,6 +37,7 @@ export const DashboardGate = ({ children }) => {
 export const ProtectedRoute = ({ children, permission }) => {
   const { isAuthenticated, hasPermission } = useAuthStore();
   const location = useLocation();
+  useAccessDeps()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

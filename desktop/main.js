@@ -10,7 +10,7 @@ const WWW = path.join(__dirname, 'www')
 const SETTINGS_FILE = () => path.join(app.getPath('userData'), 'settings.json')
 const isMac = process.platform === 'darwin'
 const SIDEBAR_FULL = 248
-const SIDEBAR_MINI = 64
+const SIDEBAR_MINI = 14 // yig'ilganda — faqat ochish tutqichi
 
 let settings = { silentPrint: false, printer: '', fullscreen: false, collapsed: false, companies: [], active: null }
 const loadSettings = () => { try { settings = { ...settings, ...JSON.parse(fs.readFileSync(SETTINGS_FILE(), 'utf8')) } } catch {} }
